@@ -1,0 +1,24 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="story_item_corner_radius">1dp</dimen>
+
+    <!--Bottom navigation notification-->
+    <dimen name="bottom_navigation_notification_width">8dp</dimen>
+    <dimen name="bottom_navigation_notification_height">8dp</dimen>
+    <dimen name="bottom_navigation_notification_padding">0dp</dimen>
+    <dimen name="bottom_navigation_notification_margin_top_classic">9dp</dimen>
+    <dimen name="bottom_navigation_notification_margin_left">10dp</dimen>
+    <dimen name="bottom_navigation_notification_elevation">2dp</dimen>
+
+    <!--Bottom navigation-->
+    <dimen name="bottom_navigation_margin_top_active">8dp</dimen>
+    <dimen name="bottom_navigation_text_size_active">12sp</dimen>
+    <dimen name="bottom_navigation_text_size_forced_active">10sp</dimen>
+
+    <!--Bottom navigation small-->
+    <dimen name="bottom_navigation_small_active_min_width">64dp</dimen>
+    <dimen name="bottom_navigation_small_active_max_width">96dp</dimen>
+    <dimen name="bottom_navigation_small_margin_top_active">16dp</dimen>
+</resources>

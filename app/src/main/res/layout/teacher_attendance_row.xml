@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:weightSum="5">
+
+            <ImageView
+                android:id="@+id/kidPicture"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:scaleType="fitCenter"
+                android:layout_marginEnd="10dp"/>
+
+            <TextView
+                android:id="@+id/kidname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Martin Oriabure"/>
+
+            <ImageView
+                android:id="@+id/attendanceMarker"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_attendance_present_24dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+
+<!--android:background="?android:attr/selectableItemBackground"-->

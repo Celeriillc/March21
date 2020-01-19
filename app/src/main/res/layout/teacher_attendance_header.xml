@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/chieflayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:orientation="vertical"
+        android:background="@drawable/story_background_no_shadow_embedded">
+
+        <LinearLayout
+            android:id="@+id/subjectlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Subject"/>
+
+            <TextView
+                android:id="@+id/subject"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryPurple"
+                android:text="General"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/datelayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Date Taken"/>
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryPurple"
+                android:text="December 12, 2019"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="15dp"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginStart="15dp"
+            android:background="#aaaaaa" />
+
+        <LinearLayout
+            android:id="@+id/teacherlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Teacher"/>
+
+            <TextView
+                android:id="@+id/teacher"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:text="Esther, Oriabure"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/classlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Class"/>
+
+            <TextView
+                android:id="@+id/classname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:text="Toulouse"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/termlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Term"/>
+
+            <TextView
+                android:id="@+id/term"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:text="First Term"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/noofstudentslayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Number of Students Present"/>
+
+            <TextView
+                android:id="@+id/noofstudents"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:text="32"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/noofboyslayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Number of Boys Present"/>
+
+            <TextView
+                android:id="@+id/noofboys"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:text="12"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/noofgirlslayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Number of Girls Present"/>
+
+            <TextView
+                android:id="@+id/noofgirls"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                android:textSize="13sp"
+                android:text="20"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="15dp"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginStart="15dp"
+            android:background="#aaaaaa" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/deleterecord"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="15dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryPurple"
+            android:text="Delete this record"/>
+
+    </LinearLayout>
+
+    <include android:id="@+id/errorlayout"
+        layout="@layout/error_layout_tab"/>
+
+</LinearLayout>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground">
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="#eeeeee"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:background="@android:color/white"
+        android:weightSum="14">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5">
+
+            <TextView
+                android:id="@+id/classname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@android:color/black"
+                android:text="Toulouse" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/term"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4.25"
+            android:paddingStart="5dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@android:color/black"
+            android:text="2nd Term"/>
+
+        <TextView
+            android:id="@+id/year"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.25"
+            android:paddingStart="5dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@android:color/black"
+            android:text="2019"
+            />
+
+        <ImageView
+            android:id="@+id/movefromlastscore"
+            android:layout_width="0dp"
+            android:layout_height="10dp"
+            android:layout_weight="0.75"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_triangle_down"/>
+
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.75"
+            android:gravity="end"
+            android:text="100%"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+</LinearLayout>

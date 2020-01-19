@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_edit_first_name"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <include android:id="@+id/hometoolbar"
+        layout="@layout/home_toolbar"/>
+
+    <TextView
+        android:id="@+id/caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="25dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="15dp"
+        android:textStyle="bold"
+        android:textSize="13sp"
+        android:textColor="@android:color/black"
+        android:text="Maximum Obtainable Score"/>
+
+    <EditText
+        android:id="@+id/edititem"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="5dp"
+        android:hint="Enter maximum score"
+        android:inputType="number"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/darker_gray"
+        android:background="@drawable/edittext_background" />
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_margin="15dp"
+        android:textSize="13sp"
+        android:text="Type in the the maximum score obtainable by any one student"/>
+
+</LinearLayout>

@@ -1,0 +1,237 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.celerii.celerii.Activities.Delete.TeacherProfileFragment">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="350dp"
+                    android:src="@drawable/materialdesignwallpaperbeach"
+                    android:scaleType="centerCrop"
+                    android:layout_alignTop="@+id/profilepic"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/backgroundimage" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/scrim_up_down"/>
+
+                <ImageView
+                    android:id="@+id/profilepic"
+                    android:layout_width="100dp"
+                    android:layout_height="200dp"
+                    android:src="@drawable/hueywhite"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="100dp"
+                    android:scaleType="centerCrop"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clara Ikubese"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_below="@+id/profilepic"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/textView"
+                    android:paddingTop="10dp"/>
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/edityourprofile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textAllCaps="false"
+                android:background="@android:color/transparent"
+                android:layout_gravity="center"
+                android:text="Edit your profile"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/story_background">
+
+                <LinearLayout
+                    android:id="@+id/fullnamelayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="5dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:textColor="@android:color/black"
+                        android:text="Full Name"/>
+
+                    <TextView
+                        android:id="@+id/fullname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="end"
+                        android:textSize="13sp"
+                        android:text="Clara Ikubese"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/genderlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:textColor="@android:color/black"
+                        android:text="Gender"/>
+
+                    <TextView
+                        android:id="@+id/gender"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="end"
+                        android:textSize="13sp"
+                        android:text="Female"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/maritalstatuslayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:textColor="@android:color/black"
+                        android:text="Marital Status"/>
+
+                    <TextView
+                        android:id="@+id/maritalstatus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="end"
+                        android:textSize="13sp"
+                        android:text="Married"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/occupationlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:textColor="@android:color/black"
+                        android:text="Occupation"/>
+
+                    <TextView
+                        android:id="@+id/occupation"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="end"
+                        android:textSize="13sp"
+                        android:text="Beauty Blogger"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/locationlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:textColor="@android:color/black"
+                        android:text="Location"/>
+
+                    <TextView
+                        android:id="@+id/location"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="end"
+                        android:textSize="13sp"
+                        android:text="Surulere"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:textAllCaps="false"
+                android:text="Contact Clara >"
+                android:background="@android:color/transparent"/>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context="com.celerii.celerii.Activities.Inbox.ChatActivity">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/activity_chat_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_login_background_2"
+        tools:context="com.celerii.celerii.Activities.Inbox.ChatActivity">
+
+        <include android:id="@+id/hometoolbar"
+            layout="@layout/home_toolbar"/>
+
+        <View
+            android:id="@+id/base"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="#eeeeee"
+            android:layout_alignParentBottom="true"/>
+
+        <LinearLayout
+            android:id="@+id/form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/base"
+            android:background="#ffffff"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:weightSum="10">
+
+            <ImageView
+                android:id="@+id/attachments"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/ic_camera_black_no_white_24dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"/>
+
+            <ImageView
+                android:id="@+id/stickers"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/ic_camera_black_no_white_24dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="5dp"/>
+
+            <EditText
+                android:id="@+id/messageEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10"
+                android:paddingTop="10dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="10dp"
+                android:hint="Send a message"
+                android:textColorHint="#CCCCCC"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/custom_edit_text_for_chat"
+                android:maxHeight="160dp"
+                android:textColor="#777777"
+                android:textSize="15dp" />
+
+            <ImageView
+                android:id="@+id/sendMessageButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/ic_play_circle_filled_black_24dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"/>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="#ffffff"
+            android:layout_above="@id/form"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:clipToPadding="false"
+            android:layout_alignBottom="@id/separator"
+            android:layout_marginTop="?actionBarSize"
+            />
+    </RelativeLayout>
+</LinearLayout>

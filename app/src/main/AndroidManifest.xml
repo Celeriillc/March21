@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.celerii.celerii">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name=".helperClasses.MApplication"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".Activities.Home.NotificationDetailActivity"></activity>
+
+        <service android:name=".helperClasses.MyFirebaseInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".helperClasses.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".Activities.Utility.ApplicationLaunchActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Activities.Delete.MainActivity" />
+        <activity android:name=".Activities.Settings.SettingsActivityTeacher" />
+        <activity android:name=".Activities.Delete.SignUpActivity" />
+        <activity android:name=".Activities.LoginAndSignup.ForgotPasswordActivity" />
+        <activity android:name=".Activities.LoginAndSignup.SignUpActivityOne" />
+        <activity android:name=".Activities.Settings.ManageKidsRowActivity" />
+        <activity android:name=".Activities.Delete.ParentSetupActivityTwo" />
+        <activity android:name=".Activities.Delete.SignUpActivityTwoParents" />
+        <activity
+            android:name=".Activities.Comment.CommentStoryActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Activities.Inbox.Parent.ParentMessageHome"
+            android:theme="@style/NoAnimTheme" />
+        <activity
+            android:name=".Activities.Inbox.ChatActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".Activities.EditProfiles.EditStudentProfileActivity" />
+        <activity
+            android:name=".Activities.Delete.SchoolProfile"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activities.TeacherPerformance.TeacherPerformanceRowActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.GalleryDetailActivity" />
+        <activity android:name=".Activities.StudentAttendance.AttendanceDetailActivity" />
+        <activity android:name=".Activities.StudentAttendance.ParentAttendanceActivity" />
+        <activity android:name=".Activities.StudentPerformance.StudentPerformanceForParentsActivity" />
+        <activity android:name=".Activities.Delete.FuturePerformanceActivity" />
+        <activity android:name=".Activities.Delete.CurrentPerformanceActivity" />
+        <activity android:name=".Activities.StudentPerformance.History.HistoryPerformanceActivity" />
+        <activity android:name=".Activities.Newsletters.NewsletterRowActivity" />
+        <activity android:name=".Activities.Events.EventDetailActivity" />
+        <activity android:name=".Activities.Newsletters.NewsletterDetailActivity" />
+        <activity android:name=".Activities.Events.EventsRowActivity" />
+        <activity android:name=".Activities.LoginAndSignup.LoginActivity" />
+        <activity android:name=".Activities.EditProfiles.EditParentProfileActivity" />
+        <activity android:name=".Activities.Settings.ChangePasswordActivity" />
+        <activity android:name=".Activities.Settings.PushNotificationSettingsActivity" />
+        <activity android:name=".Activities.Settings.ReportAProblemActivity" />
+        <activity android:name=".Activities.Settings.ContactUsActivity" />
+        <activity android:name=".Activities.Settings.FAQActivity" />
+        <activity android:name=".Activities.Settings.ReportAProblemListActivity" />
+        <activity android:name=".Activities.Settings.FAQRowActivity" />
+        <activity android:name=".Activities.Delete.SearchResultsTeacherActivity" />
+        <activity android:name=".Activities.Home.Teacher.TeacherMainActivityTwo" />
+        <activity android:name=".Activities.StudentAttendance.TeacherTakeAttendanceActivity" />
+        <activity android:name=".Activities.Delete.SettingsActivity" />
+        <activity android:name=".Activities.StudentAttendance.TeacherAttendanceActivity" />
+        <activity android:name=".Activities.StudentPerformance.EnterResultsActivity" />
+        <activity android:name=".Activities.StudentPerformance.History.StudentAcademicHistoryActivity" />
+        <activity android:name=".Activities.Delete.TeacherProfile" />
+        <activity android:name=".Activities.Profiles.TeacherProfileOneActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileActivity" />
+        <activity android:name=".Activities.Profiles.StudentProfileActivity" />
+        <activity android:name=".Activities.Home.Teacher.TeacherCreateClassPostActivity" />
+        <activity android:name=".Activities.Delete.ParentAddAKidActivity" />
+        <activity android:name=".Activities.RatingAndReview.WriteAReviewTeacher" />
+        <activity android:name=".Activities.EditProfiles.EditTeacherProfileActivity" />
+        <activity android:name=".Activities.Delete.MoreTeacherActivity" />
+        <activity android:name=".Activities.LoginAndSignup.SignUpActivityTwo" />
+        <activity android:name=".Activities.LoginAndSignup.SignUpActivityThree" />
+        <activity android:name=".Activities.LoginAndSignup.SignUpActivityFour" />
+        <activity android:name=".Activities.Delete.ParentSetupActivityOne" />
+        <activity android:name=".Activities.Home.Parent.ParentMainActivityTwo" />
+        <activity android:name=".Activities.LoginAndSignup.SignUpActivityFive" />
+        <activity android:name=".Activities.Delete.TeacherSetupActivityOne" />
+        <activity android:name=".Activities.Intro.IntroSlider" />
+        <activity android:name=".Activities.Delete.TeacherSetupActivityThree" />
+        <activity android:name=".Activities.Delete.TeacherSetupActivityTwo" />
+        <activity android:name=".Activities.Search.Teacher.SearchActivity" />
+        <activity android:name=".Activities.Search.Teacher.SearchResultsActivity" />
+        <activity android:name=".Activities.Delete.SocialPerformanceHistoryActivity" />
+        <activity android:name=".Activities.Delete.TeacherCreateAssignmentPostActivity" />
+        <activity android:name=".Activities.RatingAndReview.ReviewActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolGalleryActivity" />
+        <activity android:name=".Activities.RatingAndReview.WriteAReviewSchool" />
+        <activity android:name=".Activities.TeacherPerformance.TeacherPerformanceActivityMain" />
+        <activity android:name=".Activities.Inbox.Teacher.TeacherMessageHome" />
+        <activity android:name=".Activities.Delete.MoreParentActivity" />
+        <activity android:name=".Activities.Delete.TeacherMainActivity" />
+        <activity android:name=".Activities.Settings.SettingsActivityParent" />
+        <activity android:name=".Activities.Delete.InboxActivity" />
+        <activity android:name=".Activities.Settings.PrivacySettingsTeacher" />
+        <activity android:name=".Activities.Settings.ManageMyClassesActivity" />
+        <activity android:name=".Activities.EditPersonalInformationDetails.GeneralEditActivity" />
+        <activity android:name=".Activities.EditPersonalInformationDetails.GenderEditActivity" />
+        <activity android:name=".Activities.EditPersonalInformationDetails.MaritalStatusEditActivity" />
+        <activity android:name=".Activities.Delete.AvailableForHomeLessonsEditActivity" />
+        <activity android:name=".Activities.EditPersonalInformationDetails.EmailEditActivity" />
+        <activity android:name=".Activities.Delete.ValidateEditActivity" />
+        <activity android:name=".Activities.Delete.ParentMainActivity" />
+        <activity android:name=".Activities.Delete.ParentProfileOneActivity" />
+        <activity android:name=".Activities.Settings.AppUpdateActivity" />
+        <activity android:name=".Activities.Settings.ReportAbuseListActivity" />
+        <activity android:name=".Activities.Settings.BrowserActivityForInfo" />
+        <activity android:name=".Activities.Settings.ReportAbuseActivity" />
+        <activity android:name=".Activities.Settings.DeleteAccountActivity" />
+        <activity android:name=".Activities.Profiles.ParentProfileActivity" />
+        <activity android:name=".Activities.Utility.SwitchActivityParentTeacher" />
+        <activity android:name=".Activities.Utility.SwitchActivityTeacherParent" />
+        <activity android:name=".Activities.Delete.SetupSchoolListActivity" />
+        <activity android:name=".Activities.StudentPerformance.History.AcademicRecordDetailActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EnterResultsEditTermActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EnterResultsEditExamTypeActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EnterResultsEditMaxObtainableActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EnterResultsEditPercentageOfTotalScoreActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EnterResultsEditSubjectsActivity" />
+        <activity android:name=".Activities.Inbox.SendPictureForChatActivity" />
+        <activity android:name=".Activities.EditPersonalInformationDetails.SendPictureForEditProfileActivity" />
+        <activity android:name=".Activities.Timetable.TeacherTimetableActivity" />
+        <activity android:name=".Activities.Delete.SelectDateActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EditYearActivity" />
+        <activity android:name=".Activities.TeacherPerformance.TeacherAcademicRecordDetailActivity" />
+        <activity android:name=".Activities.TeacherPerformance.TeacherViewResultDetailWithDeleteActivity" />
+        <activity android:name=".Activities.Search.Parent.ParentSearchActivity" />
+        <activity android:name=".Activities.Search.Parent.ParentSearchResultActivity" />
+        <activity android:name=".Activities.StudentPerformance.Current.PerformanceCurrentDetailActivity" />
+        <activity android:name=".Activities.Profiles.ClassProfileActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileNoteActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileTableActivity" />
+        <activity android:name=".Activities.StudentBehaviouralPerformance.AddYourRewardActivity" />
+        <activity android:name=".Activities.StudentBehaviouralPerformance.StudentRewardHome" />
+        <activity android:name=".Activities.StudentBehaviouralPerformance.BehaviouralResultActivity" />
+        <activity android:name=".Activities.LoginAndSignup.FederatedSignInActivity" />
+    </application>
+
+</manifest>

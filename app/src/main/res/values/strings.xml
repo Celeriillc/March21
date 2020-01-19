@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Celerii</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="connect_with_parents">Connect with Parents</string>
+    <string name="effortlessly_connect_with_parents_and_discuss_the_progress_of_your_kid">Effortlessly connect with Parents and discuss the progress of your kid</string>
+    <string name="acctype">Account Type</string>
+
+    <string-array name="account_type_array">
+        <item>Teacher</item>
+        <item>Parent</item>
+    </string-array>
+
+</resources>

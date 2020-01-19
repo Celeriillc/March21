@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <include android:id="@+id/introtoolbar"
+        layout="@layout/intro_slider_toolbar"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_login_background_2">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="15dp"
+                android:src="@drawable/ic_icons_google" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="70dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="24sp"
+                android:text="Thank you/Welcome"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="13sp"
+                android:text="We're preparing a smooth experience for you. Before you begin, upload a photo (optional). Photos allow schools to verify your identity and respond to you faster"/>
+
+            <EditText
+                android:id="@+id/gender"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:hint="Gender"
+                android:inputType="none"
+                android:editable="false"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/darker_gray"
+                android:background="@drawable/edittext_background" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="30dp">
+
+                <ImageView
+                    android:id="@+id/imagebackgroundone"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/circular_image_background_primary_purple"/>
+
+                <ImageView
+                    android:id="@+id/imagebackgroundtwo"
+                    android:layout_width="142dp"
+                    android:layout_height="142dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/circular_image_background_white" />
+
+                <LinearLayout
+                    android:id="@+id/newprofilepicturelayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/circular_image_background_accent">
+
+                    <ImageView
+                        android:id="@+id/newprofilepicture"
+                        android:layout_width="142dp"
+                        android:layout_height="142dp"
+                        android:layout_centerInParent="true" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignEnd="@id/imagebackgroundtwo"
+                    android:layout_marginEnd="0dp"
+                    android:background="@drawable/circular_image_background_accent" />
+
+                <ImageView
+                    android:id="@+id/taptoupload"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentBottom="false"
+                    android:layout_alignEnd="@id/imagebackgroundtwo"
+                    android:layout_marginEnd="7dp"
+                    android:layout_marginTop="113dp"
+                    android:src="@drawable/ic_camera_alt_black_24dp" />
+
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/begin"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="30dp"
+                android:background="@drawable/roundedbutton"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:text="Begin" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
+
+
+
+<!--<View-->
+<!--android:id="@+id/taptoupload"-->
+<!--android:layout_width="150dp"-->
+<!--android:layout_height="70dp"-->
+<!--android:layout_alignParentBottom="true"-->
+<!--android:background="@drawable/scrim_up_down" />-->
+
+<!--<TextView-->
+<!--android:layout_width="wrap_content"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:layout_marginTop="120dp"-->
+<!--android:layout_centerHorizontal="true"-->
+<!--android:textSize="15sp"-->
+<!--android:textColor="@android:color/white"-->
+<!--android:textStyle="bold"-->
+<!--android:text="Tap to upload"/>-->
+
+
+

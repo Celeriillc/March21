@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:paddingStart="15dp"
+    android:paddingEnd="15dp">
+
+    <RelativeLayout
+        android:layout_width="70dp"
+        android:layout_height="70dp">
+
+        <LinearLayout
+            android:id="@+id/clipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/circular_image_background_white">
+
+            <ImageView
+                android:id="@+id/classpic"
+                android:layout_width="58dp"
+                android:layout_height="58dp"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/classtickedindicator"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/ic_check_circle_green_24dp"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/classname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:text="Toulouse"/>
+
+</LinearLayout>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginTop="60dp"
+            android:padding="15dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:textColor="@android:color/black"
+                android:textSize="25dp"
+                android:text="Quickly find your school"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:text="(Give a quick message, give a near detailed message)."
+                android:paddingLeft="4dp"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:text="The appropriate alternative to Lorem Ipsum is a sample text in the language in which the site will be published, using texts that are typical of the intended content, in literary style at least."
+                android:paddingLeft="4dp"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:text="The appropriate alternative to Lorem Ipsum is a sample text in the language in which the site will be published, using texts that are typical of the intended content, in literary style at least."
+                android:paddingLeft="4dp"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:text="The appropriate alternative to Lorem Ipsum is a sample text in the language in which the site will be published, using texts that are typical of the intended content, in literary style at least."
+                android:paddingLeft="4dp"
+                android:textSize="13sp"/>
+
+            <Button
+                android:id="@+id/btn_findschoolsaround"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="5dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Find Schools Around Me"
+                android:background="@drawable/roundedbutton"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btn_skip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="65dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Skip"
+                android:background="@drawable/roundedbuttonwhite"
+                android:textAllCaps="false"
+                android:textColor="@android:color/black" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
+
+
+
+
+

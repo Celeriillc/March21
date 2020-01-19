@@ -1,0 +1,167 @@
+package com.celerii.celerii.adapters;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
+import com.celerii.celerii.Activities.StudentBehaviouralPerformance.StudentRewardHome;
+import com.celerii.celerii.R;
+import com.celerii.celerii.models.ManageKidsModel;
+import com.bumptech.glide.Glide;
+
+import java.util.List;
+
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
+
+/**
+ * Created by DELL on 8/14/2017.
+ */
+
+public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+    private List<ManageKidsModel> manageKidsModelList;
+    String className;
+    private Context context;
+    public static final int Header = 1;
+    public static final int Normal = 2;
+    public static final int Footer = 3;
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        public TextView kidName;
+        public ImageView kidPic;
+        public Button viewProfile;
+        public View clickableView;
+
+        public MyViewHolder(final View view) {
+            super(view);
+            kidName = (TextView) view.findViewById(R.id.kidname);
+            kidPic = (ImageView) view.findViewById(R.id.kidpic);
+//            viewProfile = (Button) view.findViewById(R.id.viewprofile);
+            clickableView = view;
+        }
+    }
+
+    public class HeaderViewHolder extends RecyclerView.ViewHolder {
+        TextView className;
+        Button rewardClass, punishClass;
+
+        public HeaderViewHolder(View view) {
+            super(view);
+            className = (TextView) view.findViewById(R.id.classname);
+            rewardClass = (Button) view.findViewById(R.id.rewardclass);
+            punishClass = (Button) view.findViewById(R.id.punishclass);
+        }
+    }
+
+    public TeacherHomeClassAdapter(List<ManageKidsModel> manageKidsModelList, String className, Context context) {
+        this.manageKidsModelList = manageKidsModelList;
+        this.className = className;
+        this.context = context;
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View rowView;
+        switch (viewType) {
+            case Normal:
+                rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.teacher_home_class_row, parent, false);
+                return new TeacherHomeClassAdapter.MyViewHolder(rowView);
+            case Header:
+                rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.teacher_home_class_header, parent, false);
+                return new TeacherHomeClassAdapter.HeaderViewHolder(rowView);
+            default:
+                rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.teacher_home_class_row, parent, false);
+                return new TeacherHomeClassAdapter.MyViewHolder(rowView);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof HeaderViewHolder) {
+            ((HeaderViewHolder) holder).className.setText(className);
+
+            ((HeaderViewHolder) holder).rewardClass.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
+            ((HeaderViewHolder) holder).punishClass.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
+        } else if (holder instanceof MyViewHolder) {
+            final ManageKidsModel manageKidsModel = manageKidsModelList.get(position);
+
+            ((MyViewHolder) holder).kidName.setText(manageKidsModel.getName());
+            Glide.with(context)
+                    .load(manageKidsModel.getPicURL())
+                    .placeholder(R.drawable.profileimageplaceholder)
+                    .error(R.drawable.profileimageplaceholder)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(((MyViewHolder) holder).kidPic);
+
+            ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("kidnumber", manageKidsModel.getID());
+                    bundle.putString("studentID", manageKidsModel.getID());
+                    bundle.putString("studentName", manageKidsModel.getName());
+                    bundle.putString("studentPicURL", manageKidsModel.getPicURL());
+                    Intent I = new Intent(context, StudentRewardHome.class);
+                    I.putExtras(bundle);
+                    context.startActivity(I);
+                }
+            });
+
+//            ((MyViewHolder) holder).viewProfile.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Intent I = new Intent(context, StudentProfileActivity.class);
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString("childID", manageKidsModel.getID());
+//                    I.putExtras(bundle);
+//                    context.startActivity(I);
+//                }
+//            });
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return manageKidsModelList.size();
+    }
+
+
+    @Override
+    public int getItemViewType(int position) {
+
+        if(isPositionHeader (position)) {
+            return Header;
+        } else if(isPositionFooter (position)) {
+            return Footer;
+        }
+        return Normal;
+    }
+
+    private boolean isPositionHeader (int position) {
+        return position == 0;
+    }
+
+    private boolean isPositionFooter (int position) {
+        return position == manageKidsModelList.size () - 1;
+    }
+}

@@ -1,0 +1,779 @@
+package com.celerii.celerii.adapters;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
+import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.models.Chats;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
+/**
+ * Created by user on 7/8/2017.
+ */
+
+public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHolder>{
+    private List<Chats> chatsList;
+    private Context context;
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mDatabaseReference;
+    private SharedPreferencesManager sharedPreferencesManager;
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        public TextView message, time, noOfmesages;
+        public ImageView messageStatus, otherProfilePic, imageFile;
+        LinearLayout imageClipper, layout;
+
+        public MyViewHolder(final View view) {
+            super(view);
+            message = (TextView) view.findViewById(R.id.message_text);
+            imageClipper = (LinearLayout) view.findViewById(R.id.imageClipper);
+            layout = (LinearLayout) view.findViewById(R.id.bubble_layout);
+            messageStatus = (ImageView) view.findViewById(R.id.messagestatus);
+            otherProfilePic = (ImageView) view.findViewById(R.id.otherprofilepic);
+            imageFile = (ImageView) view.findViewById(R.id.imagefile);
+        }
+    }
+
+    public ChatRowAdapter(List<Chats> chatsList, Context context) {
+        this.chatsList = chatsList;
+        this.context = context;
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        sharedPreferencesManager = new SharedPreferencesManager(this.context);
+    }
+
+    @Override
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_row, parent, false);
+        return new ChatRowAdapter.MyViewHolder(itemView);
+    }
+
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
+        final Chats chatList = chatsList.get(position);
+
+        holder.imageClipper.setClipToOutline(true);
+        if (chatList.getRecieverID().equals(sharedPreferencesManager.getMyUserID())){ // Set isSeen = true in Firebase Database
+            mDatabaseReference = mFirebaseDatabase.getReference();
+
+            String path, pathToRecents;
+            if (sharedPreferencesManager.getMyUserID().equals(chatList.getSenderID())){
+                path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getRecieverID() + "/" + chatList.getMessageID() + "/seen";
+                pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getRecieverID() + "/seen";
+            } else if (sharedPreferencesManager.getMyUserID().equals(chatList.getRecieverID())){
+                path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/" + chatList.getMessageID() + "/seen";
+                pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/seen";
+            } else {
+                path = "";
+                pathToRecents = "";
+            }
+
+            Map<String, Object> userUpdates = new HashMap<String, Object>();
+            userUpdates.put(path, true);
+            userUpdates.put(pathToRecents, true);
+
+            mDatabaseReference.updateChildren(userUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                }
+            });
+        }
+
+        if (chatList.isMine()){
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(chatList.getRecieverID())
+                    .child(chatList.getSenderID()).child(chatList.getMessageID()).child("seen");
+            mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()){
+                        boolean isSeen = dataSnapshot.getValue(boolean.class);
+                        if (isSeen) {
+                            ((MyViewHolder) holder).messageStatus.setImageResource(R.drawable.ic_read_all_black_24dp);
+                        } else {
+                            ((MyViewHolder) holder).messageStatus.setImageResource(R.drawable.ic_sent_black_24dp);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        ((MyViewHolder) holder).imageFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle b = new Bundle();
+                b.putString("URL", chatList.getFileURL());
+                Intent I = new Intent(context, GalleryDetailActivity.class);
+                I.putExtras(b);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ((MyViewHolder) holder).imageFile.setTransitionName("imageTransition");
+                    Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).imageFile, ((MyViewHolder) holder).imageFile.getTransitionName());
+
+                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).imageFile, ((MyViewHolder) holder).imageFile.getTransitionName());
+                    context.startActivity(I, optionsCompat.toBundle());
+                }
+                else {
+                    context.startActivity(I);
+                }
+            }
+        });
+
+        ((MyViewHolder) holder).otherProfilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle b = new Bundle();
+                b.putString("URL", chatList.getOtherProfilePicURL());
+                Intent I = new Intent(context, GalleryDetailActivity.class);
+                I.putExtras(b);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ((MyViewHolder) holder).otherProfilePic.setTransitionName("imageTransition");
+                    Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).otherProfilePic, ((MyViewHolder) holder).otherProfilePic.getTransitionName());
+
+                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).otherProfilePic, ((MyViewHolder) holder).otherProfilePic.getTransitionName());
+                    context.startActivity(I, optionsCompat.toBundle());
+                }
+                else {
+                    context.startActivity(I);
+                }
+            }
+        });
+
+//            !chatList.getFileURL().isEmpty() && chatList.getFileURL() != null
+        if (!chatList.getFileURL().equals("")){
+            ((MyViewHolder) holder).message.setVisibility(View.GONE);
+            if (chatList.isMine()) {
+                ((MyViewHolder) holder).layout.setGravity(Gravity.END);
+                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
+                ((MyViewHolder) holder).otherProfilePic.setVisibility(View.GONE);
+                imageBackgroundForIsMine(((MyViewHolder) holder), position);
+
+            } else {
+                ((MyViewHolder) holder).layout.setGravity(Gravity.START);
+                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
+                imageBackgroundForNotIsMine(((MyViewHolder) holder), position);
+            }
+        }else{
+            ((MyViewHolder) holder).imageFile.setVisibility(View.GONE);
+            ((MyViewHolder) holder).message.setVisibility(View.VISIBLE);
+            ((MyViewHolder) holder).message.setText(chatList.getMessage());
+            chatBubbleBackground(((MyViewHolder) holder), position);
+        }
+    }
+
+    public int getItemCount() {
+        return chatsList.size();
+    }
+
+    private void chatBubbleBackground(final ChatRowAdapter.MyViewHolder holder, int position){
+        Chats chatList = chatsList.get(position);
+
+        if (chatsList.size() > 0) {
+            if (chatList.isMine()) {
+                holder.otherProfilePic.setVisibility(View.GONE);
+
+                holder.message.setBackgroundResource(R.drawable.chat_bubble_me);
+                holder.layout.setGravity(Gravity.END);
+                holder.message.setTextColor(Color.WHITE);
+                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+                marginParams.setMargins(0, 10, 25, 10);
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+                holder.layout.setLayoutParams(layoutParams);
+
+            } else {
+                Glide.with(context)
+                        .load(chatList.getOtherProfilePicURL())
+                        .placeholder(R.drawable.ic_icons_google)
+                        .error(R.drawable.ic_icons_google)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(holder.otherProfilePic);
+
+                holder.message.setBackgroundResource(R.drawable.chat_bubble_you);
+                holder.layout.setGravity(Gravity.START);
+                holder.message.setTextColor(Color.WHITE);
+                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+                marginParams.setMargins(25, 10, 0, 10);
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+                holder.otherProfilePic.setVisibility(View.VISIBLE);
+                holder.layout.setLayoutParams(layoutParams);
+            }
+        }
+//            if (chatList.isMine()) {
+//                holder.messageStatus.setVisibility(View.VISIBLE);
+////                holder.messageStatus.setVisibility(View.GONE);
+//                holder.otherProfilePic.setVisibility(View.GONE);
+//
+//                holder.message.setBackgroundResource(R.drawable.chat_bubble_me);
+//                holder.layout.setGravity(Gravity.END);
+//                holder.message.setTextColor(Color.WHITE);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 10, 5, 10);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//
+//            } else {
+//                holder.messageStatus.setVisibility(View.GONE);
+//                Glide.with(context)
+//                        .load(chatList.getOtherProfilePicURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .centerCrop()
+//                        .bitmapTransform(new CropCircleTransformation(context))
+//                        .into(holder.otherProfilePic);
+//
+//                holder.message.setBackgroundResource(R.drawable.chat_bubble_you);
+//                holder.layout.setGravity(Gravity.START);
+//                holder.message.setTextColor(Color.BLACK);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 10, 0, 10);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//            }
+//            return;
+//        }
+//
+//
+//        if (chatList.isMine()) {
+//            holder.messageStatus.setVisibility(View.VISIBLE);
+////            holder.messageStatus.setVisibility(View.GONE);
+//            holder.otherProfilePic.setVisibility(View.GONE);
+//            if (position == 0) {
+//                if (chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me_bottom);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 1, 5, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else{
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 10, 5, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            }
+//            else if (position == chatsList.size() - 1){
+//                if (chatsList.get(position - 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me_top);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 10, 5, 1);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else{
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 10, 5, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            }
+//            else {
+//                if (chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me_middle);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 1, 5, 1);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else if(!chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me_bottom);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 1, 5, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else if(chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me_top);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 10, 5, 1);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else if(!chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_me);
+//                    holder.layout.setGravity(Gravity.END);
+//                    holder.message.setTextColor(Color.WHITE);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(0, 10, 5, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            }
+//        }
+//        else {
+//            holder.messageStatus.setVisibility(View.GONE);
+//            Glide.with(context)
+//                    .load(chatList.getOtherProfilePicURL())
+//                    .placeholder(R.drawable.profileimageplaceholder)
+//                    .error(R.drawable.profileimageplaceholder)
+//                    .centerCrop()
+//                    .bitmapTransform(new CropCircleTransformation(context))
+//                    .into(holder.otherProfilePic);
+//
+//            if (position == 0) {
+//                if (chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 10, 0, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else{
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you_bottom);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 1, 0, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.INVISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            }
+//            else if (position == chatsList.size() - 1){
+//                if (chatsList.get(position - 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 10, 0, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else{
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you_top);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 10, 0, 1);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            }
+//            else{
+//                if (chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 10, 0, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else if (!chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you_top);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 10, 0, 1);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else if (chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you_bottom);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 1, 0, 10);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.INVISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//                else if (!chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                    holder.message.setBackgroundResource(R.drawable.chat_bubble_you_middle);
+//                    holder.layout.setGravity(Gravity.START);
+//                    holder.message.setTextColor(Color.BLACK);
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(15, 1, 0, 1);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.otherProfilePic.setVisibility(View.INVISIBLE);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            }
+//        }
+    }
+
+    private void imageBackgroundForIsMine(ChatRowAdapter.MyViewHolder holder, int position){
+        final Chats chatList = chatsList.get(position);
+
+//        if (chatsList.get(position + 1).isMine()) {
+            ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+            marginParams.setMargins(0, 10, 25, 10);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+            holder.layout.setLayoutParams(layoutParams);
+            Glide.with(context)
+                    .load(chatList.getFileURL())
+                    .fitCenter()
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .into(holder.imageFile);
+//        } else {
+//            Glide.with(context)
+//                    .load(chatList.getFileURL())
+//                    .placeholder(R.drawable.ic_icons_google)
+//                    .error(R.drawable.ic_icons_google)
+//                    .fitCenter()
+//                    .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                            new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                    .into(holder.imageFile);
+//        }
+
+
+//        Chats chatList = chatsList.get(position);
+//
+//        holder.messageStatus.setVisibility(View.VISIBLE);
+////        holder.messageStatus.setVisibility(View.GONE);
+//
+//        if (position == 0) {
+//            if (chatsList.get(position + 1).isMine()) {
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 1, 5, 15);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_TOP_RIGHT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.TOP_RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            } else {
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//        } else if (position == chatsList.size() - 1){
+//            if (chatsList.get(position - 1).isMine()) {
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 10, 5, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .centerCrop()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_BOTTOM_RIGHT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.BOTTOM_RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            } else {
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .centerCrop()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//        } else {
+//            if (chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 1, 5, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//            else if(!chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 1, 5, 10);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_TOP_RIGHT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.TOP_RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//            else if(chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 10, 5, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_BOTTOM_RIGHT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.BOTTOM_RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//            else if(!chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(0, 10, 5, 10);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//        }
+    }
+
+    private void imageBackgroundForNotIsMine(ChatRowAdapter.MyViewHolder holder, int position){
+        Chats chatList = chatsList.get(position);
+
+//        if (!chatsList.get(position + 1).isMine()) {
+            holder.layout.setGravity(Gravity.START);
+            ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+            marginParams.setMargins(25, 10, 0, 10);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+            holder.otherProfilePic.setVisibility(View.VISIBLE);
+            holder.layout.setLayoutParams(layoutParams);
+            Glide.with(context)
+                    .load(chatList.getFileURL())
+                    .fitCenter()
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .into(holder.imageFile);
+//        } else {
+//            holder.layout.setGravity(Gravity.START);
+//            ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//            marginParams.setMargins(15, 10, 0, 15);
+//            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//            holder.otherProfilePic.setVisibility(View.VISIBLE);
+//            holder.layout.setLayoutParams(layoutParams);
+//            Glide.with(context)
+//                    .load(chatList.getFileURL())
+//                    .placeholder(R.drawable.ic_icons_google)
+//                    .error(R.drawable.ic_icons_google)
+//                    .fitCenter()
+//                    .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                            new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                    .into(holder.imageFile);
+//        }
+//
+//        Chats chatList = chatsList.get(position);
+//
+//        holder.messageStatus.setVisibility(View.GONE);
+//
+//        if (position == 0) {
+//            if (!chatsList.get(position + 1).isMine()) {
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 1, 0, 15);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_TOP_LEFT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.TOP_LEFT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            } else {
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 10, 0, 15);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//        } else if (position == chatsList.size() - 1){
+//            if (!chatsList.get(position - 1).isMine()) {
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 10, 0, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_BOTTOM_LEFT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.BOTTOM_LEFT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            } else {
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 10, 0, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//        } else {
+//            if (chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 10, 0, 10);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.LEFT),
+//                                new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//            else if(!chatsList.get(position - 1).isMine() && chatsList.get(position + 1).isMine()){
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 1, 0, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_BOTTOM_LEFT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.BOTTOM_LEFT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//            else if(chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 1, 0, 10);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.OTHER_TOP_LEFT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.TOP_LEFT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//            else if(!chatsList.get(position - 1).isMine() && !chatsList.get(position + 1).isMine()){
+//                holder.layout.setGravity(Gravity.START);
+//                ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                marginParams.setMargins(15, 1, 0, 1);
+//                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                holder.otherProfilePic.setVisibility(View.VISIBLE);
+//                holder.layout.setLayoutParams(layoutParams);
+//                Glide.with(context)
+//                        .load(chatList.getFileURL())
+//                        .placeholder(R.drawable.profileimageplaceholder)
+//                        .error(R.drawable.profileimageplaceholder)
+//                        .fitCenter()
+//                        .bitmapTransform(new RoundedCornersTransformation(context, 40, 0, RoundedCornersTransformation.CornerType.RIGHT),
+//                                new RoundedCornersTransformation(context, 10, 0, RoundedCornersTransformation.CornerType.LEFT))
+//                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                        .into(holder.imageFile);
+//            }
+//        }
+    }
+}

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "900968116925",
+    "firebase_url": "https://altarii-aa0e5.firebaseio.com",
+    "project_id": "altarii-aa0e5",
+    "storage_bucket": "altarii-aa0e5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900968116925:android:84897c70b4ffaa0ecabdd4",
+        "android_client_info": {
+          "package_name": "com.celerii.celerii"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "900968116925-aphkmoj8ugcokt4estcgocfvife3229u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.celerii.celerii",
+            "certificate_hash": "8373519f3fa9151837290130cb651e7e8e1c228a"
+          }
+        },
+        {
+          "client_id": "900968116925-ucgslgsvbvnr5q7or9tc9on84vhirmh2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvrQtPyVcdGD6Y4fUNkU4qiP1Cqb9yanY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "900968116925-ucgslgsvbvnr5q7or9tc9on84vhirmh2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "900968116925-71bprc7gpr1bqntk69dbj3f9kasvs4dd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.celerri.celerii"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

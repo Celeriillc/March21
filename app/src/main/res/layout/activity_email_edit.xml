@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_edit_parent_profile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <include android:id="@+id/hometoolbar"
+        layout="@layout/home_toolbar"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_settings_black_24dp"/>
+
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/newemaillayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled = "false">
+
+            <EditText
+                android:id="@+id/newemail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="New Email"
+                android:textSize="14sp"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/black"/>
+        </android.support.design.widget.TextInputLayout>
+        <!--<EditText-->
+            <!--android:id="@+id/newemail"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_marginEnd="15dp"-->
+            <!--android:maxLines="1"-->
+            <!--android:ellipsize="end"-->
+            <!--android:inputType="textEmailAddress"-->
+            <!--android:textSize="14sp"-->
+            <!--android:hint="New Email Address"/>-->
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_settings_black_24dp"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/currentpasswordlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled = "false">
+
+            <EditText
+                android:id="@+id/currentpassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:textSize="14sp"
+                android:inputType="textPassword"
+                android:textColor="@android:color/black"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <!--<EditText-->
+            <!--android:id="@+id/currentpassword"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_marginEnd="15dp"-->
+            <!--android:maxLines="1"-->
+            <!--android:ellipsize="end"-->
+            <!--android:inputType="textPassword"-->
+            <!--android:textSize="14sp"-->
+            <!--android:hint="Current password"/>-->
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Entering your password allows us to authenticate your identity, this ensures that you alone can update your primary email."
+        android:paddingStart="10dp"
+        android:layout_marginTop="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="14sp"/>
+
+</LinearLayout>
+

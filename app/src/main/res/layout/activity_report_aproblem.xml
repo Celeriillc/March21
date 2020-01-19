@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white" >
+
+    <include android:id="@+id/hometoolbar"
+        layout="@layout/home_toolbar"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="20dp">
+
+            <TextView
+                android:id="@+id/problemtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Something not Working"
+                android:paddingStart="15dp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/setproblemtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="What feature are you reporting?"
+                android:paddingStart="15dp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@android:color/transparent"
+                android:visibility="gone"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#eeeeee"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"/>
+
+            <!--<TextView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Subject"-->
+                <!--android:paddingStart="15dp"-->
+                <!--android:textSize="12sp"/>-->
+
+            <!--<Spinner-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/spinner"-->
+                <!--android:spinnerMode="dialog"-->
+                <!--style="@style/Base.Widget.AppCompat.Spinner.Underlined"/>-->
+
+            <TextView
+                android:id="@+id/problemhint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kindly report what you think the problem is. We will fix it and send you a follow up email"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:textSize="14sp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.2dp"
+                android:background="#eeeeee"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"/>
+
+            <EditText
+                android:id="@+id/problem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="15sp"
+                android:hint="Compose message"
+                android:background="@android:color/transparent"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
