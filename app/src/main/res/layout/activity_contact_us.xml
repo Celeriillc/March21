@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white" >
+    android:background="@android:color/white"
+    android:focusable="true"
+    android:focusableInTouchMode="true" >
 
     <include android:id="@+id/hometoolbar"
         layout="@layout/home_toolbar"/>
@@ -15,28 +17,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="20dp">
+            android:paddingTop="30dp">
 
             <EditText
                 android:id="@+id/messagesubject"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:hint="Subject"
-                android:background="@android:color/transparent"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="@android:color/darker_gray"
                 android:textColor="@android:color/black"
                 android:textStyle="bold"
-                android:textSize="20sp"/>
+                android:textSize="14sp"/>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="20dp"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -48,23 +51,41 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"/>
 
             <EditText
                 android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
                 android:textColor="@android:color/black"
-                android:textSize="15sp"
+                android:textSize="14sp"
+                android:minLines="5"
+                android:gravity="top"
+                android:inputType="textMultiLine"
                 android:hint="Compose message"
-                android:background="@android:color/transparent"
+                android:background="@drawable/edittext_background"
                 android:focusable="true"
                 android:focusableInTouchMode="true"/>
+
+            <Button
+                android:id="@+id/sendmessage"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:text="Send Message"
+                android:background="@drawable/roundedbutton"
+                style="?android:attr/borderlessButtonStyle" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

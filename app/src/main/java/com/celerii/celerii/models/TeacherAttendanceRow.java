@@ -9,6 +9,26 @@ public class TeacherAttendanceRow {
     String studentID, schoolID, classID, subject, teacherID, subject_term_year, year_month_day;
 
     public TeacherAttendanceRow() {
+        this.name = "";
+        this.attendanceStatus = "";
+        this.imageURL = "";
+        this.date = "";
+        this.sortableDate = "";
+        this.term = "";
+        this.day = "";
+        this.month = "";
+        this.year = "";
+        this.remark = "";
+        this.month_year = "";
+        this.term_year = "";
+        this.key = "";
+        this.studentID = "";
+        this.schoolID = "";
+        this.classID = "";
+        this.subject = "";
+        this.teacherID = "";
+        this.subject_term_year = "";
+        this.year_month_day = "";
     }
 
     public TeacherAttendanceRow(String name, String attendanceStatus, String imageURL, String date, String term, String day, String month, String year, String remark, String month_year, String term_year) {
@@ -16,6 +36,7 @@ public class TeacherAttendanceRow {
         this.attendanceStatus = attendanceStatus;
         this.imageURL = imageURL;
         this.date = date;
+        this.sortableDate = "";
         this.term = term;
         this.day = day;
         this.month = month;
@@ -23,14 +44,37 @@ public class TeacherAttendanceRow {
         this.remark = remark;
         this.month_year = month_year;
         this.term_year = term_year;
+        this.key = "";
+        this.studentID = "";
+        this.schoolID = "";
+        this.classID = "";
+        this.subject = "";
+        this.teacherID = "";
+        this.subject_term_year = "";
+        this.year_month_day = "";
     }
 
     public TeacherAttendanceRow(String name, String studentID, String attendanceStatus, String remark, String imageURL) {
         this.name = name;
-        this.studentID = studentID;
         this.attendanceStatus = attendanceStatus;
-        this.remark = remark;
         this.imageURL = imageURL;
+        this.date = "";
+        this.sortableDate = "";
+        this.term = "";
+        this.day = "";
+        this.month = "";
+        this.year = "";
+        this.remark = remark;
+        this.month_year = "";
+        this.term_year = "";
+        this.key = "";
+        this.studentID = studentID;
+        this.schoolID = "";
+        this.classID = "";
+        this.subject = "";
+        this.teacherID = "";
+        this.subject_term_year = "";
+        this.year_month_day = "";
     }
 
     public String getName() {

@@ -6,14 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.provider.MediaStore;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
@@ -25,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
@@ -34,8 +36,11 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
@@ -50,8 +55,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class SignUpActivityFive extends AppCompatActivity {
 
@@ -120,8 +123,9 @@ public class SignUpActivityFive extends AppCompatActivity {
                 final Dialog dialog = new Dialog(context);
                 dialog.setContentView(R.layout.custom_binary_selection_dialog);
                 TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                TextView female = (TextView) dialog.findViewById(R.id.optionone);
-                TextView male = (TextView) dialog.findViewById(R.id.optiontwo);
+                Button female = (Button) dialog.findViewById(R.id.optionone);
+                Button male = (Button) dialog.findViewById(R.id.optiontwo);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
 
                 message.setText("Please select your gender. This will help us build a more custom experience for you.");
@@ -154,8 +158,13 @@ public class SignUpActivityFive extends AppCompatActivity {
                 dialog.setContentView(R.layout.custom_dialog_layout_select_image_from_gallery_camera_two);
                 LinearLayout camera = (LinearLayout) dialog.findViewById(R.id.camera);
                 LinearLayout gallery = (LinearLayout) dialog.findViewById(R.id.gallery);
-                TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                dialog.show();
+                Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                try {
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.show();
+                } catch (Exception e) {
+                    return;
+                }
 
                 camera.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -205,8 +214,13 @@ public class SignUpActivityFive extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 
@@ -230,18 +244,24 @@ public class SignUpActivityFive extends AppCompatActivity {
         mDatabaseReference.updateChildren(updater, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                applicationLauncherSharedPreferences.setLauncherActivity("Home");
-                if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
-                    Intent I = new Intent(SignUpActivityFive.this, TeacherMainActivityTwo.class);
-                    startActivity(I);
-                    progressDialog.dismiss();
-                    finish();
-                } else {
-                    Intent I = new Intent(SignUpActivityFive.this, ParentMainActivityTwo.class);
-                    startActivity(I);
-                    progressDialog.dismiss();
-                    finish();
-                }
+//                applicationLauncherSharedPreferences.setLauncherActivity("Home");
+//                if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
+//                    Intent I = new Intent(SignUpActivityFive.this, TeacherMainActivityTwo.class);
+//                    startActivity(I);
+//                    progressDialog.dismiss();
+//                    finishAffinity();
+//                } else {
+//                    Intent I = new Intent(SignUpActivityFive.this, ParentMainActivityTwo.class);
+//                    startActivity(I);
+//                    progressDialog.dismiss();
+//                    finishAffinity();
+//                }
+
+                applicationLauncherSharedPreferences.setLauncherActivity("WelcomeToBeta");
+                Intent I = new Intent(SignUpActivityFive.this, WelcomeToBetaActivity.class);
+                startActivity(I);
+                progressDialog.dismiss();
+                finishAffinity();
             }
         });
     }
@@ -332,9 +352,9 @@ public class SignUpActivityFive extends AppCompatActivity {
             } else {
                 file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
             }
-            uri = Uri.fromFile(file);
-            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-            CamIntent.putExtra("return-data", true);
+//            uri = Uri.fromFile(file);
+//            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//            CamIntent.putExtra("return-data", true);
             startActivityForResult(CamIntent, 0);
         }
     }
@@ -358,9 +378,9 @@ public class SignUpActivityFive extends AppCompatActivity {
                     } else {
                         file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
                     }
-                    uri = Uri.fromFile(file);
-                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-                    CamIntent.putExtra("return-data", true);
+//                    uri = Uri.fromFile(file);
+//                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//                    CamIntent.putExtra("return-data", true);
                     startActivityForResult(CamIntent, 0);
                 } else {
                     // permission denied, boo! Disable the
@@ -391,92 +411,234 @@ public class SignUpActivityFive extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 0 && resultCode == RESULT_OK) {
-            ImageCropFunction();
+//            ImageCropFunction();
+            if (data != null) {
+                try {
+                    Bitmap bitmap = data.getExtras().getParcelable("data");
+                    postImageToFirebase(bitmap);
+                } catch (Exception e){
+                    //tODO:
+                    return;
+                }
+            }
         }
         if (requestCode == 1) {
             if (data != null) {
                 uri = data.getData();
-                ImageCropFunction();
-            }
-        }
-        if (requestCode == 2) {
-            if (data != null) {
                 try {
-                    if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
-                        String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-                        showDialogWithMessage(Html.fromHtml(messageString));
-                        return;
-                    }
-
-                    progressDialog.show();
-                    Bitmap bitmap = data.getExtras().getParcelable("data");
-                    newProfilePicture.setImageBitmap(null);
-                    newProfilePicture.setImageBitmap(bitmap);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    byte[] byteArray = stream.toByteArray();
-
-                    String sortableDate = Date.convertToSortableDate(Date.getDate());
-                    mStorageReference = mFirebaseStorage.getReference().child("ProfilePictures/" + UID + "/" + sortableDate + ".jpg");
-                    UploadTask uploadTask = mStorageReference.putBytes(byteArray);
-                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            downloadURL = "";
-                            downloadURL = taskSnapshot.getDownloadUrl().toString();
-
-                            HashMap<String, Object> newPhotoMap = new HashMap<>();
-                            newPhotoMap.put("Parent/" + UID + "/profilePicURL", downloadURL);
-                            newPhotoMap.put("Teacher/" + UID + "/profilePicURL", downloadURL);
-
-                            mDatabaseReference = mFirebaseDatabase.getReference();
-                            mDatabaseReference.updateChildren(newPhotoMap, new DatabaseReference.CompletionListener() {
-                                @Override
-                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    progressDialog.dismiss();
-                                    sharedPreferencesManager.setMyPicURL(downloadURL);
-                                    final Dialog dialog = new Dialog(context);
-                                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
-                                    dialog.setCancelable(false);
-                                    dialog.setCanceledOnTouchOutside(false);
-                                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
-                                    TextView close = (TextView) dialog.findViewById(R.id.close);
-                                    dialog.show();
-
-                                    dialogMessage.setText("Picture uploaded successfully!");
-
-                                    close.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            dialog.dismiss();
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
-                            String messageString = "Your picture upload attempt failed. However, you can upload a profile picture through the " + "<b>" + "Edit my profile" + "</b>" + " setting. " +
-                                    "You can try again or push the " + "<b>" + "Begin" + "</b>" + " button to continue";
-                            showDialogWithMessage(Html.fromHtml(messageString));
-                        }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        }
-                    });
-                } catch (Exception e){
-                    progressDialog.dismiss();
-                    Log.d("Crop Exception", e.getMessage());
-                    return;
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                    postImageToFirebase(bitmap);
+                } catch (Exception e) {
+                    //tODO:
                 }
             }
+        }
+//        if (requestCode == 2) {
+//            if (data != null) {
+//                try {
+//                    if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+//                        String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//                        showDialogWithMessage(Html.fromHtml(messageString));
+//                        return;
+//                    }
+//
+//                    progressDialog.show();
+//                    Bitmap bitmap = data.getExtras().getParcelable("data");
+//                    newProfilePicture.setImageBitmap(null);
+//                    newProfilePicture.setImageBitmap(bitmap);
+//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//                    byte[] byteArray = stream.toByteArray();
+//
+//                    String sortableDate = Date.convertToSortableDate(Date.getDate());
+//                    mStorageReference = mFirebaseStorage.getReference().child("ProfilePictures/" + UID + "/" + sortableDate + ".jpg");
+//                    UploadTask uploadTask = mStorageReference.putBytes(byteArray);
+//                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                        @Override
+//                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                            downloadURL = "";
+//                            downloadURL = taskSnapshot.getDownloadUrl().toString();
+//
+//                            HashMap<String, Object> newPhotoMap = new HashMap<>();
+//                            newPhotoMap.put("Parent/" + UID + "/profilePicURL", downloadURL);
+//                            newPhotoMap.put("Teacher/" + UID + "/profilePicURL", downloadURL);
+//
+//                            mDatabaseReference = mFirebaseDatabase.getReference();
+//                            mDatabaseReference.updateChildren(newPhotoMap, new DatabaseReference.CompletionListener() {
+//                                @Override
+//                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                                    progressDialog.dismiss();
+//                                    sharedPreferencesManager.setMyPicURL(downloadURL);
+//                                    final Dialog dialog = new Dialog(context);
+//                                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
+//                                    dialog.setCancelable(false);
+//                                    dialog.setCanceledOnTouchOutside(false);
+//                                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+//                                    TextView close = (TextView) dialog.findViewById(R.id.close);
+//                                    dialog.show();
+//
+//                                    dialogMessage.setText("Picture uploaded successfully!");
+//
+//                                    close.setOnClickListener(new View.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(View v) {
+//                                            dialog.dismiss();
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                        }
+//                    })
+//                    .addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            progressDialog.dismiss();
+//                            String messageString = "Your picture upload attempt failed. However, you can upload a profile picture through the " + "<b>" + "Edit my profile" + "</b>" + " setting. " +
+//                                    "You can try again or push the " + "<b>" + "Begin" + "</b>" + " button to continue";
+//                            showDialogWithMessage(Html.fromHtml(messageString));
+//                        }
+//                    })
+//                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                        @Override
+//                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+////                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+////                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                        }
+//                    });
+//                } catch (Exception e){
+//                    progressDialog.dismiss();
+//                    Log.d("Crop Exception", e.getMessage());
+//                    return;
+//                }
+//            }
+//        }
+    }
+
+    void postImageToFirebase(Bitmap bitmap) {
+        try {
+            if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                showDialogWithMessage(Html.fromHtml(messageString));
+                return;
+            }
+
+            newProfilePicture.setImageBitmap(null);
+            newProfilePicture.setImageBitmap(bitmap);
+
+            progressDialog.show();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+
+            String sortableDate = Date.convertToSortableDate(Date.getDate());
+            mStorageReference = mFirebaseStorage.getReference().child("ProfilePictures/" + UID + "/" + sortableDate + ".jpg");
+            UploadTask uploadTask = mStorageReference.putBytes(byteArray);
+            Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        return null;
+                    }
+
+                    return mStorageReference.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        downloadURL = "";
+                        downloadURL = task.getResult().toString();
+
+                        HashMap<String, Object> newPhotoMap = new HashMap<>();
+                        newPhotoMap.put("Parent/" + UID + "/profilePicURL", downloadURL);
+                        newPhotoMap.put("Teacher/" + UID + "/profilePicURL", downloadURL);
+
+                        mDatabaseReference = mFirebaseDatabase.getReference();
+                        mDatabaseReference.updateChildren(newPhotoMap, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                progressDialog.dismiss();
+                                sharedPreferencesManager.setMyPicURL(downloadURL);
+                                final Dialog dialog = new Dialog(context);
+                                dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                                dialog.setCancelable(false);
+                                dialog.setCanceledOnTouchOutside(false);
+                                TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                                TextView close = (TextView) dialog.findViewById(R.id.close);
+                                dialog.show();
+
+                                dialogMessage.setText("Picture uploaded successfully!");
+
+                                close.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+
+
+//            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                    downloadURL = "";
+//                    downloadURL = taskSnapshot.getDownloadUrl().toString();
+//
+//                    HashMap<String, Object> newPhotoMap = new HashMap<>();
+//                    newPhotoMap.put("Parent/" + UID + "/profilePicURL", downloadURL);
+//                    newPhotoMap.put("Teacher/" + UID + "/profilePicURL", downloadURL);
+//
+//                    mDatabaseReference = mFirebaseDatabase.getReference();
+//                    mDatabaseReference.updateChildren(newPhotoMap, new DatabaseReference.CompletionListener() {
+//                        @Override
+//                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                            progressDialog.dismiss();
+//                            sharedPreferencesManager.setMyPicURL(downloadURL);
+//                            final Dialog dialog = new Dialog(context);
+//                            dialog.setContentView(R.layout.custom_upload_successful_dialog);
+//                            dialog.setCancelable(false);
+//                            dialog.setCanceledOnTouchOutside(false);
+//                            TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+//                            TextView close = (TextView) dialog.findViewById(R.id.close);
+//                            dialog.show();
+//
+//                            dialogMessage.setText("Picture uploaded successfully!");
+//
+//                            close.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    dialog.dismiss();
+//                                }
+//                            });
+//                        }
+//                    });
+//                }
+//            })
+//            .addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    progressDialog.dismiss();
+//                    String messageString = "Your picture upload attempt failed. However, you can upload a profile picture through the " + "<b>" + "Edit my profile" + "</b>" + " setting. " +
+//                            "You can try again or push the " + "<b>" + "Begin" + "</b>" + " button to continue";
+//                    showDialogWithMessage(Html.fromHtml(messageString));
+//                }
+//            })
+//            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+////                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+////                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                }
+//            });
+        } catch (Exception e){
+            progressDialog.dismiss();
+            Log.d("Crop Exception", e.getMessage());
+            return;
         }
     }
 }

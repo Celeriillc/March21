@@ -1,11 +1,11 @@
 package com.celerii.celerii.Activities.Delete;
 
 import android.content.Intent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.celerii.celerii.R;
@@ -47,32 +47,32 @@ public class InboxActivity extends AppCompatActivity {
     }
 
     void yeah(){
-        MessageList ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
-        inboxList.add(ml);
-
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://travel.jumia.com/blog/ng/wp-content/uploads/2015/10/oma-4-660x400.png", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://beautifulng.com/wp-content/uploads/2016/04/Natural-hair.jpg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i0.wp.com/otownloaded.com/wp-content/uploads/2016/01/rita.jpeg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://www.gossipmill.com/wp-content/uploads/2015/11/12188915_877024615750272_8641503643949066633_n.jpg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://travel.jumia.com/blog/ng/wp-content/uploads/2015/10/oma-4-660x400.png", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://www.gossipmill.com/wp-content/uploads/2015/11/12188915_877024615750272_8641503643949066633_n.jpg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://beautifulng.com/wp-content/uploads/2016/04/Natural-hair.jpg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://travel.jumia.com/blog/ng/wp-content/uploads/2015/10/oma-4-660x400.png", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i0.wp.com/otownloaded.com/wp-content/uploads/2016/01/rita.jpeg", 90);
-        inboxList.add(ml);
-        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
-        inboxList.add(ml);
+//        MessageList ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
+//        inboxList.add(ml);
+//
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://travel.jumia.com/blog/ng/wp-content/uploads/2015/10/oma-4-660x400.png", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://beautifulng.com/wp-content/uploads/2016/04/Natural-hair.jpg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i0.wp.com/otownloaded.com/wp-content/uploads/2016/01/rita.jpeg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://www.gossipmill.com/wp-content/uploads/2015/11/12188915_877024615750272_8641503643949066633_n.jpg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://travel.jumia.com/blog/ng/wp-content/uploads/2015/10/oma-4-660x400.png", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://www.gossipmill.com/wp-content/uploads/2015/11/12188915_877024615750272_8641503643949066633_n.jpg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "http://beautifulng.com/wp-content/uploads/2016/04/Natural-hair.jpg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://travel.jumia.com/blog/ng/wp-content/uploads/2015/10/oma-4-660x400.png", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i0.wp.com/otownloaded.com/wp-content/uploads/2016/01/rita.jpeg", 90);
+//        inboxList.add(ml);
+//        ml = new MessageList("Esther Oriabure", "We hope you'll be availabe for the open day, well love to have you", "3h", "https://i.onthe.io/vllkyt4c8haautcss.d62e45bb.jpg", 90);
+//        inboxList.add(ml);
     }
 }

@@ -1,50 +1,77 @@
 package com.celerii.celerii.Activities.Settings;
 
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.celerii.celerii.Activities.EditPersonalInformationDetails.EmailEditActivity;
 import com.celerii.celerii.Activities.EditProfiles.EditParentProfileActivity;
+import com.celerii.celerii.Activities.Settings.DeleteAccount.DeleteAccountReasonActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class SettingsActivityParent extends AppCompatActivity {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
+
+    FirebaseAuth auth;
+    FirebaseDatabase mFirebaseDatabase;
+    DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     private Toolbar toolbar;
-    FirebaseAuth auth;
-    LinearLayout inviteFriends, editProfile, changePassword, manageMyClasses, pushNotifications, chat, appUpdate,
-            privacySettings, FAQ, reportAProblem, reportAbuse, contactUs, blog, termsOfService, privacyPolicy, appInfo,
+    LinearLayout editProfile, editEmail, changePassword, deleteAccount, manageMyClasses, pushNotifications, appUpdate,
+            FAQ, tutorials, reportAProblem, reportAbuse, contactUs, blog, termsOfService, privacyPolicy, appInfo,
             aboutUs, viewMyAccounts;
+
+    String featureUseKey = "";
+    String featureName = "Settings Parent";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings_parent);
 
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
         auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle("Options");
+        getSupportActionBar().setTitle("Settings");
 
-        inviteFriends = (LinearLayout) findViewById(R.id.inviteFriendsLayout);
         editProfile = (LinearLayout) findViewById(R.id.editprofilelayout);
+        editEmail = (LinearLayout) findViewById(R.id.editemaillayout);
         changePassword = (LinearLayout) findViewById(R.id.changepasswordlayout);
+        deleteAccount = (LinearLayout) findViewById(R.id.deleteaccountlayout);
         manageMyClasses = (LinearLayout) findViewById(R.id.managemyclasseslayout);
         pushNotifications = (LinearLayout) findViewById(R.id.pushnotificationlayout);
-        chat = (LinearLayout) findViewById(R.id.chatlayout);
         appUpdate = (LinearLayout) findViewById(R.id.appupdateslayout);
-        privacySettings = (LinearLayout) findViewById(R.id.privacysettingslayout);
+//        privacySettings = (LinearLayout) findViewById(R.id.privacysettingslayout);
         FAQ = (LinearLayout) findViewById(R.id.faqlayout);
+        tutorials = (LinearLayout) findViewById(R.id.tutorialslayout);
         reportAProblem = (LinearLayout) findViewById(R.id.reportaproblemlayout);
         reportAbuse = (LinearLayout) findViewById(R.id.reportabuselayout);
         contactUs = (LinearLayout) findViewById(R.id.contactuslayout);
@@ -53,13 +80,6 @@ public class SettingsActivityParent extends AppCompatActivity {
         privacyPolicy = (LinearLayout) findViewById(R.id.privacypolicylayout);
         appInfo = (LinearLayout) findViewById(R.id.appinfolayout);
         aboutUs = (LinearLayout) findViewById(R.id.aboutuslayout);
-
-        inviteFriends.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
 
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,10 +91,28 @@ public class SettingsActivityParent extends AppCompatActivity {
             }
         });
 
+        editEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(SettingsActivityParent.this, EmailEditActivity.class);
+                Bundle b = new Bundle();
+                //b.putString("id", auth.getCurrentUser().getUid());
+                startActivity(I);
+            }
+        });
+
         changePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(SettingsActivityParent.this, ChangePasswordActivity.class);
+                startActivity(I);
+            }
+        });
+
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(SettingsActivityParent.this, DeleteAccountReasonActivity.class);
                 startActivity(I);
             }
         });
@@ -99,13 +137,6 @@ public class SettingsActivityParent extends AppCompatActivity {
             }
         });
 
-        chat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
         appUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,6 +151,14 @@ public class SettingsActivityParent extends AppCompatActivity {
                 Intent I = new Intent(SettingsActivityParent.this, FAQRowActivity.class);
                 Bundle b = new Bundle();
                 b.putString("id", auth.getCurrentUser().getUid());
+                startActivity(I);
+            }
+        });
+
+        tutorials.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(SettingsActivityParent.this, TutorialsActivity.class);
                 startActivity(I);
             }
         });
@@ -158,18 +197,25 @@ public class SettingsActivityParent extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String url = "https://stackoverflow.com/questions/23255026/open-chrome-app-with-url";
-                try {
-                    Intent i = new Intent("android.intent.action.MAIN");
-                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
-                    i.addCategory("android.intent.category.LAUNCHER");
-                    i.setData(Uri.parse(url));
-                    startActivity(i);
-                }
-                catch(ActivityNotFoundException e) {
-                    // Chrome is not installed
-                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(i);
-                }
+//                try {
+//                    Intent i = new Intent("android.intent.action.MAIN");
+//                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+//                    i.addCategory("android.intent.category.LAUNCHER");
+//                    i.setData(Uri.parse(url));
+//                    startActivity(i);
+//                }
+//                catch(ActivityNotFoundException e) {
+//                    // Chrome is not installed
+//                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//                    startActivity(i);
+//                }
+
+                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Header", "Blog");
+                bundle.putString("URL", url);
+                I.putExtras(bundle);
+                startActivity(I);
             }
         });
 
@@ -220,6 +266,46 @@ public class SettingsActivityParent extends AppCompatActivity {
                 startActivity(I);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override

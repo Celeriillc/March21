@@ -2,9 +2,12 @@ package com.celerii.celerii.Activities.StudentBehaviouralPerformance;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -15,7 +18,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -25,7 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AddYourRewardActivity extends AppCompatActivity {
-    Context context = this;
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -42,10 +49,18 @@ public class AddYourRewardActivity extends AppCompatActivity {
     Button add;
     int maxNumberOfCharacters = 40;
 
+    String featureUseKey = "";
+    String featureName = "Add New Reward";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_your_reward);
+
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -144,6 +159,46 @@ public class AddYourRewardActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
@@ -159,8 +214,13 @@ public class AddYourRewardActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

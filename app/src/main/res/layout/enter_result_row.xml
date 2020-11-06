@@ -57,7 +57,8 @@
                 android:gravity="end"
                 android:imeOptions="actionDone"
                 android:background="@android:color/transparent"
-                android:hint="0"/>
+                android:hint="0"
+                android:text="0"/>
 
         </LinearLayout>
     </LinearLayout>

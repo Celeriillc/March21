@@ -1,11 +1,12 @@
 package com.celerii.celerii.Activities.Events;
 
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -13,8 +14,11 @@ import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.EventRowAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.EventsRow;
 import com.celerii.celerii.models.School;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,8 +30,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 
 public class EventsRowActivity extends AppCompatActivity {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -45,25 +54,33 @@ public class EventsRowActivity extends AppCompatActivity {
     LinearLayoutManager mLayoutManager;
     String string = "Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor  Lorem ipsum dolor sit amet, nsectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor";
     String eventAccountType, accountType;
-    SharedPreferencesManager sharedPreferencesManager;
+    String todaysDate = "";
+    int childrenCounter = 0;
+
+    String featureUseKey = "";
+    String featureName = "Event Home";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events_row);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
+        auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
+
         accountType = sharedPreferencesManager.getActiveAccount();
         if (accountType.equals("Teacher")){
             eventAccountType = "Teacher Events";
         } else if (accountType.equals("Parent")) {
             eventAccountType = "Parent Events";
         }
-
-        auth = FirebaseAuth.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        mFirebaseUser = auth.getCurrentUser();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
@@ -86,6 +103,7 @@ public class EventsRowActivity extends AppCompatActivity {
         errorLayout.setVisibility(View.GONE);
 
         eventsRowList = new ArrayList<>();
+        todaysDate = (Date.getDate());
         loadEventsFromFirebase();
         mAdapter = new EventRowAdapter(eventsRowList, this);
         recyclerView.setAdapter(mAdapter);
@@ -110,6 +128,8 @@ public class EventsRowActivity extends AppCompatActivity {
             return;
         }
 
+        updateBadges();
+        childrenCounter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference().child(eventAccountType).child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -117,28 +137,65 @@ public class EventsRowActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()){
                     eventsRowList.clear();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                        final int childrenCount = (int) dataSnapshot.getChildrenCount();
                         final String eventKey = postSnapshot.getKey();
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Event").child(eventKey);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists()){
+                                if (dataSnapshot.exists()) {
                                     final EventsRow eventRow = dataSnapshot.getValue(EventsRow.class);
                                     eventRow.setKey(dataSnapshot.getKey());
 
-                                    String schoolID = eventRow.getSchool();
+                                    String schoolID = eventRow.getSchoolID();
                                     mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
+                                            childrenCounter++;
                                             if (dataSnapshot.exists()){
                                                 School schoolInstance = dataSnapshot.getValue(School.class);
-                                                eventRow.setSchool(schoolInstance.getSchoolName());
+                                                eventRow.setSchoolID(schoolInstance.getSchoolName());
                                                 mAdapter.notifyDataSetChanged();
                                             } else {
-                                                eventRow.setSchool("This school account has been deleted or doesn't exist");
+                                                eventRow.setSchoolID("This school account has been deleted or doesn't exist");
                                                 mAdapter.notifyDataSetChanged();
+                                            }
+
+                                            String eventDate = eventRow.getEventDate();
+                                            eventRow.setEventSortableDate(Date.convertToSortableDate(eventRow.getEventDate()));
+                                            if (Date.compareDates(eventDate, todaysDate)) {
+                                                eventsRowList.add(eventRow);
+                                            }
+
+                                            if (childrenCount == childrenCounter) {
+                                                if (eventsRowList.size() > 1) {
+                                                    if (eventsRowList.size() > 1) {
+                                                        Collections.sort(eventsRowList, new Comparator<EventsRow>() {
+                                                            @Override
+                                                            public int compare(EventsRow o1, EventsRow o2) {
+                                                                return o1.getEventSortableDate().compareTo(o2.getEventSortableDate());
+                                                            }
+                                                        });
+                                                    }
+
+                                                    Collections.reverse(eventsRowList);
+                                                    mAdapter.notifyDataSetChanged();
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    recyclerView.setVisibility(View.GONE);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.VISIBLE);
+                                                    if (accountType.equals("Parent")) {
+                                                        errorLayoutText.setText("You don't have any scheduled events from your kid's school yet");
+                                                    } else {
+                                                        errorLayoutText.setText("You don't have any scheduled events from your school yet");
+                                                    }
+                                                }
                                             }
                                         }
 
@@ -147,12 +204,28 @@ public class EventsRowActivity extends AppCompatActivity {
 
                                         }
                                     });
-                                    eventsRowList.add(eventRow);
-                                    mAdapter.notifyDataSetChanged();
+
+                                } else {
+                                    childrenCounter++;
+                                    if (childrenCount == childrenCounter) {
+                                        if (eventsRowList.size() > 1) {
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.GONE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            if (accountType.equals("Parent")) {
+                                                errorLayoutText.setText("You don't have any scheduled events from your kid's school yet");
+                                            } else {
+                                                errorLayoutText.setText("You don't have any scheduled events from your school yet");
+                                            }
+                                        }
+                                    }
                                 }
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                progressLayout.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
                             }
 
                             @Override
@@ -181,15 +254,61 @@ public class EventsRowActivity extends AppCompatActivity {
         });
     }
 
-    void yeah(){
-        EventsRow eventsRow = new EventsRow("Open Day", "Thursday, Mar 23, 2019", string, "Lorem Ipsum High");
-        eventsRowList.add(eventsRow);
+    public void updateBadges(){
+        HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
 
-        eventsRow = new EventsRow("Open Day", "Thursday, Mar 23, 2019", string, "Lorem Ipsum High");
-        eventsRowList.add(eventsRow);
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Events/status", false);
+            updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+            updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/More/status", false);
+        } else {
+            updateBadgesMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/Events/status", false);
+            updateBadgesMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+            updateBadgesMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/More/status", false);
+        }
 
-        eventsRow = new EventsRow("Open Day", "Thursday, Mar 23, 2019", string, "Lorem Ipsum High");
-        eventsRowList.add(eventsRow);
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mDatabaseReference.updateChildren(updateBadgesMap);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override

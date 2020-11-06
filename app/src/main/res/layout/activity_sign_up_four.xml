@@ -25,15 +25,15 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="20dp"
                 android:src="@drawable/ic_icons_google" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="70dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:text="Now, let's create a password"/>
@@ -41,39 +41,57 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="13sp"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorDarkGray"
+                android:textSize="14sp"
                 android:text="You need to provide a secure password to protect your information from unauthorized access. A secure password must be at least 8 characters long and must contain at least a number"/>
 
-            <EditText
-                android:id="@+id/password"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:textSize="13sp"
-                android:textColor="@android:color/black"
-                android:textColorHint="@android:color/darker_gray"
-                android:background="@drawable/edittext_background"/>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp">
+
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:textSize="13sp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/darker_gray"
+                    android:background="@drawable/edittext_background"/>
+
+                <ImageButton
+                    android:id="@+id/togglepasswordvisibility"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="30dp"
+                    android:src="@drawable/ic_view_password_eye_24"
+                    android:background="@android:color/transparent"/>
+
+            </RelativeLayout>
 
             <Button
                 android:id="@+id/createaccount"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:background="@drawable/roundedbutton"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:text="Create Account" />
+                android:text="Create Account"
+                style="?android:attr/borderlessButtonStyle"  />
 
         </LinearLayout>
     </ScrollView>

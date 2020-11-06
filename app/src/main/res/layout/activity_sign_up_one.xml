@@ -19,33 +19,33 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="130dp"
-                android:src="@drawable/ic_icons_google"/>
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:src="@drawable/ic_icons_google" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:gravity="center"
+                android:layout_marginTop="70dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:textColor="@android:color/black"
-                android:textStyle="bold"
-                android:textSize="25sp"
-                android:text="Welcome to celerii"/>
+                android:textSize="24sp"
+                android:text="Welcome to Celerii"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:text="Let's setup an altarri account, this should take less than 45 seconds depending on your internet connection. What's your name?"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorDarkGray"
+                android:text="Let's setup a Celerii account, this should take less than 45 seconds depending on your internet connection. What's your name?"
                 android:textSize="14sp"/>
 
             <EditText
@@ -53,8 +53,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:hint="First Name"
                 android:maxLines="1"
                 android:inputType="text|textCapSentences"
@@ -68,8 +68,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:hint="Last Name"
                 android:maxLines="1"
                 android:inputType="text|textCapSentences"
@@ -81,76 +81,17 @@
             <Button
                 android:id="@+id/getstarted"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
-                android:text="Get started >"
+                android:text="Continue >"
                 android:background="@drawable/roundedbutton"
                 style="?android:attr/borderlessButtonStyle" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:weightSum="2"
-                android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0.1dp"
-                    android:layout_weight="1"
-                    android:background="#aaaaaa"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:text="or"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0.1dp"
-                    android:layout_weight="1"
-                    android:background="#aaaaaa"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:weightSum="90"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-                android:gravity="center"
-                android:padding="15dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="38"
-                    android:gravity="end"
-                    android:paddingEnd="5dp"
-                    android:layout_height="wrap_content"
-                    android:text="Sign in using any of:"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="52"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimaryPurple"
-                    android:text="Google, Facebook or Twitter"/>
-
-            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

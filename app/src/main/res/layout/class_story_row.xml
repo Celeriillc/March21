@@ -31,12 +31,18 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp">
 
-                <ImageView
-                    android:id="@+id/profilePic"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:scaleType="fitCenter" >
-                </ImageView>
+                <LinearLayout
+                    android:id="@+id/profilepictureclipper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/circular_image_background_white">
+
+                    <ImageView
+                        android:id="@+id/profilePic"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:scaleType="centerCrop" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -124,7 +130,7 @@
 
                 <LinearLayout
                     android:id="@+id/layoutimageone"
-                    android:layout_width="310dp"
+                    android:layout_width="match_parent"
                     android:layout_height="310dp"
                     android:weightSum="2"
                     android:orientation="horizontal"
@@ -324,13 +330,14 @@
                 android:id="@+id/commentlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="15dp"
+                android:paddingTop="0dp"
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/firstcommentlayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="5dp"
+                    android:paddingTop="15dp"
                     android:paddingBottom="5dp"
                     android:paddingStart="15dp"
                     android:paddingEnd="15dp"
@@ -341,22 +348,23 @@
                         android:layout_height="wrap_content">
 
                         <LinearLayout
+                            android:id="@+id/commenterpictureclipper"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/piclayout">
+                            android:layout_marginEnd="10dp"
+                            android:background="@drawable/circular_image_background_white">
 
                             <ImageView
                                 android:id="@+id/commenterpic"
                                 android:layout_width="35dp"
                                 android:layout_height="35dp"
-                                android:scaleType="fitCenter"
-                                android:layout_marginEnd="10dp"/>
+                                android:scaleType="centerCrop" />
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_toEndOf="@+id/piclayout"
+                            android:layout_toEndOf="@+id/commenterpictureclipper"
                             android:orientation="vertical">
 
                             <LinearLayout
@@ -411,21 +419,32 @@
                     android:paddingEnd="15dp"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:id="@+id/posterpic"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp" />
+                    <LinearLayout
+                        android:id="@+id/profilepictureclipper2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/circular_image_background_white">
+
+                        <ImageView
+                            android:id="@+id/posterpic"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:scaleType="centerCrop"/>
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/addacomment"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="5dp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
+                        android:paddingTop="15dp"
+                        android:paddingStart="15dp"
+                        android:paddingEnd="15dp"
+                        android:paddingBottom="15dp"
                         android:hint="Add a comment"
+                        android:background="@drawable/custom_edit_text_for_comment_story_home"
                         android:textColorHint="#CCCCCC"
                         android:layout_gravity="center_vertical"
                         android:maxHeight="160dp"

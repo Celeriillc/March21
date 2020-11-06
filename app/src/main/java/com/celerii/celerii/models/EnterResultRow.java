@@ -9,6 +9,14 @@ public class EnterResultRow {
     String resultsID, teacherID, studentID, classID, schoolID;
 
     public EnterResultRow() {
+        this.name = "";
+        this.imageURL = "";
+        this.score = "0";
+        this.resultsID = "";
+        this.teacherID = "";
+        this.studentID = "";
+        this.classID = "";
+        this.schoolID = "";
     }
 
     public EnterResultRow(String name, String imageURL, String score) {

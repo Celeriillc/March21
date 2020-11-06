@@ -4,7 +4,8 @@
     android:id="@+id/activity_gender_edit"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <include android:id="@+id/hometoolbar"
         layout="@layout/home_toolbar"/>
@@ -36,11 +37,11 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="0dp"
                 android:background="#aaaaaa"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="0dp"/>
 
             <RadioGroup
                 android:id="@+id/updategroup"
@@ -59,12 +60,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Automatically update to the latest version (recommended)"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -80,12 +80,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Notify me but do not auto update"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -101,8 +100,7 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Do not auto update (not recommended)"
-                    android:textStyle="bold"/>
+                    android:text="Do not auto update (not recommended)"/>
 
             </RadioGroup>
         </LinearLayout>

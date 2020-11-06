@@ -5,15 +5,20 @@ package com.celerii.celerii.models;
  */
 
 public class Class {
-    String className, classPicURL, id;
+    String className, classPicURL, id, classTeacher;
     boolean isTicked;
 
     public Class() {
+        this.className = "";
+        this.classPicURL = "";
+        this.id = id;
+        this.classTeacher = "";
+//        this.isTicked = true;
     }
 
-    public Class(String className, String classPicURL, boolean isTicked) {
+    public Class(String className, String id, boolean isTicked) {
         this.className = className;
-        this.classPicURL = classPicURL;
+        this.id = id;
         this.isTicked = isTicked;
     }
 
@@ -45,19 +50,27 @@ public class Class {
         this.classPicURL = classPicURL;
     }
 
-    public boolean isTicked() {
-        return isTicked;
-    }
-
-    public void setTicked(boolean ticked) {
-        isTicked = ticked;
-    }
-
     public String getID() {
         return id;
     }
 
     public void setID(String id) {
         this.id = id;
+    }
+
+    public String getClassTeacher() {
+        return classTeacher;
+    }
+
+    public void setClassTeacher(String classTeacher) {
+        this.classTeacher = classTeacher;
+    }
+
+    public boolean isTicked() {
+        return isTicked;
+    }
+
+    public void setTicked(boolean ticked) {
+        isTicked = ticked;
     }
 }

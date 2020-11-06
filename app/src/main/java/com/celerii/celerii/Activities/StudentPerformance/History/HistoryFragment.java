@@ -1,47 +1,61 @@
 package com.celerii.celerii.Activities.StudentPerformance.History;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
 import com.celerii.celerii.Activities.StudentPerformance.StudentPerformanceForParentsActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.PerformanceHistoryAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.AcademicRecordStudent;
 import com.celerii.celerii.models.PerformanceHistoryModel;
+import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 
 public class HistoryFragment extends Fragment {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
     TextView errorLayoutText;
+    Button errorLayoutButton;
 
     private ArrayList<PerformanceHistoryModel> performanceHistoryModelList;
     private ArrayList<String> subjectList, subjectKey;
@@ -53,6 +67,11 @@ public class HistoryFragment extends Fragment {
     String activeStudent = "";
     String activeStudentName = "";
 
+    String featureUseKey = "";
+    String featureName = "Historical Academic Results";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
     public HistoryFragment() {
         // Required empty public constructor
     }
@@ -62,43 +81,110 @@ public class HistoryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
-        sharedPreferencesManager = new SharedPreferencesManager(getContext());
+        context = getContext();
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
         errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         progressLayout = (RelativeLayout) view.findViewById(R.id.progresslayout);
+
+        errorLayoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context, ParentSearchActivity.class));
+            }
+        });
 
         StudentPerformanceForParentsActivity activity = (StudentPerformanceForParentsActivity) getActivity();
         activeStudent = activity.getData();
-        if (activeStudent == null){
-            Set<String> childrenSet = sharedPreferencesManager.getMyChildren();
-            ArrayList<String> children = new ArrayList<>();
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent") && childrenSet != null) {
-                children = new ArrayList<>(childrenSet);
-                activeStudent = children.get(0);
+
+        if (activeStudent == null) {
+            Gson gson = new Gson();
+            ArrayList<Student> myChildren = new ArrayList<>();
+            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+            Type type = new TypeToken<ArrayList<Student>>() {}.getType();
+            myChildren = gson.fromJson(myChildrenJSON, type);
+
+            if (myChildren != null) {
+                gson = new Gson();
+                activeStudent = gson.toJson(myChildren.get(0));
                 sharedPreferencesManager.setActiveKid(activeStudent);
             } else {
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
                 errorLayout.setVisibility(View.VISIBLE);
                 if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                    errorLayoutText.setText("You're not connected to any child account yet. Use the search button to search for your child and request connection from their school.");
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my child");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
                 } else {
                     errorLayoutText.setText("It seems like you do not have the permission to view this child's academic record");
                 }
+
                 return view;
+            }
+        } else {
+            Boolean activeKidExist = false;
+            Gson gson = new Gson();
+            Type type = new TypeToken<Student>() {}.getType();
+            Student activeKidModel = gson.fromJson(activeStudent, type);
+
+            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+            type = new TypeToken<ArrayList<Student>>() {}.getType();
+            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+
+            for (Student student: myChildren) {
+                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                    activeKidExist = true;
+                    activeKidModel = student;
+                    activeStudent = gson.toJson(activeKidModel);
+                    sharedPreferencesManager.setActiveKid(activeStudent);
+                    break;
+                }
+            }
+
+            if (!activeKidExist) {
+                if (myChildren.size() > 0) {
+                    if (myChildren.size() > 1) {
+                        gson = new Gson();
+                        activeStudent = gson.toJson(myChildren.get(0));
+                        sharedPreferencesManager.setActiveKid(activeStudent);
+                    }
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                    } else {
+                        errorLayoutText.setText("It seems like you do not have the permission to view this child's academic record");
+                    }
+
+                    return view;
+                }
             }
         }
 
-        activeStudentID = activeStudent.split(" ")[0];
-        activeStudentName = activeStudent.split(" ")[1];
+        Gson gson = new Gson();
+        Type type = new TypeToken<Student>() {}.getType();
+        Student activeStudentModel = gson.fromJson(activeStudent, type);
+        activeStudentID = activeStudentModel.getStudentID();
+        activeStudentName = activeStudentModel.getFirstName() + " " + activeStudentModel.getLastName();
+
         mLayoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -107,15 +193,15 @@ public class HistoryFragment extends Fragment {
 
         performanceHistoryModelList = new ArrayList<>();
         subjectList = new ArrayList<>();
-        loadDetailsFromFirebase();
-        mAdapter = new PerformanceHistoryAdapter(performanceHistoryModelList, getContext(), activeStudent);
+        loadNewDetailsFromFirebase();
+        mAdapter = new PerformanceHistoryAdapter(performanceHistoryModelList, context, activeStudent);
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        loadDetailsFromFirebase();
+                        loadNewDetailsFromFirebase();
                     }
                 }
         );
@@ -123,10 +209,105 @@ public class HistoryFragment extends Fragment {
         return view;
     }
 
+    int counter = 0;
+    HashMap<String, Double> subjectTotal = new HashMap<>();
+    HashMap<String, Integer> subjectCount = new HashMap<>();
+    private void loadNewDetailsFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
+        counter = 0;
+        subjectTotal = new HashMap<>();
+        subjectCount = new HashMap<>();
+        performanceHistoryModelList.clear();
+
+        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        String subject_year_term = postSnapshot.getKey();
+                        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID).child(subject_year_term);
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                counter++;
+                                if (dataSnapshot.exists()) {
+                                    double termAverage = 0.0;
+                                    String subject = "";
+                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                        AcademicRecordStudent academicRecordStudent = postSnapshot.getValue(AcademicRecordStudent.class);
+                                        subject = academicRecordStudent.getSubject();
+                                        double testClassAverage = Double.valueOf(academicRecordStudent.getScore());
+                                        double maxObtainable = Double.valueOf(academicRecordStudent.getMaxObtainable());
+                                        double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
+
+                                        double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                        termAverage += normalizedTestClassAverage;
+                                    }
+
+                                    if (!subjectTotal.containsKey(subject)) {
+                                        subjectTotal.put(subject, termAverage);
+                                    } else {
+                                        subjectTotal.put(subject, subjectTotal.get(subject) + termAverage);
+                                    }
+
+                                    if (!subjectCount.containsKey(subject)) {
+                                        subjectCount.put(subject, 1);
+                                    } else {
+                                        subjectCount.put(subject, subjectCount.get(subject) + 1);
+                                    }
+                                }
+
+                                if (counter == childrenCount) {
+                                    for (String key: subjectTotal.keySet()) {
+                                        double score = (int)((subjectTotal.get(key) / subjectCount.get(key)));
+                                        PerformanceHistoryModel model = new PerformanceHistoryModel(key, ((int) score));
+                                        performanceHistoryModelList.add(model);
+                                    }
+
+                                    updateBadges();
+                                    mAdapter.notifyDataSetChanged();
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    progressLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    errorLayout.setVisibility(View.GONE);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(activeStudentName + " doesn't have any academic history at the moment");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     int iterator = 0; int j; int subIterator = 0;
     private void loadDetailsFromFirebase() {
-
-        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
             mySwipeRefreshLayout.setRefreshing(false);
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
@@ -173,7 +354,7 @@ public class HistoryFragment extends Fragment {
 
                                 if (iterator == childrenCount){
                                     for (j = 0; j < performanceHistoryModelList.size(); j++){
-                                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(sharedPreferencesManager.getMyUserID()).child(activeStudent).child("subjects").child(performanceHistoryModelList.get(j).getSubject()).child("status");
+                                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(sharedPreferencesManager.getMyUserID()).child(activeStudentID).child("subjects").child(performanceHistoryModelList.get(j).getSubject()).child("status");
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -239,9 +420,43 @@ public class HistoryFragment extends Fragment {
         mDatabaseReference.updateChildren(updateBadgesMap);
     }
 
-//    @Override
-//    public void onResume() {
-//        loadDetailsFromFirebase();
-//        super.onResume();
-//    }
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
 }

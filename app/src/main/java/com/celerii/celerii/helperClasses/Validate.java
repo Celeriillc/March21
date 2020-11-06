@@ -1,7 +1,7 @@
 package com.celerii.celerii.helperClasses;
 
 import android.app.Activity;
-import android.support.design.widget.TextInputLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;

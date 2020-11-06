@@ -276,7 +276,7 @@
             android:textColor="@android:color/black"
             android:gravity="center"
             android:textSize="13sp"
-            android:paddingTop="20dp"/>
+            android:paddingTop="20dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"

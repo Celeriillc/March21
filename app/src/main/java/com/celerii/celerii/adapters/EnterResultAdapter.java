@@ -3,9 +3,10 @@ package com.celerii.celerii.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,6 +26,7 @@ import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditSubjec
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.StudentPerformance.EnterResultsActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.Term;
@@ -40,7 +43,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  * Created by DELL on 8/18/2017.
  */
 
-public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
+public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<EnterResultRow> enterResultRowList;
     private Context context;
@@ -51,14 +54,15 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView studentName, score;
+        public TextView studentName;
+        public EditText score;
         public ImageView studentPic;
         public View clickableView;
 
         public MyViewHolder(final View view) {
             super(view);
             studentName = (TextView) view.findViewById(R.id.kidname);
-            score = (TextView) view.findViewById(R.id.kidscore);
+            score = (EditText) view.findViewById(R.id.kidscore);
             studentPic = (ImageView) view.findViewById(R.id.kidPicture);
             clickableView = view;
         }
@@ -127,7 +131,7 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         if(holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).teacher.setText(enterResultHeader.getTeacher());
             ((HeaderViewHolder) holder).className.setText(enterResultHeader.getClassName());
@@ -193,7 +197,7 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ((HeaderViewHolder) holder).dateLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment();
+                    CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment().setThemeCustom(R.style.MyCustomBetterPickersDialogs);
                     cdp.show(((EnterResultsActivity)context).getSupportFragmentManager(), "Material Calendar Example");
 
                     cdp.setOnDateSetListener(new CalendarDatePickerDialogFragment.OnDateSetListener() {
@@ -224,7 +228,7 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void onClick(View v) {
                     if (context instanceof EnterResultsActivity) {
-                        ((EnterResultsActivity)context).saveToCloud();
+                        ((EnterResultsActivity)context).saveNewToCloud();
                     }
                 }
             });
@@ -233,13 +237,28 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             ((MyViewHolder)holder).studentName.setText(enterResultRow.getName());
 
-            Glide.with(context)
-                    .load(enterResultRow.getImageURL())
-                    .crossFade()
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop().bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder)holder).studentPic);
+            Drawable textDrawable;
+            if (!enterResultRow.getName().isEmpty()) {
+                String[] nameArray = enterResultRow.getName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).studentPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!enterResultRow.getImageURL().isEmpty()) {
+                Glide.with(context)
+                        .load(enterResultRow.getImageURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .crossFade()
+                        .centerCrop().bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).studentPic);
+            }
 
             ((MyViewHolder)holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -265,11 +284,11 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    String score = ((MyViewHolder) holder).score.getText().toString();
-                    if (score.equals("")){
-                        score = "0";
-                    }
-                    enterResultRow.setScore(score);
+//                    String score = ((MyViewHolder) holder).score.getText().toString();
+//                    if (score.equals("")){
+//                        score = "0";
+//                    }
+//                    enterResultRow.setScore(score);
                 }
 
                 @Override
@@ -280,8 +299,11 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     if (Double.valueOf(score) > Double.valueOf(enterResultHeader.getMaxScore())) {
                         ((MyViewHolder) holder).score.setText("0");
-                        CustomToast.whiteBackgroundBottomToast(context, "Error: The entered score is greater than the max obtainable");
+                        CustomToast.blueBackgroundToast(context, "Error: The entered score is greater than the max obtainable");
                     }
+//                    else {
+//                        enterResultRowList.get(position).setScore(score);
+//                    }
                 }
             });
         }

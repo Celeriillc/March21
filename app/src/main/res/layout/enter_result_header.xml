@@ -38,7 +38,7 @@
                 android:gravity="end"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryPurple"
                 android:text="May 21, 2023"/>
         </LinearLayout>
 
@@ -69,7 +69,7 @@
                 android:gravity="end"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryPurple"
                 android:text="English Language"/>
         </LinearLayout>
 
@@ -100,7 +100,7 @@
                 android:gravity="end"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryPurple"
                 android:text="Examination"/>
         </LinearLayout>
 
@@ -131,7 +131,7 @@
                 android:gravity="end"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryPurple"
                 android:text="Third"/>
         </LinearLayout>
 
@@ -162,7 +162,7 @@
                 android:gravity="end"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryPurple"
                 android:text="100"/>
         </LinearLayout>
 
@@ -193,13 +193,13 @@
                 android:gravity="end"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryPurple"
                 android:text="20"/>
         </LinearLayout>
 
         <View
             android:layout_width="15dp"
-            android:layout_height="0.5dp"
+            android:layout_height="0dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
             android:layout_marginStart="15dp"
@@ -265,7 +265,7 @@
 
         <View
             android:layout_width="15dp"
-            android:layout_height="0.5dp"
+            android:layout_height="0dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
             android:layout_marginStart="15dp"

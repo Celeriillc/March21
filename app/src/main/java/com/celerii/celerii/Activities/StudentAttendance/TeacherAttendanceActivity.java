@@ -4,43 +4,52 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Search.Teacher.SearchActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.TeacherAttendanceRowAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.TeacherTakeAttendanceSharedPreferences;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.AttendanceStatusModel;
+import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.TeacherAttendanceHeader;
 import com.celerii.celerii.models.TeacherAttendanceRow;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.HashMap;
 
 
 public class TeacherAttendanceActivity extends AppCompatActivity  {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
     TeacherTakeAttendanceSharedPreferences teacherTakeAttendanceSharedPreferences;
 
@@ -48,6 +57,7 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     DatabaseReference headerDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     Toolbar toolbar;
     private ArrayList<TeacherAttendanceRow> teacherAttendanceRowList;
@@ -59,51 +69,126 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
     TextView errorLayoutText;
+    Button errorLayoutButton;
 
     String activeClass = "fuk";
     String attendanceKey;
 
     String myName, className, subject, term, date, year, month, day, year_month_day, dateForAdapter, maleCount, femaleCount, studentCount;
 
+    String featureUseKey = "";
+    String featureName = "Teacher Attendance Home";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_attendance);
 
+        context = this;
         sharedPreferencesManager = new SharedPreferencesManager(this);
         teacherTakeAttendanceSharedPreferences = new TeacherTakeAttendanceSharedPreferences(this);
+
+        auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        headerDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         errorLayout = (RelativeLayout) findViewById(R.id.errorlayout);
         errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         progressLayout = (RelativeLayout) findViewById(R.id.progresslayout);
 
+        errorLayoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context, SearchActivity.class));
+            }
+        });
+
         activeClass = sharedPreferencesManager.getActiveClass();
+
         if (activeClass == null) {
-            Set<String> classSet = sharedPreferencesManager.getMyClasses();
-            ArrayList<String> classes = new ArrayList<>();
-            if (classSet != null) {
-                classes = new ArrayList<>(classSet);
-                activeClass = classes.get(0);
+            Gson gson = new Gson();
+            ArrayList<Class> myClasses = new ArrayList<>();
+            String myClassesJSON = sharedPreferencesManager.getMyClasses();
+            Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+            myClasses = gson.fromJson(myClassesJSON, type);
+
+            if (myClasses != null) {
+                gson = new Gson();
+                activeClass = gson.toJson(myClasses.get(0));
                 sharedPreferencesManager.setActiveClass(activeClass);
             } else {
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle("View Attendance Records");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setHomeButtonEnabled(true);
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
-                errorLayoutText.setText("You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.");
+                mySwipeRefreshLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                errorLayoutButton.setText("Find my school");
+                errorLayoutButton.setVisibility(View.VISIBLE);
+                return;
+            }
+        } else {
+            Boolean activeClassExist = false;
+            Gson gson = new Gson();
+            Type type = new TypeToken<Class>() {}.getType();
+            Class activeClassModel = gson.fromJson(activeClass, type);
+
+            String myClassesJSON = sharedPreferencesManager.getMyClasses();
+            type = new TypeToken<ArrayList<Class>>() {}.getType();
+            ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
+
+            for (Class classInstance: myClasses) {
+                if (activeClassModel.getID().equals(classInstance.getID())) {
+                    activeClassExist = true;
+                    activeClassModel = classInstance;
+                    activeClass = gson.toJson(activeClassModel);
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                    break;
+                }
+            }
+
+            if (!activeClassExist) {
+                if (myClasses.size() > 0) {
+                    if (myClasses.size() > 1) {
+                        gson = new Gson();
+                        activeClass = gson.toJson(myClasses.get(0));
+                        sharedPreferencesManager.setActiveClass(activeClass);
+                    }
+                }
+            } else {
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle("View Attendance Records");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setHomeButtonEnabled(true);
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                errorLayoutButton.setText("Find my school");
+                errorLayoutButton.setVisibility(View.VISIBLE);
                 return;
             }
         }
 
-        activeClass = sharedPreferencesManager.getActiveClass().split(" ")[0];
-        className = sharedPreferencesManager.getActiveClass().split(" ")[1];
-
-        auth = FirebaseAuth.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        headerDatabaseReference = mFirebaseDatabase.getReference();
+        Gson gson = new Gson();
+        Type type = new TypeToken<Class>() {}.getType();
+        Class activeClassModel = gson.fromJson(activeClass, type);
+        activeClass = activeClassModel.getID();
+        className = activeClassModel.getClassName();
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(className);
@@ -300,6 +385,46 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
                 loadDetailsFromFirebase();
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override

@@ -3,12 +3,12 @@
     android:shape="rectangle">
 
     <solid
-        android:color="#66eeeeee" />
+        android:color="@color/colorLightestEditTextGray" />
     <stroke
         android:width="1dip"
-        android:color="#dddddd" />
+        android:color="@color/colorLighterGray" />
     <corners
-        android:radius="3dp" />
+        android:radius="6dp" />
     <padding
         android:bottom="15dip"
         android:left="10dip"

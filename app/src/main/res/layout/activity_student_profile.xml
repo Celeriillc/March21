@@ -1,4 +1,4 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,873 +11,1056 @@
     <include android:id="@+id/toolbar"
         layout="@layout/home_toolbar"/>
 
-    <LinearLayout
-        android:id="@+id/errorlayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:visibility="gone">
+    <include android:id="@+id/errorlayout"
+        layout="@layout/error_layout"/>
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:scaleType="centerCrop" />
+    <include android:id="@+id/progresslayout"
+        layout="@layout/progress_layout"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_margin="15dp"
-            android:text="It seems this student account has been deleted"
-            android:textSize="20sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/progresslayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical|center_horizontal"/>
-
-    </LinearLayout>
-
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
 
-        <android.support.v4.widget.NestedScrollView
-        android:id="@+id/superlayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
+        <ScrollView
+            android:id="@+id/superlayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="350dp"
-                    android:scaleType="centerCrop"
-                    android:layout_alignTop="@+id/profilepic"
-                    android:layout_alignParentStart="true"
-                    android:id="@+id/backgroundimage" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="170dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/scrim_up_down"/>
-
-                <ImageView
-                    android:id="@+id/profilepic"
-                    android:layout_width="100dp"
-                    android:layout_height="200dp"
-                    android:layout_centerHorizontal="true"
-                    android:paddingTop="100dp"
-                    android:scaleType="centerCrop"/>
-
-                <TextView
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Martin Ikubese"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp"
-                    android:layout_below="@+id/profilepic"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/headerfullname"
-                    android:paddingTop="10dp"/>
-
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/editstudentprofile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="15dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/editstudentprofiletext"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:layout_gravity="center_vertical|center_horizontal"
-                    android:textSize="13sp"
-                    android:textColor="@android:color/black"
-                    android:text="Edit Student's Profile"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:id="@+id/datelayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Full Name"/>
-
-                    <TextView
-                        android:id="@+id/fullname"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Current Class"/>
-
-                    <TextView
-                        android:id="@+id/classname"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="School"/>
-
-                    <TextView
-                        android:id="@+id/school"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Gender"/>
-
-                    <TextView
-                        android:id="@+id/gender"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/teacherlayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Term Punctuality Rating"/>
-
-                    <TextView
-                        android:id="@+id/punctuality"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="10dp"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:orientation="horizontal"
-                android:weightSum="3">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:layout_marginStart="10dp"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:textColor="@android:color/black"
-                    android:text="Term Average Performance"/>
-
-                <TextView
-                    android:id="@+id/performance"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="10dp"
-                    android:gravity="end"
-                    android:textSize="13sp"
-                    android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Behavioural Points"/>
-
-                    <TextView
-                        android:id="@+id/behaviouralpoints"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="10dp"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:orientation="horizontal"
-                    android:weightSum="3">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Temperament"/>
-
-                    <TextView
-                        android:id="@+id/temperament"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="10dp"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="2"
-                    android:orientation="horizontal"
-                    android:padding="15dp">
+                    android:layout_gravity="center"
+                    android:layout_marginTop="30dp">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:text="Subscription"/>
-
-                    <TextView
-                        android:id="@+id/viewmoresubscription"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="View more"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="4">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Status"/>
-
-                    <TextView
-                        android:id="@+id/status"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="4">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Subscription Tier"/>
-
-                    <TextView
-                        android:id="@+id/subscriptiontier"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:orientation="horizontal"
-                    android:weightSum="4">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Last Subscription"/>
-
-                    <TextView
-                        android:id="@+id/lastsubscription"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:orientation="horizontal"
-                    android:weightSum="4">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="10dp"
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:textColor="@android:color/black"
-                        android:text="Expiry"/>
-
-                    <TextView
-                        android:id="@+id/expiry"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginEnd="10dp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:gravity="end"
-                        android:textSize="13sp"
-                        android:text=""/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="2"
-                    android:orientation="horizontal"
-                    android:padding="15dp">
+                        android:id="@+id/imagebackgroundone"
+                        android:layout_width="148dp"
+                        android:layout_height="148dp"
+                        android:src="@drawable/circular_image_background_white"/>
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
+                        android:id="@+id/imagebackgroundtwo"
+                        android:layout_width="142dp"
+                        android:layout_height="142dp"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/circular_image_background_white" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:text="Bio"/>
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/bio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:textSize="13sp"
-                    android:text="Status"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="2"
-                    android:orientation="horizontal"
-                    android:padding="15dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:text="Attendance"/>
-
-                    <TextView
-                        android:id="@+id/viewmoreattendance"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="View more"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/attendanceerrorlayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="15dp"
-                    android:visibility="gone">
-
-                    <TextView
+                    <LinearLayout
+                        android:id="@+id/profilepictureclipper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="No attendance records were found"/>
+                        android:layout_centerInParent="true"
+                        android:background="@drawable/circular_image_background_white">
 
-                </LinearLayout>
+                        <ImageView
+                            android:id="@+id/profilepic"
+                            android:layout_width="142dp"
+                            android:layout_height="142dp"
+                            android:background="@drawable/roundedbutton"/>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/headerfullname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_gravity="center"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:text="Full Name" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_gravity="center"
+                    android:text="Student" />
+
+                <Button
+                    android:id="@+id/editstudentprofile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:paddingStart="30dp"
+                    android:paddingEnd="30dp"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:text="Edit Student's Profile"
+                    android:background="@drawable/roundedbutton"
+                    style="?android:attr/borderlessButtonStyle" />
 
                 <LinearLayout
-                    android:id="@+id/attendancelayout1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="15dp">
+                    android:paddingBottom="10dp">
+
+                    <LinearLayout
+                        android:id="@+id/classlayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/classname"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Fukushima"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Class"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/attendencepic1"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:weightSum="5">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/attendancedate1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    android:textColor="@android:color/black"
-                                    android:text=""/>
-
-                                <TextView
-                                    android:id="@+id/attendancedetail1"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:textStyle="italic"
-                                    android:textSize="13sp"
-                                    android:text="" />
-
-                            </LinearLayout>
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
 
                             <ImageView
-                                android:id="@+id/attendancemarker1"
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:src="@drawable/ic_attendance_present_24dp"
-                                android:layout_marginEnd="0dp"/>
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_accent_profile_icon"/>
 
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/school"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Inglewood Academy"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="School"/>
                         </LinearLayout>
 
                     </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/attendancelayout2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="10dp"
-                    android:padding="15dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/attendencepic2"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:weightSum="5">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/attendancedate2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    android:textColor="@android:color/black"
-                                    android:text=""/>
-
-                                <TextView
-                                    android:id="@+id/attendancedetail2"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:textStyle="italic"
-                                    android:textSize="13sp"
-                                    android:text="" />
-
-                            </LinearLayout>
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
 
                             <ImageView
-                                android:id="@+id/attendancemarker2"
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:src="@drawable/ic_attendance_absent_24dp"
-                                android:layout_marginEnd="0dp"/>
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
 
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/gender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Male"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Gender"/>
                         </LinearLayout>
 
                     </LinearLayout>
 
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="2"
-                    android:orientation="horizontal"
-                    android:padding="15dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:text="Performance"/>
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/viewmoreperformance"
-                        android:layout_width="0dp"
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_accent_profile_icon"/>
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/punctuality"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="98%"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Term Punctuality"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="View more"/>
-                </LinearLayout>
+                        android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="2"
-                    android:orientation="horizontal"
-                    android:padding="0dp">
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
 
-                    <TextView
-                        android:layout_width="0dp"
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/performance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="78%"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Term Academic Performance"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="15dp"
-                        android:textSize="13sp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:text="Overall Strongest Subject"/>
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/strongestsubject"
-                        android:layout_width="0dp"
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_accent_profile_icon"/>
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/behaviouralpoints"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="+154"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Term Behavioural Performance"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:textSize="13sp"
-                        android:ellipsize="middle"
-                        android:maxLines="1"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text=""/>
-                </LinearLayout>
+                        android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="2"
-                    android:orientation="horizontal"
-                    android:padding="0dp">
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="15dp"
-                        android:textSize="13sp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:text="Overall Weakest Subject"/>
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
 
-                    <TextView
-                        android:id="@+id/weakestsubject"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:textSize="13sp"
-                        android:ellipsize="middle"
-                        android:maxLines="1"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text=""/>
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/temperament"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Melancholic"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Temperament"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
                 <View
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="0.2dp"
-                    android:layout_marginTop="15dp"
-                    android:background="#cccccc"/>
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:background="@color/colorDeepGray"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textStyle="bold"
+                            android:textSize="17sp"
+                            android:textColor="@android:color/black"
+                            android:text="Subscription"/>
+
+                        <ImageView
+                            android:id="@+id/viewmoresubscription"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="15dp"
+                        android:orientation="horizontal"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Status"/>
+
+                        <TextView
+                            android:id="@+id/status"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:gravity="end"
+                            android:text=""/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="15dp"
+                        android:orientation="horizontal"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Subscription Tier"/>
+
+                        <TextView
+                            android:id="@+id/subscriptiontier"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:gravity="end"
+                            android:text=""/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="15dp"
+                        android:orientation="horizontal"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Last Subscription"/>
+
+                        <TextView
+                            android:id="@+id/lastsubscription"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:gravity="end"
+                            android:text=""/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:orientation="horizontal"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Expiry"/>
+
+                        <TextView
+                            android:id="@+id/expiry"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:gravity="end"
+                            android:text=""/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:background="@color/colorDeepGray"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textStyle="bold"
+                            android:textSize="17sp"
+                            android:textColor="@android:color/black"
+                            android:text="Attendance"/>
+
+                        <ImageView
+                            android:id="@+id/viewmoreattendance"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="20dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <ImageView
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/rounded_button_primary_purple"/>
+
+                        <TextView
+                            android:id="@+id/present"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="15dp"
+                            android:ellipsize="end"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Present: 80%"/>
+
+                        <ImageView
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/rounded_button_accent"/>
+
+                        <TextView
+                            android:id="@+id/absent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="15dp"
+                            android:ellipsize="end"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Absent: 15%"/>
+
+                        <ImageView
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/rounded_button_kilogarm_orange"/>
+
+                        <TextView
+                            android:id="@+id/late"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="15dp"
+                            android:ellipsize="end"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Came in Late: 50%"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/attendanceerrorlayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="15dp"
+                        android:padding="25dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="No attendance records were found"/>
+
+                    </LinearLayout>
+
+                    <HorizontalScrollView
+                        android:id="@+id/attendancehorizontalscrollview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:scrollbars="none"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginStart="10dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/attendance1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance5"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance7"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance8"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance9"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/attendance10"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="15dp"
+                                android:paddingStart="30dp"
+                                android:paddingEnd="30dp"
+                                android:background="@drawable/rounded_button_white_light_gray"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Nil"
+                                android:visibility="gone" />
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:background="@color/colorDeepGray"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textStyle="bold"
+                            android:textSize="17sp"
+                            android:textColor="@android:color/black"
+                            android:text="Academic Performance"/>
+
+                        <ImageView
+                            android:id="@+id/viewmoreperformance"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/strongestsubject"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Mathematics"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Term's Strongest Subject"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginStart="20dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="@drawable/rounded_button_accent_profile_icon"/>
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_centerInParent="true"
+                                android:background="@drawable/ic_search_black_24dp"/>
+
+                        </RelativeLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="15dp"
+                            android:layout_gravity="center">
+
+                            <TextView
+                                android:id="@+id/weakestsubject"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="Agric Science"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:text="Term's Weakest Subject"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="15dp"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/colorPrimaryPurpleOpaque"
                     android:text="Latest Scores"/>
 
                 <LinearLayout
@@ -885,7 +1068,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="15dp"
+                    android:padding="25dp"
                     android:visibility="gone">
 
                     <TextView
@@ -900,68 +1083,28 @@
                     android:id="@+id/performancelayout1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="15dp">
+                    android:weightSum="1"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/subject1"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_weight="1"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:text="Mathematics"/>
 
-                        <ImageView
-                            android:id="@+id/subjectpic1"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:weightSum="5">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/subject1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    android:textColor="@android:color/black"
-                                    android:text=""/>
-
-                                <TextView
-                                    android:id="@+id/class1"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:textStyle="italic"
-                                    android:textSize="13sp"
-                                    android:text="" />
-
-                            </LinearLayout>
-
-                            <TextView
-                                android:id="@+id/score1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:textColor="@android:color/black"
-                                android:textSize="13sp"
-                                android:text="" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/score1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="32%" />
 
                 </LinearLayout>
 
@@ -969,286 +1112,347 @@
                     android:id="@+id/performancelayout2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:orientation="vertical"
-                    android:padding="15dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/subjectpic2"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:weightSum="5">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/subject2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    android:textColor="@android:color/black"
-                                    android:text=""/>
-
-                                <TextView
-                                    android:id="@+id/class2"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:textStyle="italic"
-                                    android:textSize="13sp"
-                                    android:text="" />
-
-                            </LinearLayout>
-
-                            <TextView
-                                android:id="@+id/score2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:textColor="@android:color/black"
-                                android:textSize="13sp"
-                                android:text="" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="3"
+                    android:weightSum="1"
                     android:orientation="horizontal"
-                    android:padding="15dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp">
 
                     <TextView
+                        android:id="@+id/subject2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
-                        android:text="Behavioural/Social Points"/>
+                        android:text="Mathematics"/>
 
                     <TextView
-                        android:id="@+id/viewmorebehaviouralpoints"
-                        android:layout_width="0dp"
+                        android:id="@+id/score2"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="View more"/>
+                        android:text="32%" />
+
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/performancelayout3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="3"
+                    android:weightSum="1"
                     android:orientation="horizontal"
-                    android:padding="5dp">
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp">
 
                     <TextView
+                        android:id="@+id/subject3"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="15dp"
-                        android:textSize="13sp"
+                        android:layout_weight="1"
                         android:maxLines="1"
                         android:ellipsize="end"
+                        android:textStyle="bold"
                         android:textColor="@android:color/black"
-                        android:text="Points Awarded"/>
+                        android:text="Mathematics"/>
 
                     <TextView
-                        android:id="@+id/pointsawarded"
-                        android:layout_width="0dp"
+                        android:id="@+id/score3"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:layout_marginEnd="10dp"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="+987"/>
-                </LinearLayout>
+                        android:text="32%" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="3"
-                    android:orientation="horizontal"
-                    android:padding="5dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="15dp"
-                        android:textSize="13sp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:text="Points Fined"/>
-
-                    <TextView
-                        android:id="@+id/pointsfined"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:textSize="13sp"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="-89"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:weightSum="3"
-                    android:orientation="horizontal"
-                    android:padding="5dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:layout_marginStart="15dp"
-                        android:textSize="13sp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:text="Total Points Earned"/>
-
-                    <TextView
-                        android:id="@+id/totalpointsearned"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:textSize="13sp"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="+898"/>
                 </LinearLayout>
 
                 <View
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="0.2dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:background="#cccccc"/>
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:background="@color/colorDeepGray" />
 
                 <LinearLayout
-                    android:id="@+id/behaviouralerrorlayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="15dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="No behavioural records were found"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/behaviourallayout1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="15dp">
+                    android:layout_marginBottom="20dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:weightSum="1"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textStyle="bold"
+                            android:textSize="17sp"
+                            android:textColor="@android:color/black"
+                            android:text="Behavioural Points"/>
 
                         <ImageView
-                            android:id="@+id/behavoirpic1"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            />
+                            android:id="@+id/viewmorebehaviouralpoints"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Points Awarded"/>
+
+                        <TextView
+                            android:id="@+id/pointsawarded"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="433" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:text="Points Fined"/>
+
+                        <TextView
+                            android:id="@+id/pointsfined"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-89" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="15dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimaryPurpleOpaque"
+                            android:text="Total Points Earned"/>
+
+                        <TextView
+                            android:id="@+id/totalpointsearned"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimaryPurpleOpaque"
+                            android:text="+898" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/behaviouralerrorlayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="25dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="No behavioural records were found"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/behaviourallayout1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:weightSum="5">
+                            android:orientation="horizontal">
+
+                            <RelativeLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_marginStart="20dp">
+
+                                <ImageView
+                                    android:id="@+id/behaviourpic1background"
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+
+                                <ImageView
+                                    android:id="@+id/behaviourpic1"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_centerInParent="true"
+                                    android:background="@drawable/ic_search_black_24dp"/>
+
+                            </RelativeLayout>
 
                             <LinearLayout
-                                android:layout_width="0dp"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="5"
-                                android:orientation="vertical">
+                                android:layout_marginStart="10dp"
+                                android:orientation="horizontal"
+                                android:layout_gravity="center_vertical"
+                                android:weightSum="5">
 
-                                <TextView
-                                    android:id="@+id/action1"
-                                    android:layout_width="match_parent"
+                                <LinearLayout
+                                    android:layout_width="0dp"
                                     android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    android:textColor="@android:color/black"
-                                    android:text="Helped a couple of friends in class"/>
+                                    android:layout_weight="5"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:id="@+id/action1"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:maxLines="1"
+                                        android:ellipsize="end"
+                                        android:textStyle="bold"
+                                        android:textSize="13sp"
+                                        android:textColor="@android:color/black"
+                                        android:text="Helped a couple of friends in class"/>
+
+                                </LinearLayout>
 
                                 <TextView
-                                    android:id="@+id/class1social"
+                                    android:id="@+id/point1"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:textStyle="italic"
+                                    android:layout_gravity="center"
+                                    android:layout_marginEnd="20dp"
+                                    android:textColor="@android:color/black"
                                     android:textSize="13sp"
-                                    android:text="Toulouse - (Esther Oriabure)" />
+                                    android:text="+1" />
 
                             </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/point1"
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/behaviourallayout2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <RelativeLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:textColor="@android:color/black"
-                                android:textSize="13sp"
-                                android:text="+1" />
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_marginStart="20dp">
+
+                                <ImageView
+                                    android:id="@+id/behaviourpic2background"
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:background="@drawable/rounded_button_accent_profile_icon"/>
+
+                                <ImageView
+                                    android:id="@+id/behaviourpic2"
+                                    android:layout_width="25dp"
+                                    android:layout_height="25dp"
+                                    android:layout_centerInParent="true"
+                                    android:background="@drawable/ic_search_black_24dp"/>
+
+                            </RelativeLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:orientation="horizontal"
+                                android:layout_gravity="center_vertical"
+                                android:weightSum="5">
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="5"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:id="@+id/action2"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:maxLines="1"
+                                        android:ellipsize="end"
+                                        android:textStyle="bold"
+                                        android:textSize="13sp"
+                                        android:textColor="@android:color/black"
+                                        android:text="Helped a couple of friends in class"/>
+
+                                </LinearLayout>
+
+                                <TextView
+                                    android:id="@+id/point2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginEnd="20dp"
+                                    android:textColor="@android:color/black"
+                                    android:textSize="13sp"
+                                    android:text="+1" />
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
@@ -1256,267 +1460,60 @@
 
                 </LinearLayout>
 
+                <View
+                    android:id="@+id/bioseparator"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="30dp"
+                    android:background="@color/colorDeepGray"/>
+
                 <LinearLayout
-                    android:id="@+id/behaviourallayout2"
+                    android:id="@+id/biolayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="15dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/behaviorpic2"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:weightSum="5">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="5"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/action2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:textStyle="bold"
-                                    android:textSize="13sp"
-                                    android:textColor="@android:color/black"
-                                    android:text="Got involved in a little fight with class mates"/>
-
-                                <TextView
-                                    android:id="@+id/class2social"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="5dp"
-                                    android:textStyle="italic"
-                                    android:textSize="13sp"
-                                    android:text="Toulouse - (Esther Oriabure)" />
-
-                            </LinearLayout>
-
-                            <TextView
-                                android:id="@+id/point2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:textColor="@android:color/black"
-                                android:textSize="13sp"
-                                android:text="-1" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="3"
-                    android:orientation="horizontal"
-                    android:padding="15dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
                         android:textStyle="bold"
+                        android:textSize="17sp"
                         android:textColor="@android:color/black"
-                        android:text="Possible Career Choice"/>
+                        android:text="Bio"/>
 
                     <TextView
-                        android:id="@+id/viewmorepossiblecareerchoice"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text=""/>
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/possiblecareerchoice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="italic"
-                    android:textSize="13sp"
-                    android:text=""
-                    android:paddingBottom="15dp"
-                    android:paddingStart="15dp"
-                    android:paddingEnd="15dp"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/story_background">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:weightSum="3"
-                    android:orientation="horizontal"
-                    android:padding="15dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="15dp"
-                        android:src="@drawable/ic_insert_chart_black_24dp"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:text="What Teachers Think"/>
-
-                    <TextView
-                        android:id="@+id/viewmoreteachersthink"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:layout_weight="1"
-                        android:text="View more"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/reviewerrorlayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="15dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="No review records were found"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/reviewlayout1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="15dp">
-
-                    <LinearLayout
+                        android:id="@+id/bio"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/reviewpic1"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            />
-
-                        <TextView
-                            android:id="@+id/review1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="italic"
-                            android:textSize="13sp"
-                            android:text=""
-                            android:layout_marginStart="10dp"/>
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/reviewerName1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:layout_gravity="end"
-                        android:text=""
-                        android:layout_marginTop="10dp"
-                        android:textSize="13sp"/>
-
+                        android:layout_marginTop="20dp"
+                        android:textColor="@color/black"
+                        android:text="Flowgrids Limited is a company registered in Nigeria. Our core services to the oil and gas Industry are Petroleum Engineering, Geo-sciences and Training consultancy services. "/>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/reviewlayout2"
+                <Button
+                    android:id="@+id/disconnect"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="15dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/reviewpic2"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            />
-
-                        <TextView
-                            android:id="@+id/review2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="italic"
-                            android:textSize="13sp"
-                            android:text=""
-                            android:layout_marginStart="10dp"/>
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/reviewerName2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:layout_gravity="end"
-                        android:text=""
-                        android:layout_marginTop="10dp"
-                        android:textSize="13sp"/>
-
-                </LinearLayout>
+                    android:layout_height="60dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:text="Disconnect"
+                    android:background="@drawable/rounded_button_white_light_gray"
+                    style="?android:attr/borderlessButtonStyle" />
 
             </LinearLayout>
+    </ScrollView>
 
-        </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-</LinearLayout>
+</RelativeLayout>

@@ -21,7 +21,7 @@ public class StringComparer {
 
         for (int i = 0; i < searchTermSplit.length; i++) {
             for (int j = 0; j < mainTermSplit.length; j++) {
-                if (mainTermSplit[j].toLowerCase().contains(searchTermSplit[i].toLowerCase())) {
+                if (mainTermSplit[j].toLowerCase().startsWith(searchTermSplit[i].toLowerCase())) {
                     containsInnerLoop = true;
                     break;
                 } else {

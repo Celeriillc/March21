@@ -1,11 +1,13 @@
 package com.celerii.celerii.Activities.Utility;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
+import com.celerii.celerii.Activities.LoginAndSignup.FederatedSignInAccountTypeActivity;
+import com.celerii.celerii.Activities.LoginAndSignup.WelcomeToBetaActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.LoginAndSignup.SignUpActivityFive;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
@@ -38,7 +40,6 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
-//        applicationLauncherSharedPreferences.deleteLauncherActivity();
 
         if (mFirebaseUser == null){
             Intent I = new Intent(ApplicationLaunchActivity.this, IntroSlider.class);
@@ -50,12 +51,20 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
                 Intent I = new Intent(ApplicationLaunchActivity.this, SignUpActivityFive.class);
                 startActivity(I);
                 finish();
+            } else if (launchActivity.equals("WelcomeToBeta")) {
+                Intent I = new Intent(ApplicationLaunchActivity.this, WelcomeToBetaActivity.class);
+                startActivity(I);
+                finish();
             } else if (launchActivity.equals("IntroSlider")) {
+                auth.signOut();
                 Intent I = new Intent(ApplicationLaunchActivity.this, IntroSlider.class);
                 startActivity(I);
                 finish();
+            } else if (launchActivity.equals("FederatedSignInAccountType")) {
+                Intent I = new Intent(ApplicationLaunchActivity.this, FederatedSignInAccountTypeActivity.class);
+                startActivity(I);
+                finish();
             } else if (launchActivity.equals("Home")) {
-//                sharedPreferencesManager.setActiveAccount("Teacher");
                 if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
                     Intent I = new Intent(ApplicationLaunchActivity.this, TeacherMainActivityTwo.class);
                     startActivity(I);
@@ -67,6 +76,7 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
                 }
             } else {
                 sharedPreferencesManager.clear();
+                auth.signOut();
                 Intent I = new Intent(ApplicationLaunchActivity.this, IntroSlider.class);
                 startActivity(I);
                 finish();

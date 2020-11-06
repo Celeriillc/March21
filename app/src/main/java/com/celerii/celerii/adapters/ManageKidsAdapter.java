@@ -3,7 +3,7 @@ package com.celerii.celerii.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +26,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
@@ -151,7 +150,7 @@ public class ManageKidsAdapter extends RecyclerView.Adapter<ManageKidsAdapter.My
                                     childrenFirebase.add(childKey + " " + childInstance.getFirstName() + " " + childInstance.getLastName() + " " + childInstance.getImageURL());
 
                                     sharedPreferencesManager.deleteMyChildren();
-                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childrenFirebase));
+//                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childrenFirebase));
                                 }
                             }
 
@@ -195,7 +194,7 @@ public class ManageKidsAdapter extends RecyclerView.Adapter<ManageKidsAdapter.My
                                     childrenFirebase.add(childKey + " " + childInstance.getFirstName() + " " + childInstance.getLastName() + " " + childInstance.getImageURL());
 
                                     sharedPreferencesManager.deleteMyChildren();
-                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childrenFirebase));
+//                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childrenFirebase));
                                 }
                             }
 

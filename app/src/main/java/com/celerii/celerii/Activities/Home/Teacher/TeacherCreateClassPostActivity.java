@@ -6,23 +6,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.provider.MediaStore;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
-import android.text.Html;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,29 +43,29 @@ import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.ClassListAdapterHorizontal;
+import com.celerii.celerii.adapters.InboxAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
-import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ClassStory;
-import com.celerii.celerii.models.ClassStoryNotification;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -79,7 +80,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -122,7 +122,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     ImageView posterPic;
     EditText classPost;
     TextView posterName, maxCharacters, chooseClassToPostToDescriptor, noDataLayout;
-    LinearLayout recyclerViewLayout;
+    LinearLayout recyclerViewLayout, profilePictureClipper;
 
     String story, date, sortableDate, dateDue, posterID, imageURL, url, posterNameString, posterProfilePicURL;
     List<String> classReciepients = new ArrayList<String>();
@@ -137,6 +137,11 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
     boolean isClassLoaded, isParentsLoaded, isTextNotEmpty, isTeacherInfoLoaded;
     int downloadURLCounter = 0;
+
+    String featureUseKey = "";
+    String featureName = "Teacher Create Class Post";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +161,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("New Post");
+        getSupportActionBar().setTitle("New Class Post");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -167,11 +172,13 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         chooseClassToPostToDescriptor = (TextView) findViewById(R.id.chooseclasstoposttodescriptor);
         noDataLayout = (TextView) findViewById(R.id.nodatalayout);
         recyclerViewLayout = (LinearLayout) findViewById(R.id.recycler_view_layout);
+        profilePictureClipper = (LinearLayout) findViewById(R.id.profilepictureclipper);
         progressBar = (ProgressBar) findViewById(R.id.progressbar);
         superLayout = (ScrollView) findViewById(R.id.superlayout);
         post = (Button) findViewById(R.id.post);
 
         imageContainer = (HorizontalScrollView) findViewById(R.id.imagecontainer);
+        profilePictureClipper.setClipToOutline(true);
 
         imageLayoutOne = (RelativeLayout) findViewById(R.id.imagelayoutone);
         imageLayoutTwo = (RelativeLayout) findViewById(R.id.imagelayouttwo);
@@ -233,11 +240,28 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         posterNameString = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
         posterProfilePicURL = sharedPreferencesManager.getMyPicURL();
 
-        Glide.with(this)
-                .load(posterProfilePicURL)
-                .centerCrop()
-                .bitmapTransform(new CropCircleTransformation(this))
-                .into(posterPic);
+        Drawable textDrawable;
+        if (!posterNameString.isEmpty()) {
+            String[] nameArray = posterNameString.split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+            }
+            posterPic.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!posterProfilePicURL.isEmpty()) {
+            Glide.with(context)
+                    .load(posterProfilePicURL)
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(posterPic);
+        }
 
         posterName.setText(posterNameString);
         noDataLayout.setVisibility(View.GONE);
@@ -443,26 +467,47 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     }
 
     void loadClasses(){
-        Set<String> classSet = sharedPreferencesManager.getMyClasses();
-        String classStudentParentJSON = sharedPreferencesManager.getClassesStudentParent();
-        Type type = new TypeToken<ArrayList<ClassesStudentsAndParentsModel>>() {}.getType();
-        ArrayList<String> classes = new ArrayList<>();
-        if (classSet != null) { classes = new ArrayList<>(classSet); }
         Gson gson = new Gson();
+        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+        classList = gson.fromJson(myClassesJSON, type);
+
+        if (classList != null){
+            if (classList.size() > 0) {
+                for (int i = 0; i < classList.size(); i++) {
+                    classListString.add(classList.get(i).getID());
+                }
+            }
+        } else {
+            classList = new ArrayList<>();
+        }
+
+
+//        Set<String> classSet = sharedPreferencesManager.getMyClasses();
+        String classStudentParentJSON = sharedPreferencesManager.getClassesStudentParent();
+        type = new TypeToken<ArrayList<ClassesStudentsAndParentsModel>>() {}.getType();
+//        ArrayList<String> classes = new ArrayList<>();
+//        if (classSet != null) { classes = new ArrayList<>(classSet); }
+        gson = new Gson();
         classesStudentsAndParentsModelList = new ArrayList<>();
         classesStudentsAndParentsModelList.clear();
-        classList.clear();
-        classListString.clear();
+//        classList.clear();
+//        classListString.clear();
 
         classesStudentsAndParentsModelList = gson.fromJson(classStudentParentJSON, type);
-        if (classes.size() > 0) {
-            for (int i = 0; i < classes.size(); i++) {
-                String[] classInfo = classes.get(i).split(" ");
-                Class classModel = new Class(classInfo[1], classInfo[2], classInfo[0], true);
-                classList.add(classModel);
-                classListString.add(classInfo[0]);
-            }
-        }
+//        if (classes.size() > 0) {
+//            for (int i = 0; i < classes.size(); i++) {
+//                String[] classInfo = classes.get(i).split(" ");
+//                Class classModel;
+//                try {
+//                    classModel = new Class(classInfo[1], classInfo[2], classInfo[0], true);
+//                } catch (Exception e) {
+//                    classModel = new Class(classInfo[1], classInfo[0], true);
+//                }
+//                classList.add(classModel);
+//                classListString.add(classInfo[0]);
+//            }
+//        }
 
         if (classesStudentsAndParentsModelList == null) {
             classesStudentsAndParentsModelList = new ArrayList<>();
@@ -487,95 +532,302 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                  }
             }
         }
+
+        if (classList.size() == 0) {
+            recyclerViewLayout.setVisibility(View.GONE);
+            noDataLayout.setVisibility(View.VISIBLE);
+        } else {
+            recyclerViewLayout.setVisibility(View.VISIBLE);
+            noDataLayout.setVisibility(View.GONE);
+        }
     }
 
-    public void uploadStory(){
+    public void uploadImages(final int index) {
+        if (index < bitmaps.size()) {
+            Bitmap bitmap = bitmaps.get(index);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
 
-        try {
-            for (int i = 0; i < bitmaps.size(); i++) {
-                Bitmap bitmap = bitmaps.get(i);
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                byte[] byteArray = stream.toByteArray();
+            mStorageReference = mFirebaseStorage.getReference().child("ClassStory/" + UID + "/" + sortableDate + "_" + index + ".jpg");
+            UploadTask uploadTask = mStorageReference.putBytes(byteArray);
+            Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        String message = "One or more of your pictures could not be uploaded at this time. Please check your connection and try again.";
+                        showDialogWithMessage(message);
+                        return null;
+                    }
 
-                mStorageReference = mFirebaseStorage.getReference().child("ClassStory/" + UID + "/" + sortableDate + "_" + i + ".jpg");
-                UploadTask uploadTask = mStorageReference.putBytes(byteArray);
-                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        downloadURLCounter++;
-                        String downloadURL = "";
-                        downloadURL = taskSnapshot.getDownloadUrl().toString();
+                    return mStorageReference.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    String downloadURL = "";
+                    downloadURL = task.getResult().toString();
 
-                        downloadURLs.add(downloadURL);
-                        downloadURLString = downloadURLString + downloadURL + " ";
+                    downloadURLs.add(downloadURL);
+                    downloadURLString = downloadURLString + downloadURL + " ";
 
-                        if (downloadURLCounter == bitmaps.size()) {
-                            downloadURLString.trim();
-                            classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, downloadURLString, url);
-                            classStory.setClassReciepients(classReciepients);
-                            notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
-                            notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                    if (index == bitmaps.size() - 1) {
+                        downloadURLString = downloadURLString.trim();
+                        classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, downloadURLString, url);
+                        classStory.setClassReciepients(classReciepients);
+                        imageURL = downloadURLs.get(0);
+                        notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                        notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
 
-                            DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
-                            String pushID = newStoryR.getKey();
-                            DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
-                            classStory.setPostID(pushID);
-                            notificationModelParent.setActivityID(pushID);
-                            notificationModelSchool.setActivityID(pushID);
+                        DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
+                        String pushID = newStoryR.getKey();
+                        DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
+                        classStory.setPostID(pushID);
+                        notificationModelParent.setActivityID(pushID);
+                        notificationModelSchool.setActivityID(pushID);
 
-                            Map<String, Object> newStory = new HashMap<String, Object>();
-                            newStory.put("ClassStory/" + pushID, classStory);
-                            newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
-                            newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
+                        Map<String, Object> newStory = new HashMap<String, Object>();
+                        newStory.put("ClassStory/" + pushID, classStory);
+                        newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
+                        newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
-                            for (int i = 0; i < classReciepients.size(); i++){
-                                String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
-                                newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
-                                newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
-                            }
-                            for (int i = 0; i < schoolReciepients.size(); i++) {
-                                newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
-                                notificationModelSchool.setToID(schoolReciepients.get(i));
-                                newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
-                                newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
-                            }
-                            for (int i = 0; i < parentReciepients.size(); i++){
-                                newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
-                                notificationModelParent.setToID(parentReciepients.get(i));
-                                newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
-                                newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
-                            }
+                        for (int i = 0; i < classReciepients.size(); i++){
+                            String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
+                            newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
+                            newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                        }
+                        for (int i = 0; i < schoolReciepients.size(); i++) {
+                            newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
+                            notificationModelSchool.setToID(schoolReciepients.get(i));
+                            newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
+                            newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                        }
+                        for (int i = 0; i < parentReciepients.size(); i++){
+                            newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
+                            notificationModelParent.setToID(parentReciepients.get(i));
+                            newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
+                            newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                        }
 
-                            newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
-                                @Override
-                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    if (databaseError == null) {
-                                        progressDialog.dismiss();
-                                        CustomToast.blueBackgroundToast(context, "Your class story has been posted");
-                                        finish();
-                                    } else{
-                                        progressDialog.dismiss();
-                                        CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
-                                    }
+                        newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError == null) {
+                                    progressDialog.dismiss();
+                                    CustomToast.blueBackgroundToast(context, "Your class story has been posted");
+                                    finish();
+                                } else {
+                                    progressDialog.dismiss();
+                                    CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
                                 }
-                            });
+                            }
+                        });
+                    } else {
+                        uploadImages(index + 1);
+                    }
+                }
+            });
+        }
+    }
+
+    public void uploadStory() {
+        try {
+            if (bitmaps.size() > 0) {
+                uploadImages(0);
+            }
+            else {
+                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, "", url);
+                classStory.setClassReciepients(classReciepients);
+                imageURL = "";
+                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+
+                DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
+                String pushID = newStoryR.getKey();
+                DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
+                classStory.setPostID(pushID);
+                notificationModelParent.setActivityID(pushID);
+                notificationModelSchool.setActivityID(pushID);
+
+                Map<String, Object> newStory = new HashMap<String, Object>();
+                newStory.put("ClassStory/" + pushID, classStory);
+                newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
+                newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
+
+                for (int i = 0; i < classReciepients.size(); i++){
+                    String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
+                    newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
+                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                }
+                for (int i = 0; i < schoolReciepients.size(); i++) {
+                    newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
+                    notificationModelSchool.setToID(schoolReciepients.get(i));
+                    newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
+                    newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                }
+                for (int i = 0; i < parentReciepients.size(); i++){
+                    newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
+                    notificationModelParent.setToID(parentReciepients.get(i));
+                    newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
+                    newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                }
+
+                newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            CustomToast.blueBackgroundToast(context, "Your class story has been posted");
+                            finish();
+                        } else {
+                            progressDialog.dismiss();
+                            CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
                         }
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                });
+            }
+        } catch (Exception e) {
+            progressDialog.dismiss();
+            String messageString = "An error occured while uploading your story, please try again";
+            showDialogWithMessage((messageString));
+            Log.d("Upload Story", e.getMessage());
+        }
+    }
+
+    public void uploadStoryOld(){
+        try {
+            if (bitmaps.size() > 0) {
+                for (int i = 0; i < bitmaps.size(); i++) {
+                    Bitmap bitmap = bitmaps.get(i);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    mStorageReference = mFirebaseStorage.getReference().child("ClassStory/" + UID + "/" + sortableDate + "_" + i + ".jpg");
+                    UploadTask uploadTask = mStorageReference.putBytes(byteArray);
+                    Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                return null;
+                            }
+
+                            return mStorageReference.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            downloadURLCounter++;
+                            String downloadURL = "";
+                            downloadURL = task.getResult().toString();
+
+                            downloadURLs.add(downloadURL);
+                            downloadURLString = downloadURLString + downloadURL + " ";
+
+                            if (downloadURLCounter == bitmaps.size()) {
+                                downloadURLString = downloadURLString.trim();
+                                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, downloadURLString, url);
+                                classStory.setClassReciepients(classReciepients);
+                                imageURL = downloadURLs.get(0);
+                                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+
+                                DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
+                                String pushID = newStoryR.getKey();
+                                DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
+                                classStory.setPostID(pushID);
+                                notificationModelParent.setActivityID(pushID);
+                                notificationModelSchool.setActivityID(pushID);
+
+                                Map<String, Object> newStory = new HashMap<String, Object>();
+                                newStory.put("ClassStory/" + pushID, classStory);
+                                newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
+                                newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
+
+                                for (int i = 0; i < classReciepients.size(); i++){
+                                    String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
+                                    newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
+                                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                                }
+                                for (int i = 0; i < schoolReciepients.size(); i++) {
+                                    newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
+                                    notificationModelSchool.setToID(schoolReciepients.get(i));
+                                    newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
+                                    newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                                }
+                                for (int i = 0; i < parentReciepients.size(); i++){
+                                    newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
+                                    notificationModelParent.setToID(parentReciepients.get(i));
+                                    newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
+                                    newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                                }
+
+                                newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        if (databaseError == null) {
+                                            progressDialog.dismiss();
+                                            CustomToast.blueBackgroundToast(context, "Your class story has been posted");
+                                            finish();
+                                        } else {
+                                            progressDialog.dismiss();
+                                            CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+            else {
+                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, "", url);
+                classStory.setClassReciepients(classReciepients);
+                imageURL = "";
+                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+
+                DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
+                String pushID = newStoryR.getKey();
+                DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
+                classStory.setPostID(pushID);
+                notificationModelParent.setActivityID(pushID);
+                notificationModelSchool.setActivityID(pushID);
+
+                Map<String, Object> newStory = new HashMap<String, Object>();
+                newStory.put("ClassStory/" + pushID, classStory);
+                newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
+                newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
+
+                for (int i = 0; i < classReciepients.size(); i++){
+                    String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
+                    newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
+                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                }
+                for (int i = 0; i < schoolReciepients.size(); i++) {
+                    newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
+                    notificationModelSchool.setToID(schoolReciepients.get(i));
+                    newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
+                    newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                }
+                for (int i = 0; i < parentReciepients.size(); i++){
+                    newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
+                    notificationModelParent.setToID(parentReciepients.get(i));
+                    newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
+                    newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                }
+
+                newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
                     @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        String messageString = "An error occured while uploading your story, please try again";
-                        showDialogWithMessage((messageString));
-                    }
-                })
-                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            CustomToast.blueBackgroundToast(context, "Your class story has been posted");
+                            finish();
+                        } else {
+                            progressDialog.dismiss();
+                            CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
+                        }
                     }
                 });
             }
@@ -593,8 +845,13 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 
@@ -613,8 +870,13 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.custom_dialog_layout_select_image_from_gallery_camera_two);
         LinearLayout camera = (LinearLayout) dialog.findViewById(R.id.camera);
         LinearLayout gallery = (LinearLayout) dialog.findViewById(R.id.gallery);
-        TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-        dialog.show();
+        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -680,10 +942,12 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
             } else {
                 file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
             }
-            uri = Uri.fromFile(file);
-            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-            CamIntent.putExtra("return-data", true);
+//            uri = Uri.fromFile(file);
+//            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//            CamIntent.putExtra("return-data", true);
             startActivityForResult(CamIntent, 0);
+
+
         }
     }
 
@@ -723,9 +987,10 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                     } else {
                         file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
                     }
-                    uri = Uri.fromFile(file);
-                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-                    CamIntent.putExtra("return-data", true);
+
+//                    uri = Uri.fromFile(file);
+//                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//                    CamIntent.putExtra("return-data", true);
                     startActivityForResult(CamIntent, 0);
                 } else {
                     // permission denied, boo! Disable the
@@ -756,12 +1021,25 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 0 && resultCode == RESULT_OK) {
-            ImageCropFunction();
+//            ImageCropFunction();
+            if (data != null) {
+                try {
+                    Bitmap bitmap = data.getExtras().getParcelable("data");
+                    loadImageViews(bitmap);
+                } catch (Exception e){
+                    //tODO:
+                }
+            }
         }
         if (requestCode == 1) {
             if (data != null) {
                 uri = data.getData();
-                ImageCropFunction();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                    loadImageViews(bitmap);
+                } catch (Exception e) {
+                    //tODO:
+                }
             }
         }
         if (requestCode == 2) {
@@ -774,6 +1052,46 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     void loadImageViews(Bitmap bitmap) {

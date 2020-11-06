@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -20,8 +20,11 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -118,49 +121,93 @@ public class SendPictureForChatActivity extends AppCompatActivity {
 
             mStorageReference = mFirebaseStorage.getReference().child("InboxPictures/" + mFirebaseUser.getUid() + "/" + IDofChatPartner + "/" + "InboxPicture_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
             UploadTask uploadTask = mStorageReference.putBytes(data);
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    progressDialog.dismiss();
-                    CustomToast.whiteBackgroundBottomToast(getApplicationContext(), "File Uploaded");
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        return null;
+                    }
 
-                    String downloadUrl = taskSnapshot.getDownloadUrl().toString();
-                    Intent intent = new Intent();
-                    intent.putExtra("DownloadURL", downloadUrl);
-                    setResult(RESULT_OK, intent);
-
-                    final Dialog dialog = new Dialog(context);
-                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
-                    dialog.setCancelable(false);
-                    dialog.setCanceledOnTouchOutside(false);
-                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
-                    TextView close = (TextView) dialog.findViewById(R.id.close);
-                    dialog.show();
-
-                    dialogMessage.setText("Picture sent successfully!");
-
-                    close.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            finish();
-                            dialog.dismiss();
-                        }
-                    });
+                    return mStorageReference.getDownloadUrl();
                 }
-            })
-            .addOnFailureListener(new OnFailureListener() {
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                 @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                }
-            })
-            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        progressDialog.dismiss();
+                        CustomToast.whiteBackgroundBottomToast(getApplicationContext(), "File Uploaded");
+
+                        String downloadUrl = task.getResult().toString();
+                        Intent intent = new Intent();
+                        intent.putExtra("DownloadURL", downloadUrl);
+                        setResult(RESULT_OK, intent);
+
+                        final Dialog dialog = new Dialog(context);
+                        dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                        dialog.setCancelable(false);
+                        dialog.setCanceledOnTouchOutside(false);
+                        TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                        TextView close = (TextView) dialog.findViewById(R.id.close);
+                        dialog.show();
+
+                        dialogMessage.setText("Picture sent successfully!");
+
+                        close.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                finish();
+                                dialog.dismiss();
+                            }
+                        });
+                    }
                 }
             });
+
+
+
+//            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                    progressDialog.dismiss();
+//                    CustomToast.whiteBackgroundBottomToast(getApplicationContext(), "File Uploaded");
+//
+//                    String downloadUrl = taskSnapshot.getDownloadUrl().toString();
+//                    Intent intent = new Intent();
+//                    intent.putExtra("DownloadURL", downloadUrl);
+//                    setResult(RESULT_OK, intent);
+//
+//                    final Dialog dialog = new Dialog(context);
+//                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
+//                    dialog.setCancelable(false);
+//                    dialog.setCanceledOnTouchOutside(false);
+//                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+//                    TextView close = (TextView) dialog.findViewById(R.id.close);
+//                    dialog.show();
+//
+//                    dialogMessage.setText("Picture sent successfully!");
+//
+//                    close.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            finish();
+//                            dialog.dismiss();
+//                        }
+//                    });
+//                }
+//            })
+//            .addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    progressDialog.dismiss();
+//                }
+//            })
+//            .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+////                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+////                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                }
+//            });
         }
     }
 }

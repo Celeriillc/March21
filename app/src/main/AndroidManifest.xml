@@ -17,7 +17,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.Home.NotificationDetailActivity"></activity>
+        <activity android:name=".Activities.Home.RemoteCampaignActivity"></activity>
+        <activity android:name=".Activities.Home.Teacher.TeacherRequestActivity" />
+        <activity android:name=".Activities.Home.Parent.ParentsRequestActivity" />
+
+        <receiver android:name=".helperClasses.NotificationReceiver" />
 
         <service android:name=".helperClasses.MyFirebaseInstanceIdService">
             <intent-filter>
@@ -41,11 +45,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Activities.Settings.InviteParentsHomeActivity" />
+        <activity android:name=".Activities.Utility.CorrectSystemTimeActivity" />
+        <activity android:name=".Activities.LoginAndSignup.FederatedSignInAccountTypeActivity" />
+        <activity android:name=".Activities.Subscription.SubscriptionHomeActivity" />
+        <activity android:name=".Activities.Settings.TutorialsActivity" />
+        <activity android:name=".Activities.Settings.DeleteAccount.DeleteAccountConfirmPasswordActivity" />
+        <activity android:name=".Activities.Settings.DeleteAccount.DeleteAccountReasonActivity" />
+        <activity android:name=".Activities.Settings.VerifyPhoneNumberActivity" />
+        <activity android:name=".Activities.Settings.EditPhoneNumberActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EditClassActivity" />
+        <activity android:name=".Activities.EditTermAndYearInfo.EditDayActivity" />
+        <activity android:name=".Activities.Timetable.AddNewTimetableActivity" />
+        <activity android:name=".Activities.Timetable.TimetableDetailActivity" />
+        <activity android:name=".Activities.Home.NotificationDetailActivity" />
         <activity android:name=".Activities.Delete.MainActivity" />
         <activity android:name=".Activities.Settings.SettingsActivityTeacher" />
         <activity android:name=".Activities.Delete.SignUpActivity" />
         <activity android:name=".Activities.LoginAndSignup.ForgotPasswordActivity" />
         <activity android:name=".Activities.LoginAndSignup.SignUpActivityOne" />
+        <activity android:name=".Activities.LoginAndSignup.WelcomeToBetaActivity" />
         <activity android:name=".Activities.Settings.ManageKidsRowActivity" />
         <activity android:name=".Activities.Delete.ParentSetupActivityTwo" />
         <activity android:name=".Activities.Delete.SignUpActivityTwoParents" />
@@ -125,7 +144,7 @@
         <activity android:name=".Activities.Settings.SettingsActivityParent" />
         <activity android:name=".Activities.Delete.InboxActivity" />
         <activity android:name=".Activities.Settings.PrivacySettingsTeacher" />
-        <activity android:name=".Activities.Settings.ManageMyClassesActivity" />
+        <activity android:name=".Activities.Delete.ManageMyClassesActivity" />
         <activity android:name=".Activities.EditPersonalInformationDetails.GeneralEditActivity" />
         <activity android:name=".Activities.EditPersonalInformationDetails.GenderEditActivity" />
         <activity android:name=".Activities.EditPersonalInformationDetails.MaritalStatusEditActivity" />
@@ -166,6 +185,9 @@
         <activity android:name=".Activities.StudentBehaviouralPerformance.StudentRewardHome" />
         <activity android:name=".Activities.StudentBehaviouralPerformance.BehaviouralResultActivity" />
         <activity android:name=".Activities.LoginAndSignup.FederatedSignInActivity" />
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
     </application>
 
 </manifest>

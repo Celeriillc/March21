@@ -2,14 +2,18 @@ package com.celerii.celerii.Activities.LoginAndSignup;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
@@ -56,7 +60,6 @@ public class SignUpActivityOne extends AppCompatActivity {
                 startActivity(I);
             }
         });
-
     }
 
     private boolean validateName(String nameString, EditText name) {
@@ -86,8 +89,13 @@ public class SignUpActivityOne extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

@@ -1,23 +1,29 @@
 package com.celerii.celerii.Activities.Search.Parent;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SearchHistoryAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.models.SearchAnalyticsModel;
 import com.celerii.celerii.models.SearchHistoryHeader;
 import com.celerii.celerii.models.SearchHistoryRow;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,12 +31,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ParentSearchActivity extends AppCompatActivity {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     private Toolbar mToolbar;
     private ArrayList<SearchHistoryRow> searchHistoryRowList;
@@ -41,14 +51,23 @@ public class ParentSearchActivity extends AppCompatActivity {
 
     boolean loading;
 
+    String featureUseKey = "";
+    String featureName = "Parent Search Home (History)";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parent_search);
 
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         SearchView searchView;
 
@@ -80,7 +99,7 @@ public class ParentSearchActivity extends AppCompatActivity {
         ((LinearLayout.LayoutParams) searchEditFrame.getLayoutParams()).leftMargin = 0;
 
         //Sets hint for search
-        searchView.setQueryHint("Search location, school or teacher"); //Todo: Use @string resource
+        searchView.setQueryHint("Search for your child"); //Todo: Use @string resource
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
@@ -97,9 +116,37 @@ public class ParentSearchActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                String mFirebaseUserID = mFirebaseUser.getUid();
+                String date = Date.getDate();
+                String sortableDate = Date.convertToSortableDate(date);
+                String day = Date.getDay();
+                String month = Date.getMonth();
+                String year = Date.getYear();
+                String day_month_year = day + "_" + month + "_" + year;
+                String month_year = month + "_" + year;
+                String platform = "Android";
+
+                HashMap<String, Object> searchUpdateMap = new HashMap<>();
+                String key = FirebaseDatabase.getInstance().getReference().child("Search Analytics").child("Feature Use Analytics").child(featureName).push().getKey();
+                SearchAnalyticsModel searchAnalyticsModel = new SearchAnalyticsModel(mFirebaseUser.getUid(), "Parent", date, sortableDate, day, month, year, key, platform, query);
+
+                searchUpdateMap.put("Search Analytics/Search/" + key, searchAnalyticsModel);
+                searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key, searchAnalyticsModel);
+                searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key, searchAnalyticsModel);
+                searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key, searchAnalyticsModel);
+
+                searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key, searchAnalyticsModel);
+                searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key, searchAnalyticsModel);
+                searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key, searchAnalyticsModel);
+                searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key, searchAnalyticsModel);
+
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(searchUpdateMap);
+
                 Intent intent = new Intent(ParentSearchActivity.this, ParentSearchResultActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Query", query);
+                bundle.putString("Search Key", key);
                 intent.putExtras(bundle);
                 startActivity(intent);
                 return false;
@@ -119,6 +166,46 @@ public class ParentSearchActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
@@ -130,7 +217,7 @@ public class ParentSearchActivity extends AppCompatActivity {
 
     void loadDetailsFromFirebase(){
         mDatabaseReference = mFirebaseDatabase.getReference("MySearchHistory").child("Parents").child(auth.getCurrentUser().getUid());
-        mDatabaseReference.orderByChild("time").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.orderByChild("time").limitToLast(5).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
@@ -139,8 +226,8 @@ public class ParentSearchActivity extends AppCompatActivity {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         SearchHistoryRow searchHistoryRow = postSnapshot.getValue(SearchHistoryRow.class);
                         searchHistoryRowList.add(1, searchHistoryRow);
-                        mAdapter.notifyDataSetChanged();
                     }
+                    mAdapter.notifyDataSetChanged();
                 }
             }
 

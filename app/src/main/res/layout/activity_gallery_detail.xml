@@ -6,6 +6,14 @@
     android:background="@android:color/black"
     tools:context="com.celerii.celerii.Activities.Delete.GalleryDetailFragment">
 
+    <ImageView
+        android:id="@+id/close"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:paddingTop="25dp"
+        android:paddingStart="25dp"
+        android:src="@drawable/ic_arrow_back_white"/>
+
     <ProgressBar
         android:layout_width="30dp"
         android:layout_height="30dp"

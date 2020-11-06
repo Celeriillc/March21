@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".Activities.Settings.DeleteAccount.DeleteAccountReasonActivity">
+
+    <include android:id="@+id/hometoolbar"
+        layout="@layout/home_toolbar"/>
+
+    <ScrollView
+        android:id="@+id/superlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:weightSum="1"
+                android:padding="15dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/profilepictureclipper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/circular_image_background_white">
+
+                    <ImageView
+                        android:id="@+id/profilepicture"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="15dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:text=""/>
+
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/chooseclasstoposttodescriptor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:padding="15dp"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:text="Choose the classes to post to:"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:textStyle="bold"
+                android:textColor="@color/colorLightGray"
+                android:textSize="12sp"
+                android:text="You are about to delete your Celerii account. If you continue, you'll lose access to all custom information including Connections, Messages, Class Feeds, Class Accounts and Children accounts"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:padding="15dp"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:text="Please tell us why you want to delete your account"/>
+
+            <RadioGroup
+                android:id="@+id/reportinggroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp">
+
+                <RadioButton
+                    android:id="@+id/loginsignup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"
+                    android:checked="true"
+                    android:layoutDirection="rtl"
+                    android:textAlignment="textStart"
+                    android:layout_gravity="start"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorLightGray"
+                    android:textSize="12sp"
+                    android:text="Login/Signup"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="#eeeeee"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"/>
+
+                <RadioButton
+                    android:id="@+id/classfeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"
+                    android:layoutDirection="rtl"
+                    android:textAlignment="textStart"
+                    android:layout_gravity="start"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorLightGray"
+                    android:textSize="12sp"
+                    android:text="Class Feed"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="#eeeeee"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"/>
+
+                <RadioButton
+                    android:id="@+id/assignmentfeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"
+                    android:layoutDirection="rtl"
+                    android:textAlignment="textStart"
+                    android:layout_gravity="start"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorLightGray"
+                    android:textSize="12sp"
+                    android:text="Assignment Feed"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="#eeeeee"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"/>
+
+                <RadioButton
+                    android:id="@+id/notifications"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"
+                    android:layoutDirection="rtl"
+                    android:textAlignment="textStart"
+                    android:layout_gravity="start"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorLightGray"
+                    android:textSize="12sp"
+                    android:text="Notifications"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="#eeeeee"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"/>
+
+                <RadioButton
+                    android:id="@+id/other"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"
+                    android:layoutDirection="rtl"
+                    android:textAlignment="textStart"
+                    android:layout_gravity="start"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorLightGray"
+                    android:textSize="12sp"
+                    android:text="Other"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="#eeeeee"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginTop="5dp"/>
+
+            </RadioGroup>
+
+            <EditText
+                android:id="@+id/otheredittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:minLines="5"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:hint="Compose message"
+                android:background="@drawable/edittext_background"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/continuebutton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:text="Continue"
+                android:background="@drawable/roundedbutton"
+                style="?android:attr/borderlessButtonStyle" />
+
+
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

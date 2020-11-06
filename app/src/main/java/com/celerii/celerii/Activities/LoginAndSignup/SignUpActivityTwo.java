@@ -3,12 +3,14 @@ package com.celerii.celerii.Activities.LoginAndSignup;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,10 +55,11 @@ public class SignUpActivityTwo extends AppCompatActivity {
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
                 final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.custom_binary_selection_dialog);
+                dialog.setContentView(R.layout.custom_binary_selection_dialog_for_signup_two);
                 TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                TextView parent = (TextView) dialog.findViewById(R.id.optionone);
-                TextView teacher = (TextView) dialog.findViewById(R.id.optiontwo);
+                Button parent = (Button) dialog.findViewById(R.id.optionone);
+                Button teacher = (Button) dialog.findViewById(R.id.optiontwo);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
 
                 message.setText("Please select an account type for your home screen from the options below. Don't worry, you can still switch between modes within the app");
@@ -123,8 +126,13 @@ public class SignUpActivityTwo extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

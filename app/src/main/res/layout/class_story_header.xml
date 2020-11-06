@@ -21,10 +21,18 @@
             android:orientation="horizontal"
             android:background="@android:color/white">
 
-            <ImageView
-                android:id="@+id/profilepic"
-                android:layout_width="35dp"
-                android:layout_height="35dp" />
+            <LinearLayout
+                android:id="@+id/profilepictureclipper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/circular_image_background_white">
+
+                <ImageView
+                    android:id="@+id/profilepic"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp" />
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="0dp"

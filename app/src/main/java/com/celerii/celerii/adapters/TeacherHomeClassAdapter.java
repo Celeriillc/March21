@@ -2,18 +2,20 @@ package com.celerii.celerii.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
 import com.celerii.celerii.Activities.StudentBehaviouralPerformance.StudentRewardHome;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.models.ManageKidsModel;
 import com.bumptech.glide.Glide;
 
@@ -27,7 +29,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private List<ManageKidsModel> manageKidsModelList;
-    String className;
+    public String className;
     private Context context;
     public static final int Header = 1;
     public static final int Normal = 2;
@@ -36,6 +38,7 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView kidName;
         public ImageView kidPic;
+        public LinearLayout kidPicClipper;
         public Button viewProfile;
         public View clickableView;
 
@@ -43,6 +46,7 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
             super(view);
             kidName = (TextView) view.findViewById(R.id.kidname);
             kidPic = (ImageView) view.findViewById(R.id.kidpic);
+            kidPicClipper = (LinearLayout) view.findViewById(R.id.kidpicclipper);
 //            viewProfile = (Button) view.findViewById(R.id.viewprofile);
             clickableView = view;
         }
@@ -105,13 +109,30 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
             final ManageKidsModel manageKidsModel = manageKidsModelList.get(position);
 
             ((MyViewHolder) holder).kidName.setText(manageKidsModel.getName());
-            Glide.with(context)
-                    .load(manageKidsModel.getPicURL())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder) holder).kidPic);
+            ((MyViewHolder) holder).kidPicClipper.setClipToOutline(true);
+
+            Drawable textDrawable;
+            if (!manageKidsModel.getName().isEmpty()) {
+                String[] nameArray = manageKidsModel.getName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 100);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 100);
+                }
+                ((MyViewHolder) holder).kidPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!manageKidsModel.getPicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(manageKidsModel.getPicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).kidPic);
+            }
 
             ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override

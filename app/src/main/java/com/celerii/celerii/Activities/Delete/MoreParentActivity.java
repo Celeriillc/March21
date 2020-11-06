@@ -1,10 +1,10 @@
 package com.celerii.celerii.Activities.Delete;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.widget.ProgressBar;
 
 import com.celerii.celerii.Activities.Intro.IntroSlider;
@@ -24,7 +24,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class MoreParentActivity extends AppCompatActivity {
 
@@ -119,7 +118,7 @@ public class MoreParentActivity extends AppCompatActivity {
                                     sharedPreferencesManager.deleteMyChildren();
 //                                    sharedPreferencesManager.deleteMyChildrensName();
 //                                    sharedPreferencesManager.deleteMyChildrensURL();
-                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childIdsFirebase));
+//                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childIdsFirebase));
 //                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childIdsFirebase));
 //                                    sharedPreferencesManager.setMyChildren(new HashSet<String>(childIdsFirebase));
                                     loadDataFromSharedPreferences();

@@ -2,10 +2,11 @@ package com.celerii.celerii.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.StudentPerformance.History.HistoryPerformanceActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.PerformanceHistoryModel;
 import com.amulyakhare.textdrawable.TextDrawable;
@@ -94,8 +96,9 @@ public class PerformanceHistoryAdapter extends RecyclerView.Adapter<PerformanceH
             }
         });
 
-        TextDrawable textDrawable = TextDrawable.builder()
-                .buildRound(letter, Color.rgb(211,47,47));
+        Drawable textDrawable = CreateTextDrawable.createTextDrawable(context, letter);
+//        TextDrawable.builder()
+//                .buildRound(letter, ContextCompat.getColor(context, R.color.colorPrimaryPurple));
         holder.imageBadge.setImageDrawable(textDrawable);
 
     }

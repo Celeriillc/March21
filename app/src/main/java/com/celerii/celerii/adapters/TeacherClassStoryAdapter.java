@@ -3,11 +3,12 @@ package com.celerii.celerii.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.util.Pair;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +25,14 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherCreateClassPostActivity;
 import com.celerii.celerii.Activities.Profiles.TeacherProfileOneActivity;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
-import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.LikeNotification;
 import com.celerii.celerii.models.NotificationModel;
@@ -71,12 +74,13 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
         public TextView poster, classreciepient, timestamp, story, url, noOfLikes, noOfComments;
         public TextView commentPoster, comment, time;
         public ImageView storyimage, profilepic, likebutton, commentbutton, commenterPic, posterPic;
-        public LinearLayout commentLayout, createCommentLayout;
+        public LinearLayout commentLayout, firstCommentLayout, createCommentLayout;
 
         public ImageView storyImageOne, storyImageTwo, storyImageThree, storyImageFour;
         public LinearLayout layoutImageOne, layoutImageTwo, layoutImageThree;
         public LinearLayout storyImageOneContainer, storyImageTwoContainer, storyImageThreeContainer;
         public LinearLayout storyImageOneClipper, storyImageTwoClipper, storyImageThreeClipper, storyImageFourClipper;
+        public LinearLayout profilePictureClipper, profilePictureClipper2, commenterPictureClipper;
         public RelativeLayout layoutImageFour;
         public LinearLayout imageContainer;
         public View moreImagesScrim;
@@ -101,6 +105,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             commenterPic = (ImageView) view.findViewById(R.id.commenterpic);
             posterPic = (ImageView) view.findViewById(R.id.posterpic);
             commentLayout = (LinearLayout) view.findViewById(R.id.commentlayout);
+            firstCommentLayout = (LinearLayout) view.findViewById(R.id.firstcommentlayout);
             createCommentLayout = (LinearLayout) view.findViewById(R.id.createcommentlayout);
 
             storyImageOne = (ImageView) view.findViewById(R.id.storyimageone);
@@ -123,13 +128,17 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             storyImageTwoClipper = (LinearLayout) view.findViewById(R.id.storyimagetwoclipper);
             storyImageThreeClipper = (LinearLayout) view.findViewById(R.id.storyimagethreeclipper);
             storyImageFourClipper = (LinearLayout) view.findViewById(R.id.storyimagefourclipper);
+
+            profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
+            profilePictureClipper2 = (LinearLayout) view.findViewById(R.id.profilepictureclipper2);
+            commenterPictureClipper = (LinearLayout) view.findViewById(R.id.commenterpictureclipper);
         }
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView poster;
         ImageView profilePicture;
-        LinearLayout createClassStory, chiefLayout;
+        LinearLayout createClassStory, chiefLayout, profilePictureClipper;
         RelativeLayout errorLayout;
         TextView errorLayoutText;
 
@@ -138,6 +147,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             profilePicture = (ImageView) view.findViewById(R.id.profilepic);
             createClassStory = (LinearLayout) view.findViewById(R.id.createclassstory);
             chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
+            profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
             errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
         }
@@ -182,6 +192,8 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderViewHolder) {
+            ((HeaderViewHolder) holder).createClassStory.setVisibility(View.GONE);
+            ((HeaderViewHolder) holder).profilePictureClipper.setClipToOutline(true);
             if (classStoryList.size() <= 1){
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
@@ -192,13 +204,28 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             }
 
-            Glide.with(context)
-                    .load(sharedPreferencesManager.getMyPicURL())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((HeaderViewHolder) holder).profilePicture);
+            Drawable textDrawable;
+            if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
+                String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((HeaderViewHolder) holder).profilePicture.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(sharedPreferencesManager.getMyPicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((HeaderViewHolder) holder).profilePicture);
+            }
 
             ((HeaderViewHolder) holder).createClassStory.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -335,7 +362,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             if (classStory.isLiked()) {
                 ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_favorite_black_24dp);
                 ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_favorite_black_24dp));
-            }else{
+            } else {
                 ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_favorite_border_black_24dp);
                 ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_favorite_border_black_24dp));
             }
@@ -344,63 +371,133 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             ((MyViewHolder)holder).classreciepient.setText(classStory.getClassReciepient());
             ((MyViewHolder)holder).timestamp.setText(Date.getRelativeTimeSpan(classStory.getDate()));
             ((MyViewHolder)holder).story.setText(classStory.getStory());
+            ((MyViewHolder)holder).profilePictureClipper.setClipToOutline(true);
+            ((MyViewHolder)holder).profilePictureClipper2.setClipToOutline(true);
+            ((MyViewHolder)holder).commenterPictureClipper.setClipToOutline(true);
+            if (classStory.getStory().equals("")) {
+                ((MyViewHolder)holder).story.setVisibility(View.GONE);
+            } else {
+                ((MyViewHolder)holder).story.setVisibility(View.VISIBLE);
+            }
 
             String likes = String.valueOf(classStory.getNoOfLikes());
             ((MyViewHolder)holder).noOfLikes.setText(likes);
             String comments = String.valueOf(classStory.getNumberOfComments());
             ((MyViewHolder)holder).noOfComments.setText(comments);
 
-            Glide.with(context)
-                    .load(classStory.getProfilePicURL())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder)holder).profilepic);
+            Drawable textDrawable;
+            if (!classStory.getPosterName().isEmpty()) {
+                String[] nameArray = classStory.getPosterName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).profilepic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
 
-            Glide.with(context)
-                    .load(sharedPreferencesManager.getMyPicURL())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder)holder).posterPic);
+            if (!classStory.getProfilePicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(classStory.getProfilePicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).profilepic);
+            }
+
+            if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
+                String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+//                Drawable textDrawable;
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).posterPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(sharedPreferencesManager.getMyPicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).posterPic);
+            }
 
             if (classStory.getComment() != null) {
-                ((MyViewHolder) holder).commentLayout.setVisibility(View.VISIBLE);
+                ((MyViewHolder) holder).firstCommentLayout.setVisibility(View.VISIBLE);
                 ((MyViewHolder) holder).commentPoster.setText(classStory.getComment().getPosterName());
                 ((MyViewHolder) holder).comment.setText(classStory.getComment().getComment());
                 ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpan(classStory.getComment().getTime()));
-                Glide.with(context)
-                        .load(classStory.getComment().getPosterPic())
-                        .placeholder(R.drawable.profileimageplaceholder)
-                        .error(R.drawable.profileimageplaceholder)
-                        .centerCrop()
-                        .bitmapTransform(new CropCircleTransformation(context))
-                        .into(((MyViewHolder) holder).commenterPic);
+
+                if (!classStory.getComment().getPosterName().isEmpty()) {
+                    String[] nameArray = classStory.getComment().getPosterName().split(" ");
+                    if (nameArray.length == 1) {
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    } else {
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    }
+                    ((MyViewHolder) holder).commenterPic.setImageDrawable(textDrawable);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                }
+
+                if (!classStory.getComment().getPosterPic().isEmpty()) {
+                    Glide.with(context)
+                            .load(classStory.getComment().getPosterPic())
+                            .placeholder(textDrawable)
+                            .error(textDrawable)
+                            .centerCrop()
+                            .bitmapTransform(new CropCircleTransformation(context))
+                            .into(((MyViewHolder) holder).commenterPic);
+                }
             } else {
-                ((MyViewHolder) holder).commentLayout.setVisibility(View.GONE);
+                ((MyViewHolder) holder).firstCommentLayout.setVisibility(View.GONE);
             }
 
             ((MyViewHolder)holder).poster.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent I = new Intent(context, TeacherProfileOneActivity.class);
-                    Bundle b = new Bundle();
-                    b.putString("ID", classStory.getPosterID());
-                    I.putExtras(b);
-                    context.startActivity(I);
+                    if (classStory.getPosterAccountType().equals("School")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else if (classStory.getPosterAccountType().equals("Teacher")) {
+                        Intent I = new Intent(context, TeacherProfileOneActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    }
+
                 }
             });
 
             ((MyViewHolder)holder).profilepic.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent I = new Intent(context, TeacherProfileOneActivity.class);
-                    Bundle b = new Bundle();
-                    b.putString("ID", classStory.getPosterID());
-                    I.putExtras(b);
-                    context.startActivity(I);
+                    if (classStory.getPosterAccountType().equals("School")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else if (classStory.getPosterAccountType().equals("Teacher")) {
+                        Intent I = new Intent(context, TeacherProfileOneActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    }
                 }
             });
 
@@ -408,98 +505,95 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                 @Override
                 public void onClick(View v) {
                     int tag = (Integer)((MyViewHolder)holder).likebutton.getTag();
-                    if (!classStory.isLiked()) {
-                        mDatabaseReference = mFirebaseDatabase.getReference();
-                        Map<String, Object> userUpdates = new HashMap<String, Object>();
-                        String path = "";
-                        if (sharedPreferencesManager.getActiveAccount().equals("Parent")){
-                            path = "ClassStoryParentFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID();
+                    if (!classStory.getPosterAccountType().equals("Admin")) {
+                        if (!classStory.isLiked()) {
+                            mDatabaseReference = mFirebaseDatabase.getReference();
+                            Map<String, Object> userUpdates = new HashMap<String, Object>();
+                            String time = Date.getDate();
+                            String sortableTime = Date.convertToSortableDate(time);
+                            boolean isSeen = false;
+                            NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), "Teacher",
+                                    sharedPreferencesManager.getActiveAccount(), time, sortableTime, classStory.getPostID(), "Like", "", "", isSeen);
 
-                        }else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")){
-                            path = "ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID();
-                        }
-                        String time = Date.getDate();
-                        String sortableTime = Date.convertToSortableDate(time);
-                        boolean isSeen = false;
-                        NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), "Teacher",
-                                sharedPreferencesManager.getActiveAccount(), time, sortableTime, classStory.getPostID(), "Like", "", "", isSeen);
+                            userUpdates.put("ClassStoryParentFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
+                            userUpdates.put("ClassStoryTeacherFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
+                            if (mFirebaseUser.getUid().equals(classStory.getPosterID())) {
+                                userUpdates.put("ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
+                            }
+                            userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + auth.getCurrentUser().getUid(), time);
+                            userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
+                            if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
+                                userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), new LikeNotification(auth.getCurrentUser().getUid(), time));
+                                userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), notificationModel);
+                            }
+                            mDatabaseReference.updateChildren(userUpdates);
+                            DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("ClassStory/" + classStory.getPostID() + "/" + "noOfLikes");
+                            updateLikeRef.runTransaction(new Transaction.Handler() {
+                                @Override
+                                public Transaction.Result doTransaction(MutableData mutableData) {
+                                    Integer currentValue = mutableData.getValue(Integer.class);
+                                    if (currentValue == null) {
+                                        mutableData.setValue(1);
+                                    } else {
+                                        mutableData.setValue(currentValue + 1);
+                                    }
 
-                        userUpdates.put(path, true);
-                        userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + auth.getCurrentUser().getUid(), time);
-                        userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
-                        if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())){
-                            userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), new LikeNotification(auth.getCurrentUser().getUid(), time));
-                            userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), notificationModel);
-                        }
-                        mDatabaseReference.updateChildren(userUpdates);
-                        DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("ClassStory/" + classStory.getPostID() + "/" + "noOfLikes");
-                        updateLikeRef.runTransaction(new Transaction.Handler() {
-                            @Override
-                            public Transaction.Result doTransaction(MutableData mutableData) {
-                                Integer currentValue = mutableData.getValue(Integer.class);
-                                if (currentValue == null) {
-                                    mutableData.setValue(1);
-                                } else {
-                                    mutableData.setValue(currentValue + 1);
+                                    return Transaction.success(mutableData);
+
                                 }
 
-                                return Transaction.success(mutableData);
+                                @Override
+                                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
 
+                                }
+                            });
+                            animateHeart(((MyViewHolder) holder).likebutton);
+                            ((MyViewHolder) holder).likebutton.setImageResource((R.drawable.ic_favorite_black_24dp));
+                            ((MyViewHolder) holder).likebutton.setTag(R.drawable.ic_favorite_black_24dp);
+                            classStory.setLiked(true);
+
+                        } else {
+                            mDatabaseReference = mFirebaseDatabase.getReference();
+                            Map<String, Object> userUpdates = new HashMap<String, Object>();
+                            userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + auth.getCurrentUser().getUid(), null);
+                            userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), null);
+                            userUpdates.put("ClassStoryParentFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), false);
+                            userUpdates.put("ClassStoryTeacherFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), false);
+                            if (auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
+                                userUpdates.put("ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), false);
                             }
-
-                            @Override
-                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
+                            if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
+                                userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID(), null);
                             }
-                        });
-                        animateHeart(((MyViewHolder)holder).likebutton);
-                        ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_favorite_black_24dp));
-                        ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_favorite_black_24dp);
-                        classStory.setLiked(true);
+                            mDatabaseReference.updateChildren(userUpdates);
+                            DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("ClassStory/" + classStory.getPostID() + "/" + "noOfLikes");
+                            updateLikeRef.runTransaction(new Transaction.Handler() {
+                                @Override
+                                public Transaction.Result doTransaction(MutableData mutableData) {
+                                    Integer currentValue = mutableData.getValue(Integer.class);
+                                    if (currentValue == null) {
+                                        mutableData.setValue(1);
+                                    } else {
+                                        mutableData.setValue(currentValue - 1);
+                                    }
 
-                    }
-                    else{
-                        mDatabaseReference = mFirebaseDatabase.getReference();
-                        Map<String, Object> userUpdates = new HashMap<String, Object>();
-                        String path = "";
-                        if (sharedPreferencesManager.getActiveAccount().equals("Parent")){
-                            path = "ClassStoryParentFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID();
+                                    return Transaction.success(mutableData);
 
-                        }else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")){
-                            path = "ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID();
-                        }
-                        userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + auth.getCurrentUser().getUid(), null);
-                        userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), null);
-                        userUpdates.put(path, false);
-                        if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
-                            userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID(), null);
-                        }
-                        mDatabaseReference.updateChildren(userUpdates);
-                        DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("ClassStory/" + classStory.getPostID() + "/" + "noOfLikes");
-                        updateLikeRef.runTransaction(new Transaction.Handler() {
-                            @Override
-                            public Transaction.Result doTransaction(MutableData mutableData) {
-                                Integer currentValue = mutableData.getValue(Integer.class);
-                                if (currentValue == null) {
-                                    mutableData.setValue(1);
-                                } else {
-                                    mutableData.setValue(currentValue - 1);
                                 }
 
-                                return Transaction.success(mutableData);
+                                @Override
+                                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
 
-                            }
+                                }
+                            });
+                            ((MyViewHolder) holder).likebutton.setImageResource((R.drawable.ic_favorite_border_black_24dp));
+                            ((MyViewHolder) holder).likebutton.setTag(R.drawable.ic_favorite_border_black_24dp);
+                            animateHeart(((MyViewHolder) holder).likebutton);
+                            classStory.setLiked(false);
 
-                            @Override
-                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-                            }
-                        });
-                        ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_favorite_border_black_24dp));
-                        ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_favorite_border_black_24dp);
-                        animateHeart(((MyViewHolder)holder).likebutton);
-                        classStory.setLiked(false);
-
+                        }
+                    } else {
+                        CustomToast.primaryBackgroundToast(context, "Likes for this post are turned off");
                     }
                 }
             });
@@ -507,44 +601,60 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             ((MyViewHolder) holder).story.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("postKey", classStory.getPostID());
-                    Intent I = new Intent(context, CommentStoryActivity.class);
-                    I.putExtras(bundle);
-                    context.startActivity(I);
+                    if (!classStory.getPosterAccountType().equals("Admin")) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("postKey", classStory.getPostID());
+                        Intent I = new Intent(context, CommentStoryActivity.class);
+                        I.putExtras(bundle);
+                        context.startActivity(I);
+                    } else {
+                        CustomToast.primaryBackgroundToast(context, "Comments for this post are turned off");
+                    }
                 }
             });
 
             ((MyViewHolder)holder).commentbutton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("postKey", classStory.getPostID());
-                    Intent I = new Intent(context, CommentStoryActivity.class);
-                    I.putExtras(bundle);
-                    context.startActivity(I);
+                    if (!classStory.getPosterAccountType().equals("Admin")) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("postKey", classStory.getPostID());
+                        Intent I = new Intent(context, CommentStoryActivity.class);
+                        I.putExtras(bundle);
+                        context.startActivity(I);
+                    } else {
+                        CustomToast.primaryBackgroundToast(context, "Comments for this post are turned off");
+                    }
                 }
             });
 
             ((MyViewHolder)holder).noOfComments.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("postKey", classStory.getPostID());
-                    Intent I = new Intent(context, CommentStoryActivity.class);
-                    I.putExtras(bundle);
-                    context.startActivity(I);
+                    if (!classStory.getPosterAccountType().equals("Admin")) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("postKey", classStory.getPostID());
+                        Intent I = new Intent(context, CommentStoryActivity.class);
+                        I.putExtras(bundle);
+                        context.startActivity(I);
+                    } else {
+                        CustomToast.primaryBackgroundToast(context, "Comments for this post are turned off");
+                    }
                 }
             });
 
             ((MyViewHolder)holder).commentLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("postKey", classStory.getPostID());
-                    Intent I = new Intent(context, CommentStoryActivity.class);
-                    I.putExtras(bundle);
-                    context.startActivity(I);
+                    if (!classStory.getPosterAccountType().equals("Admin")) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("postKey", classStory.getPostID());
+                        Intent I = new Intent(context, CommentStoryActivity.class);
+                        I.putExtras(bundle);
+                        context.startActivity(I);
+                    } else {
+                        CustomToast.primaryBackgroundToast(context, "Comments for this post are turned off");
+                    }
                 }
             });
         }

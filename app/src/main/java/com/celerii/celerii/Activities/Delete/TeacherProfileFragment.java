@@ -2,7 +2,7 @@ package com.celerii.celerii.Activities.Delete;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +39,7 @@ public class TeacherProfileFragment extends Fragment {
         ImageView largeImage = (ImageView) view.findViewById(R.id.backgroundimage);
 
         if (!smallImageURL.isEmpty()) {
-            Glide.with(this)
+            Glide.with(getContext())
                     .load(smallImageURL)
                     .crossFade()
                     .placeholder(R.drawable.profileimageplaceholder)
@@ -49,7 +49,7 @@ public class TeacherProfileFragment extends Fragment {
                     .into(smallImage);
         }
         else {
-            Glide.with(this)
+            Glide.with(getContext())
                     .load(R.drawable.profileimageplaceholder)
                     .centerCrop()
                     .bitmapTransform(new CropCircleTransformation(getContext()))
@@ -57,14 +57,14 @@ public class TeacherProfileFragment extends Fragment {
         }
 
         if (!largeImageURL.isEmpty()) {
-            Glide.with(this)
+            Glide.with(getContext())
                     .load(largeImageURL)
                     .centerCrop()
                     .bitmapTransform(new BlurTransformation(getContext(), 50))
                     .into(largeImage);
         }
         else {
-            Glide.with(this)
+            Glide.with(getContext())
                     .load(R.drawable.materialdesignwallpapericebasic)
                     .centerCrop()
                     .bitmapTransform(new BlurTransformation(getContext(), 50))

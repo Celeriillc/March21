@@ -2,13 +2,13 @@ package com.celerii.celerii.Activities.Intro;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.LoginAndSignup.FederatedSignInActivity;
 import com.celerii.celerii.Activities.LoginAndSignup.LoginActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.LoginAndSignup.SignUpActivityOne;
@@ -33,7 +34,8 @@ public class IntroSlider extends AppCompatActivity {
     private LinearLayout dotsLayout;
     private TextView[] dots;
     private int[] layouts;
-    private Button btnSignUp, btnLogin;
+    private Button signUp;
+    private LinearLayout signIn;
     private Toolbar mToolbar;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseDatabase mFirebaseDatabase;
@@ -53,8 +55,8 @@ public class IntroSlider extends AppCompatActivity {
 
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
-        btnSignUp = (Button) findViewById(R.id.btn_signUp);
-        btnLogin = (Button) findViewById(R.id.btn_login);
+        signUp = (Button) findViewById(R.id.signup);
+        signIn = (LinearLayout) findViewById(R.id.signin);
         mToolbar = (Toolbar) findViewById(R.id.introtoolbar);
 
         setSupportActionBar(mToolbar);
@@ -73,15 +75,15 @@ public class IntroSlider extends AppCompatActivity {
         viewPager.setAdapter(myViewPagerAdapter);
         viewPager.addOnPageChangeListener(viewPagerPageChangeListener);
 
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
+        signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent I = new Intent(IntroSlider.this, SignUpActivityOne.class);
+                Intent I = new Intent(IntroSlider.this, FederatedSignInActivity.class);
                 startActivity(I);
             }
         });
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(IntroSlider.this, LoginActivity.class);

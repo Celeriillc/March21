@@ -104,10 +104,11 @@
             android:id="@+id/subjectname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:text="Overall Average In"/>
+            android:text="Overall Average"/>
 
         <TextView
             android:id="@+id/averagescore"
@@ -121,7 +122,7 @@
 
         <View
             android:layout_width="15dp"
-            android:layout_height="0.5dp"
+            android:layout_height="0dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
             android:background="#aaaaaa" />
@@ -129,8 +130,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/story_background"
-            android:padding="3dp">
+            android:padding="0dp">
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/historychart"
@@ -142,7 +142,7 @@
 
         <View
             android:layout_width="15dp"
-            android:layout_height="0.5dp"
+            android:layout_height="0dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
             android:background="#aaaaaa" />

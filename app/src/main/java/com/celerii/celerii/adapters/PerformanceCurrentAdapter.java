@@ -3,24 +3,43 @@ package com.celerii.celerii.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.StudentPerformance.Current.PerformanceCurrentDetailActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.PerformanceCurrentHeader;
 import com.celerii.celerii.models.PerformanceCurrentModel;
+import com.celerii.celerii.models.SubscriptionModel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -99,7 +118,7 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
 
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderViewHolder) {
-            ((HeaderViewHolder) holder).term.setText(performanceCurrentHeader.getTerm());
+            ((HeaderViewHolder) holder).term.setText(Term.Term(performanceCurrentHeader.getTerm()));
             ((HeaderViewHolder) holder).year.setText(performanceCurrentHeader.getYear());
             ((HeaderViewHolder) holder).average.setText(TypeConverterClass.convStringToIntString(performanceCurrentHeader.getTermAverage()));
             ((HeaderViewHolder) holder).classAverage.setText(TypeConverterClass.convStringToIntString(performanceCurrentHeader.getClassAverage()));
@@ -129,19 +148,66 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
                 }
             });
 
+            ((HeaderViewHolder) holder).printThisResult.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
         } else if (holder instanceof MyViewHolder) {
             final PerformanceCurrentModel performanceCurrentModel = performanceCurrentModelList.get(position);
 
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            ((MyViewHolder) holder).subject.setText(performanceCurrentModel.getSubject());
+//            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                 if (performanceCurrentModel.isNew()) {
                     ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
                 } else {
                     ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
                 }
+//            }
+
+            Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
+            Gson gson = new Gson();
+            String subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationTeachers();
+            Type type = new TypeToken<HashMap<String, SubscriptionModel>>() {}.getType();
+            HashMap<String, SubscriptionModel> subscriptionModelMap = gson.fromJson(subscriptionModelJSON, type);
+            SubscriptionModel subscriptionModel = new SubscriptionModel();
+            if (subscriptionModelMap != null) {
+                subscriptionModel = subscriptionModelMap.get(performanceCurrentHeader.getStudent());
+                if (subscriptionModel == null) {
+                    subscriptionModel = new SubscriptionModel();
+                }
+            }
+            if (subscriptionModel.getStudentAccount().equals("")) {
+                gson = new Gson();
+                subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationParents();
+                type = new TypeToken<HashMap<String, ArrayList<SubscriptionModel>>>() {}.getType();
+                HashMap<String, ArrayList<SubscriptionModel>> subscriptionModelMapParent = gson.fromJson(subscriptionModelJSON, type);
+                subscriptionModel = new SubscriptionModel();
+                if (subscriptionModelMapParent != null) {
+                    ArrayList<SubscriptionModel> subscriptionModelList = subscriptionModelMapParent.get(performanceCurrentHeader.getStudent());
+                    String latestSubscriptionDate = "0000/00/00 00:00:00:000";
+                    for (SubscriptionModel subscriptionModel1: subscriptionModelList) {
+                        if (Date.compareDates(subscriptionModel1.getExpiryDate(), latestSubscriptionDate)) {
+                            subscriptionModel = subscriptionModel1;
+                            latestSubscriptionDate = subscriptionModel1.getExpiryDate();
+                        }
+                    }
+                }
+            }
+            Boolean isExpired = Date.compareDates(performanceCurrentModel.getDate(), subscriptionModel.getExpiryDate());
+
+            if (isOpenToAll) {
+                ((MyViewHolder) holder).subjectScore.setText(TypeConverterClass.convStringToIntString(String.valueOf(performanceCurrentModel.getCurrentScore())));
+            } else {
+                if (!isExpired) {
+                    ((MyViewHolder) holder).subjectScore.setText(TypeConverterClass.convStringToIntString(String.valueOf(performanceCurrentModel.getCurrentScore())));
+                } else {
+                    ((MyViewHolder) holder).subjectScore.setText(R.string.not_subscribed_long);
+                }
             }
 
-            ((MyViewHolder) holder).subject.setText(performanceCurrentModel.getSubject());
-            ((MyViewHolder) holder).subjectScore.setText(TypeConverterClass.convStringToIntString(String.valueOf(performanceCurrentModel.getCurrentScore())));
             ((MyViewHolder) holder).view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

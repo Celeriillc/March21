@@ -1,7 +1,7 @@
 package com.celerii.celerii.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +12,13 @@ import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.AcademicRecordStudent;
+import com.celerii.celerii.models.SubscriptionModel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -77,6 +83,47 @@ public class PerformanceCurrentDetailAdapter extends RecyclerView.Adapter<Perfor
         holder.percentageOfTotal.setText(academicRecordStudent.getPercentageOfTotal() + "%");
         holder.term.setText(Term.Term(academicRecordStudent.getTerm()));
         holder.year.setText(academicRecordStudent.getAcademicYear());
+
+        Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
+        Gson gson = new Gson();
+        String subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationTeachers();
+        Type type = new TypeToken<HashMap<String, SubscriptionModel>>() {}.getType();
+        HashMap<String, SubscriptionModel> subscriptionModelMap = gson.fromJson(subscriptionModelJSON, type);
+        SubscriptionModel subscriptionModel = new SubscriptionModel();
+        if (subscriptionModelMap != null) {
+            subscriptionModel = subscriptionModelMap.get(academicRecordStudent.getStudentID());
+            if (subscriptionModel == null) {
+                subscriptionModel = new SubscriptionModel();
+            }
+        }
+        if (subscriptionModel.getStudentAccount().equals("")) {
+            gson = new Gson();
+            subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationParents();
+            type = new TypeToken<HashMap<String, ArrayList<SubscriptionModel>>>() {}.getType();
+            HashMap<String, ArrayList<SubscriptionModel>> subscriptionModelMapParent = gson.fromJson(subscriptionModelJSON, type);
+            subscriptionModel = new SubscriptionModel();
+            if (subscriptionModelMapParent != null) {
+                ArrayList<SubscriptionModel> subscriptionModelList = subscriptionModelMapParent.get(academicRecordStudent.getStudentID());
+                String latestSubscriptionDate = "0000/00/00 00:00:00:000";
+                for (SubscriptionModel subscriptionModel1: subscriptionModelList) {
+                    if (Date.compareDates(subscriptionModel1.getExpiryDate(), latestSubscriptionDate)) {
+                        subscriptionModel = subscriptionModel1;
+                        latestSubscriptionDate = subscriptionModel1.getExpiryDate();
+                    }
+                }
+            }
+        }
+        Boolean isExpired = Date.compareDates(academicRecordStudent.getDate(), subscriptionModel.getExpiryDate());
+
+        if (isOpenToAll) {
+            holder.score.setText(academicRecordStudent.getScore());
+        } else {
+            if (!isExpired) {
+                holder.score.setText(academicRecordStudent.getScore());
+            } else {
+                holder.score.setText(R.string.not_subscribed_long);
+            }
+        }
     }
 
     @Override

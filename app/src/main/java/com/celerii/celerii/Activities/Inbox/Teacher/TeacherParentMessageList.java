@@ -1,20 +1,28 @@
 package com.celerii.celerii.Activities.Inbox.Teacher;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
+import com.celerii.celerii.Activities.Search.Teacher.SearchActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.NewChatRowAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
 import com.celerii.celerii.models.NewChatRowModel;
@@ -42,6 +50,7 @@ import java.util.HashMap;
  */
 public class TeacherParentMessageList extends Fragment {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -57,12 +66,18 @@ public class TeacherParentMessageList extends Fragment {
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
     TextView errorLayoutText;
+    Button errorLayoutButton;
 
     ArrayList<String> kidsList;
     ArrayList<String> classList, parentIDList;
     ArrayList<ClassesStudentsAndParentsModel> classesStudentsAndParentsModelList;
     HashMap<String, NewChatRowModel> parentList;
     int counter = 0;
+
+    String featureUseKey = "";
+    String featureName = "Teacher New Message to Parents";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     public TeacherParentMessageList() {
         // Required empty public constructor
@@ -74,7 +89,8 @@ public class TeacherParentMessageList extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_teacher_parent_message_list, container, false);
 
-        sharedPreferencesManager = new SharedPreferencesManager(getContext());
+        context = getContext();
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -89,6 +105,7 @@ public class TeacherParentMessageList extends Fragment {
 
         errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
         errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         progressLayout = (RelativeLayout) view.findViewById(R.id.progresslayout);
 
         recyclerView.setVisibility(View.GONE);
@@ -113,6 +130,13 @@ public class TeacherParentMessageList extends Fragment {
                 }
         );
 
+        errorLayoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context, SearchActivity.class));
+            }
+        });
+
         return view;
     }
 
@@ -135,6 +159,14 @@ public class TeacherParentMessageList extends Fragment {
 
         if (classesStudentsAndParentsModelList == null) {
             classesStudentsAndParentsModelList = new ArrayList<>();
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            mySwipeRefreshLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText(Html.fromHtml("You don't have any parents to message at this time. If you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+            errorLayoutButton.setText("Find my school");
+            errorLayoutButton.setVisibility(View.VISIBLE);
         } else {
             for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
                 final ClassesStudentsAndParentsModel classesStudentsAndParentsModel = classesStudentsAndParentsModelList.get(i);
@@ -174,6 +206,7 @@ public class TeacherParentMessageList extends Fragment {
                                             mAdapter.notifyDataSetChanged();
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
                                             recyclerView.setVisibility(View.VISIBLE);
                                         }
                                     }
@@ -314,5 +347,45 @@ public class TeacherParentMessageList extends Fragment {
 //
 //            }
 //        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 }

@@ -4,7 +4,8 @@
     android:id="@+id/activity_gender_edit"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <include android:id="@+id/hometoolbar"
         layout="@layout/home_toolbar"/>
@@ -19,7 +20,6 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/account"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="15dp">
@@ -36,7 +36,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="0dp"
                 android:background="#aaaaaa"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
@@ -59,12 +59,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Single"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -80,12 +79,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Married"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -101,12 +99,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Widowed"
-                    android:textStyle="bold"/>
+                    android:text="Widowed"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -122,12 +119,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Divorced"
-                    android:textStyle="bold"/>
+                    android:text="Divorced"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -143,12 +139,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Separated"
-                    android:textStyle="bold"/>
+                    android:text="Separated"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -164,8 +159,7 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Registered Partnership"
-                    android:textStyle="bold"/>
+                    android:text="Registered Partnership"/>
 
             </RadioGroup>
         </LinearLayout>

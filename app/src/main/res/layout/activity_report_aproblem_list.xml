@@ -35,11 +35,11 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="0dp"
                 android:background="#aaaaaa"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="0dp"/>
 
             <RadioGroup
                 android:id="@+id/reportinggroup"
@@ -58,12 +58,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Login/Signup"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -79,12 +78,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Class Feed"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -100,12 +98,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Assignment Feed"
-                    android:textStyle="bold"/>
+                    android:text="Assignment Feed"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -121,12 +118,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Notifications"
-                    android:textStyle="bold"/>
+                    android:text="Notifications"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -142,12 +138,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Messaging"
-                    android:textStyle="bold"/>
+                    android:text="Messaging"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -163,12 +158,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Timetable"
-                    android:textStyle="bold"/>
+                    android:text="Timetable"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -184,12 +178,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Student Performance History"
-                    android:textStyle="bold"/>
+                    android:text="Student Performance History"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -205,12 +198,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Student Performance Current"
-                    android:textStyle="bold"/>
+                    android:text="Student Performance Current"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -226,12 +218,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Student Performance Prediction"
-                    android:textStyle="bold"/>
+                    android:text="Student Performance Prediction"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -247,12 +238,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Teacher Performance"
-                    android:textStyle="bold"/>
+                    android:text="Teacher Performance"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -268,12 +258,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Profile"
-                    android:textStyle="bold"/>
+                    android:text="Profile"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -289,12 +278,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Attendance"
-                    android:textStyle="bold"/>
+                    android:text="Attendance"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -310,12 +298,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Event"
-                    android:textStyle="bold"/>
+                    android:text="Event"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -331,12 +318,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Newsletter"
-                    android:textStyle="bold"/>
+                    android:text="Newsletter"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -352,12 +338,11 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Payment"
-                    android:textStyle="bold"/>
+                    android:text="Payment"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -373,18 +358,32 @@
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Other"
-                    android:textStyle="bold"/>
+                    android:text="Other"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
                     android:layout_marginTop="5dp"/>
 
             </RadioGroup>
+
+            <Button
+                android:id="@+id/next"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:text="Next"
+                android:background="@drawable/roundedbutton"
+                style="?android:attr/borderlessButtonStyle" />
 
         </LinearLayout>
     </ScrollView>

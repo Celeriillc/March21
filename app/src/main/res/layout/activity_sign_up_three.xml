@@ -25,15 +25,15 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="20dp"
                 android:src="@drawable/ic_icons_google" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="70dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:text="Next, provide your email..."/>
@@ -41,11 +41,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="13sp"
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorDarkGray"
+                android:textSize="14sp"
                 android:text="We need your email so we can help you find your account in case you lose your password or account access"/>
 
             <EditText
@@ -53,8 +53,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
                 android:textSize="13sp"
@@ -65,15 +65,16 @@
             <Button
                 android:id="@+id/continue_"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:background="@drawable/roundedbutton"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:text="Continue" />
+                android:text="Continue >" />
 
         </LinearLayout>
     </ScrollView>

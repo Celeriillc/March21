@@ -21,6 +21,7 @@ public class NotificationModel {
         this.notificationType = "";
         this.notificationImageURL = "";
         this.object = "";
+        this.objectName = "";
         this.isSeen = false;
     }
 
@@ -34,7 +35,22 @@ public class NotificationModel {
     }
 
     public NotificationModel(String fromID, String toID, String toAccountType, String fromAccountType, String time, String sortableTime,
-                             String activityID, String notificationType, String notificationImageURL, String object, boolean isSeen) {
+                             String activityID, String notificationType, String notificationImageURL, String objectName, boolean isSeen) {
+        this.fromID = fromID;
+        this.toID = toID;
+        this.toAccountType = toAccountType;
+        this.fromAccountType = fromAccountType;
+        this.time = time;
+        this.sortableTime = sortableTime;
+        this.activityID = activityID;
+        this.notificationType = notificationType;
+        this.notificationImageURL = notificationImageURL;
+        this.objectName = objectName;
+        this.isSeen = isSeen;
+    }
+
+    public NotificationModel(String fromID, String toID, String toAccountType, String fromAccountType, String time, String sortableTime,
+                             String activityID, String notificationType, String notificationImageURL, String object, String objectName, boolean isSeen) {
         this.fromID = fromID;
         this.toID = toID;
         this.toAccountType = toAccountType;
@@ -45,6 +61,7 @@ public class NotificationModel {
         this.notificationType = notificationType;
         this.notificationImageURL = notificationImageURL;
         this.object = object;
+        this.objectName = objectName;
         this.isSeen = isSeen;
     }
 

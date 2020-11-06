@@ -135,10 +135,18 @@
                 android:padding="15dp"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/posterpic"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp" />
+                <LinearLayout
+                    android:id="@+id/profilepictureclipper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/circular_image_background_white">
+
+                    <ImageView
+                        android:id="@+id/posterpic"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:scaleType="centerCrop" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/postername"
@@ -225,9 +233,9 @@
                 android:paddingTop="15dp"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
-                android:paddingBottom="15dp"
+                android:paddingBottom="25dp"
                 android:textSize="13sp"
-                android:text="You have no class to post to"
+                android:text="You have no classes to post to"
                 android:visibility="gone"/>
 
             <LinearLayout
@@ -235,7 +243,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>

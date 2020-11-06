@@ -5,15 +5,23 @@ package com.celerii.celerii.models;
  */
 
 public class SubscriptionModel {
-    String subscriptionTier, subscriptionDate, expiryDate, parentAccount, amount;
+    String subscriptionTier, subscriptionDate, expiryDate, studentAccount, parentAccount, amount;
+    String sortableSubscriptionDate;
 
     public SubscriptionModel() {
+        this.subscriptionTier = "";
+        this.subscriptionDate = "0000/00/00 00:00:00:000";
+        this.expiryDate = "0000/00/00 00:00:00:000";
+        this.studentAccount = "";
+        this.parentAccount = "";
+        this.amount = "";
     }
 
-    public SubscriptionModel(String subscriptionTier, String subscriptionDate, String expiryDate, String parentAccount, String amount) {
+    public SubscriptionModel(String subscriptionTier, String subscriptionDate, String expiryDate, String studentAccount, String parentAccount, String amount) {
         this.subscriptionTier = subscriptionTier;
         this.subscriptionDate = subscriptionDate;
         this.expiryDate = expiryDate;
+        this.studentAccount = studentAccount;
         this.parentAccount = parentAccount;
         this.amount = amount;
     }
@@ -42,6 +50,14 @@ public class SubscriptionModel {
         this.expiryDate = expiryDate;
     }
 
+    public String getStudentAccount() {
+        return studentAccount;
+    }
+
+    public void setStudentAccount(String studentAccount) {
+        this.studentAccount = studentAccount;
+    }
+
     public String getParentAccount() {
         return parentAccount;
     }
@@ -56,5 +72,13 @@ public class SubscriptionModel {
 
     public void setAmount(String amount) {
         this.amount = amount;
+    }
+
+    public String getSortableSubscriptionDate() {
+        return sortableSubscriptionDate;
+    }
+
+    public void setSortableSubscriptionDate(String sortableSubscriptionDate) {
+        this.sortableSubscriptionDate = sortableSubscriptionDate;
     }
 }

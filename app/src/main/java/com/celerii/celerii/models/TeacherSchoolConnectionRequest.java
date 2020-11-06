@@ -5,7 +5,7 @@ package com.celerii.celerii.models;
  */
 
 public class TeacherSchoolConnectionRequest {
-    String status, timeSent, sorttableTimeSent, teacher, school;
+    String status, timeSent, sorttableTimeSent, teacher, school, schoolName, schoolProfilePictureURL, sender;
 
     public TeacherSchoolConnectionRequest() {
         this.status = "";
@@ -13,6 +13,9 @@ public class TeacherSchoolConnectionRequest {
         this.sorttableTimeSent = "";
         this.teacher = "";
         this.school = "";
+        this.schoolName = "";
+        this.schoolProfilePictureURL = "";
+        this.sender = "";
     }
 
     public TeacherSchoolConnectionRequest(String status, String timeSent, String sorttableTimeSent, String teacher, String school) {
@@ -21,6 +24,9 @@ public class TeacherSchoolConnectionRequest {
         this.sorttableTimeSent = sorttableTimeSent;
         this.teacher = teacher;
         this.school = school;
+        this.schoolName = "";
+        this.schoolProfilePictureURL = "";
+        this.sender = "";
     }
 
     public String getStatus() {
@@ -61,5 +67,29 @@ public class TeacherSchoolConnectionRequest {
 
     public void setSchool(String school) {
         this.school = school;
+    }
+
+    public String getSchoolName() {
+        return schoolName;
+    }
+
+    public void setSchoolName(String schoolName) {
+        this.schoolName = schoolName;
+    }
+
+    public String getSchoolProfilePictureURL() {
+        return schoolProfilePictureURL;
+    }
+
+    public void setSchoolProfilePictureURL(String schoolProfilePictureURL) {
+        this.schoolProfilePictureURL = schoolProfilePictureURL;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 }

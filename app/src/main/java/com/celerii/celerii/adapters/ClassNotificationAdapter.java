@@ -2,27 +2,33 @@ package com.celerii.celerii.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
+import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Home.NotificationDetailActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
+import com.celerii.celerii.Activities.StudentAttendance.ParentAttendanceActivity;
+import com.celerii.celerii.Activities.StudentBehaviouralPerformance.BehaviouralResultActivity;
+import com.celerii.celerii.Activities.StudentPerformance.StudentPerformanceForParentsActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.NotificationModel;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
+import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,6 +36,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +62,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView notification, time, accept, decline;
         public ImageView pic, notificationType;
-        public LinearLayout connectionRequest;
+        public LinearLayout connectionRequest, profilePictureClipper;
         public LinearLayout notificationLayout;
         public View view;
 
@@ -66,6 +73,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             notificationType = (ImageView) view.findViewById(R.id.notificationtype);
             time = (TextView) view.findViewById(R.id.time);
             connectionRequest = (LinearLayout) view.findViewById(R.id.connectionrequest);
+            profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             notificationLayout = (LinearLayout) view.findViewById(R.id.notificationlayout);
             accept = (TextView) view.findViewById(R.id.accept);
             decline = (TextView) view.findViewById(R.id.decline);
@@ -98,6 +106,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
         String time = Date.getRelativeTimeSpan(notificationModel.getTime());
         String notification;
 
+        holder.connectionRequest.setVisibility(View.GONE);
         if (notificationType.equals("ClassPost")){
             notification = "<b>" + notificationSubject + "</b>" + " created a new class post for " + "<b>" + notificationModel.getObject() + "</b>";
         } else if (notificationType.equals("AssignmentPost")){
@@ -108,7 +117,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             notification = "<b>" + notificationSubject + "</b>" + " commented on your class post for " + "<b>" + notificationModel.getObject() + "</b>";
         } else if (notificationType.equals("Event")){
             notification = "<b>" + notificationSubject + "</b>" + " created a new school event for you.";
-        } else if (notificationType.equals("NewsLetter")){
+        } else if (notificationType.equals("Newsletter")){
             notification = "<b>" + notificationSubject + "</b>" + " published a new school newsletter for you.";
         } else if (notificationType.equals("ConnectionRequest")){ //TODO: Remove
             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
@@ -121,7 +130,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                 notification = "Your request to connect to " + "<b>" + notificationModel.getObject() + "</b>" + "'s account has been declined by " + "<b>" + notificationSubject + "</b>";
             } else {
-                notification = "Your request to connect to " + "<b>" + notificationModel.getObject() + "</b>" + " has been declined by them";
+                notification = "Your request to connect to " + "<b>" + notificationSubject + "</b>" + " has been declined by them";
             }
         } else if (notificationType.equals("Disconnection")){
             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
@@ -136,17 +145,18 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                 notification = "<b>" + notificationSubject + "</b>" + " has connected to your account";
             }
         } else if (notificationType.equals("NewResultPost")){
-            notification = "<b>" + notificationSubject + "</b>" + " has posted new academic results for " + "<b>" + notificationModel.getObject() + "</b>";
+            notification = "<b>" + notificationSubject + "</b>" + " has posted new academic results for " + "<b>" + notificationModel.getObjectName() + "</b>";
         } else if (notificationType.equals("NewBehaviouralPost")){
-            notification = "<b>" + notificationSubject + "</b>" + " has posted new behavioural results for " + "<b>" + notificationModel.getObject() + "</b>";
+            notification = "<b>" + notificationSubject + "</b>" + " has posted new behavioural results for " + "<b>" + notificationModel.getObjectName() + "</b>";
         } else if (notificationType.equals("NewAttendancePost")){
-            notification = "<b>" + notificationSubject + "</b>" + " has posted a new attendance record for " + "<b>" + notificationModel.getObject() + "</b>";
+            notification = "<b>" + notificationSubject + "</b>" + " has posted a new attendance record for " + "<b>" + notificationModel.getObjectName() + "</b>";
         } else {
             notification = "";
         }
 
         holder.notification.setText(Html.fromHtml(notification));
         holder.time.setText(time);
+        holder.profilePictureClipper.setClipToOutline(true);
 
         if (!notificationModel.getNotificationImageURL().isEmpty()) {
             holder.notificationType.setVisibility(View.VISIBLE);
@@ -158,13 +168,28 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             holder.notificationType.setVisibility(View.GONE);
         }
 
-        Glide.with(context)
-                .load(notificationModel.getFromProfilePicture())
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
-                .centerCrop()
-                .bitmapTransform(new CropCircleTransformation(context))
-                .into(holder.pic);
+        Drawable textDrawable;
+        if (!notificationModel.getFromName().isEmpty()) {
+            String[] nameArray = notificationModel.getFromName().split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+            }
+            holder.pic.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!notificationModel.getFromProfilePicture().isEmpty()) {
+            Glide.with(context)
+                    .load(notificationModel.getFromProfilePicture())
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(holder.pic);
+        }
 
         holder.accept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -211,18 +236,22 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                                     newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestResponse", "Accepted");
                                     newConnectionMap.put("NotificationSchool/" + recipientID + "/" + requestKey, null);
                                     newConnectionMap.put("NotificationParent/" + recipientID + "/" + requestKey, null);
+                                    newConnectionMap.put("NotificationSchool/" + mFirebaseUser.getUid() + "/" + requestKey, null);
+                                    newConnectionMap.put("NotificationParent/" + mFirebaseUser.getUid() + "/" + requestKey, null);
 
                                     if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("Parent")) {
-                                        notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, "Parent", "Parent", time, sorttableTime, requestKey, "Connection", notificationModel.getNotificationImageURL(), notificationModel.getObject(), false);
+                                        notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, "Parent", sharedPreferencesManager.getActiveAccount(), time, sorttableTime, requestKey, "Connection", notificationModel.getNotificationImageURL(), notificationModel.getObject(), false);
                                         newConnectionMap.put("NotificationParent/" + recipientID + "/" + requestKey, notification);
                                     } else if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("School")) {
-                                        notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, "School", "Parent", time, sorttableTime, requestKey, "Connection", notificationModel.getNotificationImageURL(), notificationModel.getObject(), false);
+                                        notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, "School", sharedPreferencesManager.getActiveAccount(), time, sorttableTime, requestKey, "Connection", notificationModel.getNotificationImageURL(), notificationModel.getObject(), false);
                                         newConnectionMap.put("NotificationSchool/" + recipientID + "/" + requestKey, notification);
                                     }
                                 }
 
-                                newConnectionRef.updateChildren(newConnectionMap);
+//                                newConnectionRef.updateChildren(newConnectionMap);
                                 customProgressDialogOne.dismiss();
+                            } else {
+
                             }
                         }
 
@@ -253,6 +282,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                                 newConnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Accepted");
                                 newConnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), true);
                                 newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
+                                newConnectionMap.put("NotificationTeacher/" + mFirebaseUser.getUid() + "/" + pendingRequestKey, null);
                                 newConnectionMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notification);
                                 newRef.updateChildren(newConnectionMap);
                             }
@@ -320,8 +350,8 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                                     }
                                 }
 
-                                newConnectionRef.updateChildren(newConnectionMap);
-                                customProgressDialogOne.dismiss();
+//                                newConnectionRef.updateChildren(newConnectionMap);
+//                                customProgressDialogOne.dismiss();
                             }
                         }
 
@@ -350,6 +380,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                                 String pendingRequestKey = dataSnapshot.getKey();
                                 newDeclinedMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Declined");
                                 newDeclinedMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Declined");
+                                newDeclinedMap.put("NotificationTeacher/" + mFirebaseUser.getUid() + "/" + pendingRequestKey, null);
                                 newDeclinedMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notificationModel);
                                 newRef.updateChildren(newDeclinedMap);
                             }
@@ -387,12 +418,25 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     Intent I = new Intent(context, CommentStoryActivity.class);
                     I.putExtras(b);
                     context.startActivity(I);
+                } else if (notificationType.equals("Event")){
+                    Bundle b = new Bundle();
+                    b.putString("Event ID", notificationModel.getActivityID());
+                    b.putString("Color Number", String.valueOf(0));
+                    Intent I = new Intent(context, EventDetailActivity.class);
+                    I.putExtras(b);
+                    context.startActivity(I);
                 } else if (notificationType.equals("Connection")) {
                     if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                         Bundle b = new Bundle();
                         b.putString("postKey", notificationModel.getActivityID());
                         b.putString("notificationType", "Connection");
                         Intent I = new Intent(context, NotificationDetailActivity.class);
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("School ID", notificationModel.getFromID());
                         I.putExtras(b);
                         context.startActivity(I);
                     }
@@ -405,6 +449,33 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                         I.putExtras(b);
                         context.startActivity(I);
                     }
+                } else if (notificationType.equals("NewResultPost")) {
+                    Bundle b = new Bundle();
+                    Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
+                    Gson gson = new Gson();
+                    String activeKid = gson.toJson(student);
+                    b.putString("Child ID", activeKid);
+                    Intent I = new Intent(context, StudentPerformanceForParentsActivity.class);
+                    I.putExtras(b);
+                    context.startActivity(I);
+                } else if (notificationType.equals("NewBehaviouralPost")) {
+                    Bundle b = new Bundle();
+                    Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
+                    Gson gson = new Gson();
+                    String activeKid = gson.toJson(student);
+                    b.putString("ChildID", activeKid);
+                    Intent I = new Intent(context, BehaviouralResultActivity.class);
+                    I.putExtras(b);
+                    context.startActivity(I);
+                } else if (notificationType.equals("NewAttendancePost")) {
+                    Bundle b = new Bundle();
+                    Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
+                    Gson gson = new Gson();
+                    String activeKid = gson.toJson(student);
+                    b.putString("Child ID", activeKid);
+                    Intent I = new Intent(context, ParentAttendanceActivity.class);
+                    I.putExtras(b);
+                    context.startActivity(I);
                 }
             }
         });

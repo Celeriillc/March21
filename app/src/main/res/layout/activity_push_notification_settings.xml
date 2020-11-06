@@ -26,17 +26,16 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginTop="15dp"
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textSize="12sp"
                     android:text="Class Posts"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="30dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginTop="5dp"
                     android:textStyle="italic"
@@ -45,7 +44,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
+                    android:layout_height="0dp"
                     android:background="#aaaaaa"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -60,8 +59,8 @@
                         android:id="@+id/classpostsoff"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="15dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="30dp"
                         android:layout_marginTop="5dp"
                         android:checked="true"
                         android:layoutDirection="rtl"
@@ -71,7 +70,7 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.2dp"
+                        android:layout_height="0dp"
                         android:background="#eeeeee"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"
@@ -81,8 +80,8 @@
                         android:id="@+id/classpostson"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="15dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="30dp"
                         android:layout_marginTop="5dp"
                         android:layoutDirection="rtl"
                         android:textAlignment="textStart"
@@ -92,7 +91,7 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.2dp"
+                        android:layout_height="0dp"
                         android:background="#eeeeee"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"
@@ -108,17 +107,16 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="40dp"
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textSize="12sp"
                     android:text="Assignments"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginTop="5dp"
                     android:textStyle="italic"
@@ -127,7 +125,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
+                    android:layout_height="0dp"
                     android:background="#aaaaaa"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -153,7 +151,7 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.2dp"
+                        android:layout_height="0dp"
                         android:background="#eeeeee"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"
@@ -174,7 +172,7 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.2dp"
+                        android:layout_height="0dp"
                         android:background="#eeeeee"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"
@@ -190,17 +188,16 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginTop="40dp"
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textSize="12sp"
                     android:text="Messages"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_marginStart="15dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginTop="5dp"
                     android:textStyle="italic"
@@ -209,7 +206,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
+                    android:layout_height="0dp"
                     android:background="#aaaaaa"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -235,7 +232,7 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.2dp"
+                        android:layout_height="0dp"
                         android:background="#eeeeee"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"
@@ -256,7 +253,7 @@
 
                     <View
                         android:layout_width="match_parent"
-                        android:layout_height="0.2dp"
+                        android:layout_height="0dp"
                         android:background="#eeeeee"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"

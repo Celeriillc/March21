@@ -1,10 +1,10 @@
-package com.celerii.celerii.Activities.Settings;
+package com.celerii.celerii.Activities.Delete;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.celerii.celerii.R;
@@ -13,7 +13,6 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ManageClassesModel;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class ManageMyClassesActivity extends AppCompatActivity {
 
@@ -47,20 +46,20 @@ public class ManageMyClassesActivity extends AppCompatActivity {
     }
 
     private void loadFromSharedPreferences() {
-        Set<String> classSet = sharedPreferencesManager.getMyClasses();
-        ArrayList<String> classes = new ArrayList<>();
-
-        if (classSet != null){ classes = new ArrayList<>(classSet); }
-
-        if (classes.size() > 0) {
-            for (int i = 0; i < classes.size(); i++) {
-                String[] classInfo = classes.get(i).split(" ");
-                ManageClassesModel manageClassesModel = new ManageClassesModel(classInfo[1], classInfo[2], classInfo[0]);
-                manageClassesModelsList.add(manageClassesModel);
-            }
-        }
-
-        mAdapter.notifyDataSetChanged();
+//        Set<String> classSet = sharedPreferencesManager.getMyClasses();
+//        ArrayList<String> classes = new ArrayList<>();
+//
+//        if (classSet != null){ classes = new ArrayList<>(classSet); }
+//
+//        if (classes.size() > 0) {
+//            for (int i = 0; i < classes.size(); i++) {
+//                String[] classInfo = classes.get(i).split(" ");
+//                ManageClassesModel manageClassesModel = new ManageClassesModel(classInfo[1], classInfo[2], classInfo[0]);
+//                manageClassesModelsList.add(manageClassesModel);
+//            }
+//        }
+//
+//        mAdapter.notifyDataSetChanged();
     }
 
     @Override

@@ -4,11 +4,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
-import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -16,21 +17,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
 import com.celerii.celerii.Activities.Profiles.TeacherProfileOneActivity;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.DisconnectionModel;
 import com.celerii.celerii.models.NotificationModel;
-import com.celerii.celerii.models.Parent;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
 import com.celerii.celerii.models.SearchHistoryRow;
 import com.celerii.celerii.models.SearchResultsRow;
@@ -70,12 +71,11 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     FirebaseUser mFirebaseUser;
     int classesToBeRemovedCounter = 0;
     CustomProgressDialogOne customProgressDialogOne;
-    int parentsToBeRemovedCounter = 0;
-    boolean connected = false;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView entityName, entityLocationClass;
-        public ImageView entityPic;
+        private TextView entityName, entityLocationClass;
+        private ImageView entityPic;
+        private LinearLayout entityPicClipper;
         Button sendRequest;
         public View clickableView;
 
@@ -84,6 +84,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             entityName = (TextView) view.findViewById(R.id.entityname);
             entityLocationClass = (TextView) view.findViewById(R.id.entitylocation_class);
             entityPic = (ImageView) view.findViewById(R.id.entitypic);
+            entityPicClipper = (LinearLayout) view.findViewById(R.id.entitypictureclipper);
             sendRequest = (Button) view.findViewById(R.id.sendrequest);
             clickableView = view;
         }
@@ -119,17 +120,32 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         holder.entityName.setText(searchResultsRow.getEntityName());
         holder.entityLocationClass.setText(searchResultsRow.getEntityAddress());
+        holder.entityPicClipper.setClipToOutline(true);
         final String entityId = searchResultsRow.getEntityId();
         final String entityName = searchResultsRow.getEntityName();
-        final String entityAddressID = searchResultsRow.getEntityAddressID();
 
-        Glide.with(context)
-                .load(searchResultsRow.getEntityPic())
-                .crossFade()
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
-                .centerCrop().bitmapTransform(new CropCircleTransformation(context))
-                .into(holder.entityPic);
+        Drawable textDrawable;
+        if (!searchResultsRow.getEntityName().isEmpty()) {
+            String[] nameArray = searchResultsRow.getEntityName().split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+            }
+            holder.entityPic.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!searchResultsRow.getEntityPic().isEmpty()) {
+            Glide.with(context)
+                    .load(searchResultsRow.getEntityPic())
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .crossFade()
+                    .centerCrop().bitmapTransform(new CropCircleTransformation(context))
+                    .into(holder.entityPic);
+        }
 
         if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
             if (searchResultsRow.getEntityType().equals("School")) {
@@ -166,7 +182,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                     holder.sendRequest.setBackgroundResource(R.drawable.roundedbuttonaccent);
                     holder.sendRequest.setTextColor(Color.WHITE);
                 } else if (pendingIncomingRequests.contains(entityId)) {
-                    holder.sendRequest.setText("Respond");
+//                    holder.sendRequest.setText("Respond");
+                    holder.sendRequest.setVisibility(View.GONE);
                     holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                     holder.sendRequest.setTextColor(Color.WHITE);
                 } else if (pendingOutgoingRequests.contains(entityId)) {
@@ -207,7 +224,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         String timeSent = Date.getDate();
                         String sorttableTimeSent = Date.convertToSortableDate(timeSent);
                         TeacherSchoolConnectionRequest teacherSchoolConnectionRequest = new TeacherSchoolConnectionRequest("Pending", timeSent, sorttableTimeSent, mFirebaseUser.getUid(), entityId);
-                        NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", timeSent, sorttableTimeSent, refKey, "Connection Request", "", "", false);
+                        NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", timeSent, sorttableTimeSent, refKey, "ConnectionRequest", "", "", false);
 
                         Map<String, Object> newRequestMap = new HashMap<String, Object>();
                         mDatabaseReference = mFirebaseDatabase.getReference();
@@ -229,9 +246,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         final Dialog dialog = new Dialog(context);
                         dialog.setContentView(R.layout.custom_dialog_request_connection);
                         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                        TextView action = (TextView) dialog.findViewById(R.id.action);
-                        dialog.show();
+                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                        Button action = (Button) dialog.findViewById(R.id.action);
+                        try {
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            dialog.show();
+                        } catch (Exception e) {
+                            return;
+                        }
 //                        dialog.getWindow().setLayout((19 * width) / 20, RecyclerView.LayoutParams.WRAP_CONTENT);
 
                         String messageString = "Do you want to revoke your request to connect to " + "<b>" + entityName + "</b>" + "?";
@@ -298,9 +320,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         final Dialog dialog = new Dialog(context);
                         dialog.setContentView(R.layout.custom_dialog_request_connection);
                         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                        TextView action = (TextView) dialog.findViewById(R.id.action);
-                        dialog.show();
+                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                        Button action = (Button) dialog.findViewById(R.id.action);
+                        try {
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            dialog.show();
+                        } catch (Exception e) {
+                            return;
+                        }
 //                        dialog.getWindow().setLayout((19 * width) / 20, RecyclerView.LayoutParams.WRAP_CONTENT);
 
                         String messageString = "Disconnecting would restrict your access to all " + "<b>" + entityName + "</b>" + "'s information, including class and " +
@@ -336,8 +363,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
                                 newDisconnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, null);
                                 newDisconnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), null);
-                                newDisconnectionMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + disconnectionKey, teacherSchoolConnectionRequest);
-                                newDisconnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + disconnectionKey, teacherSchoolConnectionRequest);
+                                newDisconnectionMap.put("Teacher To School Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + disconnectionKey, teacherSchoolConnectionRequest);
+                                newDisconnectionMap.put("Teacher To School Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + disconnectionKey, teacherSchoolConnectionRequest);
                                 newDisconnectionMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notificationModel);
 
                                 final ArrayList<String> classesToBeRemoved = new ArrayList<String>();
@@ -407,9 +434,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         final Dialog dialog = new Dialog(context);
                         dialog.setContentView(R.layout.custom_dialog_request_connection);
                         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                        TextView action = (TextView) dialog.findViewById(R.id.action);
-                        dialog.show();
+                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                        Button action = (Button) dialog.findViewById(R.id.action);
+                        try {
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            dialog.show();
+                        } catch (Exception e) {
+                            return;
+                        }
 //                        dialog.getWindow().setLayout((19 * width) / 20, RecyclerView.LayoutParams.WRAP_CONTENT);
 
                         String messageString = "<b>" + entityName + "</b>" + " sent you a connection request, accepting this request will give you access to their students, classes and data. Do you " +
@@ -445,7 +477,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                                 String pendingRequestKey = postSnapshot.getKey();
                                                 newRequestMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Declined");
                                                 newRequestMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Declined");
-                                                newRequestMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notificationModel);
+                                                newRequestMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notificationModel);
                                             }
                                             newRef.updateChildren(newRequestMap);
                                         }
@@ -495,7 +527,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                                 newConnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Accepted");
                                                 newConnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), true);
                                                 newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
-                                                newConnectionMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notificationModel);
+                                                newConnectionMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notificationModel);
                                             }
                                         }
 
@@ -530,42 +562,85 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
 
                         mDatabaseReference = mFirebaseDatabase.getReference("Student Connection Request Sender").child(mFirebaseUser.getUid()).push();
-                        String refKey = mDatabaseReference.getKey();
+                        final String refKey = mDatabaseReference.getKey();
 
-                        Map<String, Object> newRequestMap = new HashMap<String, Object>();
-                        mDatabaseReference = mFirebaseDatabase.getReference();
+                        final Map<String, Object> newRequestMap = new HashMap<String, Object>();
 
-                        String timeSent = Date.getDate();
-                        String sorttableTimeSent = Date.convertToSortableDate(timeSent);
-                        ParentSchoolConnectionRequest parentSchoolConnectionRequest = new ParentSchoolConnectionRequest("Pending", timeSent, sorttableTimeSent, mFirebaseUser.getUid(), "Parent", entityId, refKey, "", "", guardians.get(entityId));
-
-                        newRequestMap.put("Student Connection Request Sender/" + mFirebaseUser.getUid() + "/" + refKey, parentSchoolConnectionRequest);
-
-                        if (guardians.get(entityId) != null && guardians.get(entityId).size() != 0) {
-                            for (int i = 0; i < guardians.get(entityId).size(); i++) {
-                                String recipientID = guardians.get(entityId).get(i).split(" ")[0];
-                                String recipientAccountType = guardians.get(entityId).get(i).split(" ")[1];
-
-                                if (!recipientID.equals(mFirebaseUser.getUid())) {
-                                    NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, refKey, "Connection Request", searchResultsRow.getEntityPic(), entityName, false);
-
-                                    newRequestMap.put("Student Connection Request Recipients/" + recipientID + "/" + refKey, parentSchoolConnectionRequest);
-                                    if (recipientAccountType.equals("School")) {
-                                        newRequestMap.put("NotificationSchool/" + recipientID + "/" + refKey, notificationModel);
-                                    } else if (recipientAccountType.equals("Parent")) {
-                                        newRequestMap.put("NotificationParent/" + recipientID + "/" + refKey, notificationModel);
+                        mDatabaseReference = mFirebaseDatabase.getReference("Student Parent").child(entityId);
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                        if (!guardians.containsKey(entityId)) {
+                                            guardians.put(entityId, new ArrayList<String>());
+                                            guardians.get(entityId).add(postSnapshot.getKey() + " Parent");
+                                        } else {
+                                            guardians.get(entityId).add(postSnapshot.getKey() + " Parent");
+                                        }
                                     }
                                 }
+
+                                mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(entityId);
+                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                if (!guardians.containsKey(entityId)) {
+                                                    guardians.put(entityId, new ArrayList<String>());
+                                                    guardians.get(entityId).add(postSnapshot.getKey() + " School");
+                                                } else {
+                                                    guardians.get(entityId).add(postSnapshot.getKey() + " School");
+                                                }
+                                            }
+                                        }
+
+                                        String timeSent = Date.getDate();
+                                        String sorttableTimeSent = Date.convertToSortableDate(timeSent);
+                                        ParentSchoolConnectionRequest parentSchoolConnectionRequest = new ParentSchoolConnectionRequest("Pending", timeSent, sorttableTimeSent, mFirebaseUser.getUid(), "Parent", entityId, refKey, "", "", guardians.get(entityId));
+
+                                        newRequestMap.put("Student Connection Request Sender/" + mFirebaseUser.getUid() + "/" + refKey, parentSchoolConnectionRequest);
+
+                                        if (guardians.get(entityId) != null && guardians.get(entityId).size() != 0) {
+                                            for (int i = 0; i < guardians.get(entityId).size(); i++) {
+                                                String recipientID = guardians.get(entityId).get(i).split(" ")[0];
+                                                String recipientAccountType = guardians.get(entityId).get(i).split(" ")[1];
+
+                                                if (!recipientID.equals(mFirebaseUser.getUid())) {
+                                                    NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, refKey, "Connection Request", searchResultsRow.getEntityPic(), entityName, false);
+
+                                                    newRequestMap.put("Student Connection Request Recipients/" + recipientID + "/" + refKey, parentSchoolConnectionRequest);
+                                                    if (recipientAccountType.equals("School")) {
+                                                        newRequestMap.put("NotificationSchool/" + recipientID + "/" + refKey, notificationModel);
+                                                    } else if (recipientAccountType.equals("Parent")) {
+                                                        newRequestMap.put("NotificationParent/" + recipientID + "/" + refKey, notificationModel);
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            //Todo: lost student account
+                                        }
+
+                                        mDatabaseReference = mFirebaseDatabase.getReference();
+                                        mDatabaseReference.updateChildren(newRequestMap);
+                                        pendingOutgoingRequests.add(entityId);
+                                        notifyDataSetChanged();
+                                        customProgressDialogOne.dismiss();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
                             }
-                        } else {
-                            //Todo: lost student account
-                        }
 
-                        mDatabaseReference.updateChildren(newRequestMap);
-                        pendingOutgoingRequests.add(entityId);
-                        notifyDataSetChanged();
-                        customProgressDialogOne.dismiss();
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
+                            }
+                        });
                     }
                     else if (holder.sendRequest.getText().equals("Revoke")) {
 
@@ -575,9 +650,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         final Dialog dialog = new Dialog(context);
                         dialog.setContentView(R.layout.custom_dialog_request_connection);
                         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                        TextView action = (TextView) dialog.findViewById(R.id.action);
-                        dialog.show();
+                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                        Button action = (Button) dialog.findViewById(R.id.action);
+                        try {
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            dialog.show();
+                        } catch (Exception e) {
+                            return;
+                        }
 
                         String messageString = "Do you want to revoke your request to connect to " + "<b>" + entityName + "</b>" + "'s profile?";
                         message.setText(Html.fromHtml(messageString));
@@ -662,9 +742,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         final Dialog dialog = new Dialog(context);
                         dialog.setContentView(R.layout.custom_dialog_request_connection);
                         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                        TextView action = (TextView) dialog.findViewById(R.id.action);
-                        dialog.show();
+                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                        Button action = (Button) dialog.findViewById(R.id.action);
+                        try {
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            dialog.show();
+                        } catch (Exception e) {
+                            return;
+                        }
 
                         String messageString = "Disconnecting would restrict your access to " + "<b>" + entityName + "</b>" + "'s information, including class stories and " +
                                 "attendance information. To regain access, you'll need to send a new request to their school. Do you wish to disconnect?";
@@ -687,12 +772,12 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                 customProgressDialogOne.show();
                                 holder.sendRequest.setEnabled(false);
 
-                                String timeSent = Date.getDate();
-                                String sorttableTimeSent = Date.convertToSortableDate(timeSent);
+                                final String timeSent = Date.getDate();
+                                final String sorttableTimeSent = Date.convertToSortableDate(timeSent);
 
-                                Map<String, Object> newDisconnectionMap = new HashMap<String, Object>();
+                                final Map<String, Object> newDisconnectionMap = new HashMap<String, Object>();
                                 DatabaseReference newDisconnectionRef = mFirebaseDatabase.getReference().child("Disconnection Subject").child(mFirebaseUser.getUid()).push();
-                                String disconnectionRefKey = newDisconnectionRef.getKey();
+                                final String disconnectionRefKey = newDisconnectionRef.getKey();
                                 DisconnectionModel disconnectionModel = new DisconnectionModel(mFirebaseUser.getUid(), entityId, disconnectionRefKey, timeSent, sorttableTimeSent);
 
                                 newDisconnectionMap.put("Parents Students/" + mFirebaseUser.getUid() + "/" + entityId, null);
@@ -700,36 +785,80 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                 newDisconnectionMap.put("Disconnection Subject/" + mFirebaseUser.getUid() + "/" + disconnectionRefKey, disconnectionModel);
                                 newDisconnectionMap.put("Disconnection Object/" + entityId + "/" + disconnectionRefKey, disconnectionModel);
 
-                                if (guardians.get(entityId) != null) {
-                                    if (guardians.get(entityId).size() != 0) {
-                                        for (int i = 0; i < guardians.get(entityId).size(); i++) {
-                                            String recipientID = guardians.get(entityId).get(i).split(" ")[0];
-                                            String recipientAccountType = guardians.get(entityId).get(i).split(" ")[1];
-
-                                            if (!recipientID.equals(mFirebaseUser.getUid())) {
-                                                NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, disconnectionRefKey, "Disconnection", searchResultsRow.getEntityPic(), entityId, false);
-
-                                                if (recipientAccountType.equals("School")) {
-                                                    newDisconnectionMap.put("NotificationSchool/" + recipientID + "/" + disconnectionRefKey, notificationModel);
-                                                } else if (recipientAccountType.equals("Parent")) {
-                                                    newDisconnectionMap.put("NotificationParent/" + recipientID + "/" + disconnectionRefKey, notificationModel);
+                                mDatabaseReference = mFirebaseDatabase.getReference("Student Parent").child(entityId);
+                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                if (!guardians.containsKey(entityId)) {
+                                                    guardians.put(entityId, new ArrayList<String>());
+                                                    guardians.get(entityId).add(postSnapshot.getKey() + " Parent");
+                                                } else {
+                                                    guardians.get(entityId).add(postSnapshot.getKey() + " Parent");
                                                 }
                                             }
                                         }
-                                    }
-                                } else {
-                                    //Todo: lost student account
-                                }
 
-                                newDisconnectionRef = mFirebaseDatabase.getReference();
-                                holder.sendRequest.setText("Connect");
-                                holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
-                                holder.sendRequest.setTextColor(Color.WHITE);
-                                newDisconnectionRef.updateChildren(newDisconnectionMap);
-                                existingConnections.remove(entityId);
-                                notifyDataSetChanged();
-                                holder.sendRequest.setEnabled(true);
-                                customProgressDialogOne.dismiss();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(entityId);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                if (dataSnapshot.exists()) {
+                                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                        if (!guardians.containsKey(entityId)) {
+                                                            guardians.put(entityId, new ArrayList<String>());
+                                                            guardians.get(entityId).add(postSnapshot.getKey() + " School");
+                                                        } else {
+                                                            guardians.get(entityId).add(postSnapshot.getKey() + " School");
+                                                        }
+                                                    }
+                                                }
+
+                                                if (guardians.get(entityId) != null) {
+                                                    if (guardians.get(entityId).size() != 0) {
+                                                        for (int i = 0; i < guardians.get(entityId).size(); i++) {
+                                                            String recipientID = guardians.get(entityId).get(i).split(" ")[0];
+                                                            String recipientAccountType = guardians.get(entityId).get(i).split(" ")[1];
+
+                                                            if (!recipientID.equals(mFirebaseUser.getUid())) {
+                                                                NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, disconnectionRefKey, "Disconnection", searchResultsRow.getEntityPic(), entityId, false);
+
+                                                                if (recipientAccountType.equals("School")) {
+                                                                    newDisconnectionMap.put("NotificationSchool/" + recipientID + "/" + disconnectionRefKey, notificationModel);
+                                                                } else if (recipientAccountType.equals("Parent")) {
+                                                                    newDisconnectionMap.put("NotificationParent/" + recipientID + "/" + disconnectionRefKey, notificationModel);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    //Todo: lost student account
+                                                }
+
+                                                DatabaseReference newDisconnectionRef = mFirebaseDatabase.getReference();
+                                                holder.sendRequest.setText("Connect");
+                                                holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
+                                                holder.sendRequest.setTextColor(Color.WHITE);
+                                                newDisconnectionRef.updateChildren(newDisconnectionMap);
+                                                existingConnections.remove(entityId);
+                                                notifyDataSetChanged();
+                                                holder.sendRequest.setEnabled(true);
+                                                customProgressDialogOne.dismiss();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
                             }
                         });
                     }
@@ -805,8 +934,13 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

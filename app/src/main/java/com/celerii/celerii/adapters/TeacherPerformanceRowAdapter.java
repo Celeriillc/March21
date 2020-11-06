@@ -3,8 +3,9 @@ package com.celerii.celerii.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.TeacherPerformance.TeacherPerformanceActivityMain;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.models.TeacherPerformanceHeader;
 import com.celerii.celerii.models.TeacherPerformanceRow;
 import com.amulyakhare.textdrawable.TextDrawable;
@@ -115,7 +117,7 @@ public class TeacherPerformanceRowAdapter extends RecyclerView.Adapter<RecyclerV
         ColorGenerator generator = ColorGenerator.MATERIAL;
         int color = Color.GRAY;
 
-        TextDrawable textDrawable = TextDrawable.builder()
+        Drawable textDrawable = TextDrawable.builder()
                 .buildRound(letter, color);
 
 //        if (previousScore > currentScore){
@@ -129,8 +131,7 @@ public class TeacherPerformanceRowAdapter extends RecyclerView.Adapter<RecyclerV
 //            ((MyViewHolder) holder).progressImg.setImageResource(R.drawable.ic_attendance_late_24dp);
 //        }
 
-        textDrawable = TextDrawable.builder()
-                .buildRound(letter, context.getResources().getColor(R.color.colorButtonBlue));
+        textDrawable = CreateTextDrawable.createTextDrawable(context, letter);
         ((MyViewHolder) holder).subjectPic.setImageDrawable(textDrawable);
 
         ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {

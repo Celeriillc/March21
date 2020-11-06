@@ -7,8 +7,24 @@ package com.celerii.celerii.models;
 public class ParentAttendanceRow {
     String date, attendanceStatus, term, day, month, year, remark, subject, key;
     String studentID, classID, className, schoolID, teacherID;
+    Boolean isNew;
 
     public ParentAttendanceRow() {
+        this.date = "";
+        this.attendanceStatus = "";
+        this.term = "";
+        this.day = "";
+        this.month = "";
+        this.year = "";
+        this.remark = "";
+        this.subject = "";
+        this.key = "";
+        this.studentID = "";
+        this.classID = "";
+        this.className = "";
+        this.schoolID = "";
+        this.teacherID = "";
+        this.isNew = false;
     }
 
     public ParentAttendanceRow(String date, String attendanceStatus, String term, String day, String month, String year, String remark, String classID, String schoolID, String teacherID) {
@@ -19,9 +35,14 @@ public class ParentAttendanceRow {
         this.month = month;
         this.year = year;
         this.remark = remark;
+        this.subject = "";
+        this.key = "";
+        this.studentID = "";
         this.classID = classID;
+        this.className = "";
         this.schoolID = schoolID;
         this.teacherID = teacherID;
+        this.isNew = false;
     }
 
     public String getDate() {
@@ -134,5 +155,13 @@ public class ParentAttendanceRow {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public Boolean getNew() {
+        return isNew;
+    }
+
+    public void setNew(Boolean aNew) {
+        isNew = aNew;
     }
 }

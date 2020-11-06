@@ -5,16 +5,18 @@ package com.celerii.celerii.models;
  */
 
 public class ReportFeatureModel {
-    String feature, message, senderID, senderEMail, date, year, month, day;
+    String feature, operatingSystem, message, senderID, senderAccountType, senderEMail, date, year, month, day;
     boolean read, responded;
 
     public ReportFeatureModel() {
     }
 
-    public ReportFeatureModel(String feature, String message, String senderID, String senderEMail, String date, String year, String month, String day, boolean read, boolean responded) {
+    public ReportFeatureModel(String feature, String operatingSystem, String message, String senderID, String senderAccountType, String senderEMail, String date, String year, String month, String day, boolean read, boolean responded) {
         this.feature = feature;
+        this.operatingSystem = operatingSystem;
         this.message = message;
         this.senderID = senderID;
+        this.senderAccountType = senderAccountType;
         this.senderEMail = senderEMail;
         this.date = date;
         this.year = year;
@@ -32,20 +34,24 @@ public class ReportFeatureModel {
         this.feature = feature;
     }
 
-    public String getMessage() {
-        return message;
+    public String getOperatingSystem() {
+        return operatingSystem;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getSenderID() {
-        return senderID;
+    public void setOperatingSystem(String operatingSystem) {
+        this.operatingSystem = operatingSystem;
     }
 
     public void setSenderID(String senderID) {
         this.senderID = senderID;
+    }
+
+    public String getSenderAccountType() {
+        return senderAccountType;
+    }
+
+    public void setSenderAccountType(String senderAccountType) {
+        this.senderAccountType = senderAccountType;
     }
 
     public String getSenderEMail() {

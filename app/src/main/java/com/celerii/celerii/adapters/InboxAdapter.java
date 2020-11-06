@@ -1,14 +1,17 @@
 package com.celerii.celerii.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -18,6 +21,7 @@ import com.celerii.celerii.Activities.Inbox.ChatActivity;
 import com.celerii.celerii.Activities.Inbox.Parent.ParentMessageHome;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.Inbox.Teacher.TeacherMessageHome;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.MessageList;
@@ -42,6 +46,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name, message, time;
         public ImageView profilePic, unReadMessagesOne, unReadMessagesTwo, messageStatus, noOfmesages;
+        public LinearLayout profilePictureClipper;
         public View view;
 
         public MyViewHolder(final View view) {
@@ -52,6 +57,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             profilePic = (ImageView) view.findViewById(R.id.pic);
             unReadMessagesOne = (ImageView) view.findViewById(R.id.unreadmessagesone);
             unReadMessagesTwo = (ImageView) view.findViewById(R.id.unreadmessagestwo);
+            profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             this.view = view;
         }
     }
@@ -60,6 +66,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         LinearLayout sendANewMessage, chiefLayout;
         RelativeLayout errorLayout;
         TextView errorLayoutText;
+        Button errorLayoutButton;
 
         public HeaderViewHolder(View view) {
             super(view);
@@ -67,6 +74,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             sendANewMessage = (LinearLayout) view.findViewById(R.id.sendanewmessage);
             errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
             errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+            errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         }
     }
 
@@ -94,17 +102,20 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        if(holder instanceof HeaderViewHolder){
-            if (inboxList.size() <= 1){
+        if(holder instanceof HeaderViewHolder) {
+            ((HeaderViewHolder) holder).sendANewMessage.setVisibility(View.GONE);
+            if (inboxList.size() <= 1) {
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
                 String errorMessage = "";
                 if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                    errorMessage = "You don't have any messages at this time. To start a new conversation with your children's teachers or school, tap the " + "<b>" + "Send a new message" + "</b>" + " button";
+                    errorMessage = "You don't have any messages at this time. To start a new conversation with your children's teachers or school, tap the " + "<b>" + "Send a new message" + "</b>" + " header above or click the " + "<b>" + "Send a new message" + "</b>" + " button below";
                 } else {
-                    errorMessage = "You don't have any messages at this time. To start a new conversation with your student's parents, your colleagues or school, tap the " + "<b>" + "Send a new message" + "</b>" + " button";
+                    errorMessage = "You don't have any messages at this time. To start a new conversation with your student's parents, your colleagues or school, tap the " + "<b>" + "Send a new message" + "</b>" + " header above or click the " + "<b>" + "Send a new message" + "</b>" + " button below";
                 }
                 ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
+                ((HeaderViewHolder) holder).errorLayoutButton.setText("Send a new message");
+                ((HeaderViewHolder) holder).errorLayoutButton.setVisibility(View.VISIBLE);
             } else {
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.GONE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -129,14 +140,34 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
             });
 
-        } else if (holder instanceof MyViewHolder){
+            ((HeaderViewHolder) holder).errorLayoutButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")){
+                        Intent I = new Intent(context, ParentMessageHome.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", sharedPreferencesManager.getMyUserID());
+                        I.putExtras(b);
+                        ((Activity) context).startActivity(I);
+                    } else {
+                        Intent I = new Intent(context, TeacherMessageHome.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", sharedPreferencesManager.getMyUserID());
+                        I.putExtras(b);
+                        ((Activity) context).startActivity(I);
+                    }
+                }
+            });
+
+        } else if (holder instanceof MyViewHolder) {
             final MessageList messageList = inboxList.get(position);
 
             ((MyViewHolder) holder).name.setText(messageList.getName());
             ((MyViewHolder) holder).message.setText(messageList.getMessage());
             ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpanShort(messageList.getTime()));
+            ((MyViewHolder) holder).profilePictureClipper.setClipToOutline(true);
 
-            if (messageList.getRecieverID().equals(sharedPreferencesManager.getMyUserID())) {
+            if (messageList.getReceiverID().equals(sharedPreferencesManager.getMyUserID())) {
                 if (!messageList.isSeen()) {
                     ((MyViewHolder) holder).unReadMessagesOne.setVisibility(View.VISIBLE);
                     ((MyViewHolder) holder).unReadMessagesTwo.setVisibility(View.VISIBLE);
@@ -149,18 +180,35 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     ((MyViewHolder) holder).time.setTypeface(null, Typeface.NORMAL);
                 }
             }
-            else{
+            else {
                 ((MyViewHolder) holder).unReadMessagesOne.setVisibility(View.INVISIBLE);
                 ((MyViewHolder) holder).unReadMessagesTwo.setVisibility(View.INVISIBLE);
                 ((MyViewHolder) holder).message.setTypeface(null, Typeface.NORMAL);
                 ((MyViewHolder) holder).time.setTypeface(null, Typeface.NORMAL);
             }
 
-            Glide.with(context)
-                    .load(messageList.getProfilepicUrl())
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder) holder).profilePic);
+            Drawable textDrawable;
+            if (!messageList.getName().isEmpty()) {
+                String[] nameArray = messageList.getName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).profilePic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!messageList.getProfilepicUrl().isEmpty()) {
+                Glide.with(context)
+                        .load(messageList.getProfilepicUrl())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).profilePic);
+            }
 
             ((MyViewHolder) holder).view.setOnClickListener(new View.OnClickListener() {
                 @Override

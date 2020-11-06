@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.BehaviouralResultRowModel;
 import com.celerii.celerii.models.BehaviouralResultsHeaderModel;
@@ -26,6 +27,7 @@ import java.util.List;
  */
 
 public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private SharedPreferencesManager sharedPreferencesManager;
     private List<BehaviouralResultRowModel> behaviouralResultRowModelList;
     private BehaviouralResultsHeaderModel behaviouralResultsHeaderModel;
     private Context context;
@@ -35,7 +37,7 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView reward, className, point;
+        public TextView reward, className, newBadge, point;
         public ImageView pointPic;
 
         public MyViewHolder(final View view) {
@@ -43,6 +45,7 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
             pointPic = (ImageView) view.findViewById(R.id.pointpic);
             reward = (TextView) view.findViewById(R.id.reward);
             className = (TextView) view.findViewById(R.id.classname);
+            newBadge = (TextView) view.findViewById(R.id.newbadge);
             point = (TextView) view.findViewById(R.id.point);
         }
     }
@@ -62,6 +65,7 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
     }
 
     public BehaviouralResultAdapter(List<BehaviouralResultRowModel> behaviouralResultRowModelList, BehaviouralResultsHeaderModel behaviouralResultsHeaderModel, Context context) {
+        sharedPreferencesManager = new SharedPreferencesManager(context);
         this.behaviouralResultRowModelList = behaviouralResultRowModelList;
         this.behaviouralResultsHeaderModel = behaviouralResultsHeaderModel;
         this.context = context;
@@ -122,6 +126,14 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
             ((MyViewHolder) holder).reward.setText(behaviouralResultRowModel.getReward());
             ((MyViewHolder) holder).className.setText(behaviouralResultRowModel.getClassName());
             ((MyViewHolder) holder).point.setText(behaviouralResultRowModel.getPoint());
+
+//            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                if (behaviouralResultRowModel.getNew()) {
+                    ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
+                } else {
+                    ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
+                }
+//            }
 
             TextDrawable textDrawable;
             if (behaviouralResultRowModel.getPoint().equals("+1")) {

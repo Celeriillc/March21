@@ -4,6 +4,7 @@
     android:id="@+id/activity_edit_first_name"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical">
 
     <include android:id="@+id/hometoolbar"
@@ -14,22 +15,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:layout_marginBottom="10dp"
         android:paddingStart="5dp"
         android:paddingEnd="15dp"
         android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
         android:text="First Name"/>
-
-    <EditText
-        android:id="@+id/edititem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center|start"
-        android:paddingStart="15dp"
-        android:paddingEnd="15dp"
-        android:textSize="15sp"
-        android:hint="First Name"/>
 
     <TextView
         android:id="@+id/description"
@@ -40,6 +33,34 @@
         android:layout_marginBottom="10dp"
         android:paddingStart="5dp"
         android:textSize="15sp"
+        android:visibility="gone"
         android:text="Utilizing the weights sharing strategy, neurons are able to perform convolutions on the data with the convolution filter being formed by the weights. This is then followed by a pooling operation which as a form of non-linear down-sampling, progressively reduces the spatial size of the representation thus reducing the amount of computation and parameters in the network"/>
+
+    <EditText
+        android:id="@+id/edititem"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:hint="First Name"
+        android:textSize="14sp"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/darker_gray"
+        android:background="@drawable/edittext_background" />
+
+    <Button
+        android:id="@+id/edit"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:text="Edit"
+        android:background="@drawable/roundedbutton"
+        style="?android:attr/borderlessButtonStyle" />
 
 </LinearLayout>

@@ -5,16 +5,17 @@ package com.celerii.celerii.models;
  */
 
 public class ReportAbuseModel {
-    String header, report, senderID, senderEMail, reporteeID, date, year, month, day;
+    String header, report, senderID, senderAccountType, senderEMail, reporteeID, date, year, month, day;
     boolean read, responded;
 
     public ReportAbuseModel() {
     }
 
-    public ReportAbuseModel(String header, String report, String senderID, String senderEMail, String reporteeID, String date, String year, String month, String day, boolean read, boolean responded) {
+    public ReportAbuseModel(String header, String report, String senderID, String senderAccountType, String senderEMail, String reporteeID, String date, String year, String month, String day, boolean read, boolean responded) {
         this.header = header;
         this.report = report;
         this.senderID = senderID;
+        this.senderAccountType = senderAccountType;
         this.senderEMail = senderEMail;
         this.reporteeID = reporteeID;
         this.date = date;
@@ -43,6 +44,14 @@ public class ReportAbuseModel {
 
     public String getSenderID() {
         return senderID;
+    }
+
+    public String getSenderAccountType() {
+        return senderAccountType;
+    }
+
+    public void setSenderAccountType(String senderAccountType) {
+        this.senderAccountType = senderAccountType;
     }
 
     public void setSenderID(String senderID) {

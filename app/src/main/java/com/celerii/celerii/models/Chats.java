@@ -5,14 +5,14 @@ package com.celerii.celerii.models;
  */
 
 public class Chats {
-    String message, messageID, senderID, recieverID, datestamp, sortableDate, fileURL, otherProfilePicURL;
+    String message, messageID, senderID, receiverID, datestamp, sortableDate, fileURL, otherProfilePicURL;
     boolean received, mine, isRow, seen;
 
     public Chats() {
         this.message = "";
         this.messageID = "";
         this.senderID = "";
-        this.recieverID = "";
+        this.receiverID = "";
         this.datestamp = "";
         this.sortableDate = "";
         this.fileURL = "";
@@ -22,10 +22,10 @@ public class Chats {
         this.seen = false;
     }
 
-    public Chats(String message, String senderID, String recieverID, String datestamp, String sortableDate, boolean seen, boolean mine, String fileURL, String otherProfilePicURL, boolean isRow) {
+    public Chats(String message, String senderID, String receiverID, String datestamp, String sortableDate, boolean seen, boolean mine, String fileURL, String otherProfilePicURL, boolean isRow) {
         this.message = message;
         this.senderID = senderID;
-        this.recieverID = recieverID;
+        this.receiverID = receiverID;
         this.datestamp = datestamp;
         this.sortableDate = sortableDate;
         this.fileURL = fileURL;
@@ -59,12 +59,12 @@ public class Chats {
         this.senderID = senderID;
     }
 
-    public String getRecieverID() {
-        return recieverID;
+    public String getReceiverID() {
+        return receiverID;
     }
 
-    public void setRecieverID(String recieverID) {
-        this.recieverID = recieverID;
+    public void setReceiverID(String receiverID) {
+        this.receiverID = receiverID;
     }
 
     public String getDatestamp() {

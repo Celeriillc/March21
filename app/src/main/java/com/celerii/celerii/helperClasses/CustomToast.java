@@ -37,6 +37,46 @@ public class CustomToast {
         toast.show();
     }
 
+    public static void primaryBackgroundToast(Context context, String message){
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View layout = inflater.inflate(R.layout.custom_toast_primary, null);
+
+        TextView text = (TextView) layout.findViewById(R.id.text);
+        text.setText(message);
+        double actionBarHeight;
+        TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+        } else {
+            actionBarHeight = 100;
+        }
+        toast = new Toast(context);
+        toast.setGravity(Gravity.TOP, 0, (int)actionBarHeight + 20);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
+    }
+
+    public static void accentBackgroundToast(Context context, String message){
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View layout = inflater.inflate(R.layout.custom_toast_accent, null);
+
+        TextView text = (TextView) layout.findViewById(R.id.text);
+        text.setText(message);
+        double actionBarHeight;
+        TypedValue tv = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+        } else {
+            actionBarHeight = 100;
+        }
+        toast = new Toast(context);
+        toast.setGravity(Gravity.TOP, 0, (int)actionBarHeight + 20);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
+    }
+
     public static void whiteBackgroundBottomToast(Context context, String message){
         LayoutInflater inflater = LayoutInflater.from(context);
         View layout = inflater.inflate(R.layout.custom_general_toast_white, null);

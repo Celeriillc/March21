@@ -6,6 +6,17 @@
     <string name="connect_with_parents">Connect with Parents</string>
     <string name="effortlessly_connect_with_parents_and_discuss_the_progress_of_your_kid">Effortlessly connect with Parents and discuss the progress of your kid</string>
     <string name="acctype">Account Type</string>
+    <string name="more_frag_empty_parent">You\'re not connected to any of your children\'s account. Click the <b> Search </b> button to search for your child to get started or get started by clicking the <b> Find my child </b> button below</string>
+    <string name="more_frag_empty_teacher">You\'re not connected to any of your classes\' account. Click the <b> Search </b> button to search for your school to access your classes or get started by clicking the <b> Find my school </b> button below</string>
+    <string name="TermsAndPrivacyForLogin">By signing up, you agree to Celerii\'s <a href="https://www.google.com/">Terms of Service</a> and <a href="https://www.Instagram.com/">Privacy Policy</a> </string>
+    <string name="not_subscribed_short">NSD</string>
+    <string name="not_subscribed_long">Not Subscribed</string>
+
+    <string name="facebook_app_id">2450690141844730</string>
+    <string name="fb_login_protocol_scheme">fb2450690141844730</string>
+
+    <string name="twitter_consumer_key">yKf8E2usdNIuBhRes0bBbgilK</string>
+    <string name="twitter_consumer_secret">1nfc9fUaZRujSZHL7cvpKkKhN7bgspJyoUHH7jQT4g0c1hgQqR</string>
 
     <string-array name="account_type_array">
         <item>Teacher</item>

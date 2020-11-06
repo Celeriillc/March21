@@ -6,20 +6,25 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.StudentPerformance.History.AcademicRecordDetailActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.HistoryPerformanceBody;
 import com.celerii.celerii.models.HistoryPerformanceHeader;
+import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.SubscriptionModel;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -34,7 +39,10 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +65,8 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView className, term, year, score;
         View newBadge;
-        public ImageView isIncrease;
+        ImageView isIncrease;
+        LinearLayout layout;
         View clickableView;
 
         public MyViewHolder(final View view) {
@@ -68,6 +77,7 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
             score = (TextView) view.findViewById(R.id.score);
             newBadge = (View) view.findViewById(R.id.newbadge);
             isIncrease = (ImageView) view.findViewById(R.id.movefromlastscore);
+            layout = (LinearLayout) view.findViewById(R.id.layout);
             clickableView = view;
         }
     }
@@ -79,7 +89,7 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
 
         public HeaderViewHolder(View view) {
             super(view);
-//            subject = (TextView) view.findViewById(R.id.subjectname);
+            subject = (TextView) view.findViewById(R.id.subjectname);
             averageScore = (TextView) view.findViewById(R.id.averagescore);
 //            lastScore = (TextView) view.findViewById(R.id.movefrompreviousscore);
             chart = (LineChart) view.findViewById(R.id.historychart);
@@ -117,6 +127,7 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
             HistoryPerformanceHeader historyPerformanceHeader = this.historyPerformanceHeader;
 
             ((HeaderViewHolder) holder).averageScore.setText(TypeConverterClass.convStringToIntString(historyPerformanceHeader.getAverageScore()) + "%");
+            ((HeaderViewHolder) holder).subject.setText("Overall Average in " + historyPerformanceHeader.getSubjectHead());
 
             final String[] xArray = historyPerformanceHeader.getxList();
             Double[] yArray = historyPerformanceHeader.getyList();
@@ -140,16 +151,18 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
                     xAxis.setValueFormatter(formatter);
                     xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
                     xAxis.setDrawAxisLine(false);
-                    xAxis.setDrawGridLines(false);
+//                    xAxis.setDrawGridLines(false);
                     xAxis.setTextColor(Color.GRAY);
+                    xAxis.setEnabled(false);
 
                     YAxis yAxis = ((HeaderViewHolder) holder).chart.getAxisLeft();
-                    yAxis.setDrawGridLines(false);
-                    yAxis.setDrawAxisLine(false);
+//                    yAxis.setDrawGridLines(false);
+//                    yAxis.setDrawAxisLine(false);
                     yAxis.setGranularity(25f);
                     yAxis.setAxisMinimum(0f);
                     yAxis.setAxisMaximum(100f);
                     yAxis.setTextColor(Color.GRAY);
+//                    yAxis.setEnabled(false);
 
                     Legend legend = ((HeaderViewHolder) holder).chart.getLegend();
                     legend.setEnabled(false);
@@ -161,9 +174,11 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
                     }
 
                     LineDataSet dataSet = new LineDataSet(entries, "");
-                    dataSet.setColor(Color.RED);
-                    dataSet.setLineWidth(4f);
-                    dataSet.setCircleColor(Color.RED);
+                    dataSet.setColor(ContextCompat.getColor(context, R.color.colorTransparentPurple));
+                    dataSet.setLineWidth(1f);
+                    dataSet.setCircleColor(ContextCompat.getColor(context, R.color.colorTransparentPurple));
+                    dataSet.setDrawFilled(true);
+                    dataSet.setFillDrawable(ContextCompat.getDrawable(context, R.drawable.fade_accent_for_chart));
                     LineData lineData = new LineData(dataSet);
                     lineData.setDrawValues(false);
 
@@ -190,13 +205,13 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
 
             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                 if (historyPerformanceBody.isNew()) {
-                    ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
+//                    ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
                     ((MyViewHolder) holder).className.setTypeface(null, Typeface.BOLD);
                     ((MyViewHolder) holder).term.setTypeface(null, Typeface.BOLD);
                     ((MyViewHolder) holder).score.setTypeface(null, Typeface.BOLD);
                     ((MyViewHolder) holder).year.setTypeface(null, Typeface.BOLD);
                 } else {
-                    ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
+//                    ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
                     ((MyViewHolder) holder).className.setTypeface(null, Typeface.NORMAL);
                     ((MyViewHolder) holder).term.setTypeface(null, Typeface.NORMAL);
                     ((MyViewHolder) holder).score.setTypeface(null, Typeface.NORMAL);
@@ -205,9 +220,14 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
             }
 
             ((MyViewHolder) holder).className.setText(historyPerformanceBody.getClassName());
-            ((MyViewHolder) holder).term.setText(Term.Term(historyPerformanceBody.getTerm()));
-            ((MyViewHolder) holder).score.setText(historyPerformanceBody.getScoreNormalized());
+            ((MyViewHolder) holder).term.setText(Term.TermShort(historyPerformanceBody.getTerm()));
             ((MyViewHolder) holder).year.setText(historyPerformanceBody.getYear());
+
+            if (position % 2 == 1) {
+                ((MyViewHolder) holder).layout.setBackground(ContextCompat.getDrawable(context, R.color.colorLightestGray));
+            } else {
+                ((MyViewHolder) holder).layout.setBackground(ContextCompat.getDrawable(context, R.color.white));
+            }
 
             if (historyPerformanceBody.getIsIncrease().equals("true")){
                 ((MyViewHolder) holder).isIncrease.setImageResource(R.drawable.ic_triangle_up);
@@ -216,6 +236,51 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
                 ((MyViewHolder) holder).isIncrease.setScaleY(-1);
             } else {
                 ((MyViewHolder) holder).isIncrease.setImageResource(R.drawable.ic_attendance_late_24dp);
+            }
+
+            Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
+            Gson gson = new Gson();
+            String subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationTeachers();
+            Type type = new TypeToken<HashMap<String, SubscriptionModel>>() {}.getType();
+            HashMap<String, SubscriptionModel> subscriptionModelMap = gson.fromJson(subscriptionModelJSON, type);
+            gson = new Gson();
+            type = new TypeToken<Student>() {}.getType();
+            Student activeStudentModel = gson.fromJson(historyPerformanceBody.getStudent(), type);
+            SubscriptionModel subscriptionModel = new SubscriptionModel();
+            if (subscriptionModelMap != null) {
+                subscriptionModel = subscriptionModelMap.get(activeStudentModel.getStudentID());
+                if (subscriptionModel == null) {
+                    subscriptionModel = new SubscriptionModel();
+                }
+            }
+            if (subscriptionModel.getStudentAccount().equals("")) {
+                gson = new Gson();
+                subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationParents();
+                type = new TypeToken<HashMap<String, ArrayList<SubscriptionModel>>>() {}.getType();
+                HashMap<String, ArrayList<SubscriptionModel>> subscriptionModelMapParent = gson.fromJson(subscriptionModelJSON, type);
+                subscriptionModel = new SubscriptionModel();
+                if (subscriptionModelMapParent != null) {
+                    ArrayList<SubscriptionModel> subscriptionModelList = subscriptionModelMapParent.get(activeStudentModel.getStudentID());
+                    String latestSubscriptionDate = "0000/00/00 00:00:00:000";
+                    for (SubscriptionModel subscriptionModel1: subscriptionModelList) {
+                        if (Date.compareDates(subscriptionModel1.getExpiryDate(), latestSubscriptionDate)) {
+                            subscriptionModel = subscriptionModel1;
+                            latestSubscriptionDate = subscriptionModel1.getExpiryDate();
+                        }
+                    }
+                }
+            }
+            Boolean isExpired = Date.compareDates(historyPerformanceBody.getDate(), subscriptionModel.getExpiryDate());
+
+            if (isOpenToAll) {
+                ((MyViewHolder) holder).score.setText(appendPercentage(historyPerformanceBody.getScoreNormalized()));
+            } else {
+                if (!isExpired) {
+                    ((MyViewHolder) holder).score.setText(appendPercentage(historyPerformanceBody.getScoreNormalized()));
+                } else {
+                    ((MyViewHolder) holder).score.setText(R.string.not_subscribed_short);
+                    ((MyViewHolder) holder).isIncrease.setVisibility(View.GONE);
+                }
             }
 
             ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
@@ -259,6 +324,14 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
     private boolean isPositionFooter (int position) {
         return position == historyPerformanceBodyList.size () + 1;
     }
+
+    private String appendPercentage(String inputString){
+        if (inputString.equals("NA")){
+            return inputString;
+        } else {
+            return inputString + "%";
+        }
+    }
 }
 
 class YourMarkerView extends MarkerView {
@@ -293,7 +366,11 @@ class YourMarkerView extends MarkerView {
 
         term.setText("Term : " + termString);
         year.setText("Year : " + yearString);
-        score.setText("Score : " + y + "%");
+//        if (y.equals("-1")) {
+//            score.setText(R.string.not_subscribed_short);
+//        } else {
+            score.setText("Score : " + y + "%");
+//        }
 
         // this will perform necessary layouting
         super.refreshContent(e, highlight);

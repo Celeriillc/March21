@@ -3,10 +3,13 @@ package com.celerii.celerii.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -46,13 +49,17 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
-        public TextView header;
-        public LinearLayout progressBarLayout;
+        public TextView header, errorLayoutText;
+        public LinearLayout chiefLayout, errorLayout;
+        public ImageView errorLayoutImage;
 
         public HeaderViewHolder(View view) {
             super(view);
             header = (TextView) view.findViewById(R.id.header);
-            progressBarLayout = (LinearLayout) view.findViewById(R.id.progressbarlayout);
+            errorLayoutText = (TextView) view.findViewById(R.id.errorlayouttext);
+            chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
+            errorLayout = (LinearLayout) view.findViewById(R.id.errorlayout);
+            errorLayoutImage = (ImageView) view.findViewById(R.id.errorlayoutimage);
         }
     }
 
@@ -82,11 +89,22 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).header.setText(searchHistoryHeader.getHeader());
-            if (searchHistoryHeader.isLoading()){
-                ((HeaderViewHolder) holder).progressBarLayout.setVisibility(View.VISIBLE);
+
+            if (searchHistoryRowList.size() <= 1) {
+                ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
+                ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                String errorMessage = "";
+                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                    errorMessage = "Use the text field above to search for your child and connect with their account. You can also search for a school, a location or any of your children's teachers to profile or send a message";
+                } else {
+                    errorMessage = "Use the text field above to search for your school and connect with their account. Connecting to a school gives you access to their classes and all their students.";
+                }
+                ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
             } else {
-                ((HeaderViewHolder) holder).progressBarLayout.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).errorLayout.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             }
+
         }
         else {
             final SearchHistoryRow searchHistoryRow = searchHistoryRowList.get(position);

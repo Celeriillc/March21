@@ -1,18 +1,27 @@
 package com.celerii.celerii.Activities.StudentAttendance;
 
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
+import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.Day;
@@ -21,22 +30,29 @@ import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ParentAttendanceRow;
 import com.celerii.celerii.models.School;
+import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.Teacher;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 
 public class AttendanceDetailActivity extends AppCompatActivity {
     SharedPreferencesManager sharedPreferencesManager;
 
+    FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     ScrollView superLayout;
     SwipeRefreshLayout mySwipeRefreshLayout;
@@ -48,8 +64,15 @@ public class AttendanceDetailActivity extends AppCompatActivity {
     EditText remark;
     Bundle b;
 
-    String activeKid, activeKidName, activeKidID;
+    String activeKid, activeKidName, activeKidID, activeAccount;
     String dateString, statusString, termString, subjectString, teacherString, classNameString, schoolString, remarkString, key;
+    String parentActivity;
+    Boolean isSubscribed;
+
+    String featureUseKey = "";
+    String featureName = "Attendance Detail";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +81,10 @@ public class AttendanceDetailActivity extends AppCompatActivity {
 
         sharedPreferencesManager = new SharedPreferencesManager(this);
 
+        auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         superLayout = (ScrollView) findViewById(R.id.superlayout);
@@ -70,10 +95,18 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         superLayout.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
 
+//        Gson gson = new Gson();
+//        Type type = new TypeToken<Student>() {}.getType();
+//        Student activeStudentModel = gson.fromJson(sharedPreferencesManager.getActiveKid(), type);
+
         Bundle b = getIntent().getExtras();
         key = b.getString("key");
         activeKidID = b.getString("ID");
-        activeKidName = sharedPreferencesManager.getActiveKid().split(" ")[1];
+        activeKidName = b.getString("name");
+        activeAccount = b.getString("accountType");
+//        activeKidName = activeStudentModel.getFirstName();
+        parentActivity = b.getString("parentActivity");
+        isSubscribed = b.getBoolean("isSubscribed");
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -90,6 +123,18 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         school = (TextView) findViewById(R.id.school);
         remark = (EditText) findViewById(R.id.remark);
 
+        if (!isSubscribed) {
+            String message;
+            if (activeAccount.equals("Parent")) {
+                message = activeKidName + "'s attendance information is not currently available, please subscribe " + activeKidName + " to a Celerii plan to get the latest information from " + activeKidName + "'s school";
+            } else {
+                message = activeKidName + "'s attendance information is not currently available, please check back when " + activeKidName + " has an active Celerii subscription";
+            }
+            showDialogWithMessageAndClose(message);
+            return;
+        }
+
+        updateBadges();
         loadFromFirebase();
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -144,9 +189,9 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                         if (statusString.equals("Present")) {
                             remark.setHint("Enter your remarks here");
                         } else if (statusString.equals("Absent")) {
-                            remark.setHint("Please tell us why " + activeKidName + " was absent");
+                            remark.setHint("Please tell us why they were absent today");
                         } else {
-                            remark.setHint("Please tell us why " + activeKidName + " was late to class");
+                            remark.setHint("Please tell us why they were late to class today");
                         }
                     } else {
                         remark.setText(remarkString);
@@ -228,25 +273,142 @@ public class AttendanceDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("AttendenceStudent/" + activeKidID + "/" + key + "/remark", remark.getText().toString());
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    public void updateBadges(){
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+                updateBadgesMap.put("AttendanceParentNotification/" + mFirebaseUser.getUid() + "/" + activeKidID + "/status", false);
+                updateBadgesMap.put("AttendanceParentNotification/" + mFirebaseUser.getUid() + "/" + activeKidID + "/" + key + "/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/More/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/" + activeKidID + "/More/status", false);
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
+            }
+        } else {
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+                updateBadgesMap.put("AttendanceParentNotification/" + mFirebaseUser.getUid() + "/" + activeKidID + "/status", false);
+                updateBadgesMap.put("AttendanceParentNotification/" + mFirebaseUser.getUid() + "/" + activeKidID + "/" + key + "/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/More/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/" + activeKidID + "/More/status", false);
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
+            }
+        }
+    }
+
+    void showDialogWithMessageAndClose (String messageString) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == android.R.id.home){
+        if (id == android.R.id.home) {
+            if (parentActivity != null) {
+                if (parentActivity.equals("Parent")) {
+                    Intent i = new Intent(this, ParentMainActivityTwo.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Fragment Int", "2");
+                    i.putExtras(bundle);
+                    startActivity(i);
+                } else if (parentActivity.equals("Teacher")) {
+                    Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Fragment Int", "3");
+                    i.putExtras(bundle);
+                    startActivity(i);
+                }
+            }
             finish();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
-    protected void onStop() {
-        mDatabaseReference = mFirebaseDatabase.getReference();
-
-        Map<String, Object> remarkMap = new HashMap<String, Object>();
-        remarkMap.put("AttendenceStudent/" + activeKidID + "/" + key + "/remark", remark.getText().toString());
-        mDatabaseReference.updateChildren(remarkMap);
-
-        super.onStop();
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                Intent i = new Intent(this, ParentMainActivityTwo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Fragment Int", "2");
+                i.putExtras(bundle);
+                startActivity(i);
+            } else if (parentActivity.equals("Teacher")) {
+                Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Fragment Int", "3");
+                i.putExtras(bundle);
+                startActivity(i);
+            }
+        }
     }
 }

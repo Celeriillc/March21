@@ -1,29 +1,37 @@
 package com.celerii.celerii.Activities.Settings;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Dialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ReportAbuseModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ReportAbuseActivity extends AppCompatActivity {
+    SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -35,12 +43,20 @@ public class ReportAbuseActivity extends AppCompatActivity {
     private Toolbar toolbar;
     TextView header, hint;
     EditText message;
-    boolean connected = false;
+    Button reportUser;
+    String report;
+
+    String featureUseKey = "";
+    String featureName = "Report Abuse Main";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_abuse);
+
+        sharedPreferencesManager = new SharedPreferencesManager(this);
 
         bundle = getIntent().getExtras();
         userID = bundle.getString("userID");
@@ -60,32 +76,123 @@ public class ReportAbuseActivity extends AppCompatActivity {
         header = (TextView) findViewById(R.id.reportheader);
         hint = (TextView) findViewById(R.id.reportuserhint);
         message = (EditText) findViewById(R.id.reportmessage);
+        reportUser = (Button) findViewById(R.id.reportuser);
 
         header.setText("Report " + userName);
 
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
+        reportUser.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-
-                } else {
-
+            public void onClick(View v) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
                 }
-            }
 
+                report = message.getText().toString().trim();
+
+                if (!validate(report, "body", message))
+                    return;
+
+                String date = Date.getDate();
+                String year = Date.getYear();
+                String month = Date.getMonth();
+                String day = Date.getDay();
+                boolean seen = false;
+                boolean responded = false;
+                DatabaseReference reportKey = mFirebaseDatabase.getReference("Customer Feedback").child("Report User").child(mFirebaseUser.getUid()).push();
+                String pushKey = reportKey.getKey();
+                DatabaseReference reportRef = mFirebaseDatabase.getReference();
+                ReportAbuseModel reportAbuseModel = new ReportAbuseModel(header.getText().toString(), report, mFirebaseUser.getUid(), sharedPreferencesManager.getActiveAccount(), mFirebaseUser.getEmail(), userID, date, year, month, day, seen, responded);
+                Map<String, Object> newReportFeatureMap = new HashMap<String, Object>();
+                newReportFeatureMap.put("Customer Feedback/Report User/" + pushKey + "/", reportAbuseModel);
+                newReportFeatureMap.put("Customer Feedback/Reportee/" + userID + "/" + pushKey + "/", reportAbuseModel);
+                reportRef.updateChildren(newReportFeatureMap, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        CustomToast.blueBackgroundToast(ReportAbuseActivity.this, "We have received your report, Thank you");
+                        finish();
+                    }
+                });
+            }
+        });
+    }
+
+    private boolean validate(String string, String type, EditText editText) {
+        if (string.isEmpty()) {
+            String messageString = "The " + type + " of your mail is empty";
+            showDialogWithMessage(messageString);
+            editText.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    void showDialogWithMessage (String messageString) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
+            public void onClick(View v) {
+                dialog.dismiss();
             }
         });
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_message_menu, menu);
-        return true;
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override
@@ -93,39 +200,6 @@ public class ReportAbuseActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            finish();
-        }
-        else if (id == R.id.action_send){
-            //TODO; Ensure we save updated data to database
-            final String report = message.getText().toString().trim();
-            if (report.equals("")) {
-                CustomToast.whiteBackgroundBottomToast(this, "Error: The report section is empty");
-                return false;
-            }
-
-            if (connected){
-                String date = Date.getDate();
-                String year = Date.getYear();
-                String month = Date.getMonth();
-                String day = Date.getDay();
-                boolean seen = false;
-                boolean responded = false;
-                DatabaseReference reportKey = mFirebaseDatabase.getReference("Customer Feedback").child("Report User").push();
-                String pushKey = reportKey.getKey();
-                DatabaseReference reportRef = mFirebaseDatabase.getReference();
-                ReportAbuseModel reportAbuseModel = new ReportAbuseModel(header.getText().toString(), report, mFirebaseUser.getUid(), mFirebaseUser.getEmail(), userID, date, year, month, day, seen, responded);
-                Map<String, Object> newReportFeatureMap = new HashMap<String, Object>();
-                newReportFeatureMap.put("Customer Feedback/Report User/" + pushKey + "/", reportAbuseModel);
-                reportRef.updateChildren(newReportFeatureMap, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        CustomToast.whiteBackgroundBottomToast(ReportAbuseActivity.this, "Report sent, Thank you");
-                    }
-                });
-            } else {
-                CustomToast.whiteBackgroundBottomToast(ReportAbuseActivity.this, "Connection lost, check and try again");
-            }
-
             finish();
         }
 

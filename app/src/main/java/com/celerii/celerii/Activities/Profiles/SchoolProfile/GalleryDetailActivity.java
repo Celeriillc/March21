@@ -1,8 +1,10 @@
 package com.celerii.celerii.Activities.Profiles.SchoolProfile;
 
+import android.content.Context;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.appcompat.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.view.View;
 import android.view.Window;
@@ -16,12 +18,16 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 public class GalleryDetailActivity extends AppCompatActivity {
 
-
+    Context context;
+    ImageView close;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery_detail);
+
+        context = this;
+        close = (ImageView) findViewById(R.id.close);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setSharedElementEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.gallery_detail_transition));
@@ -45,5 +51,15 @@ public class GalleryDetailActivity extends AppCompatActivity {
                 .crossFade()
                 .into((ImageView) findViewById(R.id.fullimage));
 
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                back();
+            }
+        });
+    }
+
+    void back() {
+        this.onBackPressed();
     }
 }

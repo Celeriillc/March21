@@ -5,19 +5,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@android:color/white"
+    android:gravity="center"
     android:layout_marginTop="?attr/actionBarSize">
 
     <LinearLayout
         android:id="@+id/progresslayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
-        <ProgressBar
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical|center_horizontal"/>
+<!--        <ProgressBar-->
+<!--            android:layout_width="50dp"-->
+<!--            android:layout_height="50dp"-->
+<!--            android:layout_gravity="center_vertical|center_horizontal"/>-->
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/progressBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:layout_weight="2"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/download" />
 
     </LinearLayout>
 

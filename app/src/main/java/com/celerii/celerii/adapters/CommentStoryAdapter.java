@@ -3,11 +3,12 @@ package com.celerii.celerii.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.util.Pair;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +17,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.Profiles.ParentProfileActivity;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.Profiles.TeacherProfileOneActivity;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.Comment;
@@ -46,6 +48,7 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView poster, time, comment;
         public ImageView posterPic;
+        public LinearLayout picLayout;
 
         public MyViewHolder(final View view) {
             super(view);
@@ -53,6 +56,7 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             poster = (TextView) view.findViewById(R.id.commentposter);
             comment = (TextView) view.findViewById(R.id.comment);
             time = (TextView) view.findViewById(R.id.time);
+            picLayout = (LinearLayout) view.findViewById(R.id.piclayout);
         }
     }
 
@@ -61,7 +65,7 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ImageView posterPic, storyimage;
 
         HorizontalScrollView imageContainer;
-        LinearLayout imageLayoutOne, imageLayoutTwo, imageLayoutThree, imageLayoutFour, imageLayoutFive, imageLayoutSix, imageLayoutSeven, imageLayoutEight, imageLayoutNine, imageLayoutTen;
+        LinearLayout imageLayoutOne, imageLayoutTwo, imageLayoutThree, imageLayoutFour, imageLayoutFive, imageLayoutSix, imageLayoutSeven, imageLayoutEight, imageLayoutNine, imageLayoutTen, picLayout;
         ImageView storyImageOne, storyImageTwo, storyImageThree, storyImageFour, storyImageFive, storyImageSix, storyImageSeven, storyImageEight, storyImageNine, storyImageTen;
 
         public HeaderViewHolder(View view) {
@@ -88,6 +92,7 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             imageLayoutEight = (LinearLayout) view.findViewById(R.id.imagelayouteight);
             imageLayoutNine = (LinearLayout) view.findViewById(R.id.imagelayoutnine);
             imageLayoutTen = (LinearLayout) view.findViewById(R.id.imagelayoutten);
+            picLayout = (LinearLayout) view.findViewById(R.id.piclayout);
 
             storyImageOne = (ImageView) view.findViewById(R.id.storyimageone);
             storyImageTwo = (ImageView) view.findViewById(R.id.storyimagetwo);
@@ -137,6 +142,12 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((HeaderViewHolder) holder).noOfComments.setText(String.valueOf(classStory.getNumberOfComments()) + " Comments");
             ((HeaderViewHolder) holder).classstory.setText(classStory.getStory());
             ((HeaderViewHolder) holder).urlLink.setVisibility(View.GONE);
+            ((HeaderViewHolder) holder).picLayout.setClipToOutline(true);
+            if (classStory.getStory().equals("")) {
+                ((HeaderViewHolder)holder).classstory.setVisibility(View.GONE);
+            } else {
+                ((HeaderViewHolder)holder).classstory.setVisibility(View.VISIBLE);
+            }
 
             final String[] imageArray = classStory.getImageURL().split(" ");
             if (imageArray.length == 1 && imageArray[0].equals("")) {
@@ -347,13 +358,28 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 });
             }
 
-            Glide.with(context)
-                    .load(classStory.getProfilePicURL())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((HeaderViewHolder) holder).posterPic);
+            Drawable textDrawable;
+            if (!classStory.getPosterName().isEmpty()) {
+                String[] nameArray = classStory.getPosterName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((HeaderViewHolder) holder).posterPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!classStory.getProfilePicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(classStory.getProfilePicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((HeaderViewHolder) holder).posterPic);
+            }
 
 //            if (!classStory.getImageURL().isEmpty()){
 //                Glide.with(context)
@@ -369,22 +395,38 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((HeaderViewHolder) holder).poster.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent I = new Intent(context, TeacherProfileOneActivity.class);
-                    Bundle b = new Bundle();
-                    b.putString("ID", classStory.getPosterID());
-                    I.putExtras(b);
-                    context.startActivity(I);
+                    if (classStory.getPosterAccountType().equals("School")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else {
+                        Intent I = new Intent(context, TeacherProfileOneActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    }
                 }
             });
 
             ((HeaderViewHolder) holder).posterPic.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent I = new Intent(context, TeacherProfileOneActivity.class);
-                    Bundle b = new Bundle();
-                    b.putString("ID", classStory.getPosterID());
-                    I.putExtras(b);
-                    context.startActivity(I);
+                    if (classStory.getPosterAccountType().equals("School")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else {
+                        Intent I = new Intent(context, TeacherProfileOneActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", classStory.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    }
                 }
             });
         }
@@ -395,20 +437,42 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((MyViewHolder) holder).poster.setText(comment.getPosterName());
             ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpan(comment.getTime()));
             ((MyViewHolder) holder).comment.setText(comment.getComment());
+            ((MyViewHolder) holder).picLayout.setClipToOutline(true);
 
-            Glide.with(context)
-                    .load(comment.getPosterPic())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder) holder).posterPic);
+            Drawable textDrawable;
+            if (!comment.getPosterName().isEmpty()) {
+                String[] nameArray = comment.getPosterName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).posterPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!comment.getPosterPic().isEmpty()) {
+                Glide.with(context)
+                        .load(comment.getPosterPic())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).posterPic);
+            }
 
 
             ((MyViewHolder) holder).posterPic.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (commenterAccountType.equals("Parent")){
+                    if (commenterAccountType.equals("School")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", comment.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else if (commenterAccountType.equals("Parent")){
                         Intent I = new Intent(context, ParentProfileActivity.class);
                         Bundle b = new Bundle();
                         b.putString("parentID", comment.getPosterID());
@@ -427,7 +491,13 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((MyViewHolder) holder).poster.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (commenterAccountType.equals("Parent")){
+                    if (commenterAccountType.equals("School")) {
+                        Intent I = new Intent(context, SchoolProfileActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("ID", comment.getPosterID());
+                        I.putExtras(b);
+                        context.startActivity(I);
+                    } else if (commenterAccountType.equals("Parent")){
                         Intent I = new Intent(context, ParentProfileActivity.class);
                         Bundle b = new Bundle();
                         b.putString("parentID", comment.getPosterID());

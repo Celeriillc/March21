@@ -3,9 +3,10 @@ package com.celerii.celerii.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditSubjec
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.StudentAttendance.TeacherTakeAttendanceActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.TeacherAttendanceHeader;
@@ -214,13 +216,28 @@ public class TeacherTakeAttendanceRowAdapter extends RecyclerView.Adapter<Recycl
 
             ((MyViewHolder)holder).studentName.setText(teacherAttendanceRow.getName());
 
-            Glide.with(context)
-                    .load(teacherAttendanceRow.getImageURL())
-                    .crossFade()
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop().bitmapTransform(new CropCircleTransformation(context))
-                    .into(((MyViewHolder)holder).studentPic);
+            Drawable textDrawable;
+            if (!teacherAttendanceRow.getName().isEmpty()) {
+                String[] nameArray = teacherAttendanceRow.getName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).studentPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!teacherAttendanceRow.getImageURL().isEmpty()) {
+                Glide.with(context)
+                        .load(teacherAttendanceRow.getImageURL())
+                        .crossFade()
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop().bitmapTransform(new CropCircleTransformation(context))
+                        .into(((MyViewHolder) holder).studentPic);
+            }
 
             if (teacherAttendanceRow.getAttendanceStatus().equals("Present")) {
                 ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_present_24dp);

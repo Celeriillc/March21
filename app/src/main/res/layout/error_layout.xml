@@ -28,7 +28,25 @@
             android:layout_gravity="center_horizontal|center_vertical"
             android:gravity="center"
             android:layout_margin="15dp"
-            android:textSize="14sp"/>
+            android:textSize="15sp"/>
+
+        <Button
+            android:id="@+id/errorlayoutbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:text=""
+            android:background="@drawable/roundedbutton"
+            style="?android:attr/borderlessButtonStyle"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

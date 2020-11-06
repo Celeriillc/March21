@@ -3,28 +3,61 @@ package com.celerii.celerii.Activities.EditTermAndYearInfo;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class EnterResultsEditMaxObtainableActivity extends AppCompatActivity {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
+
+    FirebaseAuth auth;
+    FirebaseDatabase mFirebaseDatabase;
+    DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     private Toolbar toolbar;
     TextView captionView, descriptionView;
     EditText editItem;
+    Button save;
+
+    String featureUseKey = "";
+    String featureName = "Edit Max Obtainable";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_results_edit_max_obtainable);
+
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
+        auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         Bundle bundle = getIntent().getExtras();
 
@@ -33,23 +66,67 @@ public class EnterResultsEditMaxObtainableActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Enter Maximum Score Obtainable");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black_24dp);
 
         captionView = (TextView) findViewById(R.id.caption);
         descriptionView = (TextView) findViewById(R.id.description);
         editItem = (EditText) findViewById(R.id.edititem);
+        save = (Button) findViewById(R.id.save);
         editItem.setText(bundle.getString("Maximum Obtainable"));
         editItem.setSelectAllOnFocus(true);
 
-        //Show keyboard by default
-        InputMethodManager imm = (InputMethodManager)   getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String maxScore = editItem.getText().toString().trim();
+                if (!validateMaxScore(maxScore))
+                    return;
+
+                Intent intent = new Intent();
+                intent.putExtra("Max Obtainable", maxScore);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.send_message_menu, menu);
-        return true;
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override
@@ -57,20 +134,10 @@ public class EnterResultsEditMaxObtainableActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            InputMethodManager imm = (InputMethodManager)getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(editItem.getWindowToken(), 0);
             finish();
         }
         else if (id == R.id.action_send){
-            String maxScore = editItem.getText().toString().trim();
-            if (!validateMaxScore(maxScore))
-                return false;
-
-            Intent intent = new Intent();
-            intent.putExtra("Max Obtainable", maxScore);
-            setResult(RESULT_OK, intent);
-            finish();
+//
         }
 
         return super.onOptionsItemSelected(item);
@@ -111,8 +178,13 @@ public class EnterResultsEditMaxObtainableActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

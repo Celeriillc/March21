@@ -17,6 +17,13 @@ public class TeacherPerformanceRow {
         this.subject_year_term = "";
     }
 
+    public TeacherPerformanceRow(String previousScore, String currentScore, String projectedScore, String subject) {
+        this.previousScore = previousScore;
+        this.currentScore = currentScore;
+        this.projectedScore = projectedScore;
+        this.subject = subject;
+    }
+
     public TeacherPerformanceRow(String previousScore, String currentScore, String projectedScore, String subject, String subject_year_term) {
         this.previousScore = previousScore;
         this.currentScore = currentScore;

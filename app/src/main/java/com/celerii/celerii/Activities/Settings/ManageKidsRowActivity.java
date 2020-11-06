@@ -1,15 +1,16 @@
 package com.celerii.celerii.Activities.Settings;
 
+import android.content.Context;
 import android.graphics.Color;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -17,13 +18,26 @@ import android.widget.LinearLayout;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.ManageKidsAdapter;
 import com.celerii.celerii.adapters.RecyclerItemTouchHelper;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ManageKidsModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.HashMap;
 
 public class ManageKidsRowActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener{
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
+
+    FirebaseAuth auth;
+    FirebaseDatabase mFirebaseDatabase;
+    DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     Toolbar toolbar;
     private ArrayList<ManageKidsModel> manageKidsModelsList;
@@ -32,14 +46,24 @@ public class ManageKidsRowActivity extends AppCompatActivity implements Recycler
     LinearLayoutManager mLayoutManager;
     LinearLayout coordinatorLayout;
 
-    SharedPreferencesManager sharedPreferencesManager;
+    String featureUseKey = "";
+    String featureName = "Manage Kids Setting";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_kids_row);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
+        auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
+
         coordinatorLayout = (LinearLayout) findViewById(R.id.coordinator_layout);
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
@@ -64,21 +88,61 @@ public class ManageKidsRowActivity extends AppCompatActivity implements Recycler
     }
 
     private void loadFromSharedPreferrences() {
-        Set<String> childrenSet = sharedPreferencesManager.getMyChildren();
-        ArrayList<String> children = new ArrayList<>();
-        if (childrenSet != null) {children = new ArrayList<>(childrenSet); }
+//        Set<String> childrenSet = sharedPreferencesManager.getMyChildren();
+//        ArrayList<String> children = new ArrayList<>();
+//        if (childrenSet != null) {children = new ArrayList<>(childrenSet); }
+//
+//        manageKidsModelsList.clear();
+//
+//        if (children.size() > 0) {
+//            for (int i = 0; i < children.size(); i++) {
+//                String[] childrenInfo = children.get(i).split(" ");
+//                ManageKidsModel manageKidsModel = new ManageKidsModel(childrenInfo[1] + " " + childrenInfo[2], childrenInfo[3], childrenInfo[0]);
+//                manageKidsModelsList.add(manageKidsModel);
+//            }
+//        }
+//
+//        mAdapter.notifyDataSetChanged();
+    }
 
-        manageKidsModelsList.clear();
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        if (children.size() > 0) {
-            for (int i = 0; i < children.size(); i++) {
-                String[] childrenInfo = children.get(i).split(" ");
-                ManageKidsModel manageKidsModel = new ManageKidsModel(childrenInfo[1] + " " + childrenInfo[2], childrenInfo[3], childrenInfo[0]);
-                manageKidsModelsList.add(manageKidsModel);
-            }
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
         }
+        sessionStartTime = System.currentTimeMillis();
+    }
 
-        mAdapter.notifyDataSetChanged();
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override

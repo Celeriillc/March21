@@ -26,22 +26,22 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="0dp"
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
-                    android:text="Invite Friends"/>
+                    android:textSize="12sp"
+                    android:textColor="@color/colorLightGray"
+                    android:text="Invite"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#aaaaaa"
+                android:layout_height="0.0dp"
+                android:background="@color/colorLightGray"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
             <LinearLayout
-                android:id="@+id/inviteFriendsLayout"
+                android:id="@+id/inviteparentslayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
@@ -53,10 +53,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:textSize="14sp"
-                    android:text="Invite Friends"/>
+                    android:text="Invite Parents"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -64,14 +63,13 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginTop="5dp"
-                    android:textColor="@android:color/black"
                     android:textSize="12sp"
-                    android:text="Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet"/>
+                    android:text="Celerii is more fun when parents interact with your posts and message you to discuss the status of your students, click here to invite them."/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
@@ -86,17 +84,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10sp"
+                    android:layout_marginStart="00sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorLightGray"
                     android:text="Account"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#aaaaaa"
+                android:layout_height="0.0dp"
+                android:background="@color/colorLightGray"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
@@ -115,14 +113,39 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="Edit Profile"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
+                android:background="#eeeeee"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"/>
+
+            <LinearLayout
+                android:id="@+id/editemaillayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:text="Edit Email"/>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -142,20 +165,19 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="Change Password"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
             <LinearLayout
-                android:id="@+id/managemyclasseslayout"
+                android:id="@+id/deleteaccountlayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
@@ -169,23 +191,20 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:text="Manage My Classes"/>
+                    android:text="Delete Account"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginTop="5dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp"
-                    android:text="Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
+                android:background="#eeeeee"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
@@ -200,17 +219,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10sp"
+                    android:layout_marginStart="0sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorLightGray"
                     android:text="Settings"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#aaaaaa"
+                android:layout_height="0.0dp"
+                android:background="@color/colorLightGray"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
@@ -229,41 +248,20 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="Push Notifications"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
-            <LinearLayout
-                android:id="@+id/chatlayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:orientation="vertical"
-                android:clickable="true"
-                android:background="?android:attr/selectableItemBackground">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:text="Chat"/>
-
-            </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -283,41 +281,20 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="App Updates"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
-            <LinearLayout
-                android:id="@+id/privacysettingslayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:orientation="vertical"
-                android:clickable="true"
-                android:background="?android:attr/selectableItemBackground">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/black"
-                    android:textStyle="bold"
-                    android:text="Privacy Settings"/>
-
-            </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
@@ -332,17 +309,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10sp"
+                    android:layout_marginStart="0sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorLightGray"
                     android:text="Support and Feedback"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#aaaaaa"
+                android:layout_height="0.0dp"
+                android:background="@color/colorLightGray"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
@@ -361,14 +338,39 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="FAQ"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
+                android:background="#eeeeee"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"/>
+
+            <LinearLayout
+                android:id="@+id/tutorialslayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:text="Tutorials"/>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -388,14 +390,13 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="Report a Problem"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -415,14 +416,13 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="Report Abuse"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -442,14 +442,13 @@
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"
                     android:text="Contact Us"/>
 
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
@@ -464,17 +463,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10sp"
+                    android:layout_marginStart="0sp"
                     android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
+                    android:textSize="12sp"
+                    android:textColor="@color/colorLightGray"
                     android:text="About"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#aaaaaa"
+                android:layout_height="0dp"
+                android:background="@color/colorLightGray"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
 
@@ -492,7 +491,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:text="Blog"/>
 
@@ -500,7 +498,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -519,7 +517,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:text="Terms of Service"/>
 
@@ -527,7 +524,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -546,7 +543,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:text="Privacy Policy"/>
 
@@ -554,7 +550,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -573,7 +569,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:text="App Info"/>
 
@@ -581,7 +576,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"/>
@@ -600,7 +595,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:text="About Us"/>
 
@@ -608,11 +602,11 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="15dp"/>
 
         </LinearLayout>
     </ScrollView>

@@ -1,7 +1,9 @@
 package com.celerii.celerii.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.models.Class;
-import com.amulyakhare.textdrawable.TextDrawable;
-import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
@@ -66,14 +67,28 @@ public class ClassListAdapterHorizontal extends RecyclerView.Adapter<ClassListAd
         holder.clipper.setClipToOutline(true);
 
         holder.className.setText(aClass.getClassName());
-        try {
-            Glide.with(context)
-                .load(aClass.getClassPicURL())
-                .centerCrop()
-                .bitmapTransform(new CropCircleTransformation(context))
-                .into(holder.classPic);
-        } catch (Exception e) {
 
+        Drawable textDrawable;
+        if (!aClass.getClassName().isEmpty()) {
+            String[] nameArray = aClass.getClassName().split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 80);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 80);
+            }
+            holder.classPic.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!aClass.getClassPicURL().isEmpty()) {
+            Glide.with(context)
+                    .load(aClass.getClassPicURL())
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(holder.classPic);
         }
 
         if (aClass.isTicked()){
@@ -81,7 +96,6 @@ public class ClassListAdapterHorizontal extends RecyclerView.Adapter<ClassListAd
         } else {
             holder.classTickedIndicator.setVisibility(View.GONE);
         }
-
 
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 
 public class ParentSchoolConnectionRequest {
-    String requestStatus, timeSent, sorttableTimeSent, requestSenderID, requestSenderAccountType, studentID;
+    String requestStatus, timeSent, sorttableTimeSent, requestSenderID, requestSenderName, requestSenderAccountType, requestSenderProfilePictureURL, studentID, studentName, studentProfilePictureURL;
     String requestKey, requestResponder, requestResponse;
     ArrayList<String> requestReciepients;
 
@@ -16,8 +16,12 @@ public class ParentSchoolConnectionRequest {
         this.timeSent = "";
         this.sorttableTimeSent = "";
         this.requestSenderID = "";
+        this.requestSenderName = "";
         this.requestSenderAccountType = "";
+        this.requestSenderProfilePictureURL = "";
         this.studentID = "";
+        this.studentName = "";
+        this.studentProfilePictureURL = "";
         this.requestKey = "";
         this.requestResponder = "";
         this.requestResponse = "";
@@ -29,8 +33,12 @@ public class ParentSchoolConnectionRequest {
         this.timeSent = timeSent;
         this.sorttableTimeSent = sorttableTimeSent;
         this.requestSenderID = requestSenderID;
+        this.requestSenderName = "";
         this.requestSenderAccountType = requestSenderAccountType;
+        this.requestSenderProfilePictureURL = "";
         this.studentID = studentID;
+        this.studentName = "";
+        this.studentProfilePictureURL = "";
         this.requestKey = requestKey;
         this.requestResponder = requestResponder;
         this.requestResponse = requestResponse;
@@ -69,6 +77,14 @@ public class ParentSchoolConnectionRequest {
         this.requestSenderID = requestSenderID;
     }
 
+    public String getRequestSenderName() {
+        return requestSenderName;
+    }
+
+    public void setRequestSenderName(String requestSenderName) {
+        this.requestSenderName = requestSenderName;
+    }
+
     public String getRequestSenderAccountType() {
         return requestSenderAccountType;
     }
@@ -77,12 +93,36 @@ public class ParentSchoolConnectionRequest {
         this.requestSenderAccountType = requestSenderAccountType;
     }
 
+    public String getRequestSenderProfilePictureURL() {
+        return requestSenderProfilePictureURL;
+    }
+
+    public void setRequestSenderProfilePictureURL(String requestSenderProfilePictureURL) {
+        this.requestSenderProfilePictureURL = requestSenderProfilePictureURL;
+    }
+
     public String getStudentID() {
         return studentID;
     }
 
     public void setStudentID(String studentID) {
         this.studentID = studentID;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public String getStudentProfilePictureURL() {
+        return studentProfilePictureURL;
+    }
+
+    public void setStudentProfilePictureURL(String studentProfilePictureURL) {
+        this.studentProfilePictureURL = studentProfilePictureURL;
     }
 
     public String getRequestKey() {

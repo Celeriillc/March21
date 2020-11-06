@@ -5,16 +5,27 @@ package com.celerii.celerii.models;
  */
 
 public class EventsRow {
-    String eventTitle, eventDate, eventDescription, school, key;
+    String eventTitle, eventDate, eventSortableDate, eventDescription, schoolID, key;
+    Boolean isNew;
 
     public EventsRow() {
+        this.eventTitle = "";
+        this.eventDate = "";
+        this.eventSortableDate = "";
+        this.eventDescription = "";
+        this.schoolID = "";
+        this.key = "";
+        this.isNew = false;
     }
 
-    public EventsRow(String eventTitle, String eventDate, String eventDescription, String school) {
+    public EventsRow(String eventTitle, String eventDate, String eventDescription, String schoolID) {
         this.eventTitle = eventTitle;
         this.eventDate = eventDate;
+        this.eventSortableDate = "";
         this.eventDescription = eventDescription;
-        this.school = school;
+        this.schoolID = schoolID;
+        this.key = "";
+        this.isNew = false;
     }
 
     public String getEventTitle() {
@@ -33,6 +44,14 @@ public class EventsRow {
         this.eventDate = eventDate;
     }
 
+    public String getEventSortableDate() {
+        return eventSortableDate;
+    }
+
+    public void setEventSortableDate(String eventSortableDate) {
+        this.eventSortableDate = eventSortableDate;
+    }
+
     public String getEventDescription() {
         return eventDescription;
     }
@@ -41,12 +60,12 @@ public class EventsRow {
         this.eventDescription = eventDescription;
     }
 
-    public String getSchool() {
-        return school;
+    public String getSchoolID() {
+        return schoolID;
     }
 
-    public void setSchool(String school) {
-        this.school = school;
+    public void setSchoolID(String schoolID) {
+        this.schoolID = schoolID;
     }
 
     public String getKey() {
@@ -55,5 +74,13 @@ public class EventsRow {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public Boolean getNew() {
+        return isNew;
+    }
+
+    public void setNew(Boolean aNew) {
+        isNew = aNew;
     }
 }

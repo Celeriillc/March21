@@ -5,6 +5,5 @@
     <item
         android:id="@+id/action_save"
         android:title="Save"
-        android:icon="@drawable/ic_full_dialog_save_black_24dp"
         app:showAsAction="always"/>
 </menu>

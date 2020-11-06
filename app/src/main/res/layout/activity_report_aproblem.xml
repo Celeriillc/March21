@@ -25,25 +25,27 @@
                 android:paddingStart="15dp"
                 android:textColor="@android:color/black"
                 android:textStyle="bold"
-                android:textSize="20sp"/>
+                android:textSize="15sp"/>
 
             <EditText
                 android:id="@+id/setproblemtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="What feature are you reporting?"
-                android:paddingStart="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:maxLines="1"
                 android:textColor="@android:color/black"
                 android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@android:color/transparent"
+                android:textSize="15sp"
+                android:background="@drawable/edittext_background"
                 android:visibility="gone"/>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="20dp"
                 android:layout_marginTop="10dp"/>
 
             <!--<TextView-->
@@ -64,30 +66,48 @@
                 android:id="@+id/problemhint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Kindly report what you think the problem is. We will fix it and send you a follow up email"
+                android:text="Kindly report what the problem is. We will fix it and send you a follow up email"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
                 android:textSize="14sp"/>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="0.2dp"
+                android:layout_height="0dp"
                 android:background="#eeeeee"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="20dp"
                 android:layout_marginTop="10dp"/>
 
             <EditText
                 android:id="@+id/problem"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
                 android:textColor="@android:color/black"
-                android:textSize="15sp"
+                android:textSize="14sp"
+                android:minLines="5"
+                android:gravity="top"
+                android:inputType="textMultiLine"
                 android:hint="Compose message"
-                android:background="@android:color/transparent"
+                android:background="@drawable/edittext_background"
                 android:focusable="true"
                 android:focusableInTouchMode="true"/>
+
+            <Button
+                android:id="@+id/sendreport"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:text="Send Report"
+                android:background="@drawable/roundedbutton"
+                style="?android:attr/borderlessButtonStyle" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

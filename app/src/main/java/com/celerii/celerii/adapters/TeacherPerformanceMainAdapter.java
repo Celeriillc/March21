@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -142,6 +143,7 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
 
 //            ((HeaderViewHolder) holder).previousScore.setText(appendPercentage(teacherPerformanceHeaderMain.getPreviousScore()));
             ((HeaderViewHolder) holder).currentScore.setText(appendPercentage(teacherPerformanceHeaderMain.getCurrentScore()));
+            ((HeaderViewHolder) holder).currentLabel.setText("Overall Average Score");
 //            ((HeaderViewHolder) holder).projectedScore.setText(appendPercentage(teacherPerformanceHeaderMain.getProjectedScore()));
 
 //            ((HeaderViewHolder) holder).upFrom.setText(teacherPerformanceHeaderMain.getPreviousScore());
@@ -180,7 +182,7 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
 //            String term = Term.Term(teacherPerformanceHeaderMain.getCurrentTerm());
 //            ((HeaderViewHolder) holder).currentTerm.setText(term);
 //            ((HeaderViewHolder) holder).currentYear.setText(teacherPerformanceHeaderMain.getCurrentYear());
-            ((HeaderViewHolder) holder).currentLabel.setText("Average Score");
+//            ((HeaderViewHolder) holder).currentLabel.setText("Average Score");
 
 //            ((HeaderViewHolder) holder).projectedClass.setText(teacherPerformanceHeaderMain.getProjectedClass());
 //            ((HeaderViewHolder) holder).projectedMaxObtainable.setText(teacherPerformanceHeaderMain.getProjectedMaxObtainable());
@@ -212,6 +214,7 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
                 xAxis.setDrawAxisLine(false);
                 xAxis.setDrawGridLines(false);
                 xAxis.setTextColor(Color.GRAY);
+                xAxis.setEnabled(false);
 
                 YAxis yAxis = ((HeaderViewHolder) holder).chart.getAxisLeft();
                 yAxis.setDrawGridLines(false);
@@ -220,6 +223,7 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
                 yAxis.setAxisMinimum(0f);
                 yAxis.setAxisMaximum(100f);
                 yAxis.setTextColor(Color.GRAY);
+                yAxis.setEnabled(false);
 
                 Legend legend = ((HeaderViewHolder) holder).chart.getLegend();
                 legend.setEnabled(false);
@@ -231,9 +235,11 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
                 }
 
                 LineDataSet dataSet = new LineDataSet(entries, "");
-                dataSet.setColor(Color.RED);
-                dataSet.setLineWidth(4f);
-                dataSet.setCircleColor(Color.RED);
+                dataSet.setColor(ContextCompat.getColor(context, R.color.colorTransparentPurple));
+                dataSet.setLineWidth(1f);
+                dataSet.setCircleColor(ContextCompat.getColor(context, R.color.colorTransparentPurple));
+                dataSet.setDrawFilled(true);
+                dataSet.setFillDrawable(ContextCompat.getDrawable(context, R.drawable.fade_accent_for_chart));
                 LineData lineData = new LineData(dataSet);
                 lineData.setDrawValues(false);
 
@@ -257,16 +263,18 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
             final TeacherPerformanceRowMain teacherPerformanceRowMain = this.teacherPerformanceRowMainList.get(position);
 
             ((MyViewHolder) holder).className.setText(teacherPerformanceRowMain.getClassName());
-            ((MyViewHolder) holder).term.setText(Term.Term(teacherPerformanceRowMain.getTerm()));
+            ((MyViewHolder) holder).term.setText(Term.TermShort(teacherPerformanceRowMain.getTerm()));
             ((MyViewHolder) holder).year.setText(teacherPerformanceRowMain.getYear());
             ((MyViewHolder) holder).score.setText(Double.valueOf(teacherPerformanceRowMain.getScore()).intValue() + "%");
 
-            if (teacherPerformanceRowMain.isIncrease){
+            if (teacherPerformanceRowMain.getIncrease().equals("true")){
                 ((MyViewHolder) holder).isIncrease.setImageResource(R.drawable.ic_triangle_up);
-            }
-            else {
+            } else if (teacherPerformanceRowMain.getIncrease().equals("false")){
                 ((MyViewHolder) holder).isIncrease.setImageResource(R.drawable.ic_triangle_down);
                 ((MyViewHolder) holder).isIncrease.setScaleY(-1);
+            }
+            else {
+                ((MyViewHolder) holder).isIncrease.setImageResource(R.drawable.ic_attendance_late_24dp);
             }
 
             ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
@@ -278,6 +286,7 @@ public class TeacherPerformanceMainAdapter extends RecyclerView.Adapter<Recycler
                     bundle.putString("Subject", teacherPerformanceRowMain.getSubject());
                     bundle.putString("Term", teacherPerformanceRowMain.getTerm());
                     bundle.putString("Year", teacherPerformanceRowMain.getYear());
+                    bundle.putString("Class", teacherPerformanceRowMain.getClassID());
                     I.putExtras(bundle);
                     context.startActivity(I);
                 }

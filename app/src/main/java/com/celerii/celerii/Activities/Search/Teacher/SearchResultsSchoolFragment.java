@@ -1,22 +1,25 @@
 package com.celerii.celerii.Activities.Search.Teacher;
 
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SearchResultsAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.SchoolTeacherConnectionRequest;
@@ -32,12 +35,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class SearchResultsSchoolFragment extends Fragment {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -49,13 +55,20 @@ public class SearchResultsSchoolFragment extends Fragment {
     TextView errorLayoutText;
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
+    private HashMap<String, School> schoolMap;
+    private HashMap<String, Integer> searchMap = new HashMap<>();
     private ArrayList<String> existingConnections;
     private ArrayList<String> pendingIncomingRequests;
     private ArrayList<String> pendingOutgoingRequests;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    String query;
+    String query, key;
+
+    String featureUseKey = "";
+    String featureName = "Teacher Search Results (School)";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     public SearchResultsSchoolFragment() {
         // Required empty public constructor
@@ -73,8 +86,13 @@ public class SearchResultsSchoolFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_search_results_school, container, false);
 
+        context = getContext();
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
         Bundle args = getArguments();
         query = args.getString("Query");
+        key = args.getString("Search Key");
+        query = query.trim();
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -95,6 +113,7 @@ public class SearchResultsSchoolFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
+        schoolMap = new HashMap<>();
         existingConnections = new ArrayList<>();
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
@@ -176,7 +195,7 @@ public class SearchResultsSchoolFragment extends Fragment {
 
                                 if (childrenCount == loopControl) {
                                     mAdapter.notifyDataSetChanged();
-                                    loadFromFirebase();
+                                    loadPendingOutgoingRequests();
                                 }
                             }
 
@@ -226,7 +245,7 @@ public class SearchResultsSchoolFragment extends Fragment {
 
                                 if (childrenCount == loopControl) {
                                     mAdapter.notifyDataSetChanged();
-                                    loadFromFirebase();
+                                    loadNewFromFirebase();
                                 }
                             }
 
@@ -238,8 +257,124 @@ public class SearchResultsSchoolFragment extends Fragment {
                     }
                 } else {
                     mAdapter.notifyDataSetChanged();
-                    loadFromFirebase();
+                    loadNewFromFirebase();
                 }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    void loadNewFromFirebase() {
+        query = query.toLowerCase();
+
+        searchResultsRowList.clear();
+        schoolMap.clear();
+        searchMap.clear();
+
+        mDatabaseReference = mFirebaseDatabase.getReference().child("School");
+        mDatabaseReference.orderByChild("searchableSchoolName").startAt(query).endAt(query + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                searchResultsRowList.clear();
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        String key = postSnapshot.getKey();
+                        School school = postSnapshot.getValue(School.class);
+                        if (searchMap.containsKey(key)) {
+                            searchMap.put(key, searchMap.get(key) + 1);
+                        } else {
+                            searchMap.put(key, 1);
+                            String location = school.getLocation() + ", " + school.getState() + ", " + school.getCountry();
+                            SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
+                            if (!school.getDeleted()) {
+                                searchResultsRowList.add(searchHistoryRow);
+                            }
+                            schoolMap.put(key, school);
+                        }
+                    }
+                }
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("School");
+                mDatabaseReference.orderByChild("searchableLocation").startAt(query).endAt(query + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                String key = postSnapshot.getKey();
+                                School school = postSnapshot.getValue(School.class);
+                                if (searchMap.containsKey(key)) {
+                                    searchMap.put(key, searchMap.get(key) + 1);
+                                } else {
+                                    searchMap.put(key, 1);
+                                    String location = school.getLocation() + ", " + school.getState() + ", " + school.getCountry();
+                                    SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
+                                    if (!school.getDeleted()) {
+                                        searchResultsRowList.add(searchHistoryRow);
+                                    }
+                                    schoolMap.put(key, school);
+                                }
+                            }
+                        }
+
+                        String numberOfHits = String.valueOf(searchResultsRowList.size());
+
+                        String day = Date.getDay();
+                        String month = Date.getMonth();
+                        String year = Date.getYear();
+                        String day_month_year = day + "_" + month + "_" + year;
+                        String month_year = month + "_" + year;
+
+                        HashMap<String, Object> searchUpdateMap = new HashMap<>();
+                        String mFirebaseUserID = mFirebaseUser.getUid();
+
+                        searchUpdateMap.put("Search Analytics/Search/" + key + "/schoolHits", numberOfHits);
+                        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/schoolHits", numberOfHits);
+                        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/schoolHits", numberOfHits);
+                        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/schoolHits", numberOfHits);
+
+                        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/schoolHits", numberOfHits);
+                        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/schoolHits", numberOfHits);
+                        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/schoolHits", numberOfHits);
+                        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/schoolHits", numberOfHits);
+
+                        searchUpdateMap.put("Search Analytics/Search/" + key + "/schoolResults", schoolMap);
+                        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/schoolResults", schoolMap);
+                        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/schoolResults", schoolMap);
+                        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/schoolResults", schoolMap);
+
+                        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/schoolResults", schoolMap);
+                        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/schoolResults", schoolMap);
+                        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/schoolResults", schoolMap);
+                        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/schoolResults", schoolMap);
+
+                        DatabaseReference searchUpdateRef = FirebaseDatabase.getInstance().getReference();
+                        searchUpdateRef.updateChildren(searchUpdateMap);
+
+                        if (searchResultsRowList.size() > 0) {
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            errorLayout.setVisibility(View.GONE);
+                        } else {
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText("There are no schools fitting the search criteria. Please check the search term and try again.");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
@@ -299,5 +434,45 @@ public class SearchResultsSchoolFragment extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 }

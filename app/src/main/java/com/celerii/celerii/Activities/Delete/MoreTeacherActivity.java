@@ -1,9 +1,9 @@
 package com.celerii.celerii.Activities.Delete;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.MoreTeacherAdapter;
@@ -18,9 +18,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class MoreTeacherActivity extends AppCompatActivity {
 
@@ -36,6 +36,7 @@ public class MoreTeacherActivity extends AppCompatActivity {
     SharedPreferencesManager sharedPreferencesManager;
 
     ArrayList<String> classesFirebase = new ArrayList<>();
+    private static ArrayList<Class> myClasses = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +58,8 @@ public class MoreTeacherActivity extends AppCompatActivity {
 //        loadDataFromFirebase();
 //        loadDataFromSharedPreferences();
 //        yeah();
-        mAdapter = new MoreTeacherAdapter(moreTeachersModelList, moreHeader, this);
-        recyclerView.setAdapter(mAdapter);
+//        mAdapter = new MoreTeacherAdapter(moreTeachersModelList, moreHeader, this);
+//        recyclerView.setAdapter(mAdapter);
     }
 
     private void loadDataFromFirebase() {
@@ -95,10 +96,14 @@ public class MoreTeacherActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()){
                                     Class classInstance = dataSnapshot.getValue(Class.class);
+                                    myClasses.add(classInstance);
                                     classesFirebase.add(classKey + " " + classInstance.getClassName() + " " + classInstance.getClassPicURL());
 
                                     sharedPreferencesManager.deleteMyClasses();
-                                    sharedPreferencesManager.setMyClasses(new HashSet<String>(classesFirebase));
+                                    Gson gson = new Gson();
+                                    String json = gson.toJson(myClasses);
+                                    sharedPreferencesManager.setMyClasses(json);
+//                                    sharedPreferencesManager.setMyClasses(new HashSet<String>(classesFirebase));
                                     loadDataFromSharedPreferences();
 
                                 }

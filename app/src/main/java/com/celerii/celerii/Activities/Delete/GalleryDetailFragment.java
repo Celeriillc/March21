@@ -2,7 +2,7 @@ package com.celerii.celerii.Activities.Delete;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +28,7 @@ public class GalleryDetailFragment extends Fragment {
         Bundle b = getArguments();
         String url = b.getString("URL");
 
-        Glide.with(this)
+        Glide.with(getContext())
                 .load(url)
                 .crossFade()
                 .centerCrop()

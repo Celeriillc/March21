@@ -1,13 +1,19 @@
 package com.celerii.celerii.Activities.Profiles.SchoolProfile;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
+import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SchoolProfileGalleryAdapter;
 import com.celerii.celerii.models.GalleryModel;
@@ -34,7 +40,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
     TextView aboutUs, yearOfEstablishment, motto, numberOfEmployees, studentSize, schoolFeesRange, schoolCurriculum;
     TextView reviewOne, reviewTwo, reviewerOne, reviewerTwo;
 
-    String schoolID = "Grac0001";
+    String schoolID = "Grac0001", parentActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
 //        auth = FirebaseAuth.getInstance();
 //        mFirebaseDatabase = FirebaseDatabase.getInstance();
 //        mDatabaseReference = mFirebaseDatabase.getReference();
+
+//        Bundle bundle = getIntent().getExtras();
+//        if (bundle != null)
+//        {
+//            parentActivity = bundle.getString("parentActivity");
+//        }
 //
 //        profilePic = (ImageView) findViewById(R.id.profilepic);
 //        backgroundPic = (ImageView) findViewById(R.id.backgroundimage);
@@ -447,4 +459,36 @@ public class SchoolProfileActivity extends AppCompatActivity {
 //        model = new GalleryModel("http://dailymail.com.ng/wp-content/uploads/2015/04/Ini-Edo1.jpg", "");
 //        galleryModelList.add(model);
 //    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home){
+            if (parentActivity != null) {
+                if (parentActivity.equals("Parent")) {
+                    Intent i = new Intent(this, ParentMainActivityTwo.class);
+                    startActivity(i);
+                } else if (parentActivity.equals("Teacher")) {
+                    Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                    startActivity(i);
+                }
+            }
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                Intent i = new Intent(this, ParentMainActivityTwo.class);
+                startActivity(i);
+            } else if (parentActivity.equals("Teacher")) {
+                Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                startActivity(i);
+            }
+        }
+    }
 }

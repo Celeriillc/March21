@@ -6,37 +6,44 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.text.Html;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
+import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.ChatRowAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
-import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -54,8 +61,6 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,6 +78,7 @@ public class ChatActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
 
     private ArrayList<Chats> chatsList;
+    private HashMap<String, Chats> chatMaps;
     public RecyclerView recyclerView;
     public ChatRowAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -90,6 +96,12 @@ public class ChatActivity extends AppCompatActivity {
 
     String IDofChatPartner = "";
     String nameOfChatPartner = "";
+    String parentActivity;
+
+    String featureUseKey = "";
+    String featureName = "Chat";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +115,7 @@ public class ChatActivity extends AppCompatActivity {
         bundle = getIntent().getExtras();
         IDofChatPartner = bundle.getString("ID");
         nameOfChatPartner = bundle.getString("name");
+        parentActivity = bundle.getString("parentActivity");
 
         auth = FirebaseAuth.getInstance();
         mFirebaseStorage = FirebaseStorage.getInstance();
@@ -118,8 +131,8 @@ public class ChatActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(nameOfChatPartner);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mLayoutManager = new LinearLayoutManager(this);
-        mLayoutManager.setReverseLayout(true);
-        mLayoutManager.setStackFromEnd(false);
+//        mLayoutManager.setReverseLayout(true);
+//        mLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(mLayoutManager);
 
         sendMessage = (ImageView) findViewById(R.id.sendMessageButton);
@@ -127,8 +140,9 @@ public class ChatActivity extends AppCompatActivity {
         editMessage = (EditText) findViewById(R.id.messageEditText);
 
         chatsList = new ArrayList<>();
+        chatMaps = new HashMap<>();
         loadMessagesFromFirebase();
-        mAdapter = new ChatRowAdapter(chatsList, this);
+        mAdapter = new ChatRowAdapter(chatsList, nameOfChatPartner, this);
         recyclerView.setAdapter(mAdapter);
 
         sendMessage.setOnClickListener(new View.OnClickListener() {
@@ -152,8 +166,13 @@ public class ChatActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.custom_dialog_layout_select_image_from_gallery_camera_two);
                 LinearLayout camera = (LinearLayout) dialog.findViewById(R.id.camera);
                 LinearLayout gallery = (LinearLayout) dialog.findViewById(R.id.gallery);
-                TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                dialog.show();
+                Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                try {
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.show();
+                } catch (Exception e) {
+                    return;
+                }
 
                 camera.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -194,7 +213,8 @@ public class ChatActivity extends AppCompatActivity {
                         chat.setMessageID(messageID);
                         chatsList.add(chat);
                     }
-                    Collections.reverse(chatsList);
+//                    Collections.reverse(chatsList);
+                    recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                     mAdapter.notifyDataSetChanged();
                 }
             }
@@ -226,49 +246,40 @@ public class ChatActivity extends AppCompatActivity {
         boolean isSeen = false;
         boolean isMine = true;
         boolean isRow = false;
-        Calendar calendar = Calendar.getInstance();
         String date = Date.getDate();
         String sortableDate = Date.convertToSortableDate(date);
         final Chats senderChat = new Chats(message, senderId, recieverId, date, sortableDate, isSeen, isMine, fileURL, "", isRow);
         final Chats recieverChat = new Chats(message, senderId, recieverId, date, sortableDate, isSeen, !isMine, fileURL, sharedPreferencesManager.getMyPicURL(), isRow);
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        Map<String, Object> newChatMessageMap = new HashMap<String, Object>();
+        newChatMessageMap.put("Messages/" + senderId + "/" + recieverId + "/" + senderKey, senderChat);
+        newChatMessageMap.put("Messages/" + recieverId + "/" + senderId + "/" + senderKey, recieverChat);
+        newChatMessageMap.put("Messages Recent/" + senderId + "/" + recieverId, senderChat);
+        newChatMessageMap.put("Messages Recent/" + recieverId + "/" + senderId, recieverChat);
+        newChatMessageMap.put("Notification Badges/General/" + recieverId + "/Inbox/status", true);
+        DatabaseReference updateBottomNotificationBadgeRef = mFirebaseDatabase.getReference("Notification Badges/General/" + recieverId + "/Inbox/number");
+        updateBottomNotificationBadgeRef.runTransaction(new Transaction.Handler() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Map<String, Object> newChatMessageMap = new HashMap<String, Object>();
-                newChatMessageMap.put("Messages/" + senderId + "/" + recieverId + "/" + senderKey, senderChat);
-                newChatMessageMap.put("Messages/" + recieverId + "/" + senderId + "/" + senderKey, recieverChat);
-                newChatMessageMap.put("Messages Recent/" + senderId + "/" + recieverId, senderChat);
-                newChatMessageMap.put("Messages Recent/" + recieverId + "/" + senderId, recieverChat);
-                newChatMessageMap.put("Notification Badges/General/" + recieverId + "/Inbox/status", true);
-                DatabaseReference updateBottomNotificationBadgeRef = mFirebaseDatabase.getReference("Notification Badges/General/" + recieverId + "/Inbox/number");
-                updateBottomNotificationBadgeRef.runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        Integer currentValue = mutableData.getValue(Integer.class);
-                        if (currentValue == null) {
-                            mutableData.setValue(1);
-                        } else {
-                            mutableData.setValue(currentValue + 1);
-                        }
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-                    }
-                });
-                mDatabaseReference.updateChildren(newChatMessageMap, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        //TODO: Change the message status image with a sound
-                    }
-                });
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue == null) {
+                    mutableData.setValue(1);
+                } else {
+                    mutableData.setValue(currentValue + 1);
+                }
+                return Transaction.success(mutableData);
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+            }
+        });
+
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mDatabaseReference.updateChildren(newChatMessageMap, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
             }
         });
@@ -324,9 +335,9 @@ public class ChatActivity extends AppCompatActivity {
             } else {
                 file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
             }
-            uri = Uri.fromFile(file);
-            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-            CamIntent.putExtra("return-data", true);
+//            uri = Uri.fromFile(file);
+//            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//            CamIntent.putExtra("return-data", true);
             startActivityForResult(CamIntent, 0);
         }
     }
@@ -379,9 +390,9 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
                     }
-                    uri = Uri.fromFile(file);
-                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-                    CamIntent.putExtra("return-data", true);
+//                    uri = Uri.fromFile(file);
+//                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//                    CamIntent.putExtra("return-data", true);
                     startActivityForResult(CamIntent, 0);
                 } else {
                     // permission denied, boo! Disable the
@@ -428,39 +439,60 @@ public class ChatActivity extends AppCompatActivity {
                         showDialogWithMessage((messageString));
                         return;
                     }
+
                     progressDialog.show();
                     Bitmap bitmap = data.getExtras().getParcelable("data");
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     byte[] byteArray = stream.toByteArray();
-//
+
                     String sortableDate = Date.convertToSortableDate(Date.getDate());
                     mStorageReference = mFirebaseStorage.getReference().child("Chat/" + mFirebaseUser.getUid() + "/" + IDofChatPartner + "/" + sortableDate + ".jpg");
                     UploadTask uploadTask = mStorageReference.putBytes(byteArray);
-                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                return null;
+                            }
+
+                            return mStorageReference.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
                             String downloadURL = "";
-                            downloadURL = taskSnapshot.getDownloadUrl().toString();
+                            downloadURL = task.getResult().toString();
                             postMessageToFirebase(downloadURL);
                             progressDialog.dismiss();
                         }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
-                            String messageString = "Your image failed to upload, please try again later";
-                            showDialogWithMessage((messageString));
-                        }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        }
                     });
+
+
+//                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                        @Override
+//                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                            String downloadURL = "";
+//                            downloadURL = taskSnapshot.getDownloadUrl().toString();
+//                            postMessageToFirebase(downloadURL);
+//                            progressDialog.dismiss();
+//                        }
+//                    })
+//                    .addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            progressDialog.dismiss();
+//                            String messageString = "Your image failed to upload, please try again later";
+//                            showDialogWithMessage((messageString));
+//                        }
+//                    })
+//                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                        @Override
+//                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+////                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+////                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                        }
+//                    });
                 } catch (Exception e){
 //                    progressDialog.dismiss();
 //                    Log.d("Crop Exception", e.getMessage());
@@ -476,8 +508,13 @@ public class ChatActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 
@@ -492,13 +529,88 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == android.R.id.home){
+        if (id == android.R.id.home) {
+            if (parentActivity != null) {
+                if (parentActivity.equals("Parent")) {
+                    Intent i = new Intent(this, ParentMainActivityTwo.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Fragment Int", "1");
+                    i.putExtras(bundle);
+                    startActivity(i);
+                } else if (parentActivity.equals("Teacher")) {
+                    Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Fragment Int", "2");
+                    i.putExtras(bundle);
+                    startActivity(i);
+                }
+            }
             finish();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                Intent i = new Intent(this, ParentMainActivityTwo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Fragment Int", "1");
+                i.putExtras(bundle);
+                startActivity(i);
+            } else if (parentActivity.equals("Teacher")) {
+                Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Fragment Int", "2");
+                i.putExtras(bundle);
+                startActivity(i);
+            }
+        }
     }
 }

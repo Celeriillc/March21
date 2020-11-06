@@ -88,7 +88,7 @@ public class Date {
         return String.valueOf(calendar.get(Calendar.MILLISECOND));
     }
 
-    private static String makeTwoDigits(int val){
+    public static String makeTwoDigits(int val){
         if (val >= 0 && val < 10){
             return "0" + String.valueOf(val);
         }
@@ -98,19 +98,23 @@ public class Date {
     public static String convertToSortableDate(String Date) {
         if (Date == null) {return "";}
         if (Date.equals("")) {return "";}
-        String[] calendarDate = Date.split(" ")[0].split("/");
-        String[] time = Date.split(" ")[1].split(":");
+        try {
+            String[] calendarDate = Date.split(" ")[0].split("/");
+            String[] time = Date.split(" ")[1].split(":");
 
-        String year = calendarDate[0];
-        String month = makeTwoDigits(Integer.parseInt(calendarDate[1]));
-        String day = makeTwoDigits(Integer.parseInt(calendarDate[2]));
-        String hour = makeTwoDigits(Integer.parseInt(time[0]));
-        String min = makeTwoDigits(Integer.parseInt(time[1]));
-        String sec = makeTwoDigits(Integer.parseInt(time[2]));
-        String milliSec = time[3];
+            String year = calendarDate[0];
+            String month = makeTwoDigits(Integer.parseInt(calendarDate[1]));
+            String day = makeTwoDigits(Integer.parseInt(calendarDate[2]));
+            String hour = makeTwoDigits(Integer.parseInt(time[0]));
+            String min = makeTwoDigits(Integer.parseInt(time[1]));
+            String sec = makeTwoDigits(Integer.parseInt(time[2]));
+            String milliSec = time[3];
 
-        return year + month + day +
-                hour + min + sec + milliSec;
+            return year + month + day +
+                    hour + min + sec + milliSec;
+        } catch (Exception e) {
+            return "00000000000000000";
+        }
     }
 
     public static String convertToSortableDateShort(String Date) {
@@ -126,32 +130,25 @@ public class Date {
     }
 
     public static boolean compareDates(String dateA, String dateB){
+        if (dateA == null) return true;
+        if (dateB == null) return true;
+        if (dateA.equals("")) return true;
+        if (dateB.equals("")) return true;
         boolean dateAGreater = false;
-        String[] calenderDateA = dateA.split(" ")[0].split("/");
-        String[] calenderDateB = dateB.split(" ")[0].split("/");
-        String[] timeA = dateA.split(" ")[1].split(":");
-        String[] timeB = dateB.split(" ")[1].split(":");
+        String sortableDateA = convertToSortableDate(dateA);
+        String sortableDateB = convertToSortableDate(dateB);
+        double sortableDateAInt = Double.valueOf(sortableDateA);
+        double sortableDateBInt = Double.valueOf(sortableDateB);
+        double diff = sortableDateAInt - sortableDateBInt;
 
-        if (Integer.valueOf(calenderDateA[0]) > Integer.valueOf(calenderDateB[0])){
-            dateAGreater = true;
-        } else if (Integer.valueOf(calenderDateA[1]) > Integer.valueOf(calenderDateB[1])){
-            dateAGreater = true;
-        } else if (Integer.valueOf(calenderDateA[2]) > Integer.valueOf(calenderDateB[2])){
-            dateAGreater = true;
-        } else if (Integer.valueOf(timeA[0]) > Integer.valueOf(timeB[0])){
-            dateAGreater = true;
-        } else if (Integer.valueOf(timeA[1]) > Integer.valueOf(timeB[1])){
-            dateAGreater = true;
-        } else if (Integer.valueOf(timeA[2]) > Integer.valueOf(timeB[2])){
-            dateAGreater = true;
-        } else if (Integer.valueOf(timeA[3]) > Integer.valueOf(timeB[3])){
+        if (diff > 0) {
             dateAGreater = true;
         }
 
         return dateAGreater;
     }
 
-    public static String getRelativeTimeSpan(String date){
+    public static String getRelativeTimeSpan(String date) {
         if (date == null) {return "";}
         if (date.equals("")) {return "";}
         Integer postYear, postMonth, postDay, postHour, postMin, postSec;
@@ -185,8 +182,8 @@ public class Date {
 
         if (totalTime < 60){
             diff = totalTime;
-            if (diff == 1){
-                return String.valueOf(diff) + " second ago";
+            if (diff <= 1){
+                return "Just now";
             } else {
                 return String.valueOf(diff) + " seconds ago";
             }
@@ -264,7 +261,7 @@ public class Date {
 
         if (totalTime < 60){
             diff = totalTime;
-            return String.valueOf(diff) + "s";
+            return "Just now";
         } else if (totalTime >= 60 && totalTime < 3600){
             diff = Math.round(totalTime / 60);
             return String.valueOf(diff) + "m";

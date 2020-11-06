@@ -12,17 +12,26 @@
         android:padding="15dp"
         android:background="?android:attr/selectableItemBackground">
 
-        <ImageView
-            android:id="@+id/entitypic"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"/>
+        <LinearLayout
+            android:id="@+id/entitypictureclipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/circular_image_background_white">
+
+            <ImageView
+                android:id="@+id/entitypic"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:weightSum="5">
 

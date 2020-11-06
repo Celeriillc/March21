@@ -1,29 +1,37 @@
 package com.celerii.celerii.Activities.Home.Teacher;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.TeacherClassStoryAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomToast;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
+import com.celerii.celerii.models.Admin;
 import com.celerii.celerii.models.ClassStory;
+import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.Teacher;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -32,10 +40,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -44,6 +56,7 @@ import java.util.List;
  */
 public class TeacherHomeClassFeed extends Fragment {
 
+    private Context context;
     private ArrayList<ClassStory> classStoryList;
     public RecyclerView recyclerView;
     public TeacherClassStoryAdapter mAdapter;
@@ -57,14 +70,20 @@ public class TeacherHomeClassFeed extends Fragment {
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
     TextView errorLayoutText;
+    FloatingActionButton newPost;
 
     List<String> storyList;
     List<String> storyKeyList;
 
-    String teacherName, teacherProfilePicURL;
+    String posterName, posterProfilePicURL;
     String classStoryKeys;
     Boolean stillLoading = true;
-    int numberOfPostsPerLoad = 5;
+    int numberOfPostsPerLoad = 20;
+
+    String featureUseKey = "";
+    String featureName = "Teacher Feed";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     public TeacherHomeClassFeed() {
         // Required empty public constructor
@@ -81,7 +100,7 @@ public class TeacherHomeClassFeed extends Fragment {
         setRetainInstance(true);
         super.onResume();
 //        loadTeacherFeed();
-        UpdateDataFromFirebase.populateEssentials(getContext());
+//        UpdateDataFromFirebase.populateEssentials(getContext());
     }
 
     @Override
@@ -89,6 +108,7 @@ public class TeacherHomeClassFeed extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_teacher_home_class_feed, container, false);
 
+        context = getContext();
         sharedPreferencesManager = new SharedPreferencesManager(getContext());
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -100,8 +120,9 @@ public class TeacherHomeClassFeed extends Fragment {
         errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
         errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
         progressLayout = (RelativeLayout) view.findViewById(R.id.progresslayout);
+        newPost = (FloatingActionButton) view.findViewById(R.id.newpost);
 
-        if (mFirebaseUser == null){
+        if (mFirebaseUser == null) {
             auth.signOut();
             Intent I = new Intent(getActivity(), IntroSlider.class);
             startActivity(I);
@@ -116,12 +137,9 @@ public class TeacherHomeClassFeed extends Fragment {
         storyList = new ArrayList<>();
         storyKeyList = new ArrayList<>();
 
+        loadFromSharedPreferences();
         mAdapter = new TeacherClassStoryAdapter(classStoryList, stillLoading, getContext());
         recyclerView.setAdapter(mAdapter);
-
-        recyclerView.setVisibility(View.GONE);
-        progressLayout.setVisibility(View.VISIBLE);
-
         loadTeacherFeed();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -139,10 +157,13 @@ public class TeacherHomeClassFeed extends Fragment {
         childEventRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                classStoryList.clear();
-//                ClassStory newClassStory = dataSnapshot.getValue(ClassStory.class);
-//                classStoryList.add(newClassStory);
-//                mAdapter.notifyDataSetChanged();
+                if (classStoryList.size() > 1) {
+                    String newClassStoryKey = dataSnapshot.getKey();
+                    ClassStory newClassStory = dataSnapshot.getValue(ClassStory.class);
+                    classStoryList.add(1, newClassStory);
+                    storyKeyList.add(newClassStoryKey);
+                    mAdapter.notifyDataSetChanged();
+                }
             }
 
             @Override
@@ -155,6 +176,7 @@ public class TeacherHomeClassFeed extends Fragment {
                         if (classStoryList.get(i).getPostID().equals(changedClassStoryKey) && changedClassStory != null) {
                             classStoryList.get(i).setNoOfLikes(changedClassStory.getNoOfLikes());
                             classStoryList.get(i).setNumberOfComments(changedClassStory.getNumberOfComments());
+                            classStoryList.get(i).setComment(changedClassStory.getComment());
                             break;
                         }
                     }
@@ -179,6 +201,14 @@ public class TeacherHomeClassFeed extends Fragment {
             }
         });
 
+        newPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent I = new Intent(context, TeacherCreateClassPostActivity.class);
+                context.startActivity(I);
+            }
+        });
+
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -191,18 +221,59 @@ public class TeacherHomeClassFeed extends Fragment {
         return view;
     }
 
+    private void loadFromSharedPreferences() {
+//        Gson gson = new Gson();
+//        ArrayList<ClassStory> classStoryListHolder = new ArrayList<>();
+//        String parentFeedJSON = sharedPreferencesManager.getParentFeed();
+//        Type type = new TypeToken<ArrayList<ClassStory>>() {}.getType();
+//        classStoryListHolder = gson.fromJson(parentFeedJSON, type);
+
+        Gson gson = new Gson();
+        classStoryList = new ArrayList<>();
+        String messagesJSON = sharedPreferencesManager.getTeacherFeed();
+        Type type = new TypeToken<ArrayList<ClassStory>>() {}.getType();
+        classStoryList = gson.fromJson(messagesJSON, type);
+
+        if (classStoryList == null) {
+            classStoryList = new ArrayList<>();
+            classStoryList.add(0, new ClassStory());
+            mAdapter = new TeacherClassStoryAdapter(classStoryList, true, context);
+            recyclerView.setAdapter(mAdapter);
+//            mAdapter.notifyDataSetChanged();
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.VISIBLE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
+        } else {
+            for (ClassStory classStory: classStoryList) {
+                if (!storyKeyList.contains(classStory.getPostID())) {
+                    storyKeyList.add(classStory.getPostID());
+                }
+            }
+            classStoryList.add(0, new ClassStory());
+            classStoryList.add(new ClassStory());
+            mAdapter = new TeacherClassStoryAdapter(classStoryList, true, context);
+            recyclerView.setAdapter(mAdapter);
+            mySwipeRefreshLayout.setRefreshing(false);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
     int counter;
+    int childrenCount;
     void loadTeacherFeed(){
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
             mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
             progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            errorLayout.setVisibility(View.GONE);
+            CustomToast.blueBackgroundToast(context, "No Internet");
             return;
         }
 
-        mDatabaseReference = mFirebaseDatabase.getReference("ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid());
+        mDatabaseReference = mFirebaseDatabase.getReference("ClassStoryTeacherFeed/" + auth.getCurrentUser().getUid());
         mDatabaseReference.orderByKey().limitToLast(numberOfPostsPerLoad).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -210,15 +281,15 @@ public class TeacherHomeClassFeed extends Fragment {
                 storyKeyList.clear();
                 stillLoading = true;
                 mAdapter.stillLoading = true;
-                mAdapter.notifyDataSetChanged();
+
                 if (dataSnapshot.exists()) {
                     counter = 0;
+                    childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         classStoryKeys = postSnapshot.getKey();
                         if (storyKeyList.contains(classStoryKeys)) { continue; }
                         storyKeyList.add(classStoryKeys);
                         final boolean liked = postSnapshot.getValue(boolean.class);
-                        final int childrenCount = (int) dataSnapshot.getChildrenCount();
 
                         mDatabaseReference = mFirebaseDatabase.getReference("ClassStory/" + classStoryKeys);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -226,50 +297,174 @@ public class TeacherHomeClassFeed extends Fragment {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     final ClassStory classStoryServer = dataSnapshot.getValue(ClassStory.class);
-                                    String teacherID = classStoryServer.getPosterID();
+                                    String posterAccountType = classStoryServer.getPosterAccountType();
 
-                                    mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
-                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            counter++;
-                                            if (dataSnapshot.exists()) {
-                                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
-                                                teacherName = teacher.getFirstName() + " " + teacher.getLastName();
-                                                teacherProfilePicURL = teacher.getProfilePicURL();
+                                    if (posterAccountType.equals("School")) {
+                                        String schoolID = classStoryServer.getPosterID();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("School/" + schoolID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                counter++;
+                                                if (dataSnapshot.exists()) {
+                                                    School school = dataSnapshot.getValue(School.class);
+                                                    posterName = school.getSchoolName();
+                                                    posterProfilePicURL = school.getProfilePhotoUrl();
 
-                                                classStoryServer.setPosterName(teacherName);
-                                                classStoryServer.setProfilePicURL(teacherProfilePicURL);
-                                                classStoryServer.setLiked(liked);
-                                                classStoryList.add(classStoryServer);
+                                                    classStoryServer.setPosterName(posterName);
+                                                    classStoryServer.setProfilePicURL(posterProfilePicURL);
+                                                    classStoryServer.setLiked(liked);
+                                                    classStoryList.add(classStoryServer);
 
-                                                if (counter == childrenCount) {
-//                                                    if (classStoryList.size() > 1) {
-//                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
-//                                                            @Override
-//                                                            public int compare(ClassStory o1, ClassStory o2) {
-//                                                                return o1.getTime().compareTo(o2.getTime());
-//                                                            }
-//                                                        });
-//                                                    }
+                                                    if (counter == childrenCount) {
+                                                        if (classStoryList.size() > 1) {
+                                                            Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                                @Override
+                                                                public int compare(ClassStory o1, ClassStory o2) {
+                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                                }
+                                                            });
+                                                        }
 //
-                                                    Collections.reverse(classStoryList);
-                                                    classStoryList.add(0, new ClassStory());
-                                                    classStoryList.add(new ClassStory());
-                                                    mySwipeRefreshLayout.setRefreshing(false);
-                                                    progressLayout.setVisibility(View.GONE);
-                                                    errorLayout.setVisibility(View.GONE);
-                                                    recyclerView.setVisibility(View.VISIBLE);
-                                                    mAdapter.notifyDataSetChanged();
+                                                        Collections.reverse(classStoryList);
+                                                        Gson gson = new Gson();
+                                                        String json = gson.toJson(classStoryList);
+                                                        sharedPreferencesManager.setTeacherFeed(json);
+                                                        classStoryList.add(0, new ClassStory());
+                                                        classStoryList.add(new ClassStory());
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        mAdapter.notifyDataSetChanged();
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
 
+                                            }
+                                        });
+                                    }
+                                    else if (posterAccountType.equals("Teacher") || posterAccountType.equals("Parent")) {
+                                        String teacherID = classStoryServer.getPosterID();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                counter++;
+                                                if (dataSnapshot.exists()) {
+                                                    Teacher teacher = dataSnapshot.getValue(Teacher.class);
+                                                    posterName = teacher.getFirstName() + " " + teacher.getLastName();
+                                                    posterProfilePicURL = teacher.getProfilePicURL();
+
+                                                    classStoryServer.setPosterName(posterName);
+                                                    classStoryServer.setProfilePicURL(posterProfilePicURL);
+                                                    classStoryServer.setLiked(liked);
+                                                    classStoryList.add(classStoryServer);
+
+                                                    if (counter == childrenCount) {
+                                                        if (classStoryList.size() > 1) {
+                                                            Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                                @Override
+                                                                public int compare(ClassStory o1, ClassStory o2) {
+                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                                }
+                                                            });
+                                                        }
+//
+                                                        Collections.reverse(classStoryList);
+                                                        Gson gson = new Gson();
+                                                        String json = gson.toJson(classStoryList);
+                                                        sharedPreferencesManager.setTeacherFeed(json);
+                                                        classStoryList.add(0, new ClassStory());
+                                                        classStoryList.add(new ClassStory());
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        mAdapter.notifyDataSetChanged();
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        String adminID = classStoryServer.getPosterID();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("Admin/" + adminID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                counter++;
+                                                if (dataSnapshot.exists()) {
+                                                    Admin admin = dataSnapshot.getValue(Admin.class);
+                                                    posterName = admin.getDisplayName();
+                                                    posterProfilePicURL = admin.getProfilePictureURL();
+
+                                                    classStoryServer.setPosterName(posterName);
+                                                    classStoryServer.setProfilePicURL(posterProfilePicURL);
+                                                    classStoryServer.setLiked(liked);
+                                                    classStoryList.add(classStoryServer);
+
+                                                    if (counter == childrenCount) {
+                                                        if (classStoryList.size() > 1) {
+                                                            Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                                @Override
+                                                                public int compare(ClassStory o1, ClassStory o2) {
+                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                                }
+                                                            });
+                                                        }
+//
+                                                        Collections.reverse(classStoryList);
+                                                        Gson gson = new Gson();
+                                                        String json = gson.toJson(classStoryList);
+                                                        sharedPreferencesManager.setTeacherFeed(json);
+                                                        classStoryList.add(0, new ClassStory());
+                                                        classStoryList.add(new ClassStory());
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        mAdapter.notifyDataSetChanged();
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    counter++;
+
+                                    if (counter == childrenCount) {
+                                        if (classStoryList.size() > 1) {
+                                            Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                @Override
+                                                public int compare(ClassStory o1, ClassStory o2) {
+                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                }
+                                            });
                                         }
-                                    });
+//
+                                        Collections.reverse(classStoryList);
+                                        classStoryList.add(0, new ClassStory());
+                                        classStoryList.add(new ClassStory());
+                                        mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
                                 }
                             }
 
@@ -298,7 +493,7 @@ public class TeacherHomeClassFeed extends Fragment {
 
     void loadMoreTeacherFeed(String lastKey) {
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
-            CustomToast.blueBackgroundToast(getContext(), "Your device is not connected to the internet. Check your connection and try again.");
+            CustomToast.blueBackgroundToast(getContext(), "No internet");
             return;
         }
 
@@ -309,9 +504,9 @@ public class TeacherHomeClassFeed extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 1) {
                     counter = 0;
+                    childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         classStoryKeys = postSnapshot.getKey();
-                        final int childrenCount = (int) dataSnapshot.getChildrenCount();
                         if (storyKeyList.contains(classStoryKeys)) { counter++; continue; }
                         storyKeyList.add(classStoryKeys);
                         final boolean liked = postSnapshot.getValue(boolean.class);
@@ -322,24 +517,26 @@ public class TeacherHomeClassFeed extends Fragment {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     final ClassStory classStoryServer = dataSnapshot.getValue(ClassStory.class);
-                                    String teacherID = classStoryServer.getPosterID();
+                                    String posterAccountType = classStoryServer.getPosterAccountType();
 
-                                    mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
-                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            counter++;
-                                            if (dataSnapshot.exists()) {
-                                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
-                                                teacherName = teacher.getFirstName() + " " + teacher.getLastName();
-                                                teacherProfilePicURL = teacher.getProfilePicURL();
+                                    if (posterAccountType.equals("School")) {
+                                        String schoolID = classStoryServer.getPosterID();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("School/" + schoolID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                counter++;
+                                                if (dataSnapshot.exists()) {
+                                                    School school = dataSnapshot.getValue(School.class);
+                                                    posterName = school.getSchoolName();
+                                                    posterProfilePicURL = school.getProfilePhotoUrl();
 
-                                                classStoryServer.setPosterName(teacherName);
-                                                classStoryServer.setProfilePicURL(teacherProfilePicURL);
-                                                classStoryServer.setLiked(liked);
-                                                classStoryList.add(sizeOnEntry, classStoryServer);
+                                                    classStoryServer.setPosterName(posterName);
+                                                    classStoryServer.setProfilePicURL(posterProfilePicURL);
+                                                    classStoryServer.setLiked(liked);
+                                                    classStoryList.add(sizeOnEntry, classStoryServer);
 
-                                                if (counter == childrenCount) {
+                                                    if (counter == childrenCount) {
 //                                                    if (classStoryList.size() > 1) {
 //                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
 //                                                            @Override
@@ -352,20 +549,133 @@ public class TeacherHomeClassFeed extends Fragment {
 //                                                    Collections.reverse(classStoryList);
 //                                                    classStoryList.add(0, new ClassStory());
 //                                                    classStoryList.add(new ClassStory());
-                                                    mySwipeRefreshLayout.setRefreshing(false);
-                                                    progressLayout.setVisibility(View.GONE);
-                                                    errorLayout.setVisibility(View.GONE);
-                                                    recyclerView.setVisibility(View.VISIBLE);
-                                                    mAdapter.notifyDataSetChanged();
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                        progressLayout.setVisibility(View.GONE);
+                                                        errorLayout.setVisibility(View.GONE);
+                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        mAdapter.notifyDataSetChanged();
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
 
-                                        }
-                                    });
+                                            }
+                                        });
+                                    }
+                                    else if (posterAccountType.equals("Teacher") || posterAccountType.equals("Parent")) {
+                                        String teacherID = classStoryServer.getPosterID();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                counter++;
+                                                if (dataSnapshot.exists()) {
+                                                    Teacher teacher = dataSnapshot.getValue(Teacher.class);
+                                                    posterName = teacher.getFirstName() + " " + teacher.getLastName();
+                                                    posterProfilePicURL = teacher.getProfilePicURL();
+
+                                                    classStoryServer.setPosterName(posterName);
+                                                    classStoryServer.setProfilePicURL(posterProfilePicURL);
+                                                    classStoryServer.setLiked(liked);
+                                                    classStoryList.add(sizeOnEntry, classStoryServer);
+
+                                                    if (counter == childrenCount) {
+//                                                    if (classStoryList.size() > 1) {
+//                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
+//                                                            @Override
+//                                                            public int compare(ClassStory o1, ClassStory o2) {
+//                                                                return o1.getTime().compareTo(o2.getTime());
+//                                                            }
+//                                                        });
+//                                                    }
+//
+//                                                    Collections.reverse(classStoryList);
+//                                                    classStoryList.add(0, new ClassStory());
+//                                                    classStoryList.add(new ClassStory());
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                        progressLayout.setVisibility(View.GONE);
+                                                        errorLayout.setVisibility(View.GONE);
+                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        mAdapter.notifyDataSetChanged();
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        String adminID = classStoryServer.getPosterID();
+                                        mDatabaseReference = mFirebaseDatabase.getReference("Admin/" + adminID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                counter++;
+                                                if (dataSnapshot.exists()) {
+                                                    Admin admin = dataSnapshot.getValue(Admin.class);
+                                                    posterName = admin.getDisplayName();
+                                                    posterProfilePicURL = admin.getProfilePictureURL();
+
+                                                    classStoryServer.setPosterName(posterName);
+                                                    classStoryServer.setProfilePicURL(posterProfilePicURL);
+                                                    classStoryServer.setLiked(liked);
+                                                    classStoryList.add(sizeOnEntry, classStoryServer);
+
+                                                    if (counter == childrenCount) {
+//                                                    if (classStoryList.size() > 1) {
+//                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
+//                                                            @Override
+//                                                            public int compare(ClassStory o1, ClassStory o2) {
+//                                                                return o1.getTime().compareTo(o2.getTime());
+//                                                            }
+//                                                        });
+//                                                    }
+//
+//                                                    Collections.reverse(classStoryList);
+//                                                    classStoryList.add(0, new ClassStory());
+//                                                    classStoryList.add(new ClassStory());
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                        progressLayout.setVisibility(View.GONE);
+                                                        errorLayout.setVisibility(View.GONE);
+                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        mAdapter.notifyDataSetChanged();
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    counter++;
+
+                                    if (counter == childrenCount) {
+//                                                    if (classStoryList.size() > 1) {
+//                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
+//                                                            @Override
+//                                                            public int compare(ClassStory o1, ClassStory o2) {
+//                                                                return o1.getTime().compareTo(o2.getTime());
+//                                                            }
+//                                                        });
+//                                                    }
+//
+//                                                    Collections.reverse(classStoryList);
+//                                                    classStoryList.add(0, new ClassStory());
+//                                                    classStoryList.add(new ClassStory());
+                                        mySwipeRefreshLayout.setRefreshing(false);
+                                        progressLayout.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
                                 }
                             }
 
@@ -398,5 +708,46 @@ public class TeacherHomeClassFeed extends Fragment {
         } catch (Exception e) {
             return "None";
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+        UpdateDataFromFirebase.populateEssentials(getContext());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 }

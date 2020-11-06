@@ -5,16 +5,17 @@ package com.celerii.celerii.models;
  */
 
 public class ContactUsModel {
-    String subject, message, senderID, senderEMail, date, year, month, day;
+    String subject, message, senderID, senderAccountType, senderEMail, date, year, month, day;
     boolean read, responded;
 
     public ContactUsModel() {
     }
 
-    public ContactUsModel(String subject, String message, String senderID, String senderEMail, String date, String year, String month, String day, boolean read, boolean responded) {
+    public ContactUsModel(String subject, String message, String senderID, String senderAccountType, String senderEMail, String date, String year, String month, String day, boolean read, boolean responded) {
         this.subject = subject;
         this.message = message;
         this.senderID = senderID;
+        this.senderAccountType = senderAccountType;
         this.senderEMail = senderEMail;
         this.date = date;
         this.year = year;
@@ -46,6 +47,14 @@ public class ContactUsModel {
 
     public void setSenderID(String senderID) {
         this.senderID = senderID;
+    }
+
+    public String getSenderAccountType() {
+        return senderAccountType;
+    }
+
+    public void setSenderAccountType(String senderAccountType) {
+        this.senderAccountType = senderAccountType;
     }
 
     public String getSenderEMail() {

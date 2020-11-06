@@ -4,16 +4,20 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.TeacherPerformance.TeacherViewResultDetailWithDeleteActivity;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
@@ -77,24 +81,6 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
-
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        });
     }
 
     @Override
@@ -121,6 +107,7 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
             public void onClick(View v) {
                 Intent intent = new Intent(context, TeacherViewResultDetailWithDeleteActivity.class);
                 Bundle bundle = new Bundle();
+                bundle.putString("subject_year_term", academicRecordTeacher.getSubject_AcademicYear_Term());
                 bundle.putString("RecordID", academicRecordTeacher.getRecordKey());
                 intent.putExtras(bundle);
                 context.startActivity(intent);
@@ -133,21 +120,26 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
                 DisplayMetrics metrics = context.getResources().getDisplayMetrics();
                 final Dialog dialog = new Dialog(context);
                 dialog.setContentView(R.layout.custom_dialog_layout_delete_academic_record_teacher);
-                TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                TextView delete = (TextView) dialog.findViewById(R.id.delete);
-                dialog.show();
-
-                cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
+                Button delete = (Button) dialog.findViewById(R.id.delete);
+                Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                try {
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.show();
+                } catch (Exception e) {
+                    return;
+                }
 
                 delete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        deleteAcademicRecord(academicRecordTeacher);
+                        deleteNewAcademicRecord(academicRecordTeacher);
+                        dialog.dismiss();
+                    }
+                });
+
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         dialog.dismiss();
                     }
                 });
@@ -160,12 +152,121 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
         return AcademicRecordTeacherList.size();
     }
 
+    int numberOfRemainingResults = 0;
+    private void deleteNewAcademicRecord(final AcademicRecordTeacher academicRecordTeacher) {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+            showDialogWithMessage("Internet is down, check your connection and try again");
+            return;
+        }
+
+        final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
+        progressDialog.show();
+        final String subject_year_term = academicRecordTeacher.getSubject_AcademicYear_Term();
+        final String key = academicRecordTeacher.getRecordKey();
+        final String teacherID = academicRecordTeacher.getTeacherID();
+        final String classID = academicRecordTeacher.getClassID();
+        final String schoolID = academicRecordTeacher.getSchoolID();
+
+        final HashMap<String, Object> deleteMap = new HashMap<>();
+        final ArrayList<String> parentsList = new ArrayList<>();
+        final ArrayList<String> studentsList = new ArrayList<>();
+
+        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher").child(teacherID).child(subject_year_term);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                numberOfRemainingResults = 0;
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        if (!postSnapshot.getKey().equals(key)) {
+                            numberOfRemainingResults++;
+                        }
+                    }
+                }
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                parentsList.add(postSnapshot.getKey());
+                            }
+                        }
+
+                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                        studentsList.add(postSnapshot.getKey());
+                                    }
+                                }
+
+                                deleteMap.put("AcademicRecordClass/" + classID + "/" + subject_year_term + "/" + key, null);
+                                deleteMap.put("AcademicRecordTeacher/" +  teacherID + "/" + subject_year_term + "/" + key, null);
+
+                                for (String parent: parentsList) {
+                                    deleteMap.put("AcademicRecordParentRecipients/" + key + "/" + parent, null);
+                                    deleteMap.put("NotificationParent/" + parent + "/" + key, null);
+                                }
+
+                                for (String student: studentsList) {
+                                    deleteMap.put("AcademicRecordStudent/" + student + "/" + subject_year_term + "/" + key, null);
+                                    deleteMap.put("AcademicRecordClass-Student/" + classID + "/" + subject_year_term + "/" + key, null);
+                                    deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
+                                }
+
+                                DatabaseReference updateRef = mFirebaseDatabase.getReference();
+                                updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        if (databaseError == null) {
+                                            if (numberOfRemainingResults == 0) {
+                                                progressDialog.dismiss();
+                                                ((Activity) context).finish();
+//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
+//                                                notifyDataSetChanged();
+                                            } else {
+                                                progressDialog.dismiss();
+//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
+//                                                notifyDataSetChanged();
+                                            }
+                                        } else {
+                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
+                                            showDialogWithMessage(message);
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     private double newClassAverage = 0.0;
     private double newMaxObtainable = 0.0;
     private double newPercentageOfTotal = 0.0;
     private void deleteAcademicRecord(final AcademicRecordTeacher academicRecordTeacher){
-        if (connected) {
+        if ((CheckNetworkConnectivity.isNetworkAvailable(context))) {
             final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
             progressDialog.show();
 
@@ -338,5 +439,58 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
         } else {
             CustomToast.whiteBackgroundBottomToast(context, "Internet is down, check your connection and try again");
         }
+    }
+
+    void showDialogWithMessageAndClose (String messageString) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                ((Activity)context).finish();
+            }
+        });
+    }
+
+    void showDialogWithMessage (String messageString) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

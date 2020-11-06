@@ -4,19 +4,20 @@ package com.celerii.celerii.models;
  * Created by user on 7/5/2017.
  */
 public class MessageList {
-    String name, message, senderID, recieverID, time, profilepicUrl, otherParty;
+    String name, message, senderID, receiverID, time, sortableTime, profilepicUrl, otherParty;
     int noOfMessages;
     boolean seen, received;
 
     public MessageList() {
         this.time = "";
-        this.recieverID = "";
+        this.receiverID = "";
     }
 
-    public MessageList(String name, String message, String time, String profilepicUrl, int noOfMessages) {
+    public MessageList(String name, String message, String time, String sortableTime, String profilepicUrl, int noOfMessages) {
         this.name = name;
         this.message = message;
         this.time = time;
+        this.sortableTime = sortableTime;
         this.profilepicUrl = profilepicUrl;
         this.noOfMessages = noOfMessages;
     }
@@ -45,12 +46,12 @@ public class MessageList {
         this.senderID = senderID;
     }
 
-    public String getRecieverID() {
-        return recieverID;
+    public String getReceiverID() {
+        return receiverID;
     }
 
-    public void setRecieverID(String recieverID) {
-        this.recieverID = recieverID;
+    public void setReceiverID(String receiverID) {
+        this.receiverID = receiverID;
     }
 
     public String getTime() {
@@ -59,6 +60,14 @@ public class MessageList {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getSortableTime() {
+        return sortableTime;
+    }
+
+    public void setSortableTime(String sortableTime) {
+        this.sortableTime = sortableTime;
     }
 
     public String getProfilepicUrl() {

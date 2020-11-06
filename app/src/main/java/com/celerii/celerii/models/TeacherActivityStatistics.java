@@ -5,17 +5,20 @@ package com.celerii.celerii.models;
  */
 
 public class TeacherActivityStatistics {
-    int totalPointsAwarded, totalClassPosts, totalPostLikes, totalAssignmentPosts, totalAssignmentViews;
+    int totalPointsAwarded, totalPointsFined, totalClassPosts, totalPostLikes;
 
     public TeacherActivityStatistics() {
+        this.totalPointsAwarded = 0;
+        this.totalPointsFined = 0;
+        this.totalClassPosts = 0;
+        this.totalPostLikes = 0;
     }
 
-    public TeacherActivityStatistics(int totalPointsAwarded, int totalClassPosts, int totalPostLikes, int totalAssignmentPosts, int totalAssignmentViews) {
+    public TeacherActivityStatistics(int totalPointsAwarded, int totalPointsFined, int totalClassPosts, int totalPostLikes) {
         this.totalPointsAwarded = totalPointsAwarded;
+        this.totalPointsFined = totalPointsFined;
         this.totalClassPosts = totalClassPosts;
         this.totalPostLikes = totalPostLikes;
-        this.totalAssignmentPosts = totalAssignmentPosts;
-        this.totalAssignmentViews = totalAssignmentViews;
     }
 
     public int getTotalPointsAwarded() {
@@ -24,6 +27,14 @@ public class TeacherActivityStatistics {
 
     public void setTotalPointsAwarded(int totalPointsAwarded) {
         this.totalPointsAwarded = totalPointsAwarded;
+    }
+
+    public int getTotalPointsFined() {
+        return totalPointsFined;
+    }
+
+    public void setTotalPointsFined(int totalPointsFined) {
+        this.totalPointsFined = totalPointsFined;
     }
 
     public int getTotalClassPosts() {
@@ -40,21 +51,5 @@ public class TeacherActivityStatistics {
 
     public void setTotalPostLikes(int totalPostLikes) {
         this.totalPostLikes = totalPostLikes;
-    }
-
-    public int getTotalAssignmentPosts() {
-        return totalAssignmentPosts;
-    }
-
-    public void setTotalAssignmentPosts(int totalAssignmentPosts) {
-        this.totalAssignmentPosts = totalAssignmentPosts;
-    }
-
-    public int getTotalAssignmentViews() {
-        return totalAssignmentViews;
-    }
-
-    public void setTotalAssignmentViews(int totalAssignmentViews) {
-        this.totalAssignmentViews = totalAssignmentViews;
     }
 }

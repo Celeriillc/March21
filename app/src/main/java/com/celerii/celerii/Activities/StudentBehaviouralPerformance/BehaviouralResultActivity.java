@@ -1,19 +1,26 @@
 package com.celerii.celerii.Activities.StudentBehaviouralPerformance;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
+import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
+import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.BehaviouralResultAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -22,31 +29,39 @@ import com.celerii.celerii.models.BehaviouralRecordModel;
 import com.celerii.celerii.models.BehaviouralResultRowModel;
 import com.celerii.celerii.models.BehaviouralResultsHeaderModel;
 import com.celerii.celerii.models.Class;
+import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Set;
+import java.util.HashMap;
 
 public class BehaviouralResultActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
     Bundle bundle;
 
     Toolbar toolbar;
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
     TextView errorLayoutText;
+    Button errorLayoutButton;
 
     private ArrayList<BehaviouralResultRowModel> behaviouralResultRowModelList;
     private BehaviouralResultsHeaderModel behaviouralResultsHeaderModel;
@@ -57,56 +72,136 @@ public class BehaviouralResultActivity extends AppCompatActivity {
     String activeStudentID = "", year, term;
     String activeStudent;
     String activeStudentName;
+    String parentActivity;
     int totalPointsEarned, totalPointsFined, pointsEarnedThisTerm, pointsFinedThisTerm;
+    int isNewCounter = 0;
+
+    String featureUseKey = "";
+    String featureName = "Behavioural Records";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_behavioural_result);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
         bundle = getIntent().getExtras();
+        parentActivity = bundle.getString("parentActivity");
 
+        activeStudent = bundle.getString("ChildID");
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         errorLayout = (RelativeLayout) findViewById(R.id.errorlayout);
         errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         progressLayout = (RelativeLayout) findViewById(R.id.progresslayout);
 
-        activeStudentID = bundle.getString("childID");
-        activeStudentName = bundle.getString("childName");
-        if (activeStudentID == null){
-            Set<String> childrenSet = sharedPreferencesManager.getMyChildren();
-            ArrayList<String> children = new ArrayList<>();
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent") && childrenSet != null) {
-                children = new ArrayList<>(childrenSet);
-                activeStudent = children.get(0);
+        errorLayoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context, ParentSearchActivity.class));
+            }
+        });
+
+        if (activeStudent == null) {
+            Gson gson = new Gson();
+            ArrayList<Student> myChildren = new ArrayList<>();
+            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+            Type type = new TypeToken<ArrayList<Student>>() {}.getType();
+            myChildren = gson.fromJson(myChildrenJSON, type);
+
+            if (myChildren != null) {
+                gson = new Gson();
+                activeStudent = gson.toJson(myChildren.get(0));
                 sharedPreferencesManager.setActiveKid(activeStudent);
-                activeStudentID = activeStudent.split(" ")[0];
-                activeStudentName = activeStudent.split(" ")[1];
             } else {
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle("Behavioural Performance");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowTitleEnabled(true);
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
                 errorLayout.setVisibility(View.VISIBLE);
                 if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                    errorLayoutText.setText("You're not connected to any child account yet. Use the search button to search for your child and request connection from their school.");
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my child");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
                 } else {
-                    errorLayoutText.setText("It seems like you do not have the permission to view this child's academic record");
+                    errorLayoutText.setText("You do not have the permission to view this child's behavioural record");
                 }
                 return;
             }
+        } else {
+            Boolean activeKidExist = false;
+            Gson gson = new Gson();
+            Type type = new TypeToken<Student>() {}.getType();
+            Student activeKidModel = gson.fromJson(activeStudent, type);
+
+            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+            type = new TypeToken<ArrayList<Student>>() {}.getType();
+            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+
+            for (Student student: myChildren) {
+                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                    activeKidExist = true;
+                    activeKidModel = student;
+                    activeStudent = gson.toJson(activeKidModel);
+                    sharedPreferencesManager.setActiveKid(activeStudent);
+                    break;
+                }
+            }
+
+            if (!activeKidExist) {
+                if (myChildren.size() > 0) {
+                    if (myChildren.size() > 1) {
+                        gson = new Gson();
+                        activeStudent = gson.toJson(myChildren.get(0));
+                        sharedPreferencesManager.setActiveKid(activeStudent);
+                    }
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("Behavioural Performance");
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setDisplayShowTitleEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                    } else {
+                        errorLayoutText.setText("You do not have the permission to view this child's behavioural record");
+                    }
+                    return;
+                }
+            }
         }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Student>() {}.getType();
+        Student activeStudentModel = gson.fromJson(activeStudent, type);
+
+        activeStudentID = activeStudentModel.getStudentID();
+        activeStudentName = activeStudentModel.getFirstName() + " " + activeStudentModel.getLastName();
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setTitle(activeStudentName + "'s Behavioural Performance");
+        getSupportActionBar().setTitle(activeStudentName.trim() + "'s Behavioural Performance");
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -119,7 +214,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
         mAdapter = new BehaviouralResultAdapter(behaviouralResultRowModelList, behaviouralResultsHeaderModel, this);
         recyclerView.setAdapter(mAdapter);
 
-        year= Date.getYear();
+        year = Date.getYear();
         term = Term.getTermShort();
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -144,11 +239,13 @@ public class BehaviouralResultActivity extends AppCompatActivity {
             return;
         }
 
+        updateBadges();
         behaviouralResultRowModelList.clear();
         totalPointsEarned = 0;
         totalPointsFined = 0;
         pointsEarnedThisTerm = 0;
         pointsFinedThisTerm = 0;
+        isNewCounter = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(activeStudentID).child("Reward");
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -176,7 +273,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                     pointsEarnedThisTerm = (int) dataSnapshot.getChildrenCount();
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         BehaviouralRecordModel behaviouralRecordModel = postSnapshot.getValue(BehaviouralRecordModel.class);
-                                        behaviouralResultRowModelList.add(new BehaviouralResultRowModel("+1", behaviouralRecordModel.getRewardDescription(), "", behaviouralRecordModel.getClassID(), behaviouralRecordModel.getSortableDate()));
+                                        behaviouralResultRowModelList.add(new BehaviouralResultRowModel(postSnapshot.getKey(), "+1", behaviouralRecordModel.getRewardDescription(), "", behaviouralRecordModel.getClassID(), behaviouralRecordModel.getSortableDate()));
                                     }
                                 }
 
@@ -188,7 +285,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                             pointsFinedThisTerm = (int) dataSnapshot.getChildrenCount();
                                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                                 BehaviouralRecordModel behaviouralRecordModel = postSnapshot.getValue(BehaviouralRecordModel.class);
-                                                behaviouralResultRowModelList.add(new BehaviouralResultRowModel("-1", behaviouralRecordModel.getRewardDescription(), "", behaviouralRecordModel.getClassID(), behaviouralRecordModel.getSortableDate()));
+                                                behaviouralResultRowModelList.add(new BehaviouralResultRowModel(postSnapshot.getKey(), "-1", behaviouralRecordModel.getRewardDescription(), "", behaviouralRecordModel.getClassID(), behaviouralRecordModel.getSortableDate()));
                                             }
                                         }
 
@@ -213,19 +310,52 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                                         }
 
                                                         if (counter == behaviouralResultRowModelList.size()) {
-                                                            Collections.sort(behaviouralResultRowModelList, new Comparator<BehaviouralResultRowModel>() {
-                                                                @Override
-                                                                public int compare(BehaviouralResultRowModel o1, BehaviouralResultRowModel o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
+                                                            for (final BehaviouralResultRowModel behaviouralResultRowModel: behaviouralResultRowModelList) {
+                                                                String key = behaviouralResultRowModel.getKey();
+                                                                mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordParentNotification").child(mFirebaseUser.getUid()).child(activeStudentID).child(key).child("status");
+                                                                mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                        if (dataSnapshot.exists()) {
+                                                                            boolean isNew = dataSnapshot.getValue(boolean.class);
+                                                                            if (isNew) {
+                                                                                behaviouralResultRowModel.setNew(true);
+                                                                            } else {
+                                                                                behaviouralResultRowModel.setNew(false);
+                                                                            }
+                                                                        } else {
+                                                                            behaviouralResultRowModel.setNew(false);
+                                                                        }
 
-                                                            behaviouralResultRowModelList.add(0, new BehaviouralResultRowModel());
-                                                            mAdapter.notifyDataSetChanged();
-                                                            recyclerView.setVisibility(View.VISIBLE);
-                                                            progressLayout.setVisibility(View.GONE);
-                                                            errorLayout.setVisibility(View.GONE);
-                                                            mySwipeRefreshLayout.setRefreshing(false);
+                                                                        isNewCounter++;
+
+                                                                        if (isNewCounter == behaviouralResultRowModelList.size()) {
+                                                                            Collections.sort(behaviouralResultRowModelList, new Comparator<BehaviouralResultRowModel>() {
+                                                                                @Override
+                                                                                public int compare(BehaviouralResultRowModel o1, BehaviouralResultRowModel o2) {
+                                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                                                }
+                                                                            });
+
+                                                                            Collections.reverse(behaviouralResultRowModelList);
+                                                                            if (!behaviouralResultRowModelList.get(0).getClassID().equals("")) {
+                                                                                behaviouralResultRowModelList.add(0, new BehaviouralResultRowModel());
+                                                                            }
+
+                                                                            mAdapter.notifyDataSetChanged();
+                                                                            recyclerView.setVisibility(View.VISIBLE);
+                                                                            progressLayout.setVisibility(View.GONE);
+                                                                            errorLayout.setVisibility(View.GONE);
+                                                                            mySwipeRefreshLayout.setRefreshing(false);
+                                                                        }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onCancelled(DatabaseError databaseError) {
+
+                                                                    }
+                                                                });
+                                                            }
                                                         }
                                                     }
 
@@ -297,14 +427,125 @@ public class BehaviouralResultActivity extends AppCompatActivity {
         }
     }
 
+    public void updateBadges(){
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+                updateBadgesMap.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + mFirebaseUser.getUid() + "/" + activeStudentID + "/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/More/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/" + activeStudentID + "/More/status", false);
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
+            }
+        } else {
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+                updateBadgesMap.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + mFirebaseUser.getUid() + "/" + activeStudentID + "/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/More/status", false);
+                updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/" + activeStudentID + "/More/status", false);
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
+            }
+        }
+    }
+
+    public void updateBadgesForAllCurrent(){
+        HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+        if (behaviouralResultRowModelList != null) {
+            for (int i = 0; i < behaviouralResultRowModelList.size(); i++) {
+                BehaviouralResultRowModel behaviouralResultRowModel = behaviouralResultRowModelList.get(i);
+                String key = behaviouralResultRowModel.getKey();
+                updateBadgesMap.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + mFirebaseUser.getUid() + "/" + activeStudentID + "/" + key + "/status", false);
+            }
+        }
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mDatabaseReference.updateChildren(updateBadgesMap);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        updateBadgesForAllCurrent();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home)
-        {
-            this.finish();
-            return true;
+        if (id == android.R.id.home) {
+            if (parentActivity != null) {
+                if (parentActivity.equals("Parent")) {
+                    Intent i = new Intent(this, ParentMainActivityTwo.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Fragment Int", "2");
+                    i.putExtras(bundle);
+                    startActivity(i);
+                } else if (parentActivity.equals("Teacher")) {
+                    Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Fragment Int", "3");
+                    i.putExtras(bundle);
+                    startActivity(i);
+                }
+            }
+            finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                Intent i = new Intent(this, ParentMainActivityTwo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Fragment Int", "2");
+                i.putExtras(bundle);
+                startActivity(i);
+            } else if (parentActivity.equals("Teacher")) {
+                Intent i = new Intent(this, TeacherMainActivityTwo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Fragment Int", "3");
+                i.putExtras(bundle);
+                startActivity(i);
+            }
+        }
     }
 }

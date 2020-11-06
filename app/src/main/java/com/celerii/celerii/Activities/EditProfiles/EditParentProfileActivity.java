@@ -4,45 +4,61 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.provider.MediaStore;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.EditPersonalInformationDetails.EmailEditActivity;
 import com.celerii.celerii.Activities.EditPersonalInformationDetails.GenderEditActivity;
 import com.celerii.celerii.Activities.EditPersonalInformationDetails.GeneralEditActivity;
 import com.celerii.celerii.R;
-import com.celerii.celerii.Activities.EditPersonalInformationDetails.SendPictureForEditProfileActivity;
+import com.celerii.celerii.adapters.InboxAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
+import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
-import com.celerii.celerii.models.Parent;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashMap;
-
-import jp.wasabeef.glide.transformations.BlurTransformation;
-import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class EditParentProfileActivity extends AppCompatActivity {
 
@@ -53,22 +69,30 @@ public class EditParentProfileActivity extends AppCompatActivity {
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     FirebaseUser mFirebaseUser;
-
-    SwipeRefreshLayout mySwipeRefreshLayout;
-    LinearLayout errorLayout, progressLayout;
-    ScrollView superLayout;
+    FirebaseStorage mFirebaseStorage;
+    StorageReference mStorageReference;
 
     File file;
     Uri uri;
     Intent CamIntent, GalIntent, CropIntent ;
-    public  static final int RequestPermissionCode  = 1;
+    public static final int REQUESTPPERMISSIONCODEWRITEEXTERNALSTORAGE  = 1000;
+    public static final int REQUESTPPERMISSIONCODECAMERA  = 1001;
+    Bitmap bitmap;
+    byte[] byteArray;
+    CustomProgressDialogOne progressDialog;
+
+    LinearLayout newProfilePictureLayout;
 
     Toolbar toolbar;
-    LinearLayout firstNameLayout, lastNameLayout, middleNameLayout, genderLayout, emailLayout, phoneNumberLayout, occupationLayout;
-    TextView firstName, middleName, lastName, headerFullName, gender, email, phoneNumber, occupation;
-    ImageView profilePicture, profilePicturePrimary, changeProfilePicture;
+    LinearLayout genderLayout, phoneNumberLayout;
+    TextView gender, phoneNumber;
+    ImageView profilePicture, tapToUpload;
+    EditText firstName, middleName, lastName, occupation;
 
-    HashMap<String, Object> parentProfileUpdate;
+    String featureUseKey = "";
+    String featureName = "Edit Parent Profile";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,89 +100,52 @@ public class EditParentProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_parent_profile);
 
         sharedPreferencesManager = new SharedPreferencesManager(this);
+        progressDialog = new CustomProgressDialogOne(EditParentProfileActivity.this);
+        byteArray = null;
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
-
-        mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mStorageReference = mFirebaseStorage.getReference();
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Edit Profile");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black_24dp);
-
-        errorLayout = (LinearLayout) findViewById(R.id.errorlayout);
-        progressLayout = (LinearLayout) findViewById(R.id.progresslayout);
-        superLayout = (ScrollView) findViewById(R.id.superlayout);
-
-        superLayout.setVisibility(View.GONE);
-        progressLayout.setVisibility(View.VISIBLE);
 
         profilePicture = (ImageView) findViewById(R.id.profilepicture);
-        profilePicturePrimary = (ImageView) findViewById(R.id.profilepictureprimary);
-        changeProfilePicture = (ImageView) findViewById(R.id.changeprofilepicture);
-        firstNameLayout = (LinearLayout) findViewById(R.id.firstnamelayout);
-        lastNameLayout = (LinearLayout) findViewById(R.id.lastnamelayout);
-        middleNameLayout = (LinearLayout) findViewById(R.id.middlenamelayout);
-        headerFullName = (TextView) findViewById(R.id.headerfullname);
+        newProfilePictureLayout = (LinearLayout) findViewById(R.id.newprofilepicturelayout);
+        newProfilePictureLayout.setClipToOutline(true);
+        tapToUpload = (ImageView) findViewById(R.id.taptoupload);
         genderLayout = (LinearLayout) findViewById(R.id.genderlayout);
-        emailLayout = (LinearLayout) findViewById(R.id.emaillayout);
         phoneNumberLayout = (LinearLayout) findViewById(R.id.phonenumberlayout);
-        occupationLayout = (LinearLayout) findViewById(R.id.occupationlayout);
 
-        firstName = (TextView) findViewById(R.id.firstname);
-        middleName = (TextView) findViewById(R.id.middlename);
-        lastName = (TextView) findViewById(R.id.lastname);
+        firstName = (EditText) findViewById(R.id.firstname);
+        middleName = (EditText) findViewById(R.id.middlename);
+        lastName = (EditText) findViewById(R.id.lastname);
         gender = (TextView) findViewById(R.id.gender);
-        email = (TextView) findViewById(R.id.email);
         phoneNumber = (TextView) findViewById(R.id.phonenumber);
-        occupation = (TextView) findViewById(R.id.occupation);
-
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        });
-
-        mySwipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        loadProfileInformation();
-                    }
-                }
-        );
+        occupation = (EditText) findViewById(R.id.occupation);
 
         loadProfileInformation();
 
-        changeProfilePicture.setOnClickListener(new View.OnClickListener() {
+        tapToUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DisplayMetrics metrics = getResources().getDisplayMetrics();
-                int width = metrics.widthPixels;
-                int height = metrics.heightPixels;
                 final Dialog dialog = new Dialog(context);
                 dialog.setContentView(R.layout.custom_dialog_layout_select_image_from_gallery_camera_two);
                 LinearLayout camera = (LinearLayout) dialog.findViewById(R.id.camera);
                 LinearLayout gallery = (LinearLayout) dialog.findViewById(R.id.gallery);
-                TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                dialog.show();
+                Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                try {
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.show();
+                } catch (Exception e) {
+                    return;
+                }
 
                 camera.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -185,49 +172,6 @@ public class EditParentProfileActivity extends AppCompatActivity {
             }
         });
 
-        firstNameLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(EditParentProfileActivity.this, GeneralEditActivity.class);
-                Bundle b = new Bundle();
-                b.putString("Caption", "First Name");
-                b.putString("Description", "First Name Description");
-                b.putString("EditHint", "First Name");
-                b.putString("EditItem", firstName.getText().toString());
-                i.putExtras(b);
-                startActivityForResult(i, 1);
-            }
-        });
-
-        middleNameLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(EditParentProfileActivity.this, GeneralEditActivity.class);
-                Bundle b = new Bundle();
-                b.putString("Caption", "Middle Name");
-                b.putString("Description", "Middle Name Description");
-                b.putString("EditHint", "Middle Name");
-                String mid = middleName.getText().toString();
-                b.putString("EditItem", middleName.getText().toString());
-                i.putExtras(b);
-                startActivityForResult(i, 2);
-            }
-        });
-
-        lastNameLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(EditParentProfileActivity.this, GeneralEditActivity.class);
-                Bundle b = new Bundle();
-                b.putString("Caption", "Last Name");
-                b.putString("Description", "Last Name Description");
-                b.putString("EditHint", "Last Name");
-                b.putString("EditItem", lastName.getText().toString());
-                i.putExtras(b);
-                startActivityForResult(i, 3);
-            }
-        });
-
         genderLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -235,15 +179,7 @@ public class EditParentProfileActivity extends AppCompatActivity {
                 Bundle b = new Bundle();
                 b.putString("gender", gender.getText().toString());
                 i.putExtras(b);
-                startActivityForResult(i, 4);
-            }
-        });
-
-        emailLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(EditParentProfileActivity.this, EmailEditActivity.class);
-                startActivityForResult(i, 5);
+                startActivityForResult(i, 1);
             }
         });
 
@@ -257,71 +193,100 @@ public class EditParentProfileActivity extends AppCompatActivity {
                 b.putString("EditHint", "Phone Number");
                 b.putString("EditItem", phoneNumber.getText().toString());
                 i.putExtras(b);
-                startActivityForResult(i, 6);
-            }
-        });
-
-        occupation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(EditParentProfileActivity.this, GeneralEditActivity.class);
-                Bundle b = new Bundle();
-                b.putString("Caption", "Occupation");
-                b.putString("Description", "Occupation Description");
-                b.putString("EditHint", "Occupation");
-                b.putString("EditItem", occupation.getText().toString());
-                i.putExtras(b);
-                startActivityForResult(i, 7);
+                startActivityForResult(i, 2);
             }
         });
     }
 
     private void loadProfileInformation() {
-        mDatabaseReference = mFirebaseDatabase.getReference("Parent/" + auth.getCurrentUser().getUid());
-        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    progressLayout.setVisibility(View.GONE);
-                    superLayout.setVisibility(View.VISIBLE);
-                    Parent parent = dataSnapshot.getValue(Parent.class);
-                    firstName.setText(parent.getFirstName());
-                    middleName.setText(parent.getMiddleName());
-                    lastName.setText(parent.getLastName());
-                    headerFullName.setText(parent.getFirstName() + " " + parent.getLastName());
-                    gender.setText(parent.getGender());
-                    email.setText(auth.getCurrentUser().getEmail());
-                    phoneNumber.setText(parent.getPhone());
-                    occupation.setText(parent.getOccupation());
-                    Glide.with(getBaseContext())
-                            .load(parent.getProfilePicURL())
-                            .placeholder(R.drawable.profileimageplaceholder)
-                            .error(R.drawable.profileimageplaceholder)
-                            .centerCrop()
-                            .bitmapTransform(new CropCircleTransformation(getBaseContext()))
-                            .into(profilePicturePrimary);
-                    Glide.with(getBaseContext())
-                            .load(parent.getProfilePicURL())
-                            .placeholder(R.drawable.profileimageplaceholder)
-                            .error(R.drawable.profileimageplaceholder)
-                            .centerCrop()
-                            .bitmapTransform(new BlurTransformation(getBaseContext(), 50))
-                            .into(profilePicture);
-                }
-                else{
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    superLayout.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                }
-            }
+        firstName.setText(sharedPreferencesManager.getMyFirstName());
+        middleName.setText(sharedPreferencesManager.getMyMiddleName());
+        lastName.setText(sharedPreferencesManager.getMyLastName());
+        gender.setText(sharedPreferencesManager.getMyGender());
+        phoneNumber.setText(sharedPreferencesManager.getMyPhoneNumber());
+        occupation.setText(sharedPreferencesManager.getMyOccupation());
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+        Drawable textDrawable;
+        if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
+            String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
             }
-        });
+            profilePicture.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
+            Glide.with(getBaseContext())
+                    .load(sharedPreferencesManager.getMyPicURL())
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .into(profilePicture);
+        }
+    }
+
+    private boolean validateName(String nameString, EditText name) {
+        if (nameString.isEmpty()) {
+            String messageString = "You need to enter a name in the name field";
+            showDialogWithMessage(Html.fromHtml(messageString));
+            name.requestFocus();
+            return false;
+        }
+
+        String[] nameArray = nameString.split(" ");
+        if (nameArray.length > 1) {
+            String messageString = "You should enter only one name in this field. If you have a double name, you can separate them with a hyphen (-). E.g. Ava-Grace.";
+            showDialogWithMessage(Html.fromHtml(messageString));
+            name.requestFocus();
+            name.setSelectAllOnFocus(true);
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override
@@ -338,62 +303,164 @@ public class EditParentProfileActivity extends AppCompatActivity {
             finish();
         }
         else if (id == R.id.action_save){
-            //TODO; Ensure we save updated data to database
-            mDatabaseReference = mFirebaseDatabase.getReference();
-            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()){
-                        parentProfileUpdate = new HashMap<String, Object>();
-                        if (!firstName.getText().toString().isEmpty()){
-                            parentProfileUpdate.put("Teacher/" + auth.getCurrentUser().getUid() + "/firstName", firstName.getText().toString().trim());
-                            parentProfileUpdate.put("Parent/" + auth.getCurrentUser().getUid() + "/firstName", firstName.getText().toString().trim());
-                            sharedPreferencesManager.setMyFirstName(firstName.getText().toString());
-                        }else {
-                            return;
-                        }
-                        if (!lastName.getText().toString().isEmpty()){
-                            parentProfileUpdate.put("Teacher/" + auth.getCurrentUser().getUid() + "/lastName", lastName.getText().toString().trim());
-                            parentProfileUpdate.put("Parent/" + auth.getCurrentUser().getUid() + "/lastName", lastName.getText().toString().trim());
-                            sharedPreferencesManager.setMyLastName(lastName.getText().toString());
-                        }else {
-                            return;
-                        }
-                        if (!email.getText().toString().isEmpty()){
-                            mFirebaseUser.updateEmail(email.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()){
+            if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                showDialogWithMessage(Html.fromHtml(messageString));
+                return false;
+            }
 
-                                    }
-                                }
-                            });
-                        }else {
-                            return;
-                        }
-                        parentProfileUpdate.put("Teacher/" + auth.getCurrentUser().getUid() + "/middleName", middleName.getText().toString().trim());
-                        parentProfileUpdate.put("Parent/" + auth.getCurrentUser().getUid() + "/middleName", middleName.getText().toString().trim());
-                        parentProfileUpdate.put("Teacher/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
-                        parentProfileUpdate.put("Parent/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
-                        parentProfileUpdate.put("Teacher/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
-                        parentProfileUpdate.put("Parent/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
-                        parentProfileUpdate.put("Parent/" + auth.getCurrentUser().getUid() + "/occupation", occupation.getText().toString().trim());
+            final String firstNameString = firstName.getText().toString().trim();
+            final String middleNameString = middleName.getText().toString().trim();
+            final String lastNameString = lastName.getText().toString().trim();
 
-                        mDatabaseReference.updateChildren(parentProfileUpdate, new DatabaseReference.CompletionListener() {
+            if (!validateName(firstNameString, firstName))
+                return false;
+
+            if (!validateName(lastNameString, lastName))
+                return false;
+
+            progressDialog.show();
+
+            if (bitmap != null) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byteArray = stream.toByteArray();
+            }
+
+            if (byteArray == null) {
+                HashMap<String, Object> editProfileMap = new HashMap<String, Object>();
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
+
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/occupation", occupation.getText().toString().trim());
+
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(editProfileMap, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        progressDialog.dismiss();
+                        sharedPreferencesManager.setMyFirstName(firstNameString);
+                        sharedPreferencesManager.setMyMiddleName(middleNameString);
+                        sharedPreferencesManager.setMyLastName(lastNameString);
+                        sharedPreferencesManager.setMyGender(gender.getText().toString().trim());
+                        sharedPreferencesManager.setMyPhoneNumber(phoneNumber.getText().toString().trim());
+                        sharedPreferencesManager.setMyOccupation(occupation.getText().toString().trim());
+
+                        final Dialog dialog = new Dialog(context);
+                        dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                        dialog.setCancelable(false);
+                        dialog.setCanceledOnTouchOutside(false);
+                        TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                        TextView close = (TextView) dialog.findViewById(R.id.close);
+                        dialog.show();
+
+                        dialogMessage.setText("Your profile has been successfully updated");
+
+                        close.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
+                            public void onClick(View v) {
+                                dialog.dismiss();
                             }
                         });
                     }
-                }
+                });
+            } else {
+                mStorageReference = mFirebaseStorage.getReference().child("CeleriiProfilePicture/" + mFirebaseUser.getUid() + "/CeleriiProfilePicture_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                UploadTask uploadTask = mStorageReference.putBytes(byteArray);
+                Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            return null;
+                        }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+                        return mStorageReference.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            final String downloadURL = task.getResult().toString();
 
-                }
-            });
-            finish();
+                            HashMap<String, Object> editProfileMap = new HashMap<String, Object>();
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/profilePicURL", downloadURL);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
+
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/profilePicURL", downloadURL);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/occupation", occupation.getText().toString().trim());
+
+                            mDatabaseReference = mFirebaseDatabase.getReference();
+                            mDatabaseReference.updateChildren(editProfileMap, new DatabaseReference.CompletionListener() {
+                                @Override
+                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                    progressDialog.dismiss();
+                                    sharedPreferencesManager.setMyFirstName(firstNameString);
+                                    sharedPreferencesManager.setMyMiddleName(middleNameString);
+                                    sharedPreferencesManager.setMyLastName(lastNameString);
+                                    sharedPreferencesManager.setMyPicURL(downloadURL);
+                                    sharedPreferencesManager.setMyGender(gender.getText().toString().trim());
+                                    sharedPreferencesManager.setMyPhoneNumber(phoneNumber.getText().toString().trim());
+                                    sharedPreferencesManager.setMyOccupation(occupation.getText().toString().trim());
+
+                                    final Dialog dialog = new Dialog(context);
+                                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                                    dialog.setCancelable(false);
+                                    dialog.setCanceledOnTouchOutside(false);
+                                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                                    TextView close = (TextView) dialog.findViewById(R.id.close);
+                                    dialog.show();
+
+                                    dialogMessage.setText("Your profile has been successfully updated");
+
+                                    close.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+
+//                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        progressDialog.dismiss();
+//                        String messageString = "An error occured while uploading your story, please try again";
+//                        showDialogWithMessage(Html.fromHtml(messageString));
+//                    }
+//                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+////                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+////                            progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                    }
+//                });
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -402,67 +469,73 @@ public class EditParentProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == 1) {
-            if(resultCode == RESULT_OK) {
-                firstName.setText(data.getStringExtra("Caption"));
-                headerFullName.setText(firstName.getText() + " " + lastName.getText());
-            }
-        }
-        if (requestCode == 2) {
-            if(resultCode == RESULT_OK) {
-                middleName.setText(data.getStringExtra("Caption"));
-            }
-        }
-        if (requestCode == 3) {
-            if(resultCode == RESULT_OK) {
-                lastName.setText(data.getStringExtra("Caption"));
-                headerFullName.setText(firstName.getText() + " " + lastName.getText());
-            }
-        }
-        if (requestCode == 4) {
             if(resultCode == RESULT_OK) {
                 gender.setText(data.getStringExtra("selectedgender"));
             }
         }
-        if (requestCode == 5) {
-            if(resultCode == RESULT_OK) {
-                email.setText(data.getStringExtra("newEmail"));
-            }
-        }
-        if (requestCode == 6) {
+        if (requestCode == 2) {
             if(resultCode == RESULT_OK) {
                 phoneNumber.setText(data.getStringExtra("Caption"));
             }
         }
-        if (requestCode == 7) {
-            if(resultCode == RESULT_OK) {
-                occupation.setText(data.getStringExtra("Caption"));
-            }
-        }
-        if (requestCode == 100 && resultCode == RESULT_OK) {
-            ImageCropFunction();
-        }
-        if (requestCode == 101) {
-            if (data != null) {
-                uri = data.getData();
-                ImageCropFunction();
-            }
-        }
-        if (requestCode == 102) {
+        if (requestCode == 10 && resultCode == RESULT_OK) {
+//            ImageCropFunction();
             if (data != null) {
                 try {
-                    Bundle bundle = data.getExtras();
-                    bundle.putString("URI", uri.toString());
-                    bundle.putString("AccountType", "Parent");
-                    bundle.putString("AccountID", sharedPreferencesManager.getMyUserID());
-                    Intent i = new Intent(EditParentProfileActivity.this, SendPictureForEditProfileActivity.class);
-                    i.putExtras(bundle);
-                    startActivity(i);
+                    bitmap = data.getExtras().getParcelable("data");
+                    profilePicture.setImageDrawable(null);
+                    profilePicture.setImageBitmap(bitmap);
                 } catch (Exception e){
-                    return;
+                    //tODO:
                 }
             }
         }
+        if (requestCode == 11) {
+            if (data != null) {
+                uri = data.getData();
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                    profilePicture.setImageDrawable(null);
+                    profilePicture.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    //tODO:
+                }
+            }
+//            if (data != null) {
+//                uri = data.getData();
+//                ImageCropFunction();
+//            }
+        }
+//        if (requestCode == 12) {
+//            if (data != null) {
+//                uri = data.getData();
+//                try {
+//                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+//                    profilePicture.setImageDrawable(null);
+//                    profilePicture.setImageBitmap(bitmap);
+//
+//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//                    byteArray = stream.toByteArray();
+//                } catch (Exception e) {
+//                    return;
+//                }
+
+//                try {
+//                    Bitmap bitmap = data.getExtras().getParcelable("data");
+//                    profilePicture.setImageDrawable(null);
+//                    profilePicture.setImageBitmap(bitmap);
+//
+//                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//                    byteArray = stream.toByteArray();
+//                } catch (Exception e){
+//                    return;
+//                }
+//            }
+//        }
     }
 
     public void ImageCropFunction() {
@@ -470,14 +543,12 @@ public class EditParentProfileActivity extends AppCompatActivity {
             CropIntent = new Intent("com.android.camera.action.CROP");
             CropIntent.setDataAndType(uri, "image/*");
             CropIntent.putExtra("crop", "true");
-            CropIntent.putExtra("outputX", 180);
-            CropIntent.putExtra("outputY", 180);
             CropIntent.putExtra("aspectX", 8);
             CropIntent.putExtra("aspectY", 8);
             CropIntent.putExtra("scaleUpIfNeeded", true);
             CropIntent.putExtra("return-data", true);
 
-            startActivityForResult(CropIntent, 102);
+            startActivityForResult(CropIntent, 12);
 
         } catch (ActivityNotFoundException e) {
             return;
@@ -485,17 +556,116 @@ public class EditParentProfileActivity extends AppCompatActivity {
     }
 
     private void GetImageFromGallery() {
-        GalIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(Intent.createChooser(GalIntent, "Select Image From Gallery"), 101);
+        if (ContextCompat.checkSelfPermission(EditParentProfileActivity.this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(EditParentProfileActivity.this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUESTPPERMISSIONCODEWRITEEXTERNALSTORAGE);
+
+        } else {
+            // Permission has already been granted
+            GalIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(Intent.createChooser(GalIntent, "Select Picture From Gallery"), 11);
+        }
     }
 
     private void ClickImageFromCamera() {
-        CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        file = new File(Environment.getExternalStorageDirectory(),
-                "CeleriiImage" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-        uri = Uri.fromFile(file);
-        CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-        CamIntent.putExtra("return-data", true);
-        startActivityForResult(CamIntent, 100);
+        if (ContextCompat.checkSelfPermission(EditParentProfileActivity.this,
+                android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(EditParentProfileActivity.this,
+                    new String[]{android.Manifest.permission.CAMERA},
+                    REQUESTPPERMISSIONCODECAMERA);
+        } else {
+            CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
+
+            if(!directory.exists() && !directory.isDirectory()) {
+                if (directory.mkdirs()) {
+                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                } else {
+                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                }
+            } else {
+                file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+            }
+//            uri = Uri.fromFile(file);
+//            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//            CamIntent.putExtra("return-data", true);
+            startActivityForResult(CamIntent, 10);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUESTPPERMISSIONCODECAMERA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
+
+                    if(!directory.exists() && !directory.isDirectory()) {
+                        if (directory.mkdirs()) {
+                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                        } else {
+                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                        }
+                    } else {
+                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                    }
+
+//                    uri = Uri.fromFile(file);
+//                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+//                    CamIntent.putExtra("return-data", true);
+                    startActivityForResult(CamIntent, 10);
+                } else {
+
+                }
+                return;
+            }
+            case REQUESTPPERMISSIONCODEWRITEEXTERNALSTORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    GalIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(Intent.createChooser(GalIntent, "Select Picture From Gallery"), 11);
+                } else {
+
+                }
+                return;
+            }
+        }
+    }
+
+    void showDialogWithMessage (Spanned messageString) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

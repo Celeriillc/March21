@@ -1,27 +1,27 @@
 package com.celerii.celerii.Activities.Search.Parent;
 
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SearchResultsAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
-import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.SearchResultsRow;
-import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.StudentsSchoolsClassesandTeachersModel;
 import com.celerii.celerii.models.Teacher;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,7 +36,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -44,6 +43,7 @@ import java.util.HashMap;
  * A simple {@link Fragment} subclass.
  */
 public class ParentSearchResultsTeacherFragment extends Fragment {
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -56,6 +56,7 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
     TextView errorLayoutText;
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
+    private HashMap<String, Teacher> teacherMap;
     private ArrayList<String> existingConnections;
     private ArrayList<String> pendingIncomingRequests;
     private ArrayList<String> pendingOutgoingRequests;
@@ -64,7 +65,12 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
     int counter = 0;
-    String query;
+    String query, key;
+
+    String featureUseKey = "";
+    String featureName = "Parent Search Results (Teacher)";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     public ParentSearchResultsTeacherFragment() {
         // Required empty public constructor
@@ -82,10 +88,12 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_parent_search_results_teacher, container, false);
 
-        sharedPreferencesManager = new SharedPreferencesManager(getContext());
+        context = getContext();
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         Bundle args = getArguments();
         query = args.getString("Query");
+        key = args.getString("Search Key");
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -106,6 +114,7 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
+        teacherMap = new HashMap<>();
         existingConnections = new ArrayList<>();
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
@@ -173,11 +182,16 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
                             if (StringComparer.contains(query, searchSubject)) {
                                 if (!teachersList.containsKey(teacherKey)) {
                                     SearchResultsRow searchResultsRow = new SearchResultsRow(teacherKey, searchSubject, "", teacherPicURL, "Teacher");
-                                    searchResultsRowList.add(searchResultsRow);
+                                    if (!teacher.getDeleted()) {
+                                        searchResultsRowList.add(searchResultsRow);
+                                    }
+                                    teacherMap.put(teacherKey, teacher);
                                     teachersList.put(teacherKey, searchResultsRow);
                                 }
 
                                 if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                                    sendSearchAnalytics();
+
                                     if (searchResultsRowList.size() > 0) {
                                         //Collections.shuffle(searchResultsRowList);
                                         mAdapter.notifyDataSetChanged();
@@ -195,6 +209,7 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
                                 }
                             } else {
                                 if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                                    sendSearchAnalytics();
                                     if (searchResultsRowList.size() > 0) {
                                         //Collections.shuffle(searchResultsRowList);
                                         mAdapter.notifyDataSetChanged();
@@ -362,5 +377,81 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
 //
 //            }
 //        });
+    }
+
+    private void sendSearchAnalytics() {
+        String numberOfHits = String.valueOf(searchResultsRowList.size());
+
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> searchUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        searchUpdateMap.put("Search Analytics/Search/" + key + "/teacherHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/teacherHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/teacherHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/teacherHits", numberOfHits);
+
+        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/teacherHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/teacherHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/teacherHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/teacherHits", numberOfHits);
+
+        searchUpdateMap.put("Search Analytics/Search/" + key + "/teacherList", teacherMap);
+        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/teacherList", teacherMap);
+        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/teacherList", teacherMap);
+        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/teacherList", teacherMap);
+
+        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/teacherList", teacherMap);
+        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/teacherList", teacherMap);
+        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/teacherList", teacherMap);
+        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/teacherList", teacherMap);
+
+        DatabaseReference searchUpdateRef = FirebaseDatabase.getInstance().getReference();
+        searchUpdateRef.updateChildren(searchUpdateMap);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 }

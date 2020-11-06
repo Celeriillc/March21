@@ -9,20 +9,46 @@ public class Parent {
     String lastName;
     String email;
     String middleName;
+    String searchableFirstName;
+    String searchableLastName;
+    String searchableMiddleName;
     String gender;
     String occupation;
     String profilePicURL;
     String location;
     String maritalStatus;
     String phone;
+    Boolean isDeleted;
 
     public Parent() {
+        this.firstName = "";
+        this.lastName = "";
+        this.email = "";
+        this.middleName = "";
+        this.searchableFirstName = "";
+        this.searchableLastName = "";
+        this.searchableMiddleName = "";
+        this.gender = "";
+        this.occupation = "";
+        this.profilePicURL = "";
+        this.location = "";
+        this.maritalStatus = "";
+        this.phone = "";
+        this.isDeleted = false;
     }
 
     public Parent(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+    }
+
+    public Parent(String firstName, String lastName, String searchableFirstName, String searchableLastName, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.searchableFirstName = searchableFirstName;
+        this.searchableLastName = searchableLastName;
     }
 
     public Parent(String firstName, String lastName, String email, String middleName, String gender, String occupation) {
@@ -39,6 +65,20 @@ public class Parent {
         this.lastName = lastName;
         this.email = email;
         this.gender = gender;
+    }
+
+    public Parent(String firstName, String lastName, String email, String middleName, String gender, String occupation, String profilePicURL, String location, String maritalStatus, String phone, Boolean isDeleted) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.middleName = middleName;
+        this.gender = gender;
+        this.occupation = occupation;
+        this.profilePicURL = profilePicURL;
+        this.location = location;
+        this.maritalStatus = maritalStatus;
+        this.phone = phone;
+        this.isDeleted = isDeleted;
     }
 
     public String getFirstName() {
@@ -71,6 +111,30 @@ public class Parent {
 
     public void setMiddleName(String middleName) {
         this.middleName = middleName;
+    }
+
+    public String getSearchableFirstName() {
+        return searchableFirstName;
+    }
+
+    public void setSearchableFirstName(String searchableFirstName) {
+        this.searchableFirstName = searchableFirstName;
+    }
+
+    public String getSearchableLastName() {
+        return searchableLastName;
+    }
+
+    public void setSearchableLastName(String searchableLastName) {
+        this.searchableLastName = searchableLastName;
+    }
+
+    public String getSearchableMiddleName() {
+        return searchableMiddleName;
+    }
+
+    public void setSearchableMiddleName(String searchableMiddleName) {
+        this.searchableMiddleName = searchableMiddleName;
     }
 
     public String getGender() {
@@ -119,5 +183,13 @@ public class Parent {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 }

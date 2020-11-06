@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:gravity="center"
@@ -24,6 +25,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginBottom="10dp"
         android:layout_marginStart="15dp"
+        android:visibility="gone"
         android:background="#aaaaaa" />
 
     <LinearLayout
@@ -31,6 +33,7 @@
         android:layout_height="wrap_content"
         android:weightSum="2"
         android:padding="15dp"
+        android:visibility="gone"
         android:orientation="horizontal">
 
         <Button
@@ -91,6 +94,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="30dp"
         android:layout_marginStart="15dp"
+        android:visibility="gone"
         android:background="#aaaaaa" />
 
 </LinearLayout>

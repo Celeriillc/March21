@@ -28,12 +28,13 @@
             android:id="@+id/form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/base"
-            android:background="#ffffff"
+            android:background="@color/colorMessagesGray"
             android:orientation="horizontal"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:weightSum="10">
+            android:weightSum="10"
+            android:layout_above="@+id/base"
+            android:layout_alignParentStart="true">
 
             <ImageView
                 android:id="@+id/attachments"
@@ -52,31 +53,84 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="5dp"/>
 
-            <EditText
-                android:id="@+id/messageEditText"
+            <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="10"
-                android:paddingTop="10dp"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
-                android:paddingBottom="10dp"
-                android:hint="Send a message"
-                android:textColorHint="#CCCCCC"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/custom_edit_text_for_chat"
-                android:maxHeight="160dp"
-                android:textColor="#777777"
-                android:textSize="15dp" />
+                android:layout_marginEnd="15dp">
 
-            <ImageView
-                android:id="@+id/sendMessageButton"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@drawable/ic_play_circle_filled_black_24dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"/>
+                <EditText
+                    android:id="@+id/messageEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="65dp"
+                    android:paddingBottom="15dp"
+                    android:hint="Send a message"
+                    android:textColorHint="#CCCCCC"
+                    android:inputType="textMultiLine"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/custom_edit_text_for_messages"
+                    android:maxHeight="160dp"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true">
+
+
+                    <LinearLayout
+                        android:id="@+id/clipper"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="5dp"
+                        android:orientation="horizontal"
+                        android:background="@drawable/roundedbuttonaccent"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/sendMessageButton"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:background="@drawable/ic_send_white_24dp"/>
+
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+
+            </RelativeLayout>
+
+<!--            <EditText-->
+<!--                android:id="@+id/messageEditText"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="10"-->
+<!--                android:paddingTop="10dp"-->
+<!--                android:paddingStart="15dp"-->
+<!--                android:paddingEnd="15dp"-->
+<!--                android:paddingBottom="10dp"-->
+<!--                android:hint="Send a message"-->
+<!--                android:textColorHint="#CCCCCC"-->
+<!--                android:layout_gravity="center_vertical"-->
+<!--                android:background="@drawable/custom_edit_text_for_chat"-->
+<!--                android:maxHeight="160dp"-->
+<!--                android:textColor="#777777"-->
+<!--                android:textSize="15dp" />-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/sendMessageButton"-->
+<!--                android:layout_width="35dp"-->
+<!--                android:layout_height="35dp"-->
+<!--                android:background="@drawable/ic_play_circle_filled_black_24dp"-->
+<!--                android:layout_gravity="center_vertical"-->
+<!--                android:layout_marginStart="5dp"-->
+<!--                android:layout_marginEnd="5dp"/>-->
         </LinearLayout>
 
         <View
@@ -87,7 +141,7 @@
             android:background="#ffffff"
             android:layout_above="@id/form"/>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

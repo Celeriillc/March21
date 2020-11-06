@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="fill_parent"
-    android:weightSum="2">
+    android:background="@drawable/rounded_dialog_background">
 
     <ImageView
         android:id="@+id/dialogimage"
@@ -14,17 +14,17 @@
 
     <TextView
         android:id="@+id/dialogmessage"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="15dp"
-        android:textColor="@color/colorDeepGray"
+        android:textColor="@color/black"
         android:text=""/>
 
     <View
         android:layout_width="310dp"
         android:layout_gravity="center"
-        android:layout_height="0.2dp"
+        android:layout_height="0.0dp"
         android:background="#eeeeee"/>
 
     <LinearLayout
@@ -33,18 +33,24 @@
         android:orientation="vertical"
         android:weightSum="1">
 
-        <TextView
+        <Button
             android:id="@+id/optionone"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="15dp"
             android:padding="10dp"
             android:gravity="center"
+            android:textAllCaps="false"
             android:textSize="15sp"
-            android:textColor="@color/colorPrimaryPurple"
+            android:textColor="@color/white"
             android:textStyle="bold"
             android:text="Option One"
-            android:background="?attr/selectableItemBackground" />
+            android:background="@drawable/roundedbutton"
+            style="?android:attr/borderlessButtonStyle" />
 
     </LinearLayout>
 

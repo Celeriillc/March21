@@ -4,12 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.util.Pair;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
 import com.bumptech.glide.Glide;
@@ -38,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * Created by user on 7/8/2017.
@@ -46,6 +47,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHolder>{
     private List<Chats> chatsList;
+    private String chatTitle;
     private Context context;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabaseReference;
@@ -54,12 +56,13 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView message, time, noOfmesages;
         public ImageView messageStatus, otherProfilePic, imageFile;
-        LinearLayout imageClipper, layout;
+        LinearLayout imageClipper, profilePictureClipper, layout;
 
         public MyViewHolder(final View view) {
             super(view);
             message = (TextView) view.findViewById(R.id.message_text);
             imageClipper = (LinearLayout) view.findViewById(R.id.imageClipper);
+            profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             layout = (LinearLayout) view.findViewById(R.id.bubble_layout);
             messageStatus = (ImageView) view.findViewById(R.id.messagestatus);
             otherProfilePic = (ImageView) view.findViewById(R.id.otherprofilepic);
@@ -67,8 +70,9 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         }
     }
 
-    public ChatRowAdapter(List<Chats> chatsList, Context context) {
+    public ChatRowAdapter(List<Chats> chatsList, String chatTitle, Context context) {
         this.chatsList = chatsList;
+        this.chatTitle = chatTitle;
         this.context = context;
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
@@ -85,14 +89,15 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         final Chats chatList = chatsList.get(position);
 
         holder.imageClipper.setClipToOutline(true);
-        if (chatList.getRecieverID().equals(sharedPreferencesManager.getMyUserID())){ // Set isSeen = true in Firebase Database
+        holder.profilePictureClipper.setClipToOutline(true);
+        if (chatList.getReceiverID().equals(sharedPreferencesManager.getMyUserID())){ // Set isSeen = true in Firebase Database
             mDatabaseReference = mFirebaseDatabase.getReference();
 
             String path, pathToRecents;
             if (sharedPreferencesManager.getMyUserID().equals(chatList.getSenderID())){
-                path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getRecieverID() + "/" + chatList.getMessageID() + "/seen";
-                pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getRecieverID() + "/seen";
-            } else if (sharedPreferencesManager.getMyUserID().equals(chatList.getRecieverID())){
+                path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getReceiverID() + "/" + chatList.getMessageID() + "/seen";
+                pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getReceiverID() + "/seen";
+            } else if (sharedPreferencesManager.getMyUserID().equals(chatList.getReceiverID())){
                 path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/" + chatList.getMessageID() + "/seen";
                 pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/seen";
             } else {
@@ -113,7 +118,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         }
 
         if (chatList.isMine()){
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(chatList.getRecieverID())
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(chatList.getReceiverID())
                     .child(chatList.getSenderID()).child(chatList.getMessageID()).child("seen");
             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -217,13 +222,28 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
                 holder.layout.setLayoutParams(layoutParams);
 
             } else {
-                Glide.with(context)
-                        .load(chatList.getOtherProfilePicURL())
-                        .placeholder(R.drawable.ic_icons_google)
-                        .error(R.drawable.ic_icons_google)
-                        .centerCrop()
-                        .bitmapTransform(new CropCircleTransformation(context))
-                        .into(holder.otherProfilePic);
+                Drawable textDrawable;
+                if (!chatTitle.isEmpty()) {
+                    String[] nameArray = chatTitle.split(" ");
+                    if (nameArray.length == 1) {
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    } else {
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    }
+                    holder.otherProfilePic.setImageDrawable(textDrawable);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                }
+
+                if (!chatList.getOtherProfilePicURL().isEmpty()) {
+                    Glide.with(context)
+                            .load(chatList.getOtherProfilePicURL())
+                            .placeholder(textDrawable)
+                            .error(textDrawable)
+                            .centerCrop()
+                            .bitmapTransform(new CropCircleTransformation(context))
+                            .into(holder.otherProfilePic);
+                }
 
                 holder.message.setBackgroundResource(R.drawable.chat_bubble_you);
                 holder.layout.setGravity(Gravity.START);

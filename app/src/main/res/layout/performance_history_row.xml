@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
             android:paddingTop="4dp">
 
             <LinearLayout
@@ -72,17 +73,17 @@
                 android:orientation="horizontal"
                 android:layout_marginTop="5dp"
                 android:paddingStart="5dp"
-                android:weightSum="2">
+                android:weightSum="5">
 
                 <TextView
                     android:id="@+id/averagescorelabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="4"
                     android:textSize="15sp"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:text="Average Score"/>
+                    android:text="All Time Average Score"/>
 
                 <TextView
                     android:id="@+id/averagescore"
@@ -100,10 +101,10 @@
 
     </LinearLayout>
 
-    <!--<View-->
-        <!--android:id="@+id/newbadge"-->
-        <!--android:layout_width="5dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:background="@color/colorPrimary"/>-->
+<!--    <View-->
+<!--        android:id="@+id/newbadge"-->
+<!--        android:layout_width="5dp"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:background="@color/colorPrimary"/>-->
 
 </LinearLayout>

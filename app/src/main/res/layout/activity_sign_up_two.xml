@@ -25,15 +25,15 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
+                android:layout_marginStart="20dp"
                 android:src="@drawable/ic_icons_google" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="70dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:text="First, choose an account type..."/>
@@ -41,20 +41,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="13sp"
-                android:text="For this celerii account choose an account type. This would help us set your home screen..."/>
+                android:layout_marginTop="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorDarkGray"
+                android:textSize="14sp"
+                android:text="For this Celerii account choose an account type. This would help us setup your home screen..."/>
 
             <EditText
                 android:id="@+id/accounttype"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:hint="Account Type"
                 android:inputType="none"
                 android:editable="false"
@@ -66,10 +66,11 @@
             <Button
                 android:id="@+id/continue_"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="30dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:background="@drawable/roundedbutton"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"

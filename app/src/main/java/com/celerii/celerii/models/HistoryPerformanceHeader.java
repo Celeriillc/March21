@@ -10,6 +10,11 @@ public class HistoryPerformanceHeader {
     String[] xList;
 
     public HistoryPerformanceHeader() {
+        this.subjectHead = "";
+        this.averageScore = "";
+        this.previousScore = "";
+        this.yList = new Double[0];
+        this.xList = new String[0];
     }
 
     public HistoryPerformanceHeader(String subjectHead, String averageScore, String previousScore, Double[] yList, String[] xList) {

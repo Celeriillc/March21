@@ -1,47 +1,83 @@
 package com.celerii.celerii.Activities.Settings;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.celerii.celerii.Activities.EditPersonalInformationDetails.EmailEditActivity;
 import com.celerii.celerii.Activities.EditProfiles.EditTeacherProfileActivity;
+import com.celerii.celerii.Activities.Settings.DeleteAccount.DeleteAccountReasonActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.InviteParentsBottomSheet;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
+
+import java.util.HashMap;
 
 public class SettingsActivityTeacher extends AppCompatActivity {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
+
+    FirebaseAuth auth;
+    FirebaseDatabase mFirebaseDatabase;
+    DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     private Toolbar toolbar;
-    FirebaseAuth auth;
-    LinearLayout inviteFriends, editProfile, changePassword, manageMyClasses, pushNotifications, chat, appUpdate,
-        privacySettings, FAQ, reportAProblem, reportAbuse, contactUs, blog, termsOfService, privacyPolicy, appInfo,
-        aboutUs, viewMyAccounts;
+    LinearLayout inviteParents, editProfile, editEmail, changePassword, deleteAccount, pushNotifications, appUpdate,
+            FAQ, tutorials, reportAProblem, reportAbuse, contactUs, blog, termsOfService, privacyPolicy, appInfo,
+            aboutUs, viewMyAccounts;
+
+    String featureUseKey = "";
+    String featureName = "Settings Teacher";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings_teacher);
 
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(this);
+
         auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle("Options");
+        getSupportActionBar().setTitle("Settings");
 
-        inviteFriends = (LinearLayout) findViewById(R.id.inviteFriendsLayout);
+        inviteParents = (LinearLayout) findViewById(R.id.inviteparentslayout);
         editProfile = (LinearLayout) findViewById(R.id.editprofilelayout);
+        editEmail = (LinearLayout) findViewById(R.id.editemaillayout);
         changePassword = (LinearLayout) findViewById(R.id.changepasswordlayout);
-        manageMyClasses = (LinearLayout) findViewById(R.id.managemyclasseslayout);
+        deleteAccount = (LinearLayout) findViewById(R.id.deleteaccountlayout);
         pushNotifications = (LinearLayout) findViewById(R.id.pushnotificationlayout);
-        chat = (LinearLayout) findViewById(R.id.chatlayout);
         appUpdate = (LinearLayout) findViewById(R.id.appupdateslayout);
-        privacySettings = (LinearLayout) findViewById(R.id.privacysettingslayout);
         FAQ = (LinearLayout) findViewById(R.id.faqlayout);
+        tutorials = (LinearLayout) findViewById(R.id.tutorialslayout);
         reportAProblem = (LinearLayout) findViewById(R.id.reportaproblemlayout);
         reportAbuse = (LinearLayout) findViewById(R.id.reportabuselayout);
         contactUs = (LinearLayout) findViewById(R.id.contactuslayout);
@@ -51,10 +87,11 @@ public class SettingsActivityTeacher extends AppCompatActivity {
         appInfo = (LinearLayout) findViewById(R.id.appinfolayout);
         aboutUs = (LinearLayout) findViewById(R.id.aboutuslayout);
 
-        inviteFriends.setOnClickListener(new View.OnClickListener() {
+        inviteParents.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(context, InviteParentsHomeActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -62,8 +99,14 @@ public class SettingsActivityTeacher extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(SettingsActivityTeacher.this, EditTeacherProfileActivity.class);
-                Bundle b = new Bundle();
-                //b.putString("id", auth.getCurrentUser().getUid());
+                startActivity(I);
+            }
+        });
+
+        editEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(SettingsActivityTeacher.this, EmailEditActivity.class);
                 startActivity(I);
             }
         });
@@ -76,12 +119,10 @@ public class SettingsActivityTeacher extends AppCompatActivity {
             }
         });
 
-        manageMyClasses.setOnClickListener(new View.OnClickListener() {
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent I = new Intent(SettingsActivityTeacher.this, ManageMyClassesActivity.class);
-                Bundle b = new Bundle();
-                b.putString("id", auth.getCurrentUser().getUid());
+                Intent I = new Intent(SettingsActivityTeacher.this, DeleteAccountReasonActivity.class);
                 startActivity(I);
             }
         });
@@ -96,27 +137,10 @@ public class SettingsActivityTeacher extends AppCompatActivity {
             }
         });
 
-        chat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
         appUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(SettingsActivityTeacher.this, AppUpdateActivity.class);
-                startActivity(I);
-            }
-        });
-
-        privacySettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent I = new Intent(SettingsActivityTeacher.this, PrivacySettingsTeacher.class);
-                Bundle b = new Bundle();
-                b.putString("id", auth.getCurrentUser().getUid());
                 startActivity(I);
             }
         });
@@ -127,6 +151,14 @@ public class SettingsActivityTeacher extends AppCompatActivity {
                 Intent I = new Intent(SettingsActivityTeacher.this, FAQRowActivity.class);
                 Bundle b = new Bundle();
                 b.putString("id", auth.getCurrentUser().getUid());
+                startActivity(I);
+            }
+        });
+
+        tutorials.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(SettingsActivityTeacher.this, TutorialsActivity.class);
                 startActivity(I);
             }
         });
@@ -164,7 +196,26 @@ public class SettingsActivityTeacher extends AppCompatActivity {
         blog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String url = "https://stackoverflow.com/questions/23255026/open-chrome-app-with-url";
+//                try {
+//                    Intent i = new Intent("android.intent.action.MAIN");
+//                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+//                    i.addCategory("android.intent.category.LAUNCHER");
+//                    i.setData(Uri.parse(url));
+//                    startActivity(i);
+//                }
+//                catch(ActivityNotFoundException e) {
+//                    // Chrome is not installed
+//                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//                    startActivity(i);
+//                }
 
+                Intent I = new Intent(SettingsActivityTeacher.this, BrowserActivityForInfo.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Header", "Blog");
+                bundle.putString("URL", url);
+                I.putExtras(bundle);
+                startActivity(I);
             }
         });
 
@@ -218,11 +269,55 @@ public class SettingsActivityTeacher extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home){
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getShortDynamicLink() {
+
     }
 }

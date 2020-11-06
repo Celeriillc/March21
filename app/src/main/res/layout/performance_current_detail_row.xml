@@ -67,7 +67,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -85,7 +85,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:paddingEnd="10dp"
+                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -112,7 +112,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:paddingEnd="10dp"
+                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -139,7 +139,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -151,7 +151,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:paddingEnd="10dp"
+                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -166,7 +166,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -178,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:paddingEnd="10dp"
+                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -193,7 +193,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -205,7 +205,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:paddingEnd="10dp"
+                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -220,7 +220,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="10dp"
+                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -232,13 +232,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:paddingEnd="10dp"
+                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
         <View
             android:layout_width="20dp"
-            android:layout_height="0.5dp"
+            android:layout_height="0dp"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="0dp"
             android:layout_marginStart="15dp"

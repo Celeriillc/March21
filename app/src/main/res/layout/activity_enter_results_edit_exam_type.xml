@@ -4,7 +4,8 @@
     android:id="@+id/activity_gender_edit"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <include android:id="@+id/hometoolbar"
         layout="@layout/home_toolbar"/>
@@ -36,11 +37,11 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="0dp"
                 android:background="#aaaaaa"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="0dp"/>
 
             <RadioGroup
                 android:id="@+id/testtypegroup"
@@ -54,17 +55,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="25dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="0dp"
                     android:checked="true"
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Continous Assessment"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -77,15 +78,15 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="25dp"
                     android:layout_marginTop="5dp"
+                    android:layout_marginBottom="0dp"
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:textStyle="bold"
                     android:text="Examination"/>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
+                    android:layout_height="0.0dp"
                     android:background="#eeeeee"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="15dp"
@@ -98,11 +99,11 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="25dp"
                     android:layout_marginTop="5dp"
+                    android:layout_marginBottom="0dp"
                     android:layoutDirection="rtl"
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
-                    android:text="Other test type"
-                    android:textStyle="bold"/>
+                    android:text="Other test type"/>
 
             </RadioGroup>
         </LinearLayout>

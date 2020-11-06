@@ -1,18 +1,23 @@
 package com.celerii.celerii.Activities.StudentPerformance.Current;
 
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.PerformanceCurrentDetailAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.AcademicRecordStudent;
 import com.celerii.celerii.models.Class;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,7 +41,8 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
-    LinearLayout errorLayout, progressLayout;
+    RelativeLayout errorLayout, progressLayout;
+    TextView errorLayoutText;
 
     Toolbar toolbar;
     private ArrayList<AcademicRecordStudent> academicRecordStudentList;
@@ -45,6 +51,12 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     LinearLayoutManager mLayoutManager;
 
     String student, studentID, subject, term, year, subject_year_term;
+    int isNewCounter = 0;
+
+    String featureUseKey = "";
+    String featureName = "Current Academic Results Detail";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +66,10 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
         sharedPreferencesManager = new SharedPreferencesManager(this);
 
         Bundle bundle = getIntent().getExtras();
-        student = bundle.getString("Active Student");
+        studentID = bundle.getString("Active Student");
         subject = bundle.getString("Subject");
         term = bundle.getString("Term");
         year = bundle.getString("Year");
-        studentID = student.split(" ")[0];
         subject_year_term = subject + "_" + year + "_" + term;
 
         auth = FirebaseAuth.getInstance();
@@ -77,47 +88,133 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
-        errorLayout = (LinearLayout) findViewById(R.id.errorlayout);
-        progressLayout = (LinearLayout) findViewById(R.id.progresslayout);
+        errorLayout = (RelativeLayout) findViewById(R.id.errorlayout);
+        errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        progressLayout = (RelativeLayout) findViewById(R.id.progresslayout);
 
         recyclerView.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
 
         academicRecordStudentList = new ArrayList<>();
         mAdapter = new PerformanceCurrentDetailAdapter(academicRecordStudentList, this);
-        loadFromFirebase();
+        loadNewFromFirebase();
         recyclerView.setAdapter(mAdapter);
-
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        loadFromFirebase();
+                        loadNewFromFirebase();
                     }
                 }
         );
     }
 
+    void loadNewFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
+        isNewCounter = 0;
+        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordStudent").child(studentID).child(subject_year_term);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
+                    academicRecordStudentList.clear();
+
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        final AcademicRecordStudent academicRecordStudent = postSnapshot.getValue(AcademicRecordStudent.class);
+                        academicRecordStudent.setRecordKey(postSnapshot.getKey());
+
+                        mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(academicRecordStudent.getClassID());
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()){
+                                    Class classInstance = dataSnapshot.getValue(Class.class);
+                                    academicRecordStudent.setClassName(classInstance.getClassName());
+                                    academicRecordStudentList.add(academicRecordStudent);
+                                }
+
+                                if (childrenCount == academicRecordStudentList.size()){
+                                    for (final AcademicRecordStudent academicRecordStudent: academicRecordStudentList) {
+                                        String subject_year_term = academicRecordStudent.getSubject_AcademicYear_Term();
+                                        String key = academicRecordStudent.getRecordKey();
+
+                                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(studentID).child(subject_year_term).child(key).child("status");
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                if (dataSnapshot.exists()) {
+                                                    boolean isNew = dataSnapshot.getValue(boolean.class);
+                                                    if (isNew) {
+                                                        academicRecordStudent.setNew(true);
+                                                    } else {
+                                                        academicRecordStudent.setNew(false);
+                                                    }
+                                                } else {
+                                                    academicRecordStudent.setNew(false);
+                                                }
+
+                                                isNewCounter++;
+
+                                                if (isNewCounter == academicRecordStudentList.size()) {
+                                                    mAdapter.notifyDataSetChanged();
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.GONE);
+                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     int iterator = 0;
     private void loadFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecord/AcademicRecordStudent").child(studentID);
         mDatabaseReference.orderByChild("subject_AcademicYear_Term").equalTo(subject_year_term).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -146,7 +243,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
                                         AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
                                         String recordKey = academicRecordStudent.getRecordKey();
                                         String class_subject_year_term = academicRecordStudent.getClassID() + "_" + subject_year_term;
-                                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(auth.getCurrentUser().getUid()).child(studentID).child("subjects").child(subject).child("Class_Subject_AcademicYear_Term").child(class_subject_year_term).child("SingleRecords").child(recordKey).child("status");
+                                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(studentID).child("subjects").child(subject).child("Class_Subject_AcademicYear_Term").child(class_subject_year_term).child("SingleRecords").child(recordKey).child("status");
                                         mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -193,6 +290,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText("You don't have any " + subject + " results for the " + Term.Term(term) + " in " + year + ".");
                 }
             }
 
@@ -204,6 +302,47 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        updateBadges();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home){
@@ -212,16 +351,21 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void updateBadges(){
-        HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
-        for (int i = 0; i < academicRecordStudentList.size(); i++) {
-            AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
-            String class_subject_year_term = academicRecordStudent.getClassID() + "_" + subject_year_term;
-            updateBadgesMap.put("AcademicRecordParentNotification/" + auth.getCurrentUser().getUid() + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_year_term + "/status", false);
-            break;
+    public void updateBadges() {
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+            String subject_year_term = "";
+            if (academicRecordStudentList != null) {
+                for (int i = 0; i < academicRecordStudentList.size(); i++) {
+                    AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
+                    subject_year_term = academicRecordStudent.getSubject_AcademicYear_Term();
+                    String key = academicRecordStudent.getRecordKey();
+                    updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/" + key + "/status", false);
+                }
+            }
+            updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/status", false);
+            mDatabaseReference = mFirebaseDatabase.getReference();
+            mDatabaseReference.updateChildren(updateBadgesMap);
         }
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        mDatabaseReference.updateChildren(updateBadgesMap);
     }
-
 }

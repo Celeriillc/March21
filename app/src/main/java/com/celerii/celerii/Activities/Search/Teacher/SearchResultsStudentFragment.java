@@ -2,26 +2,26 @@ package com.celerii.celerii.Activities.Search.Teacher;
 
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SearchResultsAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
-import com.celerii.celerii.models.NewChatRowModel;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,8 +36,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 
 
 /**
@@ -56,6 +55,8 @@ public class SearchResultsStudentFragment extends Fragment {
     TextView errorLayoutText;
 
     ArrayList<SearchResultsRow> searchResultsRowList;
+    HashMap<String, Student> studentMap;
+    HashMap<String, SearchResultsRow> searchResultsRowMap;
     ArrayList<String> existingConnections;
     ArrayList<String> pendingIncomingRequests;
     ArrayList<String> pendingOutgoingRequests;
@@ -64,8 +65,13 @@ public class SearchResultsStudentFragment extends Fragment {
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
     int primaryLoopControl, secondaryLoopControl;
-    String query;
+    String query, key;
     int counter = 0;
+
+    String featureUseKey = "";
+    String featureName = "Teacher Search Results (Student)";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     public SearchResultsStudentFragment() {
         // Required empty public constructor
@@ -87,6 +93,7 @@ public class SearchResultsStudentFragment extends Fragment {
 
         Bundle args = getArguments();
         query = args.getString("Query");
+        key = args.getString("Search Key");
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -107,6 +114,8 @@ public class SearchResultsStudentFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
+        studentMap = new HashMap<>();
+        searchResultsRowMap = new HashMap<>();
         existingConnections = new ArrayList<>();
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
@@ -159,7 +168,7 @@ public class SearchResultsStudentFragment extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         counter++;
                         if (dataSnapshot.exists()) {
-                            Student student = dataSnapshot.getValue(Student.class);
+                            final Student student = dataSnapshot.getValue(Student.class);
                             final String studentKey = dataSnapshot.getKey();
                             final String studentFirstName = student.getFirstName();
                             final String studentLastName = student.getLastName();
@@ -176,10 +185,20 @@ public class SearchResultsStudentFragment extends Fragment {
                                             Class classModel = dataSnapshot.getValue(Class.class);
                                             final String classID = dataSnapshot.getKey();
                                             final String className = classModel.getClassName();
-                                            SearchResultsRow searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentLastName, className, studentPicURL, "Student");
-                                            searchResultsRowList.add(searchHistoryRow);
+                                            SearchResultsRow searchHistoryRow;
+                                            if (studentMiddleName.isEmpty()) {
+                                                searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentLastName, className, studentPicURL, "Student");
+                                            } else {
+                                                searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentMiddleName + " " + studentLastName, className, studentPicURL, "Student");
+                                            }
+                                            if (!searchResultsRowMap.containsKey(studentKey)) {
+                                                searchResultsRowMap.put(studentKey, searchHistoryRow);
+                                                searchResultsRowList.add(searchHistoryRow);
+                                                studentMap.put(studentKey, student);
+                                            }
 
                                             if (counter == classesStudentsModelList.size()) {
+                                                sendSearchAnalytics();
                                                 if (searchResultsRowList.size() > 0) {
                                                     //Collections.shuffle(searchResultsRowList);
                                                     mAdapter.notifyDataSetChanged();
@@ -205,6 +224,7 @@ public class SearchResultsStudentFragment extends Fragment {
                                 });
                             } else {
                                 if (counter == classesStudentsModelList.size()) {
+                                    sendSearchAnalytics();
                                     if (searchResultsRowList.size() > 0) {
                                         //Collections.shuffle(searchResultsRowList);
                                         mAdapter.notifyDataSetChanged();
@@ -344,5 +364,81 @@ public class SearchResultsStudentFragment extends Fragment {
 //            }
 //        });
 
+    }
+
+    private void sendSearchAnalytics() {
+        String numberOfHits = String.valueOf(searchResultsRowList.size());
+
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> searchUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        searchUpdateMap.put("Search Analytics/Search/" + key + "/studentHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/studentHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/studentHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/studentHits", numberOfHits);
+
+        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/studentHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/studentHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/studentHits", numberOfHits);
+        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/studentHits", numberOfHits);
+
+        searchUpdateMap.put("Search Analytics/Search/" + key + "/studentResults", studentMap);
+        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/studentResults", studentMap);
+        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/studentResults", studentMap);
+        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/studentResults", studentMap);
+
+        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/studentResults", studentMap);
+        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/studentResults", studentMap);
+        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/studentResults", studentMap);
+        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/studentResults", studentMap);
+
+        DatabaseReference searchUpdateRef = FirebaseDatabase.getInstance().getReference();
+        searchUpdateRef.updateChildren(searchUpdateMap);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 }

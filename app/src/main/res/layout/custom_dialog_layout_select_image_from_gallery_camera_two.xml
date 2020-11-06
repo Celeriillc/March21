@@ -3,7 +3,18 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@drawable/rounded_dialog_background"
     android:weightSum="2">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="15dp"
+        android:layout_marginTop="15dp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:text="Upload Photo"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -12,12 +23,12 @@
         android:paddingEnd="15dp"
         android:layout_marginTop="15dp"
         android:textColor="@color/colorDeepGray"
-        android:text="Upload an existing photo from your library or take a new one"/>
+        android:text="Upload an existing photo from your photo gallery or take a new one with your phone camera"/>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="0.2dp"
-        android:layout_marginTop="15dp"
+        android:layout_height="0.0dp"
+        android:layout_marginTop="25dp"
         android:background="#eeeeee"/>
 
     <LinearLayout
@@ -71,19 +82,38 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="0.2dp"
+        android:layout_height="0.0dp"
         android:background="#eeeeee"/>
 
-    <TextView
+    <Button
         android:id="@+id/cancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
+        android:layout_weight="1"
+        android:padding="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="15dp"
         android:gravity="center"
         android:textSize="15sp"
+        android:textColor="@color/colorDarkGray"
         android:textStyle="bold"
-        android:textColor="@color/colorPrimaryPurple"
         android:text="Cancel"
-        android:background="?attr/selectableItemBackground" />
+        android:textAllCaps="false"
+        android:background="@drawable/rounded_button_white_dark_gray_border"
+        style="?android:attr/borderlessButtonStyle" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/cancel"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:padding="15dp"-->
+<!--        android:gravity="center"-->
+<!--        android:textSize="15sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:textColor="@color/colorPrimaryPurple"-->
+<!--        android:text="Cancel"-->
+<!--        android:background="?attr/selectableItemBackground" />-->
 
 </LinearLayout>

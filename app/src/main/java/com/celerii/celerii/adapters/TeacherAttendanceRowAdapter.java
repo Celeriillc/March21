@@ -6,13 +6,17 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,17 +26,27 @@ import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditSubjec
 import com.celerii.celerii.Activities.StudentAttendance.AttendanceDetailActivity;
 import com.celerii.celerii.Activities.StudentAttendance.TeacherAttendanceActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Term;
+import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.SubscriptionModel;
 import com.celerii.celerii.models.TeacherAttendanceHeader;
 import com.celerii.celerii.models.TeacherAttendanceRow;
 import com.bumptech.glide.Glide;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +60,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
 public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     SharedPreferencesManager sharedPreferencesManager;
-    boolean isExpanded;
+    DatabaseReference mDatabaseReference;
     private List<TeacherAttendanceRow> teacherAttendanceRowList;
     private Context context;
     private TeacherAttendanceHeader teacherAttendanceHeader;
@@ -55,13 +69,14 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView studentName;
+        public TextView studentName, subscriptionFlag;
         public ImageView studentPic, attendanceMarker;
         public View clickableView;
 
         public MyViewHolder(final View view) {
             super(view);
             studentName = (TextView) view.findViewById(R.id.kidname);
+            subscriptionFlag = (TextView) view.findViewById(R.id.subscriptionflag);
             studentPic = (ImageView) view.findViewById(R.id.kidPicture);
             attendanceMarker = (ImageView) view.findViewById(R.id.attendanceMarker);
             clickableView = view;
@@ -70,8 +85,9 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView className, subject, term, date, teacher, noOfstudents, noOfBoys, noOfGirls;
-        LinearLayout classLayout, subjectLayout, dayLayout, dateLayout, teacherLayout, noOfStudentsLayout, noOfBoysLayout, noOfGirlsLayout, chiefLayout, deleteRecord;
+        LinearLayout classLayout, subjectLayout, dayLayout, dateLayout, teacherLayout, noOfStudentsLayout, noOfBoysLayout, noOfGirlsLayout, chiefLayout, deleteRecordLayout;
         RelativeLayout errorLayout;
+        Button deleteRecord;
         TextView errorLayoutText;
 
         public HeaderViewHolder(View view) {
@@ -97,13 +113,16 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
             errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
             errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
             chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
-            deleteRecord = (LinearLayout) view.findViewById(R.id.deleterecord);
+            deleteRecordLayout = (LinearLayout) view.findViewById(R.id.deleterecordlayout);
+
+            deleteRecord = (Button) view.findViewById(R.id.deleterecord);
         }
     }
 
     public TeacherAttendanceRowAdapter(List<TeacherAttendanceRow> teacherAttendanceRowList, TeacherAttendanceHeader teacherAttendanceHeader,
                                        Context context) {
         sharedPreferencesManager = new SharedPreferencesManager(context);
+        this.mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         this.teacherAttendanceRowList = teacherAttendanceRowList;
         this.teacherAttendanceHeader = teacherAttendanceHeader;
         this.context = context;
@@ -129,16 +148,16 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
         if(holder instanceof HeaderViewHolder) {
             if (teacherAttendanceRowList.size() <= 1){
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
-                ((HeaderViewHolder) holder).deleteRecord.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).deleteRecordLayout.setVisibility(View.GONE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
                 String errorMessage = "There is no " + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + " attendance information recorded for " + "<b>" + teacherAttendanceHeader.getClassName() + "</b>" + " on the " + Date.getFormalDocumentDate(teacherAttendanceHeader.getDate()) + ".";
                 ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
             } else {
                 String myID = sharedPreferencesManager.getMyUserID();
                 if (myID.equals(teacherAttendanceHeader.getTeacherID())) {
-                    ((HeaderViewHolder) holder).deleteRecord.setVisibility(View.VISIBLE);
+                    ((HeaderViewHolder) holder).deleteRecordLayout.setVisibility(View.VISIBLE);
                 } else {
-                    ((HeaderViewHolder) holder).deleteRecord.setVisibility(View.GONE);
+                    ((HeaderViewHolder) holder).deleteRecordLayout.setVisibility(View.GONE);
                 }
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.GONE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -196,16 +215,14 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                 public void onClick(View v) {
                     final Dialog dialog = new Dialog(context);
                     dialog.setContentView(R.layout.custom_dialog_layout_delete_academic_record_teacher);
-                    TextView cancel = (TextView) dialog.findViewById(R.id.cancel);
-                    TextView delete = (TextView) dialog.findViewById(R.id.delete);
-                    dialog.show();
-
-                    cancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            dialog.dismiss();
-                        }
-                    });
+                    Button delete = (Button) dialog.findViewById(R.id.delete);
+                    Button cancel = (Button) dialog.findViewById(R.id.cancel);
+                    try {
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.show();
+                    } catch (Exception e) {
+                        return;
+                    }
 
                     delete.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -214,44 +231,89 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                             dialog.dismiss();
                         }
                     });
+
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
                 }
             });
         }
         else {
             final TeacherAttendanceRow teacherAttendanceRow = teacherAttendanceRowList.get(position);
+            final Bundle b = new Bundle();
 
             ((MyViewHolder)holder).studentName.setText(teacherAttendanceRow.getName());
+
+            Drawable textDrawable;
+            if (!teacherAttendanceRow.getName().isEmpty()) {
+                String[] nameArray = teacherAttendanceRow.getName().split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                }
+                ((MyViewHolder) holder).studentPic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
 
             if (!teacherAttendanceRow.getImageURL().isEmpty()) {
                 Glide.with(context)
                         .load(teacherAttendanceRow.getImageURL())
-                        .crossFade()
-                        .placeholder(R.drawable.profileimageplaceholder)
-                        .error(R.drawable.profileimageplaceholder)
-                        .centerCrop().bitmapTransform(new CropCircleTransformation(context))
-                        .into(((MyViewHolder)holder).studentPic);
-            } else {
-                Glide.with(context)
-                        .load(R.drawable.profileimageplaceholder)
-                        .crossFade()
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
                         .centerCrop()
                         .bitmapTransform(new CropCircleTransformation(context))
-                        .into(((MyViewHolder)holder).studentPic);
+                        .into(((MyViewHolder) holder).studentPic);
             }
 
-            if (teacherAttendanceRow.getAttendanceStatus().equals("Present")) {
-                ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_present_24dp);
-            } else if (teacherAttendanceRow.getAttendanceStatus().equals("Absent")) {
-                ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_absent_24dp);
-            } else if (teacherAttendanceRow.getAttendanceStatus().equals("Late")) {
-                ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_late_24dp);
+            Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
+            Gson gson = new Gson();
+            String subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationTeachers();
+            Type type = new TypeToken<HashMap<String, SubscriptionModel>>() {}.getType();
+            HashMap<String, SubscriptionModel> subscriptionModelMap = gson.fromJson(subscriptionModelJSON, type);
+            SubscriptionModel subscriptionModel = new SubscriptionModel();
+            if (subscriptionModelMap != null) {
+                subscriptionModel = subscriptionModelMap.get(teacherAttendanceRow.getStudentID());
+                if (subscriptionModel == null) {
+                    subscriptionModel = new SubscriptionModel();
+                }
             }
+            Boolean isExpired = Date.compareDates(teacherAttendanceRow.getDate(), subscriptionModel.getExpiryDate());
 
+            if (isOpenToAll) {
+                if (teacherAttendanceRow.getAttendanceStatus().equals("Present")) {
+                    ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_present_24dp);
+                } else if (teacherAttendanceRow.getAttendanceStatus().equals("Absent")) {
+                    ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_absent_24dp);
+                } else if (teacherAttendanceRow.getAttendanceStatus().equals("Late")) {
+                    ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_late_24dp);
+                }
+                b.putBoolean("isSubscribed", true);
+            } else {
+                if (!isExpired) {
+                    if (teacherAttendanceRow.getAttendanceStatus().equals("Present")) {
+                        ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_present_24dp);
+                    } else if (teacherAttendanceRow.getAttendanceStatus().equals("Absent")) {
+                        ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_absent_24dp);
+                    } else if (teacherAttendanceRow.getAttendanceStatus().equals("Late")) {
+                        ((MyViewHolder)holder).attendanceMarker.setImageResource(R.drawable.ic_attendance_late_24dp);
+                    }
+                    b.putBoolean("isSubscribed", true);
+                } else {
+                    ((MyViewHolder)holder).attendanceMarker.setVisibility(View.GONE);
+                    ((MyViewHolder) holder).subscriptionFlag.setText(R.string.not_subscribed_long);
+                    ((MyViewHolder) holder).subscriptionFlag.setVisibility(View.VISIBLE);
+                    b.putBoolean("isSubscribed", false);
+                }
+            }
 
             ((MyViewHolder)holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Bundle b = new Bundle();
                     b.putString("date", teacherAttendanceRow.getDate());
                     b.putString("status", teacherAttendanceRow.getAttendanceStatus());
                     b.putString("remark", teacherAttendanceRow.getRemark());
@@ -259,6 +321,8 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                     b.putString("day", teacherAttendanceRow.getDay());
                     b.putString("key", teacherAttendanceRow.getKey());
                     b.putString("ID", teacherAttendanceRow.getStudentID());
+                    b.putString("name", teacherAttendanceRow.getName());
+                    b.putString("accountType", "Teacher");
                     Intent I = new Intent(context, AttendanceDetailActivity.class);
                     I.putExtras(b);
                     context.startActivity(I);
@@ -351,35 +415,72 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
     }
 
     private void deleteAttendanceRecord() {
-        String attendanceKey = teacherAttendanceHeader.getKey();
-        String activeClass = teacherAttendanceHeader.getClassID();
-
-        Map<String, Object> deleteAttendance = new HashMap<String, Object>();
-        deleteAttendance.put("AttendenceClass/" + activeClass + "/" + attendanceKey, null);
-        for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
-            if (teacherAttendanceRowList.get(i).getStudentID() != null) {
-                deleteAttendance.put("AttendenceClass-Students/" + activeClass + "/" + attendanceKey + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(), null);
-                deleteAttendance.put("AttendenceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + attendanceKey, null);
-            }
+        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+            showDialogWithMessage("Internet is down, check your connection and try again");
+            return;
         }
 
-        DatabaseReference mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mDatabaseReference.updateChildren(deleteAttendance, new DatabaseReference.CompletionListener() {
+        final String attendanceKey = teacherAttendanceHeader.getKey();
+        final String activeClass = teacherAttendanceHeader.getClassID();
+        final ArrayList<String> parentsList = new ArrayList<>();
+        final Map<String, Object> deleteAttendance = new HashMap<String, Object>();
+
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("AttendanceParentRecipients").child(attendanceKey);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                showDialogWithMessage("Attendance record has been deleted");
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        parentsList.add(postSnapshot.getKey());
+                    }
+                }
+
+                deleteAttendance.put("AttendenceClass/" + activeClass + "/" + attendanceKey, null);
+                for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
+                    if (!teacherAttendanceRowList.get(i).getStudentID().equals("")) {
+                        deleteAttendance.put("AttendenceClass-Students/" + activeClass + "/" + attendanceKey + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(), null);
+                        deleteAttendance.put("AttendenceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + attendanceKey, null);
+                    }
+                }
+
+                for (String parentID: parentsList) {
+                    deleteAttendance.put("AttendanceParentRecipients/" + attendanceKey + "/" + parentID, null);
+                    deleteAttendance.put("NotificationParent/" + parentID + "/" + attendanceKey, null);
+                }
+
+                mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                mDatabaseReference.updateChildren(deleteAttendance, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            showDialogWithMessageAndClose("Attendance record has been deleted");
+                        } else {
+                            showDialogWithMessage("Attendance record could not be deleted");
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }
 
-    void showDialogWithMessage (String messageString) {
+    private void showDialogWithMessageAndClose (String messageString) {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_unary_message_dialog);
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 
@@ -390,6 +491,32 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
             public void onClick(View v) {
                 dialog.dismiss();
                 ((Activity)context).finish();
+            }
+        });
+    }
+
+    private void showDialogWithMessage (String messageString) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
             }
         });
     }

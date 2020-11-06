@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <include android:id="@+id/toolbar"
+        layout="@layout/home_toolbar"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
+
+        <ImageView
+            android:id="@+id/campaignbackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <ImageView
+            android:id="@+id/campaignicon"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="120dp"
+            android:src="@drawable/ic_icons_google"/>
+
+        <TextView
+            android:id="@+id/campaigntitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/campaignicon"
+            android:layout_marginTop="30dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:textSize="25sp"
+            android:text="Campaign"/>
+
+        <TextView
+            android:id="@+id/campaigntext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/campaigntitle"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="30dp"
+            android:gravity="center"
+            android:text="Campaign Text"/>
+
+        <Button
+            android:id="@+id/campaignaction"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:text="GoTo"
+            android:background="@drawable/roundedbutton"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -41,6 +41,18 @@
                 android:textColor="@android:color/black"
                 android:text="Martin Oriabure"/>
 
+            <TextView
+                android:id="@+id/subscriptionflag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="NSD"
+                android:visibility="gone"/>
+
             <ImageView
                 android:id="@+id/attendanceMarker"
                 android:layout_width="25dp"

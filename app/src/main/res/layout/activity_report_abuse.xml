@@ -5,63 +5,90 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:background="@color/white"
     tools:context="com.celerii.celerii.Activities.Settings.ReportAbuseActivity">
 
     <include android:id="@+id/hometoolbar"
         layout="@layout/home_toolbar"/>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="20dp">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/reportheader"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:paddingStart="15dp"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
-            android:textSize="20sp"/>
+            android:orientation="vertical"
+            android:paddingTop="20dp">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.2dp"
-            android:background="#eeeeee"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"/>
+            <TextView
+                android:id="@+id/reportheader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:textSize="15sp" />
 
-        <TextView
-            android:id="@+id/reportuserhint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Kindly report what happened and we'll look into it and send you a follow up email"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
-            android:textSize="14sp"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="#eeeeee"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"/>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.2dp"
-            android:background="#eeeeee"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"/>
+            <TextView
+                android:id="@+id/reportuserhint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kindly report what happened and we'll look into it and send you a follow up email"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:textSize="14sp"/>
 
-        <EditText
-            android:id="@+id/reportmessage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
-            android:textColor="@android:color/black"
-            android:textSize="15sp"
-            android:hint="Compose message"
-            android:background="@android:color/transparent"
-            android:focusable="true"
-            android:focusableInTouchMode="true"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="#eeeeee"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"/>
 
-    </LinearLayout>
+            <EditText
+                android:id="@+id/reportmessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:minLines="5"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:hint="Compose message"
+                android:background="@drawable/edittext_background"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
+
+            <Button
+                android:id="@+id/reportuser"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:text="Report User"
+                android:background="@drawable/roundedbutton"
+                style="?android:attr/borderlessButtonStyle" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

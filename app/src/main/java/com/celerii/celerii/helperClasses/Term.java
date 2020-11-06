@@ -45,9 +45,9 @@ public class Term {
 
         if (month >= 9 && month <= 12){
             term = "1";
-        } else if (month >= 1 && month <= 4){
+        } else if (month >= 1 && month <= 4) {
             term = "2";
-        } else if (month > 4 && month <= 7){
+        } else if (month > 4 && month <= 8) {
             term = "3";
         }
 
@@ -74,7 +74,7 @@ public class Term {
         return term;
     }
 
-    public static String getTermLong(String month){
+    public static String getTermLong(String month) {
         String term = Term(getTermShort(month));
         return term;
     }

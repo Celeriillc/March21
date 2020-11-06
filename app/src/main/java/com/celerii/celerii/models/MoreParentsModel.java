@@ -10,6 +10,11 @@ public class MoreParentsModel {
     public MoreParentsModel() {
     }
 
+    public MoreParentsModel(String childId, String childName) {
+        this.childId = childId;
+        this.childName = childName;
+    }
+
     public MoreParentsModel(String childId, String childName, String childPicUrl) {
         this.childId = childId;
         this.childName = childName;

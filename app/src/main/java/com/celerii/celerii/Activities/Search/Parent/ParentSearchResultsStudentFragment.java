@@ -1,25 +1,27 @@
 package com.celerii.celerii.Activities.Search.Parent;
 
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SearchResultsAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
-import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,14 +33,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class ParentSearchResultsStudentFragment extends Fragment {
+    Context context;
+    SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -50,18 +55,24 @@ public class ParentSearchResultsStudentFragment extends Fragment {
     TextView errorLayoutText;
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
+    private HashMap<String, Student> studentMap;
     private ArrayList<String> existingConnections;
     private ArrayList<String> pendingIncomingRequests;
     private ArrayList<String> pendingOutgoingRequests;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    String query;
-    int primaryLoopControl = 0, secondaryLoopControl = 0;
-    int primaryLoopTerminator = 0, secondaryLoopTerminator = 0;
+    String query, key;
+    int primaryLoopControl = 0;
+    int primaryLoopTerminator = 0;
+
+    String featureUseKey = "";
+    String featureName = "Parent Search Results (Student)";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
 
     public ParentSearchResultsStudentFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
@@ -76,8 +87,13 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_parent_search_results_student, container, false);
 
+        context = getContext();
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+
         Bundle args = getArguments();
         query = args.getString("Query");
+        key = args.getString("Search Key");
+        query = query.trim();
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -98,6 +114,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
+        studentMap = new HashMap<>();
         existingConnections = new ArrayList<>();
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
@@ -171,29 +188,8 @@ public class ParentSearchResultsStudentFragment extends Fragment {
 
             }
         });
-//
-//        mDatabaseReference = mFirebaseDatabase.getReference("School To Parent Request Parent").child(mFirebaseUser.getUid());
-//        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-//                        pendingIncomingRequests.add(postSnapshot.getKey());
-//                    }
-//                }
-//
-//                mAdapter.notifyDataSetChanged();
-//                loadPendingOutgoingRequests();
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
-    int loopControl;
     void loadPendingOutgoingRequests(){
         mDatabaseReference = mFirebaseDatabase.getReference("Student Connection Request Sender").child(mFirebaseUser.getUid());
         mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -206,7 +202,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
                 }
 
                 mAdapter.notifyDataSetChanged();
-                loadStudentDataFromFirebase();
+                loadNewStudentDataFromFirebase();
             }
 
             @Override
@@ -214,52 +210,34 @@ public class ParentSearchResultsStudentFragment extends Fragment {
 
             }
         });
-//
-//        loopControl = 0;
-//        mDatabaseReference = mFirebaseDatabase.getReference("Parent To School Request Parent").child(mFirebaseUser.getUid());
-//        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()) {
-//                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
-//                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-//                        String childKey = postSnapshot.getKey();
-//                        loopControl++;
-//
-//                        mDatabaseReference = mFirebaseDatabase.getReference("Parent To School Request Parent").child(mFirebaseUser.getUid()).child(childKey);
-//                        mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(DataSnapshot dataSnapshot) {
-//                                if (dataSnapshot.exists()) {
-//                                    ParentSchoolConnectionRequest parentSchoolConnectionRequest = dataSnapshot.getValue(ParentSchoolConnectionRequest.class);
-//                                    String childID = parentSchoolConnectionRequest.getStudentID();
-//                                    pendingOutgoingRequests.add(childID);
-//                                }
-//
-//                                if (childrenCount == loopControl) {
-//                                    mAdapter.notifyDataSetChanged();
-//                                    loadStudentDataFromFirebase();
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onCancelled(DatabaseError databaseError) {
-//
-//                            }
-//                        });
-//
-//                    }
-//                } else {
-//                    mAdapter.notifyDataSetChanged();
-//                    loadStudentDataFromFirebase();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
+    }
+
+    int counter = 0;
+    boolean state = true;
+    final HashMap<String, Integer> searchMap = new HashMap<>();
+    final HashMap<String, Student> searchValueMap = new HashMap<>();
+    final HashMap<String, Integer> searchCheckerMap = new HashMap<>();
+    String[] queryArray;
+    int queryArraySize;
+
+    void loadNewStudentDataFromFirebase() {
+        counter = 0;
+        searchResultsRowList.clear();
+        studentMap.clear();
+        searchCheckerMap.clear();
+
+        queryArray = query.toLowerCase().split(" ");
+        queryArraySize = queryArray.length;
+
+        if (queryArraySize >= 1) {
+            search(0);
+        } else {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("There are no students fitting the search criteria. Please check the search term and try again.");
+        }
     }
 
     int counterOne = 0, counterTwo = 0;
@@ -299,155 +277,107 @@ public class ParentSearchResultsStudentFragment extends Fragment {
                         }
                     }
 
-                    for (int i = 0; i < searchResultsRowList.size(); i++) {
-                        final SearchResultsRow searchHistoryRow = searchResultsRowList.get(i);
-                        final String studentID = parsedStudents.get(i);
-
-                        mDatabaseReference = mFirebaseDatabase.getReference("Student Parent").child(studentID);
-                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                        if (!guardians.containsKey(studentID)) {
-                                            guardians.put(studentID, new ArrayList<String>());
-                                            guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
-                                        } else {
-                                            guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
-                                        }
-                                    }
-                                }
-
-                                mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(studentID);
-                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        counterOne++;
-                                        if (dataSnapshot.exists()) {
-                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                searchResultsRowList.get(counterOne - 1).setEntityAddressID(postSnapshot.getKey());
-                                                if (!guardians.containsKey(studentID)) {
-                                                    guardians.put(studentID, new ArrayList<String>());
-                                                    guardians.get(studentID).add(postSnapshot.getKey() + " School");
-                                                } else {
-                                                    guardians.get(studentID).add(postSnapshot.getKey() + " School");
-                                                }
-                                            }
-                                        }
-
-                                        if (counterOne == searchResultsRowList.size()) {
-                                            for (int i = 0; i < searchResultsRowList.size(); i++) {
-                                                mAdapter.guardians = guardians;
-                                                mAdapter.notifyDataSetChanged();
-                                                final SearchResultsRow searchHistoryRow = searchResultsRowList.get(i);
-
-                                                mDatabaseReference = mFirebaseDatabase.getReference("School").child(searchHistoryRow.getEntityAddressID());
-                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                                        String schoolName;
-                                                        counterTwo++;
-                                                        if (dataSnapshot.exists()) {
-                                                            School school = dataSnapshot.getValue(School.class);
-                                                            schoolName = school.getSchoolName();
-                                                        } else {
-                                                            schoolName = "";
-                                                        }
-
-                                                        searchHistoryRow.setEntityAddress(schoolName);
-                                                        if (counterTwo == searchResultsRowList.size()) {
-                                                            mySwipeRefreshLayout.setRefreshing(false);
-                                                            progressLayout.setVisibility(View.GONE);
-                                                            errorLayout.setVisibility(View.GONE);
-                                                            recyclerView.setVisibility(View.VISIBLE);
-                                                            mAdapter.notifyDataSetChanged();
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(DatabaseError databaseError) {
-
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+                    if (searchResultsRowList.size() > 0) {
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        progressLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                        mAdapter.notifyDataSetChanged();
+                    } else {
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText("There are no students fitting the search criteria. Please check the search term and try again.");
                     }
 
-//                    primaryLoopTerminator = 0;
-//                    if (primaryChildrenCount == primaryLoopControl) {
-//                        if (searchResultsRowList.size() > 0) {
-//                            primaryLoopControl = 0;
-//                            for (int i = 0; i < searchResultsRowList.size(); i++) {
-//                                final SearchResultsRow searchHistoryRow = searchResultsRowList.get(i);
-//                                String studentID = searchHistoryRow.getEntityId();
-//                                mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(studentID);
-//                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                    @Override
-//                                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                                        if (dataSnapshot.exists()) {
-//                                            primaryLoopControl++;
-//                                        }
-//                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-//                                            final String schoolKey = postSnapshot.getKey();
-//                                            mDatabaseReference = mFirebaseDatabase.getReference("School").child(schoolKey);
-//                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                @Override
-//                                                public void onDataChange(DataSnapshot dataSnapshot) {
-//                                                    String schoolName;
-//                                                    if (dataSnapshot.exists()) {
-//                                                        School school = dataSnapshot.getValue(School.class);
-//                                                        schoolName = school.getSchoolName();
-//                                                    } else {
-//                                                        schoolName = "";
-//                                                    }
-//                                                    searchHistoryRow.setEntityAddressID(schoolKey);
-//                                                    searchHistoryRow.setEntityAddress(schoolName);
-//                                                    primaryLoopTerminator++;
 //
-//                                                    if (primaryLoopTerminator == primaryLoopControl) {
-//                                                        Collections.shuffle(searchResultsRowList);
-//                                                        mySwipeRefreshLayout.setRefreshing(false);
-//                                                        progressLayout.setVisibility(View.GONE);
-//                                                        errorLayout.setVisibility(View.GONE);
-//                                                        recyclerView.setVisibility(View.VISIBLE);
-//                                                        mAdapter.notifyDataSetChanged();
-//                                                    }
-//                                                }
+//                    for (int i = 0; i < searchResultsRowList.size(); i++) {
+//                        final SearchResultsRow searchHistoryRow = searchResultsRowList.get(i);
+//                        final String studentID = parsedStudents.get(i);
 //
-//                                                @Override
-//                                                public void onCancelled(DatabaseError databaseError) {
+//                        for (int i = 0; i < searchResultsRowList.size(); i++) {
+//                            mAdapter.notifyDataSetChanged();
+//                            final SearchResultsRow searchHistoryRow = searchResultsRowList.get(i);
 //
-//                                                }
-//                                            });
-//                                            break;
-//                                        }
+//                            mDatabaseReference = mFirebaseDatabase.getReference("School").child(searchHistoryRow.getEntityAddressID());
+//                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                @Override
+//                                public void onDataChange(DataSnapshot dataSnapshot) {
+//                                    String schoolName;
+//                                    counterTwo++;
+//                                    if (dataSnapshot.exists()) {
+//                                        School school = dataSnapshot.getValue(School.class);
+//                                        schoolName = school.getSchoolName();
+//                                    } else {
+//                                        schoolName = "";
 //                                    }
 //
-//                                    @Override
-//                                    public void onCancelled(DatabaseError databaseError) {
-//
+//                                    searchHistoryRow.setEntityAddress(schoolName);
+//                                    if (counterTwo == searchResultsRowList.size()) {
+//                                        mySwipeRefreshLayout.setRefreshing(false);
+//                                        progressLayout.setVisibility(View.GONE);
+//                                        errorLayout.setVisibility(View.GONE);
+//                                        recyclerView.setVisibility(View.VISIBLE);
+//                                        mAdapter.notifyDataSetChanged();
 //                                    }
-//                                });
-//                            }
-//                        } else {
-//                            mySwipeRefreshLayout.setRefreshing(false);
-//                            progressLayout.setVisibility(View.GONE);
-//                            recyclerView.setVisibility(View.GONE);
+//                                }
+//
+//                                @Override
+//                                public void onCancelled(DatabaseError databaseError) {
+//
+//                                }
+//                            });
 //                        }
+////
+////                        mDatabaseReference = mFirebaseDatabase.getReference("Student Parent").child(studentID);
+////                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+////                            @Override
+////                            public void onDataChange(DataSnapshot dataSnapshot) {
+////                                if (dataSnapshot.exists()) {
+////                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+////                                        if (!guardians.containsKey(studentID)) {
+////                                            guardians.put(studentID, new ArrayList<String>());
+////                                            guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
+////                                        } else {
+////                                            guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
+////                                        }
+////                                    }
+////                                }
+////
+////                                mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(studentID);
+////                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+////                                    @Override
+////                                    public void onDataChange(DataSnapshot dataSnapshot) {
+////                                        counterOne++;
+////                                        if (dataSnapshot.exists()) {
+////                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+////                                                searchResultsRowList.get(counterOne - 1).setEntityAddressID(postSnapshot.getKey());
+////                                                if (!guardians.containsKey(studentID)) {
+////                                                    guardians.put(studentID, new ArrayList<String>());
+////                                                    guardians.get(studentID).add(postSnapshot.getKey() + " School");
+////                                                } else {
+////                                                    guardians.get(studentID).add(postSnapshot.getKey() + " School");
+////                                                }
+////                                            }
+////                                        }
+////
+////                                        if (counterOne == searchResultsRowList.size()) {
+////                                        }
+////                                    }
+////
+////                                    @Override
+////                                    public void onCancelled(DatabaseError databaseError) {
+////
+////                                    }
+////                                });
+////                            }
+////
+////                            @Override
+////                            public void onCancelled(DatabaseError databaseError) {
+////
+////                            }
+////                        });
 //                    }
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
@@ -463,5 +393,264 @@ public class ParentSearchResultsStudentFragment extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    private void search(final int queryTermIndex) {
+        if (queryTermIndex < queryArraySize) {
+            state = true;
+            final String queryTerm = queryArray[queryTermIndex];
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Student");
+            mDatabaseReference.orderByChild("searchableFirstName").startAt(queryTerm).endAt(queryTerm + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                            String key = postSnapshot.getKey();
+                            Student student = postSnapshot.getValue(Student.class);
+                            if (searchCheckerMap.containsKey(key)) {
+                                if (searchCheckerMap.get(key) != queryTermIndex) {
+                                    searchCheckerMap.put(key, queryTermIndex);
+                                    if (searchMap.containsKey(key)) {
+                                        searchMap.put(key, searchMap.get(key) + 1);
+                                    } else {
+                                        searchMap.put(key, 1);
+                                        searchValueMap.put(key, student);
+                                    }
+                                }
+                            } else {
+                                searchCheckerMap.put(key, queryTermIndex);
+                                if (searchMap.containsKey(key)) {
+                                    searchMap.put(key, searchMap.get(key) + 1);
+                                } else {
+                                    searchMap.put(key, 1);
+                                    searchValueMap.put(key, student);
+                                }
+                            }
+                        }
+
+                        if (state) {
+                            state = false;
+                        }
+                    }
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Student");
+                    mDatabaseReference.orderByChild("searchableMiddleName").startAt(queryTerm).endAt(queryTerm + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                    String key = postSnapshot.getKey();
+                                    Student student = postSnapshot.getValue(Student.class);
+                                    if (searchCheckerMap.containsKey(key)) {
+                                        if (searchCheckerMap.get(key) != queryTermIndex) {
+                                            searchCheckerMap.put(key, queryTermIndex);
+                                            if (searchMap.containsKey(key)) {
+                                                searchMap.put(key, searchMap.get(key) + 1);
+                                            } else {
+                                                searchMap.put(key, 1);
+                                                searchValueMap.put(key, student);
+                                            }
+                                        }
+                                    } else {
+                                        searchCheckerMap.put(key, queryTermIndex);
+                                        if (searchMap.containsKey(key)) {
+                                            searchMap.put(key, searchMap.get(key) + 1);
+                                        } else {
+                                            searchMap.put(key, 1);
+                                            searchValueMap.put(key, student);
+                                        }
+                                    }
+//                                    if (state) {
+//                                        if (searchMap.containsKey(key)) {
+//                                            searchMap.put(key, searchMap.get(key) + 1);
+//                                        } else {
+//                                            searchMap.put(key, 1);
+//                                            searchValueMap.put(key, student);
+//                                        }
+//                                    }
+                                }
+
+                                if (state) {
+                                    state = false;
+                                }
+                            }
+
+                            mDatabaseReference = mFirebaseDatabase.getReference().child("Student");
+                            mDatabaseReference.orderByChild("searchableLastName").startAt(queryTerm).endAt(queryTerm + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.exists()) {
+                                        for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                            String key = postSnapshot.getKey();
+                                            Student student = postSnapshot.getValue(Student.class);
+                                            if (searchCheckerMap.containsKey(key)) {
+                                                if (searchCheckerMap.get(key) != queryTermIndex) {
+                                                    searchCheckerMap.put(key, queryTermIndex);
+                                                    if (searchMap.containsKey(key)) {
+                                                        searchMap.put(key, searchMap.get(key) + 1);
+                                                    } else {
+                                                        searchMap.put(key, 1);
+                                                        searchValueMap.put(key, student);
+                                                    }
+                                                }
+                                            } else {
+                                                searchCheckerMap.put(key, queryTermIndex);
+                                                if (searchMap.containsKey(key)) {
+                                                    searchMap.put(key, searchMap.get(key) + 1);
+                                                } else {
+                                                    searchMap.put(key, 1);
+                                                    searchValueMap.put(key, student);
+                                                }
+                                            }
+//                                            if (state) {
+//                                                if (searchMap.containsKey(key)) {
+//                                                    searchMap.put(key, searchMap.get(key) + 1);
+//                                                } else {
+//                                                    searchMap.put(key, 1);
+//                                                    searchValueMap.put(key, student);
+//                                                }
+//                                            }
+                                        }
+
+                                        if (state) {
+                                            state = false;
+                                        }
+                                    }
+                                    counter++;
+                                    state = true;
+
+                                    if (queryTermIndex == queryArraySize - 1) {
+                                        for (Map.Entry<String, Integer> entry : searchMap.entrySet()) {
+                                            String studentKey = entry.getKey();
+                                            if (entry.getValue() == queryArraySize) {
+                                                Student student = searchValueMap.get(studentKey);
+                                                String studentFirstName = student.getFirstName();
+                                                String studentLastName = student.getLastName();
+                                                String studentMiddleName = student.getMiddleName();
+                                                String studentPicURL = student.getImageURL();
+                                                SearchResultsRow searchHistoryRow;
+                                                if (studentMiddleName.equals("")) {
+                                                    searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentLastName, null, studentPicURL, "Student");
+                                                } else {
+                                                    searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentMiddleName + " " + studentLastName, null, studentPicURL, "Student");
+                                                }
+                                                searchResultsRowList.add(searchHistoryRow);
+                                                studentMap.put(studentKey, student);
+//                                                parsedStudents.add(studentKey);
+                                            }
+                                        }
+
+                                        String numberOfHits = String.valueOf(searchResultsRowList.size());
+
+                                        String day = Date.getDay();
+                                        String month = Date.getMonth();
+                                        String year = Date.getYear();
+                                        String day_month_year = day + "_" + month + "_" + year;
+                                        String month_year = month + "_" + year;
+
+                                        HashMap<String, Object> searchUpdateMap = new HashMap<>();
+                                        String mFirebaseUserID = mFirebaseUser.getUid();
+
+                                        searchUpdateMap.put("Search Analytics/Search/" + key + "/studentHits", numberOfHits);
+                                        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/studentHits", numberOfHits);
+                                        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/studentHits", numberOfHits);
+                                        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/studentHits", numberOfHits);
+
+                                        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/studentHits", numberOfHits);
+                                        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/studentHits", numberOfHits);
+                                        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/studentHits", numberOfHits);
+                                        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/studentHits", numberOfHits);
+
+                                        searchUpdateMap.put("Search Analytics/Search/" + key + "/studentResults", studentMap);
+                                        searchUpdateMap.put("Search Analytics/Daily Search/" + day_month_year + "/" + key + "/studentResults", studentMap);
+                                        searchUpdateMap.put("Search Analytics/Monthly Search/" + month_year + "/" + key + "/studentResults", studentMap);
+                                        searchUpdateMap.put("Search Analytics/Yearly Search/" + year + "/" + key + "/studentResults", studentMap);
+
+                                        searchUpdateMap.put("Search Analytics/User Search/" + mFirebaseUserID + "/" + key + "/studentResults", studentMap);
+                                        searchUpdateMap.put("Search Analytics/User Daily Search/" + mFirebaseUserID + "/" + day_month_year + "/" + key + "/studentResults", studentMap);
+                                        searchUpdateMap.put("Search Analytics/User Monthly Search/" + mFirebaseUserID + "/" + month_year + "/" + key + "/studentResults", studentMap);
+                                        searchUpdateMap.put("Search Analytics/User Yearly Search/" + mFirebaseUserID + "/" + year + "/" + key + "/studentResults", studentMap);
+
+                                        DatabaseReference searchUpdateRef = FirebaseDatabase.getInstance().getReference();
+                                        searchUpdateRef.updateChildren(searchUpdateMap);
+
+                                        if (searchResultsRowList.size() > 0) {
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                            errorLayout.setVisibility(View.GONE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.GONE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            errorLayoutText.setText("There are no students fitting the search criteria. Please check the search term and try again.");
+                                        }
+                                    } else {
+                                        search(queryTermIndex + 1);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 }

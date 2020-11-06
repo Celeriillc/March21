@@ -5,20 +5,27 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.celerii.celerii.Activities.Search.Teacher.SearchActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.EnterResultAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
@@ -28,10 +35,14 @@ import com.celerii.celerii.helperClasses.TeacherEnterResultsSharedPreferences;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.AcademicRecord;
 import com.celerii.celerii.models.AcademicRecordStudent;
+import com.celerii.celerii.models.Class;
+import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
 import com.celerii.celerii.models.EnterResultHeader;
 import com.celerii.celerii.models.EnterResultRow;
+import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -39,21 +50,25 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
 
 public class EnterResultsActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
     TeacherEnterResultsSharedPreferences teacherEnterResultsSharedPreferences;
 
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     Toolbar toolbar;
     private ArrayList<EnterResultRow> enterResultRowList;
@@ -67,6 +82,7 @@ public class EnterResultsActivity extends AppCompatActivity {
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
     TextView errorLayoutText;
+    Button errorLayoutButton;
 
     String childName;
     String childImageURL;
@@ -81,53 +97,124 @@ public class EnterResultsActivity extends AppCompatActivity {
     Map<String, Object> newResultEntry;
     Map<String, String> existingStudentScores;
 
+    String featureUseKey = "";
+    String featureName = "Enter Class Results";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_results);
 
+        context = this;
         sharedPreferencesManager = new SharedPreferencesManager(this);
         teacherEnterResultsSharedPreferences = new TeacherEnterResultsSharedPreferences(this);
+
+        auth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         errorLayout = (RelativeLayout) findViewById(R.id.errorlayout);
         errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         progressLayout = (RelativeLayout) findViewById(R.id.progresslayout);
 
+        errorLayoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(context, SearchActivity.class));
+            }
+        });
+
         activeClass = sharedPreferencesManager.getActiveClass();
+
         if (activeClass == null) {
-            Set<String> classSet = sharedPreferencesManager.getMyClasses();
-            ArrayList<String> classes = new ArrayList<>();
-            if (classSet != null) {
-                classes = new ArrayList<>(classSet);
-                activeClass = classes.get(0);
+            Gson gson = new Gson();
+            ArrayList<Class> myClasses = new ArrayList<>();
+            String myClassesJSON = sharedPreferencesManager.getMyClasses();
+            Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+            myClasses = gson.fromJson(myClassesJSON, type);
+
+            if (myClasses != null) {
+                gson = new Gson();
+                activeClass = gson.toJson(myClasses.get(0));
                 sharedPreferencesManager.setActiveClass(activeClass);
             } else {
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle("New Class Result");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setHomeButtonEnabled(true);
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
                 errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText("You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.");
-                return;
+                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                errorLayoutButton.setText("Find my school");
+                errorLayoutButton.setVisibility(View.VISIBLE);return;
+            }
+        } else {
+            Boolean activeClassExist = false;
+            Gson gson = new Gson();
+            Type type = new TypeToken<Class>() {}.getType();
+            Class activeClassModel = gson.fromJson(activeClass, type);
+
+            String myClassesJSON = sharedPreferencesManager.getMyClasses();
+            type = new TypeToken<ArrayList<Class>>() {}.getType();
+            ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
+
+            for (Class classInstance: myClasses) {
+                if (activeClassModel.getID().equals(classInstance.getID())) {
+                    activeClassExist = true;
+                    activeClassModel = classInstance;
+                    activeClass = gson.toJson(activeClassModel);
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                    break;
+                }
+            }
+
+            if (!activeClassExist) {
+                if (myClasses.size() > 0) {
+                    if (myClasses.size() > 1) {
+                        gson = new Gson();
+                        activeClass = gson.toJson(myClasses.get(0));
+                        sharedPreferencesManager.setActiveClass(activeClass);
+                    }
+                }
+            } else {
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle("New Class Result");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setHomeButtonEnabled(true);
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                errorLayoutButton.setText("Find my school");
+                errorLayoutButton.setVisibility(View.VISIBLE);return;
             }
         }
 
-        activeClass = sharedPreferencesManager.getActiveClass().split(" ")[0];
-        className = sharedPreferencesManager.getActiveClass().split(" ")[1];
+        Gson gson = new Gson();
+        Type type = new TypeToken<Class>() {}.getType();
+        Class activeClassModel = gson.fromJson(activeClass, type);
+        activeClass = activeClassModel.getID();
+        className = activeClassModel.getClassName();
+
         myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
         myID = sharedPreferencesManager.getMyUserID();
-
-        auth = FirebaseAuth.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("New " + className + " Result");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black_24dp);
 
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -140,24 +227,115 @@ public class EnterResultsActivity extends AppCompatActivity {
         enterResultRowList = new ArrayList<>();
         parentList = new ArrayList<>();
         studentParentList = new HashMap<String, ArrayList<String>>();
-        enterResultRowList.add(new EnterResultRow());
         mAdapter = new EnterResultAdapter(enterResultRowList, enterResultHeader, this, this);
-        loadHeaderFromFirebase();
-        loadDetailsFromFirebase();
+        loadNewHeaderFromFirebase();
+        loadNewDetailsFromFirebase();
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        loadHeaderFromFirebase();
-                        loadDetailsFromFirebase();
+                        loadNewHeaderFromFirebase();
+                        loadNewDetailsFromFirebase();
                     }
                 }
         );
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("Date Information"));
+    }
+
+    private void loadNewHeaderFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
+        subject = teacherEnterResultsSharedPreferences.getSubject();
+        date = Date.getDate();
+        sortableDate = Date.convertToSortableDate(date);
+        testType = "Continous Assessment";
+        maximumScore = "100";
+        percentageOfTotal = "30";
+        year = Date.getYear();
+        term = Term.getTermShort();
+        academicYear_Term = year + "_" + term;
+        term_AcademicYear = term + "_" + year;
+        subject_AcademicYear_Term = subject + "_" + year + "_" + term;
+        subject_Term_AcademicYear = subject + "_" + term + "_" + year;
+        class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
+        class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
+
+        enterResultHeader.setSubject(subject);
+        enterResultHeader.setDate(date);
+        enterResultHeader.setSortableDate(sortableDate);
+        enterResultHeader.setTestType(testType);
+        enterResultHeader.setMaxScore(maximumScore);
+        enterResultHeader.setPercentageOfTotal(percentageOfTotal);
+        enterResultHeader.setYear(year);
+        enterResultHeader.setMonth(Date.getMonth());
+        enterResultHeader.setDay(Date.getDay());
+        enterResultHeader.setTerm(term);
+        enterResultHeader.setClassID(activeClass);
+        enterResultHeader.setClassName(className);
+        enterResultHeader.setTeacherID(myID);
+        enterResultHeader.setTeacher(myName);
+        enterResultHeader.setPreviousPercentageOfTotal(previousPercentageOfTotal);
+        mAdapter.notifyDataSetChanged();
+
+        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subject_AcademicYear_Term);
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        String key = postSnapshot.getKey();
+                        AcademicRecord academicRecord = postSnapshot.getValue(AcademicRecord.class);
+                        previousPercentageOfTotal += Double.valueOf(academicRecord.getPercentageOfTotal());
+                    }
+                } else {
+                    previousPercentageOfTotal = 0.0;
+                }
+
+                if ((100.0 - previousPercentageOfTotal) < Double.valueOf(percentageOfTotal)){
+                    percentageOfTotal = String.valueOf((int)(100.0 - previousPercentageOfTotal));
+                }
+
+                enterResultHeader.setPercentageOfTotal(percentageOfTotal);
+                enterResultHeader.setPreviousPercentageOfTotal(previousPercentageOfTotal);
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        mDatabaseReference = mFirebaseDatabase.getReference("Class School/" + activeClass);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                        activeSchoolID = postSnapshot.getKey();
+                        enterResultHeader.setSchoolID(activeSchoolID);
+                        mAdapter.notifyDataSetChanged();
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void loadHeaderFromFirebase() {
@@ -248,6 +426,75 @@ public class EnterResultsActivity extends AppCompatActivity {
         });
     }
 
+    private void loadNewDetailsFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
+        Gson gson = new Gson();
+        ArrayList<ClassesStudentsAndParentsModel> classesStudentsAndParentsModelList = new ArrayList<>();
+        String myClassesStudentsParentsJSON = sharedPreferencesManager.getClassesStudentParent();
+        Type type = new TypeToken<ArrayList<ClassesStudentsAndParentsModel>>() {}.getType();
+        classesStudentsAndParentsModelList = gson.fromJson(myClassesStudentsParentsJSON, type);
+
+        if (classesStudentsAndParentsModelList == null) {
+
+        } else {
+            studentParentList.clear();
+            for (ClassesStudentsAndParentsModel classesStudentsAndParentsModel: classesStudentsAndParentsModelList) {
+                String studentID = classesStudentsAndParentsModel.getStudentID();
+                String parentID = classesStudentsAndParentsModel.getParentID();
+
+                try {
+                    if (!studentParentList.get(studentID).contains(parentID)) {
+                        studentParentList.get(studentID).add(parentID);
+                    }
+                } catch (Exception e) {
+                    studentParentList.put(studentID, new ArrayList<String>());
+                    studentParentList.get(studentID).add(parentID);
+                }
+            }
+        }
+
+        gson = new Gson();
+        HashMap<String, HashMap<String, Student>> classStudentsForTeacherMap = new HashMap<String, HashMap<String, Student>>();
+        String classStudentsForTeacherJSON = sharedPreferencesManager.getClassStudentForTeacher();
+        type = new TypeToken<HashMap<String, HashMap<String, Student>>>() {}.getType();
+        classStudentsForTeacherMap = gson.fromJson(classStudentsForTeacherJSON, type);
+
+        if (classStudentsForTeacherMap == null || classStudentsForTeacherMap.size() == 0) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("This class doesn't contain any students");
+        } else {
+            enterResultRowList.clear();
+            HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClass);
+            for (Map.Entry<String, Student> entry : classMap.entrySet()) {
+                String studentID = entry.getKey();
+                Student studentModel = entry.getValue();
+                String name = studentModel.getFirstName() + " " + studentModel.getLastName();
+                EnterResultRow enterResultRow = new EnterResultRow(name, studentModel.getImageURL(), "0");
+                enterResultRow.setStudentID(studentID);
+                enterResultRowList.add(enterResultRow);
+            }
+
+            enterResultRowList.add(0, new EnterResultRow());
+            enterResultRowList.add(new EnterResultRow());
+            recyclerView.setVisibility(View.VISIBLE);
+            mySwipeRefreshLayout.setRefreshing(false);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void loadDetailsFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
             mySwipeRefreshLayout.setRefreshing(false);
@@ -309,7 +556,7 @@ public class EnterResultsActivity extends AppCompatActivity {
                                         childName = child.getFirstName() + " " + child.getLastName();
                                         childImageURL = child.getImageURL();
 
-                                        EnterResultRow enterResultRow = new EnterResultRow(childName, childImageURL, "");
+                                        EnterResultRow enterResultRow = new EnterResultRow(childName, childImageURL, "0");
                                         enterResultRow.setStudentID(dataSnapshot.getKey());
                                         enterResultRowList.add(enterResultRow);
 
@@ -354,6 +601,46 @@ public class EnterResultsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == android.R.id.home){
@@ -372,7 +659,7 @@ public class EnterResultsActivity extends AppCompatActivity {
                 subject_Term_AcademicYear = subject + "_" + term + "_" + year;
                 class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
                 class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
-                updatePercentageOfTotal(class_subject_AcademicYear_Term);
+                updateNewPercentageOfTotal(subject_AcademicYear_Term);
                 enterResultHeader.setSubject(subject);
                 mAdapter.notifyDataSetChanged();
             }
@@ -413,11 +700,47 @@ public class EnterResultsActivity extends AppCompatActivity {
                 subject_Term_AcademicYear = subject + "_" + term + "_" + year;
                 class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
                 class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
-                updatePercentageOfTotal(class_subject_AcademicYear_Term);
+                updateNewPercentageOfTotal(class_subject_AcademicYear_Term);
                 enterResultHeader.setTerm(term);
                 mAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    private void updateNewPercentageOfTotal(String subjectKey) {
+        final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(EnterResultsActivity.this);
+        progressDialog.show();
+
+        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subjectKey);
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        String key = postSnapshot.getKey();
+                        AcademicRecord academicRecord = postSnapshot.getValue(AcademicRecord.class);
+                        previousPercentageOfTotal += Double.valueOf(academicRecord.getPercentageOfTotal());
+                    }
+                } else {
+                    previousPercentageOfTotal = 0.0;
+                    percentageOfTotal = "30";
+                }
+
+                if ((100.0 - previousPercentageOfTotal) < Double.valueOf(percentageOfTotal)){
+                    percentageOfTotal = String.valueOf((int)(100.0 - previousPercentageOfTotal));
+                }
+
+                enterResultHeader.setPercentageOfTotal(percentageOfTotal);
+                enterResultHeader.setPreviousPercentageOfTotal(previousPercentageOfTotal);
+                mAdapter.notifyDataSetChanged();
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void updatePercentageOfTotal(String subjectKey){
@@ -450,6 +773,109 @@ public class EnterResultsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void saveNewToCloud() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            showDialogWithMessage("Internet is down, check your connection and try again", false);
+            return;
+        }
+
+        final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(EnterResultsActivity.this);
+        progressDialog.show();
+
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            try {
+                EnterResultAdapter.MyViewHolder holder = (EnterResultAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                assert holder != null;
+                enterResultRowList.get(i).setScore(holder.score.getText().toString());
+            } catch (Exception e) {
+                continue;
+            }
+        }
+
+        date = Date.getDate();
+        sortableDate = Date.convertToSortableDate(date);
+        academicYear_Term = year + "_" + term;
+        term_AcademicYear = term + "_" + year;
+        subject_AcademicYear_Term = subject + "_" + year + "_" + term;
+        subject_Term_AcademicYear = subject + "_" + term + "_" + year;
+        class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
+        class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
+
+        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subject_AcademicYear_Term).push();
+        pushID = mDatabaseReference.getKey();
+        newResultEntry = new HashMap<>();
+
+        double recordClassAve = 0.0;
+        double recordTotalScore = 0.0;
+        int recordCounter = 0;
+
+        //Get Class Average
+        //TODO: Check for null scores
+        for (int i = 0; i < enterResultRowList.size(); i++) {
+            if (enterResultRowList.get(i).getStudentID() != null) {
+                if (enterResultRowList.get(i).getScore().equals("")) {
+                    showDialogWithMessage("A student score can not be empty. Please check your entry and try again", false);
+                    progressDialog.dismiss();
+                    return;
+                } else {
+                    recordTotalScore += Double.valueOf(enterResultRowList.get(i).getScore());
+                    recordCounter++;
+                }
+            }
+        }
+        recordClassAve = recordTotalScore / (recordCounter - 2);
+
+        final AcademicRecord academicRecord = new AcademicRecord(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, term, year, subject,
+                date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+                class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore, percentageOfTotal);
+        academicRecord.setClassAverage(String.valueOf(recordClassAve));
+
+        newResultEntry.put("AcademicRecordClass/" + activeClass + "/" + subject_AcademicYear_Term + "/" + pushID, academicRecord);
+        newResultEntry.put("AcademicRecordTeacher/" +  auth.getCurrentUser().getUid() + "/" + subject_AcademicYear_Term + "/" + pushID, academicRecord);
+        newResultEntry.put("AcademicRecordClass-Subject/" + activeClass + "/" + subject, true);
+        newResultEntry.put("AcademicRecordTeacher-Subject/" +  auth.getCurrentUser().getUid() + "/" + subject, true);
+
+        for (int i = 0; i < enterResultRowList.size(); i++) {
+            if (!enterResultRowList.get(i).getStudentID().equals("")) {
+                newResultEntry.put("AcademicRecordClass-Student/" + activeClass + "/" + subject_AcademicYear_Term + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+                newResultEntry.put("AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + subject_AcademicYear_Term + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+
+                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), term, year, subject,
+                        date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+                        class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType,
+                        maximumScore, percentageOfTotal, enterResultRowList.get(i).getScore(), String.valueOf(recordClassAve));
+
+                newResultEntry.put("AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + subject_AcademicYear_Term + "/" + pushID, academicRecordStudent);
+                newResultEntry.put("AcademicRecordStudent-Subject/" + enterResultRowList.get(i).getStudentID() + "/" + subject, true);
+                String studentID = enterResultRowList.get(i).getStudentID();
+                ArrayList<String> parentIDList = studentParentList.get(studentID);
+                if (parentIDList != null) {
+                    for (int j = 0; j < parentIDList.size(); j++) {
+                        String parentID = parentIDList.get(j);
+                        NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewResultPost", enterResultRowList.get(i).getImageURL(), enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getName(), false);
+                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
+                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/status", true);
+                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/" + pushID + "/status", true);
+                        newResultEntry.put("AcademicRecordParentRecipients/" + pushID + "/" + parentID, true);
+                        newResultEntry.put("NotificationParent/" + parentID + "/" + pushID, notificationModel);
+                        newResultEntry.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
+                        newResultEntry.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+                    }
+                }
+            }
+        }
+
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                progressDialog.dismiss();
+                showDialogWithMessage("Results have been posted", true);
+            }
+        });
+
     }
 
     public void saveToCloud() {
@@ -491,7 +917,7 @@ public class EnterResultsActivity extends AppCompatActivity {
 
                     if (dataSnapshot.exists()) {
                         existingStudentScores = new Hashtable<String, String>();
-                        DatabaseReference childDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTotal").child("AcademicRecordClass-Student").child(classID).child(pushID).child("Students");
+                        DatabaseReference childDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTotal").child("AcademicRecordClass-Student").child(activeClass).child(pushID).child("Students");
                         childDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -749,8 +1175,13 @@ public class EnterResultsActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 
@@ -782,7 +1213,7 @@ public class EnterResultsActivity extends AppCompatActivity {
             subject_Term_AcademicYear = subject + "_" + term + "_" + year;
             class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
             class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
-            updatePercentageOfTotal(class_subject_AcademicYear_Term);
+            updateNewPercentageOfTotal(subject_AcademicYear_Term);
             enterResultHeader.setYear(year);
             enterResultHeader.setMonth(month);
             enterResultHeader.setDay(day);
@@ -792,4 +1223,9 @@ public class EnterResultsActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
         }
     };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }

@@ -3,19 +3,27 @@ package com.celerii.celerii.Activities.LoginAndSignup;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+
+import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
@@ -47,12 +55,13 @@ public class SignUpActivityFour extends AppCompatActivity {
     Button createAccount;
     private EditText password;
     private String firstName, lastName, accountType, email;
+    private ImageButton togglePasswordVisisbility;
     Bundle bundle;
 
     CustomProgressDialogOne progressDialog;
 
     String activeAccount, activeUserID;
-    boolean connected;
+    boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,14 +88,31 @@ public class SignUpActivityFour extends AppCompatActivity {
 
         createAccount = (Button) findViewById(R.id.createaccount);
         password = (EditText) findViewById(R.id.password);
+        togglePasswordVisisbility = (ImageButton) findViewById(R.id.togglepasswordvisibility);
         password.requestFocus();
         password.setTypeface(Typeface.DEFAULT);
         password.setTransformationMethod(new PasswordTransformationMethod());
 
+        togglePasswordVisisbility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isPasswordVisible) {
+                    password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    password.setSelection(password.length());
+                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    isPasswordVisible = true;
+                } else {
+                    password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    password.setSelection(password.length());
+                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    isPasswordVisible = false;
+                }
+            }
+        });
+
         createAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 final String passwordString = password.getText().toString();
                 if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
                     String messageString = "Your device is not connected to the internet. Check your connection and try again.";
@@ -105,26 +131,34 @@ public class SignUpActivityFour extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()){
                             sharedPreferencesManager.clear();
+                            String refactoredEmail = email.replace(".", "_fullStop_");
                             activeUserID = auth.getCurrentUser().getUid();
                             Map<String, Object> updateMap = new HashMap<String, Object>();
-                            Parent parent = new Parent(firstName, lastName, email);
-                            Teacher teacher = new Teacher(firstName, lastName, email);
+                            Parent parent = new Parent(firstName, lastName, firstName.toLowerCase(), lastName.toLowerCase(), email);
+                            Teacher teacher = new Teacher(firstName, lastName, firstName.toLowerCase(), lastName.toLowerCase(), email);
                             User user = new User(email, accountType);
 //                            String token = FirebaseInstanceId.getInstance().getToken();
 //                            String deviceID = FirebaseInstanceId.getInstance().getId();
                             updateMap.put("Parent/" + activeUserID, parent);
                             updateMap.put("Teacher/" + activeUserID, teacher);
                             updateMap.put("UserRoles/" + activeUserID, user);
+                            updateMap.put("Email/" + refactoredEmail, "true");
 //                            updateMap.put("UserRoles/Tokens/" + deviceID, token);
+                            Analytics.signupAnalytics( activeUserID, accountType );
 
                             mDatabaseReference = mFirebaseDatabase.getReference();
                             mDatabaseReference.updateChildren(updateMap, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                    if (databaseError != null) {
+                                        //TODO: Delete user
+                                        return;
+                                    }
                                     saveToSharedPreferencesAndProceed();
                                 }
                             });
                         } else {
+                            progressDialog.dismiss();
                             String messageString = "Your signup attempt failed, this could be due to a network error. Please try again";
                             showDialogWithMessage(messageString);
                         }
@@ -170,6 +204,7 @@ public class SignUpActivityFour extends AppCompatActivity {
         infoBundle.putString("accountType", accountType);
         applicationLauncherSharedPreferences.setLauncherActivity("SignupFive");
         progressDialog.dismiss();
+        finishAffinity();
         Intent I = new Intent(SignUpActivityFour.this, SignUpActivityFive.class);
         I.putExtras(infoBundle);
         startActivity(I);
@@ -181,8 +216,13 @@ public class SignUpActivityFour extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

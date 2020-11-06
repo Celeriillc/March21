@@ -12,33 +12,32 @@ public class AcademicRecordStudent {
     String testType, maxObtainable, percentageOfTotal, score, classAverage;
     boolean isNew;
 
-    public AcademicRecordStudent() {
-    }
-
-//    public AcademicRecordStudent(String classID, String teacherID, String schoolID, String studentID, String term, String academicYear, String subject,
-//                                 String date, String sortableDate, String academicYear_Term, String term_AcademicYear, String subject_AcademicYear_Term,
-//                                 String subject_Term_AcademicYear, String class_subject_AcademicYear_Term, String class_subject_Term_AcademicYear, String testType,
-//                                 String maxObtainable, String percentageOfTotal, String score) {
-//        this.classID = classID;
-//        this.teacherID = teacherID;
-//        this.schoolID = schoolID;
-//        this.studentID = studentID;
-//        this.term = term;
-//        this.academicYear = academicYear;
-//        this.subject = subject;
-//        this.date = date;
-//        this.sortableDate = sortableDate;
-//        this.academicYear_Term = academicYear_Term;
-//        this.term_AcademicYear = term_AcademicYear;
-//        this.subject_AcademicYear_Term = subject_AcademicYear_Term;
-//        this.subject_Term_AcademicYear = subject_Term_AcademicYear;
-//        this.class_subject_AcademicYear_Term = class_subject_AcademicYear_Term;
-//        this.class_subject_Term_AcademicYear = class_subject_Term_AcademicYear;
-//        this.testType = testType;
-//        this.maxObtainable = maxObtainable;
-//        this.percentageOfTotal = percentageOfTotal;
-//        this.score = score;
+//    public AcademicRecordStudent() {
 //    }
+
+    public AcademicRecordStudent() {
+        this.classID = "";
+        this.teacherID = "";
+        this.schoolID = "";
+        this.studentID = "";
+        this.term = "";
+        this.academicYear = "";
+        this.subject = "";
+        this.date = "";
+        this.sortableDate = "";
+        this.academicYear_Term = "";
+        this.term_AcademicYear = "";
+        this.subject_AcademicYear_Term = "";
+        this.subject_Term_AcademicYear = "";
+        this.class_subject_AcademicYear_Term = "";
+        this.class_subject_Term_AcademicYear = "";
+        this.testType = "";
+        this.maxObtainable = "0.0";
+        this.percentageOfTotal = "0.0";
+        this.score = "0.0";
+        this.classAverage = "0.0";
+        this.isNew = false;
+    }
 
 
     public AcademicRecordStudent(String classID, String teacherID, String schoolID, String studentID, String term, String academicYear, String subject,

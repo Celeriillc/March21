@@ -9,7 +9,11 @@ public class User {
     String role;
     String mode;
 
-    public User(){}
+    public User(){
+        this.email = "";
+        this.role = "";
+        this.mode = "";
+    }
 
     public User(String email, String role) {
         this.email = email;

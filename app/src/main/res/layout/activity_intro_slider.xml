@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-   <android.support.v4.view.ViewPager
+   <androidx.viewpager.widget.ViewPager
        android:id="@+id/view_pager"
        android:layout_width="match_parent"
        android:layout_height="wrap_content" />
@@ -22,52 +22,66 @@
    <LinearLayout
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
-       android:orientation="horizontal"
+       android:orientation="vertical"
        android:weightSum="2"
        android:layout_marginBottom="10dp"
        android:layout_alignParentBottom="true">
 
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:layout_weight="1"
-           android:gravity="end">
+<!--       <LinearLayout-->
+<!--           android:layout_width="match_parent"-->
+<!--           android:layout_height="wrap_content"-->
+<!--           android:layout_weight="1"-->
+<!--           android:gravity="end">-->
 
            <Button
-               android:id="@+id/btn_login"
+               android:id="@+id/signup"
                android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:layout_marginRight="10dp"
-               android:layout_marginLeft="10dp"
+               android:layout_height="60dp"
+               android:layout_marginStart="30dp"
+               android:layout_marginEnd="30dp"
                android:paddingLeft="40dp"
                android:paddingRight="40dp"
                android:textAllCaps="false"
                android:textStyle="bold"
-               android:text="Sign In"
-               android:textColor="@color/colorPrimaryPurple"
-               android:background="@android:color/transparent" />
+               android:textSize="16sp"
+               android:text="Get Started"
+               android:textColor="@color/white"
+               android:background="@drawable/roundedbutton"
+               style="?android:attr/borderlessButtonStyle" />
 
-       </LinearLayout>
+<!--       </LinearLayout>-->
 
        <LinearLayout
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:layout_weight="1">
+           android:gravity="center_horizontal">
 
-           <Button
-               android:id="@+id/btn_signUp"
-               android:layout_width="match_parent"
+           <LinearLayout
+               android:id="@+id/signin"
+               android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:layout_marginLeft="10dp"
-               android:layout_marginRight="10dp"
-               android:paddingLeft="40dp"
-               android:paddingRight="40dp"
-               android:textAllCaps="false"
-               android:textStyle="bold"
-               android:text="Sign Up"
-               android:textColor="@color/colorPrimaryPurple"
-               android:background="@android:color/transparent"/>
+               android:padding="20dp"
+               android:orientation="horizontal" >
 
+               <TextView
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:textSize="15sp"
+                   android:textColor="@color/colorDarkGray"
+                   android:text="Already have an account?" />
+
+               <TextView
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:layout_marginEnd="0dp"
+                   android:layout_marginStart="5dp"
+                   android:textAllCaps="false"
+                   android:textStyle="bold"
+                   android:text="Sign In"
+                   android:textColor="@color/colorPrimaryPurple"
+                   android:background="@android:color/transparent"/>
+
+           </LinearLayout>
        </LinearLayout>
    </LinearLayout>
 

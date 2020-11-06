@@ -3,16 +3,19 @@ package com.celerii.celerii.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Inbox.ChatActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.models.NewChatRowModel;
 import com.bumptech.glide.Glide;
 
@@ -32,6 +35,7 @@ public class NewChatRowAdapter extends RecyclerView.Adapter<NewChatRowAdapter.My
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name, relationship;
         public ImageView profilePic;
+        public LinearLayout profilePictureClipper;
         public View clickableView;
 
         public MyViewHolder(final View view) {
@@ -39,6 +43,7 @@ public class NewChatRowAdapter extends RecyclerView.Adapter<NewChatRowAdapter.My
             name = (TextView) view.findViewById(R.id.name);
             relationship = (TextView) view.findViewById(R.id.relationship);
             profilePic = (ImageView) view.findViewById(R.id.pic);
+            profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             clickableView = view;
         }
     }
@@ -61,12 +66,30 @@ public class NewChatRowAdapter extends RecyclerView.Adapter<NewChatRowAdapter.My
 
         holder.name.setText(newChatRowModel.getName());
         holder.relationship.setText(newChatRowModel.getRelationship());
+        holder.profilePictureClipper.setClipToOutline(true);
 
-        Glide.with(context)
-                .load(newChatRowModel.getProfilePicURL())
-                .centerCrop()
-                .bitmapTransform(new CropCircleTransformation(context))
-                .into(holder.profilePic);
+        Drawable textDrawable;
+        if (!newChatRowModel.getName().isEmpty()) {
+            String[] nameArray = newChatRowModel.getName().split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+            }
+            holder.profilePic.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!newChatRowModel.getProfilePicURL().isEmpty()) {
+            Glide.with(context)
+                    .load(newChatRowModel.getProfilePicURL())
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(holder.profilePic);
+        }
 
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override

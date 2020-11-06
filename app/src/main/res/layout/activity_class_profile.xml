@@ -49,13 +49,13 @@
 
     </LinearLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white">
 
-        <android.support.v4.widget.NestedScrollView
+        <ScrollView
             android:id="@+id/superlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -389,8 +389,8 @@
 
             </LinearLayout>
 
-        </android.support.v4.widget.NestedScrollView>
+        </ScrollView>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>

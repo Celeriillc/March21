@@ -1,13 +1,13 @@
 package com.celerii.celerii.Activities.Search.Parent;
 
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.celerii.celerii.R;
@@ -26,7 +26,7 @@ public class ParentSearchResultActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     TabLayout tabLayout;
-    static String query;
+    static String query, key;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,7 @@ public class ParentSearchResultActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         query = bundle.getString("Query");
+        key = bundle.getString("Search Key");
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
@@ -93,6 +94,7 @@ public class ParentSearchResultActivity extends AppCompatActivity {
             Fragment fragment = mFragmentList.get(position);
             Bundle args = new Bundle();
             args.putString("Query", query);
+            args.putString("Search Key", key);
             fragment.setArguments(args);
             return fragment;
         }

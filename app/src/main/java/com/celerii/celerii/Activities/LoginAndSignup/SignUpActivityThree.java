@@ -3,10 +3,13 @@ package com.celerii.celerii.Activities.LoginAndSignup;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +23,7 @@ import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.ProviderQueryResult;
+import com.google.firebase.auth.SignInMethodQueryResult;
 
 public class SignUpActivityThree extends AppCompatActivity {
 
@@ -70,10 +73,10 @@ public class SignUpActivityThree extends AppCompatActivity {
                 progressDialog.show();
 
                 FirebaseAuth mAuth = FirebaseAuth.getInstance();
-                mAuth.fetchProvidersForEmail(emailString).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
+                mAuth.fetchSignInMethodsForEmail(emailString).addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<ProviderQueryResult> task) {
-                        if (task.getResult().getProviders().size() > 0){
+                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
+                        if (task.getResult().getSignInMethods().size() > 0){
                             progressDialog.dismiss();
                             String messageString = "This email has already been registered. You should try a different email address. If you have lost your password, " +
                                     "use the Forgot Password section and we'll help recover it";
@@ -122,8 +125,13 @@ public class SignUpActivityThree extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-        TextView OK = (TextView) dialog.findViewById(R.id.optionone);
-        dialog.show();
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
 
         message.setText(messageString);
 

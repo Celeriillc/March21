@@ -1,59 +1,26 @@
 package com.celerii.celerii.adapters;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.EditProfiles.EditParentProfileActivity;
-import com.celerii.celerii.Activities.Events.EventsRowActivity;
 import com.celerii.celerii.Activities.Home.Parent.MoreParentFragment;
-import com.celerii.celerii.Activities.Intro.IntroSlider;
-import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
-import com.celerii.celerii.Activities.StudentAttendance.ParentAttendanceActivity;
-import com.celerii.celerii.Activities.Profiles.ParentProfileActivity;
-import com.celerii.celerii.Activities.StudentBehaviouralPerformance.BehaviouralResultActivity;
 import com.celerii.celerii.R;
-import com.celerii.celerii.Activities.Settings.SettingsActivityParent;
-import com.celerii.celerii.Activities.StudentPerformance.StudentPerformanceForParentsActivity;
-import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
-import com.celerii.celerii.Activities.Utility.SwitchActivityParentTeacher;
-import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
-import com.celerii.celerii.Activities.Timetable.TeacherTimetableActivity;
-import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
-import com.celerii.celerii.models.Class;
-import com.celerii.celerii.models.MoreParentsHeaderModel;
-import com.celerii.celerii.models.MoreParentsModel;
-import com.celerii.celerii.models.Parent;
-import com.celerii.celerii.models.Teacher;
+import com.celerii.celerii.models.Student;
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -62,7 +29,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  */
 
 public class MoreParentsAdapter extends RecyclerView.Adapter<MoreParentsAdapter.MyViewHolder> {
-    private List<MoreParentsModel> moreParentsModelList;
+    private List<Student> moreParentsModelList;
     private Context context;
     MoreParentFragment mFragment;
     private int lastSelectedPosition;
@@ -71,8 +38,7 @@ public class MoreParentsAdapter extends RecyclerView.Adapter<MoreParentsAdapter.
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView childName;
         public ImageView childPic;
-        public RadioButton selectedChild;
-        public LinearLayout parentView;
+        public LinearLayout parentView, childPicClipper;
         public View clickableView;
 
         public MyViewHolder(final View view) {
@@ -80,13 +46,12 @@ public class MoreParentsAdapter extends RecyclerView.Adapter<MoreParentsAdapter.
             childName = (TextView) view.findViewById(R.id.childname);
             childPic = (ImageView) view.findViewById(R.id.childpic);
             parentView = (LinearLayout) view.findViewById(R.id.parentview);
-//            selectedChild = (RadioButton) view.findViewById(R.id.selectedchild);
+            childPicClipper = (LinearLayout) view.findViewById(R.id.childpicclipper);
             clickableView = view;
         }
     }
 
-    public MoreParentsAdapter(List<MoreParentsModel> moreParentsModelList,
-                              Context context, MoreParentFragment mFragment) {
+    public MoreParentsAdapter(List<Student> moreParentsModelList, Context context, MoreParentFragment mFragment) {
         this.moreParentsModelList = moreParentsModelList;
         this.context = context;
         this.mFragment = mFragment;
@@ -109,72 +74,42 @@ public class MoreParentsAdapter extends RecyclerView.Adapter<MoreParentsAdapter.
     public void onBindViewHolder(final MoreParentsAdapter.MyViewHolder holder, int position) {
         outPosition = position;
 
-        final MoreParentsModel moreParentsModel = moreParentsModelList.get(position);
+        final Student moreParentsModel = moreParentsModelList.get(position);
 
-        if (moreParentsModelList.size() == 0){
-            return;
-        }
+        Student activeKid = null;
+        Gson gson = new Gson();
+        String activeKidJSON = sharedPreferencesManager.getActiveKid();
+        Type type = new TypeToken<Student>() {}.getType();
+        activeKid = gson.fromJson(activeKidJSON, type);
 
-        String activeKid = null;
-        activeKid = sharedPreferencesManager.getActiveKid();
-        if (activeKid != null) {
-            activeKid = activeKid.split(" ")[0];
-        }
-
-        if (activeKid == null){
-            lastSelectedPosition = 1;
-        }
-
-        if (activeKid != null) {
-            if (activeKid.equals(moreParentsModel.getChildId())) {
-                lastSelectedPosition = position;
-            }
-        }
-
-        (holder).childName.setText(moreParentsModel.getChildName());
-        if (lastSelectedPosition == position) {
-//            (holder).selectedChild.setChecked(true);
-            holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.round_button_gradient));
+        if (activeKid.getStudentID().equals(moreParentsModel.getStudentID())) {
+            holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
             holder.childName.setTextColor(ContextCompat.getColor(context, R.color.white));
-            sharedPreferencesManager.setActiveKid(moreParentsModel.getChildId() + " " + moreParentsModel.getChildName());
-            mFragment.loadFooter();
         } else {
             holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_corner_button_white_with_purple_border));
             holder.childName.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
-//            (holder).selectedChild.setChecked(false);
         }
 
+        holder.childPicClipper.setClipToOutline(true);
+        holder.childName.setText(moreParentsModel.getFirstName() + " " + moreParentsModel.getLastName());
+
         Glide.with(context)
-                .load(moreParentsModel.getChildPicUrl())
+                .load(moreParentsModel.getImageURL())
                 .centerCrop()
                 .placeholder(R.drawable.profileimageplaceholder)
                 .error(R.drawable.profileimageplaceholder)
                 .bitmapTransform(new CropCircleTransformation(context))
                 .into((holder).childPic);
 
-//        (holder).selectedChild.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//            }
-//        });
-
         (holder).clickableView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                lastSelectedPosition = outPosition;
-
-                String id = moreParentsModel.getChildId();
-                String name = moreParentsModel.getChildName();
-                String kid = id + " " + name;
-
-                sharedPreferencesManager.setActiveKid(kid);
+                Gson gson = new Gson();
+                String json = gson.toJson(moreParentsModel);
+                sharedPreferencesManager.setActiveKid(json);
 
                 notifyDataSetChanged();
-//                Intent I = new Intent(context, StudentProfileActivity.class);
-//                Bundle bundle = new Bundle();
-//                bundle.putString("childID", moreParentsModel.getChildId());
-//                I.putExtras(bundle);
-//                context.startActivity(I);
+                mFragment.loadFooter();
             }
         });
     }

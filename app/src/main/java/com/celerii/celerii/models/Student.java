@@ -5,22 +5,58 @@ package com.celerii.celerii.models;
  */
 
 public class Student {
-    String firstName, lastName, middleName, imageURL, gender, studentID;
+    String firstName, lastName, middleName, searchableFirstName, searchableLastName, searchableMiddleName,
+            imageURL, gender, studentID, bio;
 
     public Student(){
         this.firstName = "";
         this.lastName = "";
         this.middleName = "";
+        this.searchableFirstName = "";
+        this.searchableLastName = "";
+        this.searchableMiddleName = "";
         this.imageURL = "";
         this.gender = "";
+        this.studentID = "";
+        this.bio = "";
+    }
+
+    public Student(String firstName, String studentID){
+        this.firstName = firstName;
+        this.lastName = "";
+        this.middleName = "";
+        this.searchableFirstName = firstName.toLowerCase();
+        this.searchableLastName = "";
+        this.searchableMiddleName = "";
+        this.imageURL = "";
+        this.gender = "";
+        this.studentID = studentID;
+        this.bio = "";
+    }
+
+    public Student(String firstName, String lastName, String imageURL, String studentID) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.middleName = "";
+        this.searchableFirstName = firstName.toLowerCase();
+        this.searchableLastName = lastName.toLowerCase();
+        this.searchableMiddleName = "";
+        this.imageURL = imageURL;
+        this.gender = "";
+        this.studentID = studentID;
+        this.bio = "";
     }
 
     public Student(String firstName, String lastName, String middleName, String imageURL, String gender) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.middleName = middleName;
+        this.searchableFirstName = firstName.toLowerCase();
+        this.searchableLastName = lastName.toLowerCase();
+        this.searchableMiddleName = middleName.toLowerCase();
         this.imageURL = imageURL;
         this.gender = gender;
+        this.bio = "";
     }
 
     public String getFirstName() {
@@ -47,6 +83,30 @@ public class Student {
         this.middleName = middleName;
     }
 
+    public String getSearchableFirstName() {
+        return searchableFirstName;
+    }
+
+    public void setSearchableFirstName(String searchableFirstName) {
+        this.searchableFirstName = searchableFirstName;
+    }
+
+    public String getSearchableLastName() {
+        return searchableLastName;
+    }
+
+    public void setSearchableLastName(String searchableLastName) {
+        this.searchableLastName = searchableLastName;
+    }
+
+    public String getSearchableMiddleName() {
+        return searchableMiddleName;
+    }
+
+    public void setSearchableMiddleName(String searchableMiddleName) {
+        this.searchableMiddleName = searchableMiddleName;
+    }
+
     public String getImageURL() {
         return imageURL;
     }
@@ -69,5 +129,13 @@ public class Student {
 
     public void setStudentID(String studentID) {
         this.studentID = studentID;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 }

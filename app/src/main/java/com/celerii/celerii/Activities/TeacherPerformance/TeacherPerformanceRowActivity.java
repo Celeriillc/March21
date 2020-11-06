@@ -1,11 +1,11 @@
 package com.celerii.celerii.Activities.TeacherPerformance;
 
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -13,15 +13,18 @@ import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.TeacherPerformanceRowAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
+import com.celerii.celerii.models.AcademicRecord;
 import com.celerii.celerii.models.AcademicRecordTeacher;
 import com.celerii.celerii.models.TeacherPerformanceHeader;
 import com.celerii.celerii.models.TeacherPerformanceRow;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,6 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TeacherPerformanceRowActivity extends AppCompatActivity {
 
@@ -37,6 +41,7 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    FirebaseUser mFirebaseUser;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
@@ -56,6 +61,11 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
     String myID;
     int teacherPerformanceRowListIterator, subIterator;
 
+    String featureUseKey = "";
+    String featureName = "Teacher Performance Analysis Summary (Row)";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,12 +73,12 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
 
         sharedPreferencesManager = new SharedPreferencesManager(this);
 
-//        myID = "31sQQgT5hYPE0YkpaAyJj5MtA0b2";
         myID = sharedPreferencesManager.getMyUserID();
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mFirebaseUser = auth.getCurrentUser();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
@@ -97,7 +107,7 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
 //        teacherPerformanceRowList.add(new TeacherPerformanceRow());
         subjectList = new ArrayList<>();
         subjectKey = new ArrayList<>();
-        loadDetailsFromFirebase();
+        loadNewDetailsFromFirebase();
         mAdapter = new TeacherPerformanceRowAdapter(teacherPerformanceRowList, teacherPerformanceHeader, this);
         recyclerView.setAdapter(mAdapter);
 
@@ -105,10 +115,105 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        loadDetailsFromFirebase();
+                        loadNewDetailsFromFirebase();
                     }
                 }
         );
+    }
+
+    int counter = 0;
+    HashMap<String, Double> subjectTotal = new HashMap<>();
+    HashMap<String, Integer> subjectCount = new HashMap<>();
+    private void loadNewDetailsFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
+        counter = 0;
+        subjectTotal = new HashMap<>();
+        subjectCount = new HashMap<>();
+        teacherPerformanceRowList.clear();
+
+        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTeacher").child(myID);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        String subject_year_term = postSnapshot.getKey();
+                        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTeacher").child(myID).child(subject_year_term);
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                counter++;
+                                if (dataSnapshot.exists()) {
+                                    double termClassAverage = 0.0;
+                                    String subject = "";
+                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                        AcademicRecord academicRecord = postSnapshot.getValue(AcademicRecord.class);
+                                        subject = academicRecord.getSubject();
+                                        double testClassAverage = Double.valueOf(academicRecord.getClassAverage());
+                                        double maxObtainable = Double.valueOf(academicRecord.getMaxObtainable());
+                                        double percentageOfTotal = Double.valueOf(academicRecord.getPercentageOfTotal());
+
+                                        double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                        termClassAverage += normalizedTestClassAverage;
+                                    }
+
+                                    if (!subjectTotal.containsKey(subject)) {
+                                        subjectTotal.put(subject, termClassAverage);
+                                    } else {
+                                        subjectTotal.put(subject, subjectTotal.get(subject) + termClassAverage);
+                                    }
+
+                                    if (!subjectCount.containsKey(subject)) {
+                                        subjectCount.put(subject, 1);
+                                    } else {
+                                        subjectCount.put(subject, subjectCount.get(subject) + 1);
+                                    }
+                                }
+
+                                if (counter == childrenCount) {
+                                    for (String key: subjectTotal.keySet()) {
+                                        double score = (int)((subjectTotal.get(key) / subjectCount.get(key)));
+                                        teacherPerformanceRow = new TeacherPerformanceRow(String.valueOf(score), "NA", "NA", key);
+                                        teacherPerformanceRowList.add(teacherPerformanceRow);
+                                    }
+
+                                    mAdapter.notifyDataSetChanged();
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    progressLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    errorLayout.setVisibility(View.GONE);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText("You don't have any academic history yet. To get started, post academic results for any class");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void loadDetailsFromFirebase() {
@@ -239,6 +344,46 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override

@@ -7,6 +7,8 @@ package com.celerii.celerii.models;
 public class School {
     String schoolName, state, location, country, city, aboutUs, yearOfEstablishment, motto, numberOfEmployees, size, schoolFeesRange;
     String profilePhotoUrl, backgroundPhotoUrl, email, website;
+    String searchableSchoolName, searchableLocation;
+    Boolean isDeleted;
 
     public School() {
         schoolName = "";
@@ -24,6 +26,9 @@ public class School {
         backgroundPhotoUrl = "";
         email = "";
         website = "";
+        searchableSchoolName = "";
+        searchableLocation = "";
+        isDeleted = false;
     }
 
     public String getSchoolName() {
@@ -144,5 +149,29 @@ public class School {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getSearchableSchoolName() {
+        return searchableSchoolName;
+    }
+
+    public void setSearchableSchoolName(String searchableSchoolName) {
+        this.searchableSchoolName = searchableSchoolName;
+    }
+
+    public String getSearchableLocation() {
+        return searchableLocation;
+    }
+
+    public void setSearchableLocation(String searchableLocation) {
+        this.searchableLocation = searchableLocation;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 }

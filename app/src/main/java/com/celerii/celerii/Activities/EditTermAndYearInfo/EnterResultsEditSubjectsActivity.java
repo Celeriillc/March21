@@ -4,20 +4,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SelectSubjectAdapter;
+import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.ParentCheckAttendanceSharedPreferences;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.TeacherEnterResultsSharedPreferences;
@@ -30,8 +33,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
 
@@ -46,9 +53,11 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
-    LinearLayout errorLayout, progressLayout;
+    RelativeLayout errorLayout, progressLayout;
+    TextView errorLayoutText;
 
     private ArrayList<SelectSubjectModel> selectSubjectModelList;
+    ArrayList<String> subjectList = new ArrayList<>();
     public RecyclerView recyclerView;
     public SelectSubjectAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -57,19 +66,25 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
     String activeClass;
     String selectedSubject, activity;
 
+    String featureUseKey = "";
+    String featureName = "Edit Subject";
+    long sessionStartTime = 0;
+    String sessionDurationInSeconds = "0";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_results_edit_subjects);
 
+        sharedPreferencesManager = new SharedPreferencesManager(this);
         teacherTakeAttendanceSharedPreferences = new TeacherTakeAttendanceSharedPreferences(this);
         teacherEnterResultsSharedPreferences = new TeacherEnterResultsSharedPreferences(this);
         parentCheckAttendanceSharedPreferences = new ParentCheckAttendanceSharedPreferences(this);
         parentCheckAttendanceSharedPreferences.deleteSubject();
 
         Bundle bundle = getIntent().getExtras();
-        activeClass = bundle.getString("Active Class");
+//        activeClass = bundle.getString("Active Class");
         activity = bundle.getString("Activity");
         selectedSubject = bundle.getString("Subject");
 
@@ -89,8 +104,9 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
-        errorLayout = (LinearLayout) findViewById(R.id.errorlayout);
-        progressLayout = (LinearLayout) findViewById(R.id.progresslayout);
+        errorLayout = (RelativeLayout) findViewById(R.id.errorlayout);
+        errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        progressLayout = (RelativeLayout) findViewById(R.id.progresslayout);
 
         recyclerView.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
@@ -99,24 +115,6 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
         mAdapter = new SelectSubjectAdapter(selectSubjectModelList, selectedSubject, this);
         loadFromFirebase();
         recyclerView.setAdapter(mAdapter);
-
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -133,6 +131,37 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
     }
 
     private void loadFromFirebase() {
+        Gson gson = new Gson();
+        subjectList = new ArrayList<>();
+        String subjectJSON = sharedPreferencesManager.getSubjects();
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        subjectList = gson.fromJson(subjectJSON, type);
+
+        if (subjectList == null) {
+            subjectList = new ArrayList<>();
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("There are no subjects to assign to your timetable. If you're not connected to a school, use the search feature to search for a school and send a request.");
+            return;
+        } else {
+            for (int i = 0; i < subjectList.size(); i++) {
+                SelectSubjectModel selectSubjectModel = new SelectSubjectModel(subjectList.get(i));
+                selectSubjectModelList.add(selectSubjectModel);
+//                if (!selectSubjectModelList.contains(new SelectSubjectModel("General"))) selectSubjectModelList.add(0, new SelectSubjectModel("General"));
+            }
+
+            selectSubjectModelList.add(0, new SelectSubjectModel(""));
+            mAdapter.notifyDataSetChanged();
+            mySwipeRefreshLayout.setRefreshing(false);
+            progressLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            errorLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadFromFirebasep() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("Class School").child(activeClass);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -190,6 +219,46 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
+        } else {
+            featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
+        }
+        sessionStartTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+        String day = Date.getDay();
+        String month = Date.getMonth();
+        String year = Date.getYear();
+        String day_month_year = day + "_" + month + "_" + year;
+        String month_year = month + "_" + year;
+
+        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
+        String mFirebaseUserID = mFirebaseUser.getUid();
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+
+        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
+        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
     }
 
     @Override

@@ -14,17 +14,17 @@ public class CreateDrawable {
         if (attendance.equals("Present")){
             String attendanceLetter = "P";
             TextDrawable textDrawable = TextDrawable.builder()
-                    .buildRound(attendanceLetter, Color.argb(255, 0, 200, 0));
+                    .buildRound(attendanceLetter, Color.argb(255, 157, 58, 180));
             return textDrawable;
         } else if (attendance.equals("Absent")){
             String attendanceLetter = "A";
             TextDrawable textDrawable = TextDrawable.builder()
-                    .buildRound(attendanceLetter, Color.argb(255, 255, 0, 0));
+                    .buildRound(attendanceLetter, Color.argb(255, 231, 57, 141));
             return textDrawable;
         } else if (attendance.equals("Came In Late")){
             String attendanceLetter = "L";
             TextDrawable textDrawable = TextDrawable.builder()
-                    .buildRound(attendanceLetter, Color.argb(255, 0, 0, 255));
+                    .buildRound(attendanceLetter, Color.argb(255, 142, 152, 167));
             return textDrawable;
         } else {
             String attendanceLetter = "-";

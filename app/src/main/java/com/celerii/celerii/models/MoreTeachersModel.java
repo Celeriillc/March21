@@ -8,11 +8,15 @@ public class MoreTeachersModel {
     String classId, className, classPicUrl;
 
     public MoreTeachersModel() {
+        this.classId = "";
+        this.className = "";
+        this.classPicUrl = "";
     }
 
-    public MoreTeachersModel(String className, String classPicUrl) {
+    public MoreTeachersModel(String classId, String className) {
+        this.classId = classId;
         this.className = className;
-        this.classPicUrl = classPicUrl;
+        this.classPicUrl = "";
     }
 
     public MoreTeachersModel(String classId, String className, String classPicUrl) {

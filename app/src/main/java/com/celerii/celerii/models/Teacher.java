@@ -8,6 +8,9 @@ public class Teacher {
     String firstName;
     String lastName;
     String middleName;
+    String searchableFirstName;
+    String searchableLastName;
+    String searchableMiddleName;
     String email;
     String phone;
     String profilePicURL;
@@ -17,26 +20,39 @@ public class Teacher {
     String availableForHomeLessons;
     String state;
     String bio;
+    Boolean isDeleted = false;
 
     public Teacher() {
         firstName = "";
         lastName = "";
         middleName = "";
+        searchableFirstName = "";
+        searchableLastName = "";
+        searchableMiddleName = "";
         email = "";
         phone = "";
         profilePicURL = "";
         gender = "";
         location = "";
-        maritalStatus = "";
+        maritalStatus = "Nil";
         availableForHomeLessons = "";
         state = "";
         bio = "";
+        isDeleted = false;
     }
 
     public Teacher(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+    }
+
+    public Teacher(String firstName, String lastName, String searchableFirstName, String searchableLastName, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.searchableFirstName = searchableFirstName;
+        this.searchableLastName = searchableLastName;
     }
 
     public Teacher(String firstName, String lastName, String email, String profilePicURL) {
@@ -60,6 +76,30 @@ public class Teacher {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getSearchableFirstName() {
+        return searchableFirstName;
+    }
+
+    public void setSearchableFirstName(String searchableFirstName) {
+        this.searchableFirstName = searchableFirstName;
+    }
+
+    public String getSearchableLastName() {
+        return searchableLastName;
+    }
+
+    public void setSearchableLastName(String searchableLastName) {
+        this.searchableLastName = searchableLastName;
+    }
+
+    public String getSearchableMiddleName() {
+        return searchableMiddleName;
+    }
+
+    public void setSearchableMiddleName(String searchableMiddleName) {
+        this.searchableMiddleName = searchableMiddleName;
     }
 
     public String getEmail() {
@@ -140,5 +180,13 @@ public class Teacher {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 }
