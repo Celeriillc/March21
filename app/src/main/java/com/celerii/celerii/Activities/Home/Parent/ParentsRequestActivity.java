@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class ParentsRequestActivity extends AppCompatActivity {
     SharedPreferencesManager sharedPreferencesManager;
@@ -71,6 +72,7 @@ public class ParentsRequestActivity extends AppCompatActivity {
     String parentActivity;
 
     private ArrayList<ParentSchoolConnectionRequest> parentSchoolConnectionRequestList;
+    private ArrayList<String> parentSchoolConnectionRequestListKeys;
     public RecyclerView recyclerView;
     public ParentRequestAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -97,6 +99,13 @@ public class ParentsRequestActivity extends AppCompatActivity {
         Bundle b = getIntent().getExtras();
         if (b != null) {
             parentActivity = b.getString("parentActivity");
+            if (parentActivity != null) {
+                if (!parentActivity.isEmpty()) {
+                    sharedPreferencesManager.setActiveAccount(parentActivity);
+                    mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                    mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+                }
+            }
         }
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
@@ -120,6 +129,7 @@ public class ParentsRequestActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         parentSchoolConnectionRequestList = new ArrayList<>();
+        parentSchoolConnectionRequestListKeys = new ArrayList<>();
 //        loadFromSharedPreferences();
         mAdapter = new ParentRequestAdapter(parentSchoolConnectionRequestList, context);
         recyclerView.setAdapter(mAdapter);
@@ -156,26 +166,46 @@ public class ParentsRequestActivity extends AppCompatActivity {
 
         updateBadges();
         mDatabaseReference = mFirebaseDatabase.getReference("Student Connection Request Recipients").child(mFirebaseUser.getUid());
-        mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 parentSchoolConnectionRequestList.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         ParentSchoolConnectionRequest parentSchoolConnectionRequest = postSnapshot.getValue(ParentSchoolConnectionRequest.class);
-                        parentSchoolConnectionRequest.setSorttableTimeSent(parentSchoolConnectionRequest.getTimeSent());
+                        parentSchoolConnectionRequest.setSorttableTimeSent(Date.convertToSortableDate(parentSchoolConnectionRequest.getTimeSent()));
+                        if (!parentSchoolConnectionRequestListKeys.contains(parentSchoolConnectionRequest.getRequestKey())) {
+                            parentSchoolConnectionRequestListKeys.add(parentSchoolConnectionRequest.getRequestKey());
+                        } else {
+                            for(Iterator<ParentSchoolConnectionRequest> iterator = parentSchoolConnectionRequestList.iterator(); iterator.hasNext(); ) {
+                                if(iterator.next().getRequestKey().equals(parentSchoolConnectionRequest.getRequestKey()))
+                                    iterator.remove();
+                            }
+                        }
                         parentSchoolConnectionRequestList.add(parentSchoolConnectionRequest);
                     }
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference("Student Connection Request Sender").child(mFirebaseUser.getUid());
-                mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+                mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for(Iterator<ParentSchoolConnectionRequest> iterator = parentSchoolConnectionRequestList.iterator(); iterator.hasNext(); ) {
+                            if(iterator.next().getRequestSenderID().equals(mFirebaseUser.getUid()))
+                                iterator.remove();
+                        }
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 ParentSchoolConnectionRequest parentSchoolConnectionRequest = postSnapshot.getValue(ParentSchoolConnectionRequest.class);
-                                parentSchoolConnectionRequest.setSorttableTimeSent(parentSchoolConnectionRequest.getTimeSent());
+                                parentSchoolConnectionRequest.setSorttableTimeSent(Date.convertToSortableDate(parentSchoolConnectionRequest.getTimeSent()));
+                                if (!parentSchoolConnectionRequestListKeys.contains(parentSchoolConnectionRequest.getRequestKey())) {
+                                    parentSchoolConnectionRequestListKeys.add(parentSchoolConnectionRequest.getRequestKey());
+                                } else {
+                                    for(Iterator<ParentSchoolConnectionRequest> iterator = parentSchoolConnectionRequestList.iterator(); iterator.hasNext(); ) {
+                                        if(iterator.next().getRequestKey().equals(parentSchoolConnectionRequest.getRequestKey()))
+                                            iterator.remove();
+                                    }
+                                }
                                 parentSchoolConnectionRequestList.add(parentSchoolConnectionRequest);
                             }
                         }
@@ -247,6 +277,17 @@ public class ParentsRequestActivity extends AppCompatActivity {
                                                             }
 
                                                             if (counterSender == parentSchoolConnectionRequestList.size()) {
+                                                                if (parentSchoolConnectionRequestList.size() > 1) {
+                                                                    Collections.sort(parentSchoolConnectionRequestList, new Comparator<ParentSchoolConnectionRequest>() {
+                                                                        @Override
+                                                                        public int compare(ParentSchoolConnectionRequest o1, ParentSchoolConnectionRequest o2) {
+                                                                            return o1.getSorttableTimeSent().compareTo(o2.getSorttableTimeSent());
+                                                                        }
+                                                                    });
+                                                                }
+
+                                                                Collections.reverse(parentSchoolConnectionRequestList);
+
                                                                 mAdapter.notifyDataSetChanged();
                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                 progressLayout.setVisibility(View.GONE);

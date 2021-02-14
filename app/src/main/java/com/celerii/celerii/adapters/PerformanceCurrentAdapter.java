@@ -11,12 +11,14 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Environment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,17 +56,20 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
     private Activity myActivity;
     private Context context;
     private String activeStudent;
+    private String parentActivity;
     public static final int Header = 1;
     public static final int Normal = 2;
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView subject, subjectScore, newBadge;
+        public TextView subject, caScore, examScore, subjectScore, newBadge;
         public View view;
 
         public MyViewHolder(final View view) {
             super(view);
             subject = (TextView) view.findViewById(R.id.subject);
+            caScore = (TextView) view.findViewById(R.id.cascore);
+            examScore = (TextView) view.findViewById(R.id.examscore);
             subjectScore = (TextView) view.findViewById(R.id.subjectscore);
             newBadge = (TextView) view.findViewById(R.id.newbadge);
             this.view = view;
@@ -72,32 +77,40 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
-        TextView term, year, average, classAverage, maxAverage, className, school;
+        TextView term, year, average, classAverage, maxAverage, className, school, noDataText;
         Button printThisResult;
-        LinearLayout termLayout, yearLayout;
+        ProgressBar termAverageProgressBar, classAverageProgressBar, maxObtainableProgressBar;
+        LinearLayout termLayout, yearLayout, noDataLayout, chiefLayout;
 
         public HeaderViewHolder(View view) {
             super(view);
             term = (TextView) view.findViewById(R.id.term);
             year = (TextView) view.findViewById(R.id.year);
-            average = (TextView) view.findViewById(R.id.average);
-            classAverage = (TextView) view.findViewById(R.id.classaverage);
-            maxAverage = (TextView) view.findViewById(R.id.maxaverage);
+            average = (TextView) view.findViewById(R.id.termaveragescore);
+            classAverage = (TextView) view.findViewById(R.id.classaveragescore);
+            maxAverage = (TextView) view.findViewById(R.id.maxobtainablescore);
             className = (TextView) view.findViewById(R.id.classname);
             school = (TextView) view.findViewById(R.id.school);
+            noDataText = (TextView) view.findViewById(R.id.nodatatext);
             printThisResult = (Button) view.findViewById(R.id.printthisresult);
+            termAverageProgressBar = (ProgressBar) view.findViewById(R.id.termaverageprogressbar);
+            classAverageProgressBar = (ProgressBar) view.findViewById(R.id.classaverageprogressbar);
+            maxObtainableProgressBar = (ProgressBar) view.findViewById(R.id.maxobtainableprogressbar);
             termLayout = (LinearLayout) view.findViewById(R.id.termlayout);
             yearLayout = (LinearLayout) view.findViewById(R.id.yearlayout);
+            noDataLayout = (LinearLayout) view.findViewById(R.id.nodatalayout);
+            chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
         }
     }
 
-    public PerformanceCurrentAdapter(List<PerformanceCurrentModel> performanceCurrentModelList, PerformanceCurrentHeader performanceCurrentHeader, Activity myActivity, Context context, String activeStudent) {
+    public PerformanceCurrentAdapter(List<PerformanceCurrentModel> performanceCurrentModelList, PerformanceCurrentHeader performanceCurrentHeader, Activity myActivity, Context context, String activeStudent, String parentActivity) {
         sharedPreferencesManager = new SharedPreferencesManager(context);
         this.performanceCurrentModelList = performanceCurrentModelList;
         this.performanceCurrentHeader = performanceCurrentHeader;
         this.myActivity = myActivity;
         this.context = context;
         this.activeStudent = activeStudent;
+        this.parentActivity = parentActivity;
     }
 
     @Override
@@ -120,11 +133,42 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
         if (holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).term.setText(Term.Term(performanceCurrentHeader.getTerm()));
             ((HeaderViewHolder) holder).year.setText(performanceCurrentHeader.getYear());
-            ((HeaderViewHolder) holder).average.setText(TypeConverterClass.convStringToIntString(performanceCurrentHeader.getTermAverage()));
-            ((HeaderViewHolder) holder).classAverage.setText(TypeConverterClass.convStringToIntString(performanceCurrentHeader.getClassAverage()));
-            ((HeaderViewHolder) holder).maxAverage.setText(TypeConverterClass.convStringToIntString(performanceCurrentHeader.getMaxPossibleAverage()));
+            int termAverage = 0;
+            int classAverage = 0;
+            int maxAverage = 0;
+            if (!performanceCurrentHeader.getTermAverage().trim().isEmpty()) {
+                termAverage = Integer.parseInt(performanceCurrentHeader.getTermAverage());
+            }
+            if (!performanceCurrentHeader.getClassAverage().trim().isEmpty()) {
+                classAverage = Integer.parseInt(performanceCurrentHeader.getClassAverage());
+            }
+            if (!performanceCurrentHeader.getMaxPossibleAverage().trim().isEmpty()) {
+                maxAverage = Integer.parseInt(performanceCurrentHeader.getMaxPossibleAverage());
+            }
+            ((HeaderViewHolder) holder).termAverageProgressBar.setProgress(termAverage);
+            ((HeaderViewHolder) holder).classAverageProgressBar.setProgress(classAverage);
+            ((HeaderViewHolder) holder).maxObtainableProgressBar.setProgress(maxAverage);
+
+            String termAverageString = String.valueOf(termAverage) + "%";
+            String classAverageString = String.valueOf(classAverage) + "%";
+            String maxAverageString = String.valueOf(maxAverage) + "%";
+
+            ((HeaderViewHolder) holder).average.setText(termAverageString);
+            ((HeaderViewHolder) holder).classAverage.setText(classAverageString);
+            ((HeaderViewHolder) holder).maxAverage.setText(maxAverageString);
+
             ((HeaderViewHolder) holder).className.setText(performanceCurrentHeader.getClassName());
             ((HeaderViewHolder) holder).school.setText(performanceCurrentHeader.getSchool());
+
+            if (performanceCurrentModelList.size() <= 1){
+                ((HeaderViewHolder) holder).noDataLayout.setVisibility(View.VISIBLE);
+                String message = "There are no academic records for the "  + "<b>" + Term.Term(performanceCurrentHeader.getTerm()) + "</b>" + " of " +  "<b>" +  performanceCurrentHeader.getYear() + "</b>" + " yet";
+                ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(message));
+                ((HeaderViewHolder) holder).chiefLayout.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            } else {
+                ((HeaderViewHolder) holder).noDataLayout.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).chiefLayout.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            }
 
             ((HeaderViewHolder) holder).termLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -159,13 +203,23 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
             final PerformanceCurrentModel performanceCurrentModel = performanceCurrentModelList.get(position);
 
             ((MyViewHolder) holder).subject.setText(performanceCurrentModel.getSubject());
-//            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                if (performanceCurrentModel.isNew()) {
-                    ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
-                } else {
-                    ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
+            if (parentActivity != null) {
+                if (parentActivity.equals("Parent")) {
+                    if (performanceCurrentModel.isNew()) {
+                        ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
+                    }
                 }
-//            }
+            } else {
+                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                    if (performanceCurrentModel.isNew()) {
+                        ((MyViewHolder) holder).newBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        ((MyViewHolder) holder).newBadge.setVisibility(View.GONE);
+                    }
+                }
+            }
 
             Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
             Gson gson = new Gson();
@@ -198,15 +252,27 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
             }
             Boolean isExpired = Date.compareDates(performanceCurrentModel.getDate(), subscriptionModel.getExpiryDate());
 
+            String caScoreString = "";
+            String examScoreString = "";
+            String subjectScoreString = "";
+
             if (isOpenToAll) {
-                ((MyViewHolder) holder).subjectScore.setText(TypeConverterClass.convStringToIntString(String.valueOf(performanceCurrentModel.getCurrentScore())));
+                caScoreString = String.valueOf(performanceCurrentModel.getCaScore()) + "%";
+                examScoreString = String.valueOf(performanceCurrentModel.getExamScore()) + "%";
+                subjectScoreString = String.valueOf(performanceCurrentModel.getCurrentScore()) + "%";
             } else {
                 if (!isExpired) {
-                    ((MyViewHolder) holder).subjectScore.setText(TypeConverterClass.convStringToIntString(String.valueOf(performanceCurrentModel.getCurrentScore())));
+                    caScoreString = String.valueOf(performanceCurrentModel.getCaScore()) + "%";
+                    examScoreString = String.valueOf(performanceCurrentModel.getExamScore()) + "%";
+                    subjectScoreString = String.valueOf(performanceCurrentModel.getCurrentScore()) + "%";
                 } else {
-                    ((MyViewHolder) holder).subjectScore.setText(R.string.not_subscribed_long);
+                    caScoreString = examScoreString = subjectScoreString = context.getString(R.string.not_subscribed_short);
                 }
             }
+
+            ((MyViewHolder) holder).caScore.setText(caScoreString);
+            ((MyViewHolder) holder).examScore.setText(examScoreString);
+            ((MyViewHolder) holder).subjectScore.setText(subjectScoreString);
 
             ((MyViewHolder) holder).view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -217,6 +283,7 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
                     bundle.putString("Subject", performanceCurrentModel.getSubject());
                     bundle.putString("Term", performanceCurrentHeader.getTerm());
                     bundle.putString("Year", performanceCurrentHeader.getYear());
+                    bundle.putString("parentActivity", parentActivity);
                     I.putExtras(bundle);
                     context.startActivity(I);
                 }

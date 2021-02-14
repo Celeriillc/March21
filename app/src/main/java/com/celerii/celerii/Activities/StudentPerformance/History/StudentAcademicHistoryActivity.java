@@ -63,7 +63,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
     public RecyclerView recyclerView;
     public StudentAcademicHistoryAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    String activeClass = "";
+    String activeClass = "", className = "";
     String year, term, year_term;
 
     String featureUseKey = "";
@@ -149,26 +149,24 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
-                    }
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("Class Academic Records"); //TODO: Use class name, make dynamic
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return;
                 }
-            } else {
-                setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle("Class Academic Records"); //TODO: Use class name, make dynamic
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeButtonEnabled(true);
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                mySwipeRefreshLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                errorLayoutButton.setText("Find my school");
-                errorLayoutButton.setVisibility(View.VISIBLE);
-                return;
             }
         }
 
@@ -176,6 +174,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         Type type = new TypeToken<Class>() {}.getType();
         Class activeClassModel = gson.fromJson(activeClass, type);
         activeClass = activeClassModel.getID();
+        className = activeClassModel.getClassName();
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(activeClassModel.getClassName()); //TODO: Use class name, make dynamic
@@ -233,9 +232,27 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
             errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("This class doesn't contain any students");
+            errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
         } else {
             final HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClass);
+
+            if (classMap == null) {
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
+                return;
+            }
+
+            if (classMap.size() == 0) {
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
+                return;
+            }
 
             studentScore = new HashMap<>();
             studentCounter = new HashMap<>();

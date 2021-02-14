@@ -45,7 +45,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name, message, time;
-        public ImageView profilePic, unReadMessagesOne, unReadMessagesTwo, messageStatus, noOfmesages;
+        public ImageView profilePic, unReadMessagesOne, /*unReadMessagesTwo,*/ messageStatus, noOfmesages;
         public LinearLayout profilePictureClipper;
         public View view;
 
@@ -56,7 +56,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             time = (TextView) view.findViewById(R.id.time);
             profilePic = (ImageView) view.findViewById(R.id.pic);
             unReadMessagesOne = (ImageView) view.findViewById(R.id.unreadmessagesone);
-            unReadMessagesTwo = (ImageView) view.findViewById(R.id.unreadmessagestwo);
+//            unReadMessagesTwo = (ImageView) view.findViewById(R.id.unreadmessagestwo);
             profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             this.view = view;
         }
@@ -164,32 +164,23 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             ((MyViewHolder) holder).name.setText(messageList.getName());
             ((MyViewHolder) holder).message.setText(messageList.getMessage());
-            ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpanShort(messageList.getTime()));
+            ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpan(messageList.getTime()));
             ((MyViewHolder) holder).profilePictureClipper.setClipToOutline(true);
 
             if (messageList.getReceiverID().equals(sharedPreferencesManager.getMyUserID())) {
                 if (!messageList.isSeen()) {
                     ((MyViewHolder) holder).unReadMessagesOne.setVisibility(View.VISIBLE);
-                    ((MyViewHolder) holder).unReadMessagesTwo.setVisibility(View.VISIBLE);
-                    ((MyViewHolder) holder).message.setTypeface(null, Typeface.BOLD);
-                    ((MyViewHolder) holder).time.setTypeface(null, Typeface.BOLD);
                 } else {
                     ((MyViewHolder) holder).unReadMessagesOne.setVisibility(View.INVISIBLE);
-                    ((MyViewHolder) holder).unReadMessagesTwo.setVisibility(View.INVISIBLE);
-                    ((MyViewHolder) holder).message.setTypeface(null, Typeface.NORMAL);
-                    ((MyViewHolder) holder).time.setTypeface(null, Typeface.NORMAL);
                 }
             }
             else {
                 ((MyViewHolder) holder).unReadMessagesOne.setVisibility(View.INVISIBLE);
-                ((MyViewHolder) holder).unReadMessagesTwo.setVisibility(View.INVISIBLE);
-                ((MyViewHolder) holder).message.setTypeface(null, Typeface.NORMAL);
-                ((MyViewHolder) holder).time.setTypeface(null, Typeface.NORMAL);
             }
 
             Drawable textDrawable;
             if (!messageList.getName().isEmpty()) {
-                String[] nameArray = messageList.getName().split(" ");
+                String[] nameArray = messageList.getName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -200,22 +191,20 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
             }
 
-            if (!messageList.getProfilepicUrl().isEmpty()) {
-                Glide.with(context)
-                        .load(messageList.getProfilepicUrl())
-                        .placeholder(textDrawable)
-                        .error(textDrawable)
-                        .centerCrop()
-                        .bitmapTransform(new CropCircleTransformation(context))
-                        .into(((MyViewHolder) holder).profilePic);
-            }
+            Glide.with(context)
+                    .load(messageList.getProfilepicUrl())
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(((MyViewHolder) holder).profilePic);
 
             ((MyViewHolder) holder).view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent I = new Intent(context, ChatActivity.class);
                     Bundle b = new Bundle();
-                    b.putString("ID", messageList.getOtherParty());
+                    b.putString("ID", messageList.getReceiverID());
                     b.putString("name", messageList.getName());
                     I.putExtras(b);
                     context.startActivity(I);

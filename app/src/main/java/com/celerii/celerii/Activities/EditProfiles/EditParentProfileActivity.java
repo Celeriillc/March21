@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.EditPersonalInformationDetails.GenderEditActivity;
 import com.celerii.celerii.Activities.EditPersonalInformationDetails.GeneralEditActivity;
+import com.celerii.celerii.Activities.Settings.EditPhoneNumberActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.InboxAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
@@ -39,8 +40,10 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -186,13 +189,14 @@ public class EditParentProfileActivity extends AppCompatActivity {
         phoneNumberLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(EditParentProfileActivity.this, GeneralEditActivity.class);
-                Bundle b = new Bundle();
-                b.putString("Caption", "Phone Number");
-                b.putString("Description", "Phone Number Description");
-                b.putString("EditHint", "Phone Number");
-                b.putString("EditItem", phoneNumber.getText().toString());
-                i.putExtras(b);
+//                Intent i = new Intent(EditParentProfileActivity.this, GeneralEditActivity.class);
+//                Bundle b = new Bundle();
+//                b.putString("Caption", "Phone Number");
+//                b.putString("Description", "Phone Number Description");
+//                b.putString("EditHint", "Phone Number");
+//                b.putString("EditItem", phoneNumber.getText().toString());
+//                i.putExtras(b);
+                Intent i = new Intent(EditParentProfileActivity.this, EditPhoneNumberActivity.class);
                 startActivityForResult(i, 2);
             }
         });
@@ -207,12 +211,13 @@ public class EditParentProfileActivity extends AppCompatActivity {
         occupation.setText(sharedPreferencesManager.getMyOccupation());
 
         Drawable textDrawable;
-        if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
-            String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+        String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+        if (!myName.trim().isEmpty()) {
+            String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 150);
             }
             profilePicture.setImageDrawable(textDrawable);
         } else {
@@ -346,30 +351,36 @@ public class EditParentProfileActivity extends AppCompatActivity {
                 mDatabaseReference.updateChildren(editProfileMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        progressDialog.dismiss();
-                        sharedPreferencesManager.setMyFirstName(firstNameString);
-                        sharedPreferencesManager.setMyMiddleName(middleNameString);
-                        sharedPreferencesManager.setMyLastName(lastNameString);
-                        sharedPreferencesManager.setMyGender(gender.getText().toString().trim());
-                        sharedPreferencesManager.setMyPhoneNumber(phoneNumber.getText().toString().trim());
-                        sharedPreferencesManager.setMyOccupation(occupation.getText().toString().trim());
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            sharedPreferencesManager.setMyFirstName(firstNameString);
+                            sharedPreferencesManager.setMyMiddleName(middleNameString);
+                            sharedPreferencesManager.setMyLastName(lastNameString);
+                            sharedPreferencesManager.setMyGender(gender.getText().toString().trim());
+                            sharedPreferencesManager.setMyPhoneNumber(phoneNumber.getText().toString().trim());
+                            sharedPreferencesManager.setMyOccupation(occupation.getText().toString().trim());
 
-                        final Dialog dialog = new Dialog(context);
-                        dialog.setContentView(R.layout.custom_upload_successful_dialog);
-                        dialog.setCancelable(false);
-                        dialog.setCanceledOnTouchOutside(false);
-                        TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        TextView close = (TextView) dialog.findViewById(R.id.close);
-                        dialog.show();
+                            final Dialog dialog = new Dialog(context);
+                            dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                            dialog.setCancelable(false);
+                            dialog.setCanceledOnTouchOutside(false);
+                            TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                            TextView close = (TextView) dialog.findViewById(R.id.close);
+                            dialog.show();
 
-                        dialogMessage.setText("Your profile has been successfully updated");
+                            dialogMessage.setText("Your profile has been successfully updated");
 
-                        close.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                            }
-                        });
+                            close.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        } else {
+                            progressDialog.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                        }
                     }
                 });
             } else {
@@ -410,31 +421,37 @@ public class EditParentProfileActivity extends AppCompatActivity {
                             mDatabaseReference.updateChildren(editProfileMap, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    progressDialog.dismiss();
-                                    sharedPreferencesManager.setMyFirstName(firstNameString);
-                                    sharedPreferencesManager.setMyMiddleName(middleNameString);
-                                    sharedPreferencesManager.setMyLastName(lastNameString);
-                                    sharedPreferencesManager.setMyPicURL(downloadURL);
-                                    sharedPreferencesManager.setMyGender(gender.getText().toString().trim());
-                                    sharedPreferencesManager.setMyPhoneNumber(phoneNumber.getText().toString().trim());
-                                    sharedPreferencesManager.setMyOccupation(occupation.getText().toString().trim());
+                                    if (databaseError == null) {
+                                        progressDialog.dismiss();
+                                        sharedPreferencesManager.setMyFirstName(firstNameString);
+                                        sharedPreferencesManager.setMyMiddleName(middleNameString);
+                                        sharedPreferencesManager.setMyLastName(lastNameString);
+                                        sharedPreferencesManager.setMyPicURL(downloadURL);
+                                        sharedPreferencesManager.setMyGender(gender.getText().toString().trim());
+                                        sharedPreferencesManager.setMyPhoneNumber(phoneNumber.getText().toString().trim());
+                                        sharedPreferencesManager.setMyOccupation(occupation.getText().toString().trim());
 
-                                    final Dialog dialog = new Dialog(context);
-                                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
-                                    dialog.setCancelable(false);
-                                    dialog.setCanceledOnTouchOutside(false);
-                                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
-                                    TextView close = (TextView) dialog.findViewById(R.id.close);
-                                    dialog.show();
+                                        final Dialog dialog = new Dialog(context);
+                                        dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                                        dialog.setCancelable(false);
+                                        dialog.setCanceledOnTouchOutside(false);
+                                        TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                                        TextView close = (TextView) dialog.findViewById(R.id.close);
+                                        dialog.show();
 
-                                    dialogMessage.setText("Your profile has been successfully updated");
+                                        dialogMessage.setText("Your profile has been successfully updated");
 
-                                    close.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            dialog.dismiss();
-                                        }
-                                    });
+                                        close.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                    } else {
+                                        progressDialog.dismiss();
+                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                        showDialogWithMessage(Html.fromHtml(message));
+                                    }
                                 }
                             });
                         }

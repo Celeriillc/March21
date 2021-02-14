@@ -17,6 +17,7 @@ import com.celerii.celerii.adapters.EventRowAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.EventsRow;
@@ -52,7 +53,6 @@ public class EventsRowActivity extends AppCompatActivity {
     public RecyclerView recyclerView;
     public EventRowAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    String string = "Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor  Lorem ipsum dolor sit amet, nsectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor";
     String eventAccountType, accountType;
     String todaysDate = "";
     int childrenCounter = 0;
@@ -134,7 +134,7 @@ public class EventsRowActivity extends AppCompatActivity {
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
+                if (dataSnapshot.exists()) {
                     eventsRowList.clear();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         final int childrenCount = (int) dataSnapshot.getChildrenCount();
@@ -157,10 +157,10 @@ public class EventsRowActivity extends AppCompatActivity {
                                             if (dataSnapshot.exists()){
                                                 School schoolInstance = dataSnapshot.getValue(School.class);
                                                 eventRow.setSchoolID(schoolInstance.getSchoolName());
-                                                mAdapter.notifyDataSetChanged();
+//                                                mAdapter.notifyDataSetChanged();
                                             } else {
                                                 eventRow.setSchoolID("This school account has been deleted or doesn't exist");
-                                                mAdapter.notifyDataSetChanged();
+//                                                mAdapter.notifyDataSetChanged();
                                             }
 
                                             String eventDate = eventRow.getEventDate();
@@ -170,7 +170,7 @@ public class EventsRowActivity extends AppCompatActivity {
                                             }
 
                                             if (childrenCount == childrenCounter) {
-                                                if (eventsRowList.size() > 1) {
+                                                if (eventsRowList.size() > 0) {
                                                     if (eventsRowList.size() > 1) {
                                                         Collections.sort(eventsRowList, new Comparator<EventsRow>() {
                                                             @Override
@@ -201,7 +201,13 @@ public class EventsRowActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onCancelled(DatabaseError databaseError) {
-
+                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.GONE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            errorLayoutText.setText(message);
+                                            return;
                                         }
                                     });
 
@@ -230,7 +236,13 @@ public class EventsRowActivity extends AppCompatActivity {
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
+                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                recyclerView.setVisibility(View.GONE);
+                                progressLayout.setVisibility(View.GONE);
+                                errorLayout.setVisibility(View.VISIBLE);
+                                errorLayoutText.setText(message);
+                                return;
                             }
                         });
                     }
@@ -249,7 +261,13 @@ public class EventsRowActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(message);
+                return;
             }
         });
     }

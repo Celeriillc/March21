@@ -207,15 +207,15 @@ public class TeacherHomeNotification extends Fragment {
         }
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("NotificationTeacher").child(mFirebaseUser.getUid());
-        mDatabaseReference.orderByChild("time").limitToLast(50).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference./*orderByChild("time").*/limitToLast(50).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     notificationModelList.clear();
 //                    mAdapter.notifyDataSetChanged();
                     counter = 0;
+                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        final int childrenCount = (int) dataSnapshot.getChildrenCount();
                         final NotificationModel notificationModel = postSnapshot.getValue(NotificationModel.class);
                         notificationModel.setSortableTime(Date.convertToSortableDate(notificationModel.getTime()));
 
@@ -232,9 +232,9 @@ public class TeacherHomeNotification extends Fragment {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         notificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (counter == childrenCount) {
                                         if (notificationModelList.size() > 1) {
@@ -278,9 +278,9 @@ public class TeacherHomeNotification extends Fragment {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         notificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (counter == childrenCount) {
                                         if (notificationModelList.size() > 1) {
@@ -324,9 +324,9 @@ public class TeacherHomeNotification extends Fragment {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         notificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (counter == childrenCount) {
                                         if (notificationModelList.size() > 1) {
@@ -425,6 +425,17 @@ public class TeacherHomeNotification extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+//        if (hidden) {
+//
+//        } else {
+//
+//        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -433,7 +444,6 @@ public class TeacherHomeNotification extends Fragment {
         NotificationBadgeModel notificationBadgeModel = new NotificationBadgeModel(false, 0);
         bottomNavBadgeMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/Notifications", notificationBadgeModel);
         bottomNavBadgeRef.updateChildren(bottomNavBadgeMap);
-
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
         } else {

@@ -27,8 +27,11 @@ import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.SubscriptionModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -124,46 +127,50 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
                 return;
             }
         } else {
-            Boolean activeKidExist = false;
-            Gson gson = new Gson();
-            Type type = new TypeToken<Student>() {}.getType();
-            Student activeKidModel = gson.fromJson(activeKid, type);
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                Boolean activeKidExist = false;
+                Gson gson = new Gson();
+                Type type = new TypeToken<Student>() {
+                }.getType();
+                Student activeKidModel = gson.fromJson(activeKid, type);
 
-            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
-            type = new TypeToken<ArrayList<Student>>() {}.getType();
-            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                type = new TypeToken<ArrayList<Student>>() {
+                }.getType();
+                ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
 
-            for (Student student: myChildren) {
-                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
-                    activeKidExist = true;
-                    activeKidModel = student;
-                    activeKid = gson.toJson(activeKidModel);
-                    sharedPreferencesManager.setActiveKid(activeKid);
-                    break;
-                }
-            }
-
-            if (!activeKidExist) {
-                if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeKid = gson.toJson(myChildren.get(0));
+                for (Student student : myChildren) {
+                    if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                        activeKidExist = true;
+                        activeKidModel = student;
+                        activeKid = gson.toJson(activeKidModel);
                         sharedPreferencesManager.setActiveKid(activeKid);
+                        break;
                     }
-                } else {
-                    setSupportActionBar(toolbar);
-                    getSupportActionBar().setTitle("Subscription Status");
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setHomeButtonEnabled(true);
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                    errorLayoutButton.setText("Find my child");
-                    errorLayoutButton.setVisibility(View.VISIBLE);
-                    return;
+                }
+
+                if (!activeKidExist) {
+                    if (myChildren.size() > 0) {
+                        if (myChildren.size() > 1) {
+                            gson = new Gson();
+                            activeKid = gson.toJson(myChildren.get(0));
+                            sharedPreferencesManager.setActiveKid(activeKid);
+                        }
+                    } else {
+                        setSupportActionBar(toolbar);
+                        getSupportActionBar().setTitle("Subscription Status");
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        getSupportActionBar().setHomeButtonEnabled(true);
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                        return;
+                    }
                 }
             }
         }
@@ -211,12 +218,13 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
         loadSubscriptionInformation();
 //        mAdapter = new SubscriptionAdapter(subscriptionModelList, subscriptionModel, this);
 //        recyclerView.setAdapter(mAdapter);
+        loadStudentSubscriptionInformationFromFirebase();
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        loadSubscriptionInformation();
+                        loadStudentSubscriptionInformationFromFirebase();
                     }
                 }
         );
@@ -266,6 +274,42 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
             errorLayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void loadStudentSubscriptionInformationFromFirebase() {
+        subscriptionModelList.clear();
+        mDatabaseReference = mFirebaseDatabase.getReference().child("Student Subscription").child(childID);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        SubscriptionModel subscriptionModel = postSnapshot.getValue(SubscriptionModel.class);
+                        subscriptionModelList.add(subscriptionModel);
+                    }
+
+                    if (subscriptionModelList.size() > 1) {
+                        Collections.sort(subscriptionModelList, new Comparator<SubscriptionModel>() {
+                            @Override
+                            public int compare(SubscriptionModel o1, SubscriptionModel o2) {
+                                return o1.getSubscriptionDate().compareTo(o2.getSubscriptionDate());
+                            }
+                        });
+                    }
+
+                    Collections.reverse(subscriptionModelList);
+                }
+
+                subscriptionModelList.add(0, new SubscriptionModel());
+                mySwipeRefreshLayout.setRefreshing(false);
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

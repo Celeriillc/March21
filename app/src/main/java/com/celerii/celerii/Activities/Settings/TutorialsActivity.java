@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.TutorialsAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
@@ -102,6 +103,15 @@ public class TutorialsActivity extends AppCompatActivity {
     }
 
     private void loadTutorialsFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             mDatabaseReference = mFirebaseDatabase.getReference().child("Tutorials").child("Parent");
         } else {

@@ -25,6 +25,7 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
+import com.celerii.celerii.models.ParentSchoolConnectionRequest;
 import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.TeacherSchoolConnectionRequest;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class TeacherRequestActivity extends AppCompatActivity {
     SharedPreferencesManager sharedPreferencesManager;
@@ -57,6 +59,7 @@ public class TeacherRequestActivity extends AppCompatActivity {
     String parentActivity;
 
     private ArrayList<TeacherSchoolConnectionRequest> teacherSchoolConnectionRequestList;
+    private ArrayList<String> teacherSchoolConnectionRequestListKeys;
     public RecyclerView recyclerView;
     public TeacherRequestAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -83,6 +86,13 @@ public class TeacherRequestActivity extends AppCompatActivity {
         Bundle b = getIntent().getExtras();
         if (b != null) {
             parentActivity = b.getString("parentActivity");
+            if (parentActivity != null) {
+                if (!parentActivity.isEmpty()) {
+                    sharedPreferencesManager.setActiveAccount(parentActivity);
+                    mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                    mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+                }
+            }
         }
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
@@ -106,6 +116,7 @@ public class TeacherRequestActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         teacherSchoolConnectionRequestList = new ArrayList<>();
+        teacherSchoolConnectionRequestListKeys = new ArrayList<>();
         mAdapter = new TeacherRequestAdapter(teacherSchoolConnectionRequestList, context);
         recyclerView.setAdapter(mAdapter);
         loadSchoolToTeacherRequestFromFirebase();
@@ -145,11 +156,12 @@ public class TeacherRequestActivity extends AppCompatActivity {
         loopControl = 0;
         loopControlTwo = 0;
         mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid());
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                loopControl = 0;
+                teacherSchoolConnectionRequestList.clear();
                 if (dataSnapshot.exists()) {
-                    teacherSchoolConnectionRequestList.clear();
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         final String schoolKey = postSnapshot.getKey();
@@ -163,7 +175,16 @@ public class TeacherRequestActivity extends AppCompatActivity {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         TeacherSchoolConnectionRequest teacherSchoolConnectionRequest = postSnapshot.getValue(TeacherSchoolConnectionRequest.class);
                                         teacherSchoolConnectionRequest.setSender(schoolKey);
-                                        teacherSchoolConnectionRequest.setSorttableTimeSent(teacherSchoolConnectionRequest.getTimeSent());
+                                        teacherSchoolConnectionRequest.setSorttableTimeSent(Date.convertToSortableDate(teacherSchoolConnectionRequest.getTimeSent()));
+                                        teacherSchoolConnectionRequest.setKey(postSnapshot.getKey());
+                                        if (!teacherSchoolConnectionRequestListKeys.contains(teacherSchoolConnectionRequest.getKey())) {
+                                            teacherSchoolConnectionRequestListKeys.add(teacherSchoolConnectionRequest.getKey());
+                                        } else {
+                                            for(Iterator<TeacherSchoolConnectionRequest> iterator = teacherSchoolConnectionRequestList.iterator(); iterator.hasNext(); ) {
+                                                if(iterator.next().getKey().equals(teacherSchoolConnectionRequest.getKey()))
+                                                    iterator.remove();
+                                            }
+                                        }
                                         teacherSchoolConnectionRequestList.add(teacherSchoolConnectionRequest);
                                     }
                                 }
@@ -193,9 +214,14 @@ public class TeacherRequestActivity extends AppCompatActivity {
 
     void loadTeacherToSchoolRequestsFromFirebase () {
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher To School Request Teacher").child(mFirebaseUser.getUid());
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                loopControlTwo = 0;
+                for(Iterator<TeacherSchoolConnectionRequest> iterator = teacherSchoolConnectionRequestList.iterator(); iterator.hasNext(); ) {
+                    if(iterator.next().getSender().equals(mFirebaseUser.getUid()))
+                        iterator.remove();
+                }
                 if (dataSnapshot.exists()) {
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
@@ -210,7 +236,16 @@ public class TeacherRequestActivity extends AppCompatActivity {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         TeacherSchoolConnectionRequest teacherSchoolConnectionRequest = postSnapshot.getValue(TeacherSchoolConnectionRequest.class);
                                         teacherSchoolConnectionRequest.setSender(mFirebaseUser.getUid());
-                                        teacherSchoolConnectionRequest.setSorttableTimeSent(teacherSchoolConnectionRequest.getTimeSent());
+                                        teacherSchoolConnectionRequest.setSorttableTimeSent(Date.convertToSortableDate(teacherSchoolConnectionRequest.getTimeSent()));
+                                        teacherSchoolConnectionRequest.setKey(postSnapshot.getKey());
+                                        if (!teacherSchoolConnectionRequestListKeys.contains(teacherSchoolConnectionRequest.getKey())) {
+                                            teacherSchoolConnectionRequestListKeys.add(teacherSchoolConnectionRequest.getKey());
+                                        } else {
+                                            for(Iterator<TeacherSchoolConnectionRequest> iterator = teacherSchoolConnectionRequestList.iterator(); iterator.hasNext(); ) {
+                                                if(iterator.next().getKey().equals(teacherSchoolConnectionRequest.getKey()))
+                                                    iterator.remove();
+                                            }
+                                        }
                                         teacherSchoolConnectionRequestList.add(teacherSchoolConnectionRequest);
                                     }
                                 }

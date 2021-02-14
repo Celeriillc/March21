@@ -3,6 +3,9 @@ package com.celerii.celerii.Activities.Settings;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -30,9 +33,10 @@ public class FAQActivity extends AppCompatActivity {
 
         header = (TextView) findViewById(R.id.faqheader);
         body = (TextView) findViewById(R.id.faqbody);
+        body.setMovementMethod(LinkMovementMethod.getInstance());
 
         header.setText(headerString);
-        body.setText(bodyString);
+        body.setText(Html.fromHtml(bodyString));
     }
 
     @Override

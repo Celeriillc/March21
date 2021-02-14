@@ -50,7 +50,9 @@ import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
@@ -242,7 +244,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
         Drawable textDrawable;
         if (!posterNameString.isEmpty()) {
-            String[] nameArray = posterNameString.split(" ");
+            String[] nameArray = posterNameString.replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {
@@ -422,10 +424,24 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                     if (classList.get(i).isTicked()){
                         classReciepients.add(classList.get(i).getID());
                         if (classParentMap.containsKey(classList.get(i).getID())) {
-                            parentReciepients.addAll(classParentMap.get(classList.get(i).getID()));
+                            ArrayList<String> parents = classParentMap.get(classList.get(i).getID());
+                            if (parents != null) {
+                                for (String parent : parents) {
+                                    if (!parentReciepients.contains(parent)) {
+                                        parentReciepients.add(parent);
+                                    }
+                                }
+                            }
                         }
                         if (classSchoolMap.containsKey(classList.get(i).getID())) {
-                            schoolReciepients.addAll(classSchoolMap.get(classList.get(i).getID()));
+                            ArrayList<String> schools = classSchoolMap.get(classList.get(i).getID());
+                            if (schools != null) {
+                                for (String school : schools) {
+                                    if (!schoolReciepients.contains(school)) {
+                                        schoolReciepients.add(school);
+                                    }
+                                }
+                            }
                         }
                         replaceWithLastClass = " and " + classList.get(i).getClassName();
                         replaceLastClass = ", " + classList.get(i).getClassName() + ",";
@@ -618,7 +634,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                                     finish();
                                 } else {
                                     progressDialog.dismiss();
-                                    CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
+                                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                    ShowDialogWithMessage.showDialogWithMessage(context, message);
                                 }
                             }
                         });
@@ -639,8 +656,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, "", url);
                 classStory.setClassReciepients(classReciepients);
                 imageURL = "";
-                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
-                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, classReciepientString, false);
+                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, classReciepientString, false);
 
                 DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
                 String pushID = newStoryR.getKey();
@@ -655,8 +672,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
                 for (int i = 0; i < classReciepients.size(); i++){
-                    String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
-                    newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
+                    String classStoryRecipientsPush = "ClassStoryReciepients/" + pushID + "/";
+                    newStory.put(classStoryRecipientsPush + classReciepients.get(i), true);
                     newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
                 }
                 for (int i = 0; i < schoolReciepients.size(); i++) {
@@ -681,7 +698,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                             finish();
                         } else {
                             progressDialog.dismiss();
-                            CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
                         }
                     }
                 });
@@ -771,7 +789,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                                             finish();
                                         } else {
                                             progressDialog.dismiss();
-                                            CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
+                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                            ShowDialogWithMessage.showDialogWithMessage(context, message);
                                         }
                                     }
                                 });
@@ -826,7 +845,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                             finish();
                         } else {
                             progressDialog.dismiss();
-                            CustomToast.blueBackgroundToast(context, "Your class story could not be posted, try again");
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            showDialogWithMessage(message);
                         }
                     }
                 });

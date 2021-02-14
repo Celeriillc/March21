@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -45,6 +48,7 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
     private List<ParentAttendanceRow> parentAttendanceRowList;
     private ParentAttendanceHeader parentAttendanceHeader;
     private String studentName;
+    private String parentActivity;
     private Activity myActivity;
     private Context context;
 
@@ -54,7 +58,7 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView className, date, newBadge, status;
-//        public ImageView datePic, attendanceMarker;
+        public ImageView statusIcon;
         public View clickableView;
 
         public MyViewHolder(final View view) {
@@ -63,7 +67,7 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
             date = (TextView) view.findViewById(R.id.attendancedate);
             newBadge = (TextView) view.findViewById(R.id.newbadge);
             status = (TextView) view.findViewById(R.id.status);
-//            datePic = (ImageView) view.findViewById(R.id.datepicture);
+            statusIcon = (ImageView) view.findViewById(R.id.statusicon);
 //            attendanceMarker = (ImageView) view.findViewById(R.id.attendanceMarker);
             clickableView = view;
         }
@@ -86,11 +90,12 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
-    public ParentAttendanceRowAdapter(List<ParentAttendanceRow> parentAttendanceRowList, ParentAttendanceHeader parentAttendanceHeader, String studentName, Activity myActivity, Context context) {
+    public ParentAttendanceRowAdapter(List<ParentAttendanceRow> parentAttendanceRowList, ParentAttendanceHeader parentAttendanceHeader, String studentName, String parentActivity, Activity myActivity, Context context) {
         this.sharedPreferencesManager = new SharedPreferencesManager(context);
         this.parentAttendanceRowList = parentAttendanceRowList;
         this.parentAttendanceHeader = parentAttendanceHeader;
         this.studentName = studentName;
+        this.parentActivity = parentActivity;
         this.myActivity = myActivity;
         this.context = context;
     }
@@ -203,29 +208,39 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
                 if (parentAttendanceRow.getAttendanceStatus().equals("Present")) {
                     ((MyViewHolder)holder).status.setText("Present");
                     ((MyViewHolder)holder).status.setTextColor(context.getResources().getColor(R.color.colorPrimaryPurple));
+                    ((MyViewHolder) holder).statusIcon.setVisibility(View.VISIBLE);
+                    ((MyViewHolder) holder).statusIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
                 } else if (parentAttendanceRow.getAttendanceStatus().equals("Absent")) {
                     ((MyViewHolder)holder).status.setText("Absent");
                     ((MyViewHolder)holder).status.setTextColor(context.getResources().getColor(R.color.colorAccent));
+                    ((MyViewHolder) holder).statusIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent));
                 } else if (parentAttendanceRow.getAttendanceStatus().equals("Late")) {
                     ((MyViewHolder)holder).status.setText("Came in Late");
                     ((MyViewHolder)holder).status.setTextColor(context.getResources().getColor(R.color.colorDeepGray));
+                    ((MyViewHolder) holder).statusIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_gray));
                 }
                 b.putBoolean("isSubscribed", true);
+                ((MyViewHolder) holder).statusIcon.setVisibility(View.VISIBLE);
             } else {
                 if (!isExpired) {
                     if (parentAttendanceRow.getAttendanceStatus().equals("Present")) {
                         ((MyViewHolder)holder).status.setText("Present");
                         ((MyViewHolder)holder).status.setTextColor(context.getResources().getColor(R.color.colorPrimaryPurple));
+                        ((MyViewHolder) holder).statusIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
                     } else if (parentAttendanceRow.getAttendanceStatus().equals("Absent")) {
                         ((MyViewHolder)holder).status.setText("Absent");
                         ((MyViewHolder)holder).status.setTextColor(context.getResources().getColor(R.color.colorAccent));
+                        ((MyViewHolder) holder).statusIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent));
                     } else if (parentAttendanceRow.getAttendanceStatus().equals("Late")) {
                         ((MyViewHolder)holder).status.setText("Came in Late");
                         ((MyViewHolder)holder).status.setTextColor(context.getResources().getColor(R.color.colorDeepGray));
+                        ((MyViewHolder) holder).statusIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_gray));
                     }
                     b.putBoolean("isSubscribed", true);
+                    ((MyViewHolder) holder).statusIcon.setVisibility(View.VISIBLE);
                 } else {
                     ((MyViewHolder)holder).status.setText(R.string.not_subscribed_long);
+                    ((MyViewHolder) holder).statusIcon.setVisibility(View.GONE);
                     b.putBoolean("isSubscribed", false);
                 }
             }
@@ -254,6 +269,7 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
                     b.putString("ID", parentAttendanceRow.getStudentID());
                     b.putString("name", studentName);
                     b.putString("accountType", "Parent");
+                    b.putString("parentActivity", parentActivity);
                     Intent I = new Intent(context, AttendanceDetailActivity.class);
                     I.putExtras(b);
                     context.startActivity(I);

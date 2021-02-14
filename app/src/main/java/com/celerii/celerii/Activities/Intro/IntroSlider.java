@@ -65,8 +65,8 @@ public class IntroSlider extends AppCompatActivity {
         // layouts of all welcome sliders
         layouts = new int[]{
                 R.layout.fragment_welcome_slide_one,
-                R.layout.fragment_welcome_slide_one,
-                R.layout.fragment_welcome_slide_one};
+                R.layout.fragment_welcome_slide_two,
+                R.layout.fragment_welcome_slide_three};
 
         // adding bottom dots
         addBottomDots(0);
@@ -99,7 +99,7 @@ public class IntroSlider extends AppCompatActivity {
         for (int i = 0; i < dots.length; i++) {
             dots[i] = new TextView(this);
             dots[i].setText(Html.fromHtml("&#8226;"));
-            dots[i].setTextSize(20);
+            dots[i].setTextSize(60);
             dots[i].setTextColor(ContextCompat.getColor(this, R.color.colorLightGray));
             LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             llp.setMargins(5, 0, 5, 0); //(left, top, right, bottom);
@@ -108,7 +108,7 @@ public class IntroSlider extends AppCompatActivity {
         }
 
         if (dots.length > 0)
-            dots[currentPage].setTextSize(25); dots[currentPage].setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple));
+            dots[currentPage].setTextSize(60); dots[currentPage].setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple));
 
     }
 

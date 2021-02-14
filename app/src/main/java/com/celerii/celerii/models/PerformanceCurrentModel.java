@@ -7,13 +7,15 @@ package com.celerii.celerii.models;
 public class PerformanceCurrentModel {
 
     String subject, classID, date;
-    int currentScore, averageScore, classAverage;
+    int caScore, examScore, currentScore, averageScore, classAverage;
     boolean isNew;
 
     public PerformanceCurrentModel() {
         this.subject = "";
         this.classID = "";
         this.date = "0000/00/00 00:00:00:000";
+        this.caScore = 0;
+        this.examScore = 0;
         this.currentScore = 0;
         this.averageScore = 0;
         this.classAverage = 0;
@@ -24,26 +26,32 @@ public class PerformanceCurrentModel {
         this.subject = subject;
         this.classID = "";
         this.date = "0000/00/00 00:00:00:000";
+        this.caScore = 0;
+        this.examScore = 0;
         this.currentScore = currentScore;
         this.averageScore = 0;
         this.classAverage = 0;
         this.isNew = false;
     }
 
-    public PerformanceCurrentModel(String subject, String date, int currentScore) {
+    public PerformanceCurrentModel(String subject, String date, int caScore, int examScore, int currentScore) {
         this.subject = subject;
         this.classID = "";
         this.date = date;
+        this.caScore = caScore;
+        this.examScore = examScore;
         this.currentScore = currentScore;
         this.averageScore = 0;
         this.classAverage = 0;
         this.isNew = false;
     }
 
-    public PerformanceCurrentModel(String subject, String classID, int currentScore, int averageScore, int classAverage) {
+    public PerformanceCurrentModel(String subject, String classID, int caScore, int examScore, int currentScore, int averageScore, int classAverage) {
         this.subject = subject;
         this.classID = classID;
         this.date = "0000/00/00 00:00:00:000";
+        this.caScore = caScore;
+        this.examScore = examScore;
         this.currentScore = currentScore;
         this.averageScore = averageScore;
         this.classAverage = classAverage;
@@ -72,6 +80,22 @@ public class PerformanceCurrentModel {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getCaScore() {
+        return caScore;
+    }
+
+    public void setCaScore(int caScore) {
+        this.caScore = caScore;
+    }
+
+    public int getExamScore() {
+        return examScore;
+    }
+
+    public void setExamScore(int examScore) {
+        this.examScore = examScore;
     }
 
     public int getCurrentScore() {

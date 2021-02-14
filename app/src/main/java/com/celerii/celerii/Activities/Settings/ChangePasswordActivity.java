@@ -99,12 +99,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 if (!isCurrentPasswordVisible) {
                     currentPasswordEditText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     currentPasswordEditText.setSelection(currentPasswordEditText.length());
-                    toggleCurrentPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    toggleCurrentPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isCurrentPasswordVisible = true;
                 } else {
                     currentPasswordEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     currentPasswordEditText.setSelection(currentPasswordEditText.length());
-                    toggleCurrentPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    toggleCurrentPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isCurrentPasswordVisible = false;
                 }
             }
@@ -116,12 +116,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 if (!isNewPasswordVisible) {
                     newPasswordEditText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     newPasswordEditText.setSelection(newPasswordEditText.length());
-                    toggleNewPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    toggleNewPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isNewPasswordVisible = true;
                 } else {
                     newPasswordEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     newPasswordEditText.setSelection(newPasswordEditText.length());
-                    toggleNewPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    toggleNewPasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isNewPasswordVisible = false;
                 }
             }
@@ -133,12 +133,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 if (!isRetypePasswordVisible) {
                     reTypeNewPasswordEditText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     reTypeNewPasswordEditText.setSelection(reTypeNewPasswordEditText.length());
-                    toggleRetypePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    toggleRetypePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isRetypePasswordVisible = true;
                 } else {
                     reTypeNewPasswordEditText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     reTypeNewPasswordEditText.setSelection(reTypeNewPasswordEditText.length());
-                    toggleRetypePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    toggleRetypePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isRetypePasswordVisible = false;
                 }
             }

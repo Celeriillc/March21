@@ -9,8 +9,17 @@ public class MessageList {
     boolean seen, received;
 
     public MessageList() {
-        this.time = "";
+        this.name = "";
+        this.message = "";
+        this.senderID = "";
         this.receiverID = "";
+        this.time = "0000/00/00 00:00:00:000";
+        this.sortableTime = "00000000000000000";
+        this.profilepicUrl = "";
+        this.otherParty = "";
+        this.noOfMessages = 0;
+        this.seen = false;
+        this.received = false;
     }
 
     public MessageList(String name, String message, String time, String sortableTime, String profilepicUrl, int noOfMessages) {

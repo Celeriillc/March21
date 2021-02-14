@@ -56,7 +56,7 @@ public class EmailEditActivity extends AppCompatActivity {
     EditText newEmail, currentPassword;
     Button editEmail;
     Toolbar toolbar;
-    private ImageButton togglePasswordVisisbility;
+    private ImageButton togglePasswordVisibility;
 
     CustomProgressDialogOne progressDialog;
     boolean isPasswordVisible = false;
@@ -88,22 +88,22 @@ public class EmailEditActivity extends AppCompatActivity {
         editEmail = (Button) findViewById(R.id.editemail);
         newEmail = (EditText) findViewById(R.id.newemail);
         currentPassword = (EditText) findViewById(R.id.currentpassword);
-        togglePasswordVisisbility = (ImageButton) findViewById(R.id.togglepasswordvisibility);
+        togglePasswordVisibility = (ImageButton) findViewById(R.id.togglepasswordvisibility);
         currentPassword.setTypeface(Typeface.DEFAULT);
         currentPassword.setTransformationMethod(new PasswordTransformationMethod());
 
-        togglePasswordVisisbility.setOnClickListener(new View.OnClickListener() {
+        togglePasswordVisibility.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!isPasswordVisible) {
                     currentPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     currentPassword.setSelection(currentPassword.length());
-                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    togglePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isPasswordVisible = true;
                 } else {
                     currentPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     currentPassword.setSelection(currentPassword.length());
-                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    togglePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isPasswordVisible = false;
                 }
             }

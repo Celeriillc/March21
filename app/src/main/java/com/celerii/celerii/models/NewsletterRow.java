@@ -5,18 +5,25 @@ package com.celerii.celerii.models;
  */
 
 public class NewsletterRow {
-    String newsletterTitle, newsletterBody, newsletterPoster, newsletterDate, newsletterImageURL;
-    int noOfViews, noOfFavorites, noOfComments;
+    String newsletterKey, newsletterTitle, newsletterBody, schoolID, newsletterDate, newsletterImageURL, date, sortableDate;
 
-    public NewsletterRow(String newsletterTitle, String newsletterBody, String newsletterPoster, String newsletterDate, String newsletterImageURL, int noOfViews, int noOfFavorites, int noOfComments) {
-        this.newsletterTitle = newsletterTitle;
-        this.newsletterBody = newsletterBody;
-        this.newsletterPoster = newsletterPoster;
-        this.newsletterDate = newsletterDate;
-        this.newsletterImageURL = newsletterImageURL;
-        this.noOfViews = noOfViews;
-        this.noOfFavorites = noOfFavorites;
-        this.noOfComments = noOfComments;
+    public NewsletterRow() {
+        this.newsletterKey = "";
+        this.newsletterTitle = "";
+        this.newsletterBody = "";
+        this.schoolID = "";
+        this.newsletterDate = "";
+        this.newsletterImageURL = "";
+        this.date = "0000/00/00 00:00:00:000";
+        this.sortableDate = "00000000000000000";
+    }
+
+    public String getNewsletterKey() {
+        return newsletterKey;
+    }
+
+    public void setNewsletterKey(String newsletterKey) {
+        this.newsletterKey = newsletterKey;
     }
 
     public String getNewsletterTitle() {
@@ -35,12 +42,12 @@ public class NewsletterRow {
         this.newsletterBody = newsletterBody;
     }
 
-    public String getNewsletterPoster() {
-        return newsletterPoster;
+    public String getSchoolID() {
+        return schoolID;
     }
 
-    public void setNewsletterPoster(String newsletterPoster) {
-        this.newsletterPoster = newsletterPoster;
+    public void setSchoolID(String schoolID) {
+        this.schoolID = schoolID;
     }
 
     public String getNewsletterDate() {
@@ -59,27 +66,19 @@ public class NewsletterRow {
         this.newsletterImageURL = newsletterImageURL;
     }
 
-    public int getNoOfViews() {
-        return noOfViews;
+    public String getDate() {
+        return date;
     }
 
-    public void setNoOfViews(int noOfViews) {
-        this.noOfViews = noOfViews;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public int getNoOfFavorites() {
-        return noOfFavorites;
+    public String getSortableDate() {
+        return sortableDate;
     }
 
-    public void setNoOfFavorites(int noOfFavorites) {
-        this.noOfFavorites = noOfFavorites;
-    }
-
-    public int getNoOfComments() {
-        return noOfComments;
-    }
-
-    public void setNoOfComments(int noOfComments) {
-        this.noOfComments = noOfComments;
+    public void setSortableDate(String sortableDate) {
+        this.sortableDate = sortableDate;
     }
 }

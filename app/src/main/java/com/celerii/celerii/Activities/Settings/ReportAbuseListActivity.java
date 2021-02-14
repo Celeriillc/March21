@@ -1,6 +1,8 @@
 package com.celerii.celerii.Activities.Settings;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
 import com.celerii.celerii.models.Parent;
 import com.celerii.celerii.models.ReportUserModel;
+import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.StudentsSchoolsClassesandTeachersModel;
 import com.celerii.celerii.models.Teacher;
 import com.google.firebase.auth.FirebaseAuth;
@@ -181,7 +184,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
 
     ArrayList<String> studentsList = new ArrayList<>();
     ArrayList<String> parentsList = new ArrayList<>();
-    int studentCount = 0;
+    int schoolCounter = 0;
     private void loadFromFirebaseTeacher() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
             mySwipeRefreshLayout.setRefreshing(false);
@@ -208,7 +211,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
             counter = 0;
             reportUserModelList.clear();
             reportUserModelMap.clear();
-            for (ClassesStudentsAndParentsModel classesStudentsAndParentsModel : classesStudentsAndParentsModelList) {
+            for (final ClassesStudentsAndParentsModel classesStudentsAndParentsModel : classesStudentsAndParentsModelList) {
                 mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -226,7 +229,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                             }
                         }
 
-                        if (counter == classesStudentsAndParentsModelList.size()) {
+                        if ((counter / 2) == classesStudentsAndParentsModelList.size()) {
                             if (reportUserModelList.size() > 0) {
                                 Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
                                     @Override
@@ -245,14 +248,60 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                                 recyclerView.setVisibility(View.GONE);
                                 progressLayout.setVisibility(View.GONE);
                                 errorLayout.setVisibility(View.VISIBLE);
-                                errorLayoutText.setText("You do not have any Parents to report at this time");
+                                errorLayoutText.setText("You do not have any parents or schools to report at this time");
                             }
-
                         }
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(classesStudentsAndParentsModel.getSchoolID());
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        counter++;
+                        if (dataSnapshot.exists()) {
+                            School school = dataSnapshot.getValue(School.class);
+                            String schoolID = dataSnapshot.getKey();
+                            ReportUserModel reportUser = new ReportUserModel(school.getSchoolName(), school.getProfilePhotoUrl(), schoolID);
+                            if (!school.getDeleted()) {
+                                if (!reportUserModelMap.containsKey(schoolID)) {
+                                    reportUserModelList.add(reportUser);
+                                    reportUserModelMap.put(schoolID, reportUser);
+                                }
+                            }
+                        }
+
+                        if ((counter / 2) == classesStudentsAndParentsModelList.size()) {
+                            if (reportUserModelList.size() > 0) {
+                                Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                    @Override
+                                    public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                        return o1.getName().compareTo(o2.getName());
+                                    }
+                                });
+                                reportUserModelList.add(0, new ReportUserModel());
+                                mAdapter.notifyDataSetChanged();
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                progressLayout.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                errorLayout.setVisibility(View.GONE);
+                            } else {
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                recyclerView.setVisibility(View.GONE);
+                                progressLayout.setVisibility(View.GONE);
+                                errorLayout.setVisibility(View.VISIBLE);
+                                errorLayoutText.setText("You do not have any parents or schools to report at this time");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
                     }
                 });
@@ -271,6 +320,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
             return;
         }
 
+        schoolCounter = 0;
         Gson gson = new Gson();
         studentsSchoolsClassesandTeachersModelList = new ArrayList<>();
         String studentsSchoolsClassesandTeachersModelListJSON = sharedPreferencesManager.getStudentsSchoolsClassesTeachers();
@@ -287,7 +337,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
             counter = 0;
             reportUserModelList.clear();
             reportUserModelMap.clear();
-            for (StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel : studentsSchoolsClassesandTeachersModelList) {
+            for (final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel : studentsSchoolsClassesandTeachersModelList) {
                 mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -305,7 +355,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                             }
                         }
 
-                        if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                        if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
                             if (reportUserModelList.size() > 0) {
                                 Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
                                     @Override
@@ -324,9 +374,8 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                                 recyclerView.setVisibility(View.GONE);
                                 progressLayout.setVisibility(View.GONE);
                                 errorLayout.setVisibility(View.VISIBLE);
-                                errorLayoutText.setText("You do not have any Teachers to report at this time");
+                                errorLayoutText.setText("You do not have any teacher or schools to report at this time");
                             }
-
                         }
                     }
 
@@ -335,26 +384,55 @@ public class ReportAbuseListActivity extends AppCompatActivity {
 
                     }
                 });
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(studentsSchoolsClassesandTeachersModel.getSchoolID());
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        counter++;
+                        if (dataSnapshot.exists()) {
+                            School school = dataSnapshot.getValue(School.class);
+                            String schoolID = dataSnapshot.getKey();
+                            ReportUserModel reportUser = new ReportUserModel(school.getSchoolName(), school.getProfilePhotoUrl(), schoolID);
+                            if (!school.getDeleted()) {
+                                if (!reportUserModelMap.containsKey(schoolID)) {
+                                    reportUserModelList.add(reportUser);
+                                    reportUserModelMap.put(schoolID, reportUser);
+                                }
+                            }
+                        }
+
+                        if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
+                            if (reportUserModelList.size() > 0) {
+                                Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                    @Override
+                                    public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                        return o1.getName().compareTo(o2.getName());
+                                    }
+                                });
+                                reportUserModelList.add(0, new ReportUserModel());
+                                mAdapter.notifyDataSetChanged();
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                progressLayout.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                errorLayout.setVisibility(View.GONE);
+                            } else {
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                recyclerView.setVisibility(View.GONE);
+                                progressLayout.setVisibility(View.GONE);
+                                errorLayout.setVisibility(View.VISIBLE);
+                                errorLayoutText.setText("You do not have any teacher or schools to report at this time");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //        reportUserModelList.clear();
 //        studentsList = new ArrayList<>();

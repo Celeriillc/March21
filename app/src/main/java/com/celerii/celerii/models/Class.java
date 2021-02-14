@@ -13,24 +13,30 @@ public class Class {
         this.classPicURL = "";
         this.id = id;
         this.classTeacher = "";
-//        this.isTicked = true;
+        this.isTicked = false;
     }
 
     public Class(String className, String id, boolean isTicked) {
         this.className = className;
+        this.classPicURL = "";
         this.id = id;
+        this.classTeacher = "";
         this.isTicked = isTicked;
     }
 
     public Class(boolean isTicked, String className) {
-        this.isTicked = isTicked;
         this.className = className;
+        this.classPicURL = "";
+        this.id = id;
+        this.classTeacher = "";
+        this.isTicked = isTicked;
     }
 
     public Class(String className, String classPicURL, String id, boolean isTicked) {
         this.className = className;
         this.classPicURL = classPicURL;
         this.id = id;
+        this.classTeacher = "";
         this.isTicked = isTicked;
     }
 

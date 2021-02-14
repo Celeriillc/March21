@@ -93,8 +93,16 @@ public class BehaviouralResultActivity extends AppCompatActivity {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
+
         bundle = getIntent().getExtras();
         parentActivity = bundle.getString("parentActivity");
+        if (parentActivity != null) {
+            if (!parentActivity.isEmpty()) {
+                sharedPreferencesManager.setActiveAccount(parentActivity);
+                mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+            }
+        }
 
         activeStudent = bundle.getString("ChildID");
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
@@ -143,50 +151,54 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                 return;
             }
         } else {
-            Boolean activeKidExist = false;
-            Gson gson = new Gson();
-            Type type = new TypeToken<Student>() {}.getType();
-            Student activeKidModel = gson.fromJson(activeStudent, type);
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                Boolean activeKidExist = false;
+                Gson gson = new Gson();
+                Type type = new TypeToken<Student>() {
+                }.getType();
+                Student activeKidModel = gson.fromJson(activeStudent, type);
 
-            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
-            type = new TypeToken<ArrayList<Student>>() {}.getType();
-            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                type = new TypeToken<ArrayList<Student>>() {
+                }.getType();
+                ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
 
-            for (Student student: myChildren) {
-                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
-                    activeKidExist = true;
-                    activeKidModel = student;
-                    activeStudent = gson.toJson(activeKidModel);
-                    sharedPreferencesManager.setActiveKid(activeStudent);
-                    break;
-                }
-            }
-
-            if (!activeKidExist) {
-                if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeStudent = gson.toJson(myChildren.get(0));
+                for (Student student : myChildren) {
+                    if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                        activeKidExist = true;
+                        activeKidModel = student;
+                        activeStudent = gson.toJson(activeKidModel);
                         sharedPreferencesManager.setActiveKid(activeStudent);
+                        break;
                     }
-                } else {
-                    setSupportActionBar(toolbar);
-                    getSupportActionBar().setTitle("Behavioural Performance");
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setDisplayShowTitleEnabled(true);
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                        errorLayoutButton.setText("Find my child");
-                        errorLayoutButton.setVisibility(View.VISIBLE);
+                }
+
+                if (!activeKidExist) {
+                    if (myChildren.size() > 0) {
+                        if (myChildren.size() > 1) {
+                            gson = new Gson();
+                            activeStudent = gson.toJson(myChildren.get(0));
+                            sharedPreferencesManager.setActiveKid(activeStudent);
+                        }
                     } else {
-                        errorLayoutText.setText("You do not have the permission to view this child's behavioural record");
+                        setSupportActionBar(toolbar);
+                        getSupportActionBar().setTitle("Behavioural Performance");
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        getSupportActionBar().setDisplayShowTitleEnabled(true);
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                            errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                            errorLayoutButton.setText("Find my child");
+                            errorLayoutButton.setVisibility(View.VISIBLE);
+                        } else {
+                            errorLayoutText.setText("You do not have the permission to view this child's behavioural record");
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }

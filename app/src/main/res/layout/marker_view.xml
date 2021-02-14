@@ -9,24 +9,27 @@
         android:id="@+id/score"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textColor="@color/colorPrimaryPurple"
+        android:textStyle="bold"
+        android:textSize="13sp"
         android:text=""/>
 
     <TextView
         android:id="@+id/term"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textColor="@color/colorPrimaryPurple"
+        android:textStyle="bold"
+        android:textSize="13sp"
         android:text=""/>
 
     <TextView
         android:id="@+id/year"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textColor="@color/colorPrimaryPurple"
+        android:textStyle="bold"
+        android:textSize="13sp"
         android:text=""/>
 
 </LinearLayout>

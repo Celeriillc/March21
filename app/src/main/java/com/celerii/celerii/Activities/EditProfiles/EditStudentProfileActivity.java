@@ -44,7 +44,9 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.Student;
 import com.bumptech.glide.Glide;
@@ -262,11 +264,11 @@ public class EditStudentProfileActivity extends AppCompatActivity {
 
                     Drawable textDrawable;
                     if (!childName.isEmpty()) {
-                        String[] nameArray = childName.split(" ");
+                        String[] nameArray = childName.replaceAll("\\s+", " ").split(" ");
                         if (nameArray.length == 1) {
-                            textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+                            textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                         } else {
-                            textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
+                            textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 150);
                         }
                         profilePicturePrimary.setImageDrawable(textDrawable);
                     } else {
@@ -298,7 +300,13 @@ public class EditStudentProfileActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(message);
+                return;
             }
         });
     }
@@ -434,8 +442,8 @@ public class EditStudentProfileActivity extends AppCompatActivity {
                             String messageString = firstNameString + "</b>" + "'s profile has been successfully updated";
                             showDialogWithMessage(Html.fromHtml(messageString));
                         } else {
-                            String messageString = "We couldn't update " + "<b>" + childFirstName + "</b>" + "'s profile at this time, please try again later";
-                            showDialogWithMessage(Html.fromHtml(messageString));
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
                         }
                     }
                 });
@@ -478,8 +486,8 @@ public class EditStudentProfileActivity extends AppCompatActivity {
                                         String messageString = "<b>" + firstNameString + "</b>" + "'s profile has been successfully updated";
                                         showDialogWithMessage(Html.fromHtml(messageString));
                                     } else {
-                                        String messageString = "We couldn't update " + "<b>" + firstNameString + "</b>" + "'s profile at this time, please try again later";
-                                        showDialogWithMessage(Html.fromHtml(messageString));
+                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                        showDialogWithMessage(Html.fromHtml(message));
                                     }
                                 }
                             });

@@ -308,9 +308,11 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                                                     xLabel.add(historyPerformanceBodyList.get(i).getYear() + "_" + historyPerformanceBodyList.get(i).getTerm());
                                                                     yLabel.add(Double.parseDouble(historyPerformanceBodyList.get(i).getScore()));
 
-                                                                    Boolean isExpired = Date.compareDates(historyPerformanceBodyList.get(i).getDate(), subscriptionModel.getExpiryDate());
-                                                                    if (isExpired) {
-                                                                        yLabel.set(i, 0.0);
+                                                                    boolean isExpired = Date.compareDates(historyPerformanceBodyList.get(i).getDate(), subscriptionModel.getExpiryDate());
+                                                                    if (!isOpenToAll) {
+                                                                        if (isExpired) {
+                                                                            yLabel.set(i, 0.0);
+                                                                        }
                                                                     }
                                                                 }
                                                             }

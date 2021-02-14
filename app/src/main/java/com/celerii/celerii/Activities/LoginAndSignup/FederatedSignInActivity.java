@@ -25,9 +25,12 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebaseForLogin;
 import com.celerii.celerii.models.Parent;
 import com.celerii.celerii.models.Teacher;
@@ -255,7 +258,7 @@ public class FederatedSignInActivity extends AppCompatActivity {
     }
 
     public void FirebaseUserAuthGoogle(GoogleSignInAccount googleSignInAccount) {
-        progressDialog.show();
+        progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
         AuthCredential authCredential = GoogleAuthProvider.getCredential(googleSignInAccount.getIdToken(), null);
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(FederatedSignInActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -273,7 +276,7 @@ public class FederatedSignInActivity extends AppCompatActivity {
     }
 
     public void FirebaseUserAuthFacebook(AccessToken facebookToken) {
-        progressDialog.show();
+        progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
         AuthCredential authCredential = FacebookAuthProvider.getCredential(facebookToken.getToken());
         mAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -291,7 +294,7 @@ public class FederatedSignInActivity extends AppCompatActivity {
     }
 
     public void FirebaseUserAuthTwitter(TwitterSession twitterSession) {
-        progressDialog.show();
+        progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
         AuthCredential credential = TwitterAuthProvider.getCredential(twitterSession.getAuthToken().token, twitterSession.getAuthToken().secret);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -319,6 +322,7 @@ public class FederatedSignInActivity extends AppCompatActivity {
                     User user = dataSnapshot.getValue(User.class);
                     String activeAccount = user.getRole();
                     if (activeAccount.equals("Parent") || activeAccount.equals("Teacher")) {
+                        Analytics.loginAnalytics(context, mFirebaseUser.getUid(), activeAccount);
                         UpdateDataFromFirebaseForLogin.populateEssentials(context, activeAccount, progressDialog);
                     } else {
                         String message = "Celerii mobile only works with " + "<b>" + "Teacher" + "</b>" + " and " + "<b>" + "Parent" + "</b>" + " accounts. If your account is a " + "<b>" + "School" + "</b>" + " account, please use Celerii web at \n " + "<b>" + "www.celerii.io" + "</b";
@@ -337,12 +341,19 @@ public class FederatedSignInActivity extends AppCompatActivity {
                     updateMap.put("Teacher/" + userID, teacher);
                     updateMap.put("UserRoles/" + userID, user);
                     updateMap.put("Email/" + refactoredEmail, "true");
+                    Analytics.signupAnalytics( userID, "Parent" );
 
                     mDatabaseReference = mFirebaseDatabase.getReference();
                     mDatabaseReference.updateChildren(updateMap, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                            saveToSharedPreferencesAndProceed("Parent", userID, userName, "");
+                            if (databaseError == null) {
+                                saveToSharedPreferencesAndProceed("Parent", userID, userName, "");
+                            } else {
+                                progressDialog.dismiss();
+                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                ShowDialogWithMessage.showDialogWithMessageAndDelete(context, message, mFirebaseUser);
+                            }
                         }
                     });
                 }

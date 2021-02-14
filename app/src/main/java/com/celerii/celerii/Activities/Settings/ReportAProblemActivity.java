@@ -3,6 +3,7 @@ package com.celerii.celerii.Activities.Settings;
 import android.app.Dialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,9 +18,12 @@ import android.widget.TextView;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.ReportFeatureModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ReportAProblemActivity extends AppCompatActivity {
+    Context context;;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -54,7 +59,8 @@ public class ReportAProblemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_aproblem);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         Bundle bundle = getIntent().getExtras();
         feature = bundle.getString("problemTitle").trim();
@@ -104,6 +110,9 @@ public class ReportAProblemActivity extends AppCompatActivity {
                 if (!validate(message, "body", body))
                     return;
 
+                final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
+                progressDialog.show();
+
                 String date = Date.getDate();
                 String year = Date.getYear();
                 String month = Date.getMonth();
@@ -119,8 +128,15 @@ public class ReportAProblemActivity extends AppCompatActivity {
                 reportRef.updateChildren(newReportFeatureMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        CustomToast.blueBackgroundToast(ReportAProblemActivity.this, "Report sent, Thank you");
-                        finish();
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            CustomToast.blueBackgroundToast(ReportAProblemActivity.this, "Report sent, Thank you");
+                            finish();
+                        } else {
+                            progressDialog.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                        }
                     }
                 });
             }

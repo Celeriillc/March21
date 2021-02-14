@@ -195,46 +195,50 @@ public class StudentProfileActivity extends AppCompatActivity {
                 return;
             }
         } else {
-            Boolean activeKidExist = false;
-            Gson gson = new Gson();
-            Type type = new TypeToken<Student>() {}.getType();
-            Student activeKidModel = gson.fromJson(activeKid, type);
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                Boolean activeKidExist = false;
+                Gson gson = new Gson();
+                Type type = new TypeToken<Student>() {
+                }.getType();
+                Student activeKidModel = gson.fromJson(activeKid, type);
 
-            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
-            type = new TypeToken<ArrayList<Student>>() {}.getType();
-            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                type = new TypeToken<ArrayList<Student>>() {
+                }.getType();
+                ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
 
-            for (Student student: myChildren) {
-                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
-                    activeKidExist = true;
-                    activeKidModel = student;
-                    activeKid = gson.toJson(activeKidModel);
-                    sharedPreferencesManager.setActiveKid(activeKid);
-                    break;
-                }
-            }
-
-            if (!activeKidExist) {
-                if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeKid = gson.toJson(myChildren.get(0));
+                for (Student student : myChildren) {
+                    if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                        activeKidExist = true;
+                        activeKidModel = student;
+                        activeKid = gson.toJson(activeKidModel);
                         sharedPreferencesManager.setActiveKid(activeKid);
+                        break;
                     }
-                } else {
-                    setSupportActionBar(toolbar);
-                    getSupportActionBar().setTitle("Profile");
-                    getSupportActionBar().setHomeButtonEnabled(true);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    superLayout.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                    errorLayoutButton.setText("Find my child");
-                    errorLayoutButton.setVisibility(View.VISIBLE);
-                    return;
+                }
+
+                if (!activeKidExist) {
+                    if (myChildren.size() > 0) {
+                        if (myChildren.size() > 1) {
+                            gson = new Gson();
+                            activeKid = gson.toJson(myChildren.get(0));
+                            sharedPreferencesManager.setActiveKid(activeKid);
+                        }
+                    } else {
+                        setSupportActionBar(toolbar);
+                        getSupportActionBar().setTitle("Profile");
+                        getSupportActionBar().setHomeButtonEnabled(true);
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        superLayout.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                        return;
+                    }
                 }
             }
         }
@@ -263,6 +267,10 @@ public class StudentProfileActivity extends AppCompatActivity {
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")){
             editStudentProfile.setVisibility(View.VISIBLE);
+            disconnect.setVisibility(View.VISIBLE);
+        } else {
+            editStudentProfile.setVisibility(View.GONE);
+            disconnect.setVisibility(View.GONE);
         }
 
         headerfullname = (TextView) findViewById(R.id.headerfullname);
@@ -494,7 +502,13 @@ public class StudentProfileActivity extends AppCompatActivity {
                     getSupportActionBar().setTitle(studentName);
                     editStudentProfile.setText("Edit " + student.getFirstName() + "'s Profile");
                     headerfullname.setText(studentName);
-                    gender.setText(student.getGender());
+
+                    String studentGender = student.getGender();
+                    if (!studentGender.equals("")) {
+                        gender.setText(student.getGender());
+                    } else {
+                        gender.setText("Gender not set");
+                    }
 
                     String studentBio = student.getBio();
                     if (!studentBio.equals("")){
@@ -509,7 +523,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
                     Drawable textDrawable;
                     if (!studentName.isEmpty()) {
-                        String[] nameArray = studentName.split(" ");
+                        String[] nameArray = studentName.replaceAll("\\s+", " ").split(" ");
                         if (nameArray.length == 1) {
                             textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                         } else {
@@ -558,7 +572,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                     });
                                 }
                             } else {
-                                className.setText("Class not found");
+                                className.setText("Class not set");
                             }
 
                             mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(studentID);
@@ -588,10 +602,10 @@ public class StudentProfileActivity extends AppCompatActivity {
                                             });
                                         }
                                     } else {
-                                        school.setText("School not found");
+                                        school.setText("School not set");
                                     }
 ;
-                                    mDatabaseReference = mFirebaseDatabase.getReference("AttendenceStudent").child(studentID);
+                                    mDatabaseReference = mFirebaseDatabase.getReference("AttendanceStudent").child(studentID);
                                     mDatabaseReference.orderByChild("term_year").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -610,7 +624,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                                 }
                                                 Double puncRating = (presentDouble / total) * 100;
                                                 Double absRating = (absentDouble / total) * 100;
-                                                Double lateRating = (100 - puncRating + absRating);
+                                                Double lateRating = (100 - (puncRating + absRating));
 
                                                 String presentString = String.valueOf(puncRating.intValue()) + "%";
                                                 String absentString = String.valueOf(absRating.intValue()) + "%";
@@ -644,44 +658,45 @@ public class StudentProfileActivity extends AppCompatActivity {
                                                 late.setText("0%");
                                             }
 
-                                            mDatabaseReference = mFirebaseDatabase.getReference("StudentTemperament").child(studentID);
-                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                                    if (dataSnapshot.exists()){
-                                                        temperament.setText(dataSnapshot.getValue(String.class));
-                                                    } else {
-                                                        mDatabaseReference = mFirebaseDatabase.getReference("PredictedStudentTemperament").child(studentID);
-                                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                            @Override
-                                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                if (dataSnapshot.exists()){
-                                                                    temperament.setText(dataSnapshot.getValue(String.class));
-                                                                }
-                                                                else {
-                                                                    temperament.setText("No data");
-                                                                }
-                                                            }
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            superLayout.setVisibility(View.VISIBLE);
 
-                                                            @Override
-                                                            public void onCancelled(DatabaseError databaseError) {
-
-                                                            }
-                                                        });
-
-                                                    }
-
-                                                    progressLayout.setVisibility(View.GONE);
-                                                    errorLayout.setVisibility(View.GONE);
-                                                    mySwipeRefreshLayout.setRefreshing(false);
-                                                    superLayout.setVisibility(View.VISIBLE);
-                                                }
-
-                                                @Override
-                                                public void onCancelled(DatabaseError databaseError) {
-
-                                                }
-                                            });
+//                                            mDatabaseReference = mFirebaseDatabase.getReference("StudentTemperament").child(studentID);
+//                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                                @Override
+//                                                public void onDataChange(DataSnapshot dataSnapshot) {
+//                                                    if (dataSnapshot.exists()){
+//                                                        temperament.setText(dataSnapshot.getValue(String.class));
+//                                                    } else {
+//                                                        temperament.setText("Temperament not set");
+////                                                        mDatabaseReference = mFirebaseDatabase.getReference("PredictedStudentTemperament").child(studentID);
+////                                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+////                                                            @Override
+////                                                            public void onDataChange(DataSnapshot dataSnapshot) {
+////                                                                if (dataSnapshot.exists()){
+////                                                                    temperament.setText(dataSnapshot.getValue(String.class));
+////                                                                }
+////                                                                else {
+////                                                                    temperament.setText("Temperament not set");
+////                                                                }
+////                                                            }
+////
+////                                                            @Override
+////                                                            public void onCancelled(DatabaseError databaseError) {
+////
+////                                                            }
+////                                                        });
+//                                                    }
+//
+//                                                }
+//
+//                                                @Override
+//                                                public void onCancelled(DatabaseError databaseError) {
+//
+//                                                }
+//                                            });
                                         }
 
                                         @Override
@@ -757,7 +772,7 @@ public class StudentProfileActivity extends AppCompatActivity {
             }
         });
 
-        mDatabaseReference = mFirebaseDatabase.getReference("AttendenceStudent").child(studentID);
+        mDatabaseReference = mFirebaseDatabase.getReference("AttendanceStudent").child(studentID);
         mDatabaseReference.orderByChild("term_year").equalTo(term_year).limitToLast(10).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -768,6 +783,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                         final TeacherAttendanceRow teacherAttendanceRow = postSnapshot.getValue(TeacherAttendanceRow.class);
                         teacherAttendanceRowList.add(teacherAttendanceRow);
                     }
+                    Collections.reverse(teacherAttendanceRowList);
 
                     int counter = 0;
                     for (TeacherAttendanceRow teacherAttendanceRow: teacherAttendanceRowList) {
@@ -1031,7 +1047,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         });
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(studentID).child("Reward");
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.orderByChild("term_AcademicYear").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                 behaviouralResultRowModelList.clear();
@@ -1045,7 +1061,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(studentID).child("Punishment");
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                mDatabaseReference.orderByChild("term_AcademicYear").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
@@ -1077,10 +1093,10 @@ public class StudentProfileActivity extends AppCompatActivity {
                             actionOne.setText(recordModel1.getRewardDescription());
                             pointOne.setText(recordModel1.getPoint());
                             if (recordModel1.getRewardType().equals("Reward")) {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus_one));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                             } else {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus_one));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent_profile_icon));
                             }
 
@@ -1088,10 +1104,10 @@ public class StudentProfileActivity extends AppCompatActivity {
                             actionTwo.setText(recordModel2.getRewardDescription());
                             pointTwo.setText(recordModel2.getPoint());
                             if (recordModel2.getRewardType().equals("Reward")) {
-                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus_one));
                                 behaviourPic2Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                             } else {
-                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus_one));
                                 behaviourPic2Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent_profile_icon));
                             }
                         } else if (behaviouralResultRowModelList.size() == 1) {
@@ -1100,10 +1116,10 @@ public class StudentProfileActivity extends AppCompatActivity {
                             actionOne.setText(recordModel1.getRewardDescription());
                             pointOne.setText(recordModel1.getPoint());
                             if (recordModel1.getRewardType().equals("Reward")) {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus_one));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                             } else {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus_one));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent_profile_icon));
                             }
                         } else {
@@ -1187,10 +1203,8 @@ public class StudentProfileActivity extends AppCompatActivity {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 if (!guardians.containsKey(studentID)) {
                                     guardians.put(studentID, new ArrayList<String>());
-                                    guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
-                                } else {
-                                    guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
                                 }
+                                guardians.get(studentID).add(postSnapshot.getKey() + " Parent");
                             }
                         }
 
@@ -1202,10 +1216,8 @@ public class StudentProfileActivity extends AppCompatActivity {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         if (!guardians.containsKey(studentID)) {
                                             guardians.put(studentID, new ArrayList<String>());
-                                            guardians.get(studentID).add(postSnapshot.getKey() + " School");
-                                        } else {
-                                            guardians.get(studentID).add(postSnapshot.getKey() + " School");
                                         }
+                                        guardians.get(studentID).add(postSnapshot.getKey() + " School");
                                     }
                                 }
 
@@ -1367,7 +1379,9 @@ public class StudentProfileActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        loadFromFirebase();
+        if (activeKid != null) {
+            loadFromFirebase();
+        }
         UpdateDataFromFirebase.populateEssentials(this);
         super.onResume();
     }

@@ -1,17 +1,20 @@
 package com.celerii.celerii.models;
 
+import com.celerii.celerii.helperClasses.Date;
+
 /**
  * Created by user on 7/4/2017.
  */
 
 public class Comment {
-    String posterPic, posterName, posterID, time, comment, commentID, accountType;
+    String posterPic, posterName, posterID, time, sortableDate, comment, commentID, accountType;
 
     public Comment() {
         this.posterPic = "";
         this.posterName = "";
         this.posterID = "";
         this.time = "";
+        this.sortableDate = "";
         this.comment = "";
         this.commentID = "";
         this.accountType = "";
@@ -22,6 +25,7 @@ public class Comment {
         this.posterName = posterName;
         this.posterID = posterID;
         this.time = time;
+        this.sortableDate = Date.convertToSortableDate(time);
         this.comment = comment;
         this.commentID = commentID;
         this.accountType = accountType;
@@ -57,6 +61,14 @@ public class Comment {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getSortableDate() {
+        return sortableDate;
+    }
+
+    public void setSortableDate(String sortableDate) {
+        this.sortableDate = sortableDate;
     }
 
     public String getComment() {

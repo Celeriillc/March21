@@ -70,7 +70,7 @@ public class ClassListAdapterHorizontal extends RecyclerView.Adapter<ClassListAd
 
         Drawable textDrawable;
         if (!aClass.getClassName().isEmpty()) {
-            String[] nameArray = aClass.getClassName().split(" ");
+            String[] nameArray = aClass.getClassName().replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 80);
             } else {

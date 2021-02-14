@@ -224,8 +224,6 @@ public class TeacherCreateAssignmentPostActivity extends AppCompatActivity {
                     if (databaseError == null) {
                         CustomToast.whiteBackgroundBottomToast(TeacherCreateAssignmentPostActivity.this, "Assignment Has been posted");
                         finish();
-                    } else{
-                        CustomToast.whiteBackgroundBottomToast(TeacherCreateAssignmentPostActivity.this, "Assignment could not be posted, try again");
                     }
                 }
             });

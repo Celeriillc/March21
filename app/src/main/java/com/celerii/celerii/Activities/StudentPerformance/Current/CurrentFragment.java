@@ -76,6 +76,7 @@ public class CurrentFragment extends Fragment {
     String activeStudentID = "", year, term, year_term;
     String activeStudent = "";
     String activeStudentName;
+    String parentActivity = "";
 
     String featureUseKey = "";
     String featureName = "Current Academic Results";
@@ -116,6 +117,7 @@ public class CurrentFragment extends Fragment {
 
         StudentPerformanceForParentsActivity activity = (StudentPerformanceForParentsActivity) getActivity();
         activeStudent = activity.getData();
+        parentActivity = activity.getParentActivity();
 
         if (activeStudent == null) {
             Gson gson = new Gson();
@@ -145,47 +147,49 @@ public class CurrentFragment extends Fragment {
                 return view;
             }
         } else {
-            Boolean activeKidExist = false;
-            Gson gson = new Gson();
-            Type type = new TypeToken<Student>() {}.getType();
-            Student activeKidModel = gson.fromJson(activeStudent, type);
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                Boolean activeKidExist = false;
+                Gson gson = new Gson();
+                Type type = new TypeToken<Student>() {}.getType();
+                Student activeKidModel = gson.fromJson(activeStudent, type);
 
-            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
-            type = new TypeToken<ArrayList<Student>>() {}.getType();
-            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                type = new TypeToken<ArrayList<Student>>() {}.getType();
+                ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
 
-            for (Student student: myChildren) {
-                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
-                    activeKidExist = true;
-                    activeKidModel = student;
-                    activeStudent = gson.toJson(activeKidModel);
-                    sharedPreferencesManager.setActiveKid(activeStudent);
-                    break;
-                }
-            }
-
-            if (!activeKidExist) {
-                if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeStudent = gson.toJson(myChildren.get(0));
+                for (Student student: myChildren) {
+                    if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                        activeKidExist = true;
+                        activeKidModel = student;
+                        activeStudent = gson.toJson(activeKidModel);
                         sharedPreferencesManager.setActiveKid(activeStudent);
+                        break;
                     }
-                } else {
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                        errorLayoutButton.setText("Find my child");
-                        errorLayoutButton.setVisibility(View.VISIBLE);
-                    } else {
-                        errorLayoutText.setText("You do not have the permission to view this student's academic record");
-                    }
+                }
 
-                    return view;
+                if (!activeKidExist) {
+                    if (myChildren.size() > 0) {
+                        if (myChildren.size() > 1) {
+                            gson = new Gson();
+                            activeStudent = gson.toJson(myChildren.get(0));
+                            sharedPreferencesManager.setActiveKid(activeStudent);
+                        }
+                    } else {
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                            errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                            errorLayoutButton.setText("Find my child");
+                            errorLayoutButton.setVisibility(View.VISIBLE);
+                        } else {
+                            errorLayoutText.setText("You do not have the permission to view this student's academic record");
+                        }
+
+                        return view;
+                    }
                 }
             }
         }
@@ -209,7 +213,7 @@ public class CurrentFragment extends Fragment {
         performanceCurrentModelList = new ArrayList<>();
 //        subjectList = new ArrayList<>();
         loadNewDetailsFromFirebase();
-        mAdapter = new PerformanceCurrentAdapter(performanceCurrentModelList, performanceCurrentHeader, getActivity(), getContext(), activeStudentID);
+        mAdapter = new PerformanceCurrentAdapter(performanceCurrentModelList, performanceCurrentHeader, getActivity(), getContext(), activeStudentID, parentActivity);
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -275,6 +279,12 @@ public class CurrentFragment extends Fragment {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
                                         double termAverage = 0.0;
+                                        double caSum = 0.0;
+                                        double examSum = 0.0;
+                                        double caMax = 0.0;
+                                        double examMax = 0.0;
+                                        double caAverage = 0.0;
+                                        double examAverage = 0.0;
                                         double classAverage = 0.0;
                                         double maxScore = 0.0;
                                         String subject = "";
@@ -282,10 +292,11 @@ public class CurrentFragment extends Fragment {
 
                                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                             AcademicRecordStudent academicRecordStudent = postSnapshot.getValue(AcademicRecordStudent.class);
-                                            double testAverage = Double.valueOf(academicRecordStudent.getScore());
-                                            double termClassAverage = Double.valueOf(academicRecordStudent.getClassAverage());
-                                            double maxObtainable = Double.valueOf(academicRecordStudent.getMaxObtainable());
-                                            double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
+                                            double testAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                            double termClassAverage = Double.parseDouble(academicRecordStudent.getClassAverage());
+                                            double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                            double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+                                            String testType = academicRecordStudent.getTestType();
                                             subject = academicRecordStudent.getSubject();
                                             classID = academicRecordStudent.getClassID();
                                             className = academicRecordStudent.getClassName();
@@ -298,12 +309,25 @@ public class CurrentFragment extends Fragment {
                                             double normalizedTestAverage = (testAverage / maxObtainable) * percentageOfTotal;
                                             double normalizedTestClassAverage = (termClassAverage / maxObtainable) * percentageOfTotal;
                                             double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+
+                                            if (testType.equals("Examination")) {
+                                                examSum += normalizedTestAverage;
+                                                examMax += normalizedMaxObtainable;
+                                            } else {
+                                                caSum += normalizedTestAverage;
+                                                caMax += normalizedMaxObtainable;
+                                            }
+
                                             termAverage += normalizedTestAverage;
                                             classAverage += normalizedTestClassAverage;
                                             maxScore += normalizedMaxObtainable;
                                         }
 
-                                        PerformanceCurrentModel performanceCurrentModel = new PerformanceCurrentModel(subject, latestDate, (int) termAverage);
+                                        examAverage = (examSum / examMax) * 100;
+                                        caAverage = (caSum / caMax) * 100;
+                                        termAverage = (termAverage / maxScore) * 100;
+
+                                        PerformanceCurrentModel performanceCurrentModel = new PerformanceCurrentModel(subject, latestDate, (int) caAverage, (int) examAverage, (int) termAverage);
                                         performanceCurrentModelList.add(performanceCurrentModel);
                                         studentScoreTotal += termAverage;
                                         classScoreTotal += classAverage;

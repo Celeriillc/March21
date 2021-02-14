@@ -76,14 +76,21 @@ public class ParentProfileActivity extends AppCompatActivity {
         context = this;
         sharedPreferencesManager = new SharedPreferencesManager(context);
 
-        Bundle bundle = getIntent().getExtras();
-        parentID = bundle.getString("parentID");
-        parentActivity = bundle.getString("parentActivity");
-
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
+
+        Bundle bundle = getIntent().getExtras();
+        parentID = bundle.getString("parentID");
+        parentActivity = bundle.getString("parentActivity");
+        if (parentActivity != null) {
+            if (!parentActivity.isEmpty()) {
+                sharedPreferencesManager.setActiveAccount(parentActivity);
+                mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+            }
+        }
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
@@ -161,16 +168,26 @@ public class ParentProfileActivity extends AppCompatActivity {
                         parentName = parent.getFirstName() + " " + parent.getLastName();
                         getSupportActionBar().setTitle(parentName);
                         name.setText(parentName);
-                        gender.setText(parent.getGender());
-                        occupation.setText(parent.getOccupation());
+
+                        if (!parent.getGender().isEmpty()) {
+                            gender.setText(parent.getGender());
+                        } else {
+                            gender.setText("Gender not set yet");
+                        }
+
+                        if (!parent.getOccupation().isEmpty()) {
+                            occupation.setText(parent.getOccupation());
+                        } else {
+                            occupation.setText("Occupation not set yet");
+                        }
 
                         Drawable textDrawable;
                         if (!parentName.isEmpty()) {
-                            String[] nameArray = parentName.split(" ");
+                            String[] nameArray = parentName.replaceAll("\\s+", " ").split(" ");
                             if (nameArray.length == 1) {
-                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                             } else {
-                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
+                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 150);
                             }
                             parentPic.setImageDrawable(textDrawable);
                         } else {

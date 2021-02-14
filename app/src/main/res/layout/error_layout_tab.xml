@@ -15,10 +15,12 @@
 
         <ImageView
             android:id="@+id/errorlayoutimage"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="10dp"
             android:layout_gravity="center_horizontal|center_vertical"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_broken_internet"/>
 
         <TextView
             android:id="@+id/errorlayouttext"
@@ -26,7 +28,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
             android:gravity="center"
-            android:layout_margin="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginEnd="25dp"
+            android:textColor="@color/colorBottomNavigationIconGray"
             android:textSize="15sp"/>
 
         <Button

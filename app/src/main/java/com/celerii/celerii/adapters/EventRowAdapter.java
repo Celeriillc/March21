@@ -34,21 +34,19 @@ public class EventRowAdapter extends RecyclerView.Adapter<EventRowAdapter.MyView
 //    int eventDescriptionHeight = 0;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView eventTitle, eventDate, eventDescription, eventDescription2, eventTime, eventSchool;
-        public ImageView dayImage;
-        public LinearLayout background;
+        public TextView eventTitle, eventDescription, eventTime, eventSchool;
+        public ImageView timeIcon;
+//        public LinearLayout background;
         public View clickableView;
 
         public MyViewHolder(final View view) {
             super(view);
             eventTitle = (TextView) view.findViewById(R.id.eventtitle);
-            eventDate = (TextView) view.findViewById(R.id.eventdate);
             eventDescription = (TextView) view.findViewById(R.id.eventdescription);
-//            eventDescription2 = (TextView) view.findViewById(R.id.eventdescription2);
             eventTime = (TextView) view.findViewById(R.id.eventtime);
             eventSchool = (TextView) view.findViewById(R.id.eventschool);
-            dayImage = (ImageView) view.findViewById(R.id.dateimg);
-            background = (LinearLayout) view.findViewById(R.id.background);
+            timeIcon = (ImageView) view.findViewById(R.id.timeicon);
+//            background = (LinearLayout) view.findViewById(R.id.background);
             clickableView = view;
         }
     }
@@ -75,21 +73,20 @@ public class EventRowAdapter extends RecyclerView.Adapter<EventRowAdapter.MyView
         final int day = c.get(Calendar.DAY_OF_WEEK);
 
         holder.eventTitle.setText(eventRow.getEventTitle());
-        holder.eventDate.setText(Day.Day(day) + ", " + Date.DateFormatMMDDYYYY(eventRow.getEventDate()));
-        holder.eventTime.setText(Time.TimeFormatHHMM(eventRow.getEventDate()));
+        holder.eventTime.setText(Date.getRelativeTimeSpanForward(eventRow.getEventDate()));
         holder.eventSchool.setText(eventRow.getSchoolID());
         holder.eventDescription.setText(eventRow.getEventDescription());
 //        holder.eventDescription2.setText(eventRow.getEventDescription());
         final int randomNum = ThreadLocalRandom.current().nextInt(0, 8 + 1);
-        if (randomNum == 0) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_primary_purple)); }
-        else if (randomNum == 1) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_accent)); }
-        else if (randomNum == 2) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_instagram_blue)); }
-        else if (randomNum == 3) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_teal_green)); }
-        else if (randomNum == 4) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_kilogarm_yellow)); }
-        else if (randomNum == 5) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_kilogarm_orange)); }
-        else if (randomNum == 6) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_dark_gray)); }
-        else if (randomNum == 7) { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_green)); }
-        else { holder.background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_accent_secondary)); }
+        if (randomNum == 0) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_primary_purple)); }
+        else if (randomNum == 1) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_accent)); }
+        else if (randomNum == 2) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_instagram_blue)); }
+        else if (randomNum == 3) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_teal_green)); }
+        else if (randomNum == 4) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_kilogarm_yellow)); }
+        else if (randomNum == 5) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_kilogarm_orange)); }
+        else if (randomNum == 6) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_dark_gray)); }
+        else if (randomNum == 7) { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_green)); }
+        else { holder.timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_accent_secondary)); }
 
 //        holder.eventDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 //            @Override

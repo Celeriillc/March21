@@ -7,12 +7,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
@@ -21,6 +24,8 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.AcademicRecord;
@@ -56,7 +61,8 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
     private Context context;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView examType, score, className, date, maxObtainable, term, year, viewDetails, delete;
+        public TextView examType, score, className, date, maxObtainable, term, year, viewDetails, delete, resultAsAt;
+        public ImageView examTypeIcon;
         public View clickableView;
 
         public MyViewHolder(final View view) {
@@ -68,6 +74,8 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
             maxObtainable = (TextView) view.findViewById(R.id.maxobtainable);
             term = (TextView) view.findViewById(R.id.term);
             year = (TextView) view.findViewById(R.id.year);
+            resultAsAt = (TextView) view.findViewById(R.id.resultasat);
+            examTypeIcon = (ImageView) view.findViewById(R.id.examtypeicon);
             viewDetails = (TextView) view.findViewById(R.id.viewdetails);
             delete = (TextView) view.findViewById(R.id.delete);
             clickableView = view;
@@ -101,6 +109,17 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
         holder.maxObtainable.setText(TypeConverterClass.convStringToIntString(academicRecordTeacher.getMaxObtainable()));
         holder.term.setText(Term.Term(academicRecordTeacher.getTerm()));
         holder.year.setText(academicRecordTeacher.getAcademicYear());
+
+        if (academicRecordTeacher.getTestType().equals("Continuous Assessment")) {
+            holder.examTypeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent));
+            holder.resultAsAt.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        } else if (academicRecordTeacher.getTestType().equals("Examination")) {
+            holder.examTypeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
+            holder.resultAsAt.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+        } else {
+            holder.examTypeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_kilogarm_orange));
+            holder.resultAsAt.setTextColor(ContextCompat.getColor(context, R.color.colorKilogarmOrange));
+        }
 
         holder.viewDetails.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,8 +253,10 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
 //                                                notifyDataSetChanged();
                                             }
                                         } else {
-                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
-                                            showDialogWithMessage(message);
+//                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
+                                            progressDialog.dismiss();
+                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                            ShowDialogWithMessage.showDialogWithMessage(context, message);
                                         }
                                     }
                                 });

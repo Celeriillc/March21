@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.StudentBehaviouralPerformance.StudentRewardHome;
@@ -55,12 +58,18 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView className;
         Button rewardClass, punishClass;
+        LinearLayout chiefLayout;
+        RelativeLayout errorLayout;
+        TextView errorLayoutText;
 
         public HeaderViewHolder(View view) {
             super(view);
             className = (TextView) view.findViewById(R.id.classname);
             rewardClass = (Button) view.findViewById(R.id.rewardclass);
             punishClass = (Button) view.findViewById(R.id.punishclass);
+            chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
+            errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
+            errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
         }
     }
 
@@ -90,6 +99,15 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof HeaderViewHolder) {
             ((HeaderViewHolder) holder).className.setText(className);
+            if (manageKidsModelList.size() <= 1) {
+                ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
+                ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                String errorMessage = className + " does not have any students to display. Go to " + "<b>" + "More" + "</b>" + " (the 3 horizontal dots below) to change the active class to another with students";
+                ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
+            } else {
+                ((HeaderViewHolder) holder).errorLayout.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            }
 
             ((HeaderViewHolder) holder).rewardClass.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -113,7 +131,7 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
 
             Drawable textDrawable;
             if (!manageKidsModel.getName().isEmpty()) {
-                String[] nameArray = manageKidsModel.getName().split(" ");
+                String[] nameArray = manageKidsModel.getName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 100);
                 } else {

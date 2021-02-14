@@ -37,6 +37,7 @@ import java.util.HashMap;
 
 public class EditYearActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
     TeacherTakeAttendanceSharedPreferences teacherTakeAttendanceSharedPreferences;
     TeacherEnterResultsSharedPreferences teacherEnterResultsSharedPreferences;
@@ -68,9 +69,11 @@ public class EditYearActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_year);
 
-        teacherTakeAttendanceSharedPreferences = new TeacherTakeAttendanceSharedPreferences(this);
-        teacherEnterResultsSharedPreferences = new TeacherEnterResultsSharedPreferences(this);
-        parentCheckAttendanceSharedPreferences = new ParentCheckAttendanceSharedPreferences(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+        teacherTakeAttendanceSharedPreferences = new TeacherTakeAttendanceSharedPreferences(context);
+        teacherEnterResultsSharedPreferences = new TeacherEnterResultsSharedPreferences(context);
+        parentCheckAttendanceSharedPreferences = new ParentCheckAttendanceSharedPreferences(context);
 
         Bundle bundle = getIntent().getExtras();
         selectedYear = bundle.getString("Year");
@@ -101,24 +104,6 @@ public class EditYearActivity extends AppCompatActivity {
         mAdapter = new SelectYearAdapter(selectYearModelList, selectedYear, this);
         loadStaticData();
         recyclerView.setAdapter(mAdapter);
-
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-
-                } else {
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {

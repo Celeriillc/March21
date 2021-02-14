@@ -3,22 +3,35 @@ package com.celerii.celerii.Activities.Newsletters;
 import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.NewsletterRowAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.NewsletterRow;
+import com.celerii.celerii.models.School;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class NewsletterRowActivity extends AppCompatActivity {
@@ -30,13 +43,17 @@ public class NewsletterRowActivity extends AppCompatActivity {
     DatabaseReference mDatabaseReference;
     FirebaseUser mFirebaseUser;
 
+    SwipeRefreshLayout mySwipeRefreshLayout;
+    RelativeLayout errorLayout, progressLayout;
+    TextView errorLayoutText;
+
     Toolbar toolbar;
     private ArrayList<NewsletterRow> newsletterRowList;
     public RecyclerView recyclerView;
     public NewsletterRowAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    String string = "Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor  Lorem ipsum dolor sit amet, nsectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor" +
-            "Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor  Lorem ipsum dolor sit amet, nsectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor";
+    String newsletterAccountType, accountType;
+    int childrenCounter = 0;
 
     String featureUseKey = "";
     String featureName = "Newsletter Home";
@@ -56,6 +73,15 @@ public class NewsletterRowActivity extends AppCompatActivity {
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
 
+        accountType = sharedPreferencesManager.getActiveAccount();
+        if (accountType.equals("Teacher")){
+            newsletterAccountType = "Teacher Newsletters";
+        } else if (accountType.equals("Parent")) {
+            newsletterAccountType = "Parent Newsletters";
+        }
+
+        mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -66,10 +92,167 @@ public class NewsletterRowActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
+        errorLayout = (RelativeLayout) findViewById(R.id.errorlayout);
+        errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+        progressLayout = (RelativeLayout) findViewById(R.id.progresslayout);
+
+        recyclerView.setVisibility(View.GONE);
+        progressLayout.setVisibility(View.VISIBLE);
+        errorLayout.setVisibility(View.GONE);
+
         newsletterRowList = new ArrayList<>();
-        yeah();
+        loadNewslettersFromFirebase();
         mAdapter = new NewsletterRowAdapter(newsletterRowList, this);
         recyclerView.setAdapter(mAdapter);
+
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        loadNewslettersFromFirebase();
+                    }
+                }
+        );
+    }
+
+    private void loadNewslettersFromFirebase() {
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
+        updateBadges();
+        childrenCounter = 0;
+        mDatabaseReference = mFirebaseDatabase.getReference().child(newsletterAccountType).child(mFirebaseUser.getUid());
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    newsletterRowList.clear();
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                        final int childrenCount = (int) dataSnapshot.getChildrenCount();
+                        final String newsletterKey = postSnapshot.getKey();
+
+                        mDatabaseReference = mFirebaseDatabase.getReference().child("Newsletter").child(newsletterKey);
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    final NewsletterRow newsletterRow = dataSnapshot.getValue(NewsletterRow.class);
+                                    newsletterRow.setNewsletterKey(dataSnapshot.getKey());
+
+                                    String schoolID = newsletterRow.getSchoolID();
+                                    mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
+                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            childrenCounter++;
+                                            if (dataSnapshot.exists()){
+                                                School schoolInstance = dataSnapshot.getValue(School.class);
+                                                newsletterRow.setSchoolID(schoolInstance.getSchoolName());
+                                            } else {
+                                                newsletterRow.setSchoolID("This school account has been deleted or doesn't exist");
+                                            }
+//                                            mAdapter.notifyDataSetChanged();
+                                            newsletterRowList.add(newsletterRow);
+
+                                            if (childrenCount == childrenCounter) {
+                                                if (newsletterRowList.size() > 0) {
+                                                    if (newsletterRowList.size() > 1) {
+                                                        Collections.sort(newsletterRowList, new Comparator<NewsletterRow>() {
+                                                            @Override
+                                                            public int compare(NewsletterRow o1, NewsletterRow o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
+                                                    }
+
+                                                    Collections.reverse(newsletterRowList);
+                                                    mAdapter.notifyDataSetChanged();
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    recyclerView.setVisibility(View.GONE);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.VISIBLE);
+                                                    if (accountType.equals("Parent")) {
+                                                        errorLayoutText.setText("You don't have any published newsletters from your kid's school yet");
+                                                    } else {
+                                                        errorLayoutText.setText("You don't have any published newsletters from your school yet");
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+
+                                } else {
+                                    childrenCounter++;
+                                    if (childrenCount == childrenCounter) {
+                                        if (newsletterRowList.size() > 1) {
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.GONE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            if (accountType.equals("Parent")) {
+                                                errorLayoutText.setText("You don't have any published newsletters from your kid's school yet");
+                                            } else {
+                                                errorLayoutText.setText("You don't have any published newsletters from your school yet");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    if (accountType.equals("Parent")) {
+                        errorLayoutText.setText("You don't have any published newsletters from your kid's school yet");
+                    } else {
+                        errorLayoutText.setText("You don't have any published newsletters from your school yet");
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == android.R.id.home){
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -89,8 +272,12 @@ public class NewsletterRowActivity extends AppCompatActivity {
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Newsletter/status", false);
+            updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+            updateBadgesMap.put("Notification Badges/Parents/" + mFirebaseUser.getUid() + "/More/status", false);
         } else {
             updateBadgesMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/Newsletter/status", false);
+            updateBadgesMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/Notifications/status", false);
+            updateBadgesMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/More/status", false);
         }
 
         mDatabaseReference = mFirebaseDatabase.getReference();
@@ -123,16 +310,5 @@ public class NewsletterRowActivity extends AppCompatActivity {
 
         DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
         featureUseUpdateRef.updateChildren(featureUseUpdateMap);
-    }
-
-    void yeah(){
-        NewsletterRow newsletterRow = new NewsletterRow("New first newsletter, it's a test", string, "Lorem Ipsum High School", "May 27, 2019", "https://si.wsj.net/public/resources/images/MI-BX240_DWEEK_G_20130716135136.jpg", 434, 231, 32);
-        newsletterRowList.add(newsletterRow);
-
-        newsletterRow = new NewsletterRow("New first newsletter, it's a test", string, "Lorem Ipsum High School", "May 27, 2019", "http://www.foreverlawn.com/wp-content/uploads/2015/11/DSC9083.jpg", 434, 231, 32);
-        newsletterRowList.add(newsletterRow);
-
-        newsletterRow = new NewsletterRow("New first newsletter, it's a test", string, "Lorem Ipsum High School", "May 27, 2019", "http://www.foreverlawn.com/wp-content/uploads/2015/11/DSC9084.jpg", 434, 231, 32);
-        newsletterRowList.add(newsletterRow);
     }
 }

@@ -164,7 +164,7 @@ public class UpdateDataFromFirebaseForLogin {
                     sharedPreferencesManager.setMyOccupation(parent.getOccupation());
                 }
 
-                getMyChildren(mFirebaseUser.getUid());
+                getMyChildren();
             }
 
             @Override
@@ -174,9 +174,16 @@ public class UpdateDataFromFirebaseForLogin {
         });
     }
 
-    private static void getMyChildren(final String myID) {
+    private static ArrayList<String> childrenKeyHolder = new ArrayList<>();
+    private static void getMyChildren() {
+        if (mFirebaseUser == null) {
+            return;
+        }
+
         childrenCounter = 0;
         myChildren.clear();
+        childrenKeyHolder.clear();
+        final ArrayList<String> childrenKeyList = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference().child("Parents Students").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -186,36 +193,13 @@ public class UpdateDataFromFirebaseForLogin {
                     myChildren.clear();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()) {
                         final String childKey = postSnapShot.getKey();
-
-                        mDatabaseReference = mFirebaseDatabase.getReference("Student").child(childKey);
-                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                childrenCounter++;
-                                if (dataSnapshot.exists()) {
-                                    Student childInstance = dataSnapshot.getValue(Student.class);
-                                    childInstance.setStudentID(dataSnapshot.getKey());
-                                    myChildren.add(childInstance);
-                                }
-
-                                if (childrenCounter == childrenCount) {
-                                    sharedPreferencesManager.deleteMyChildren();
-                                    Gson gson = new Gson();
-                                    String json = gson.toJson(myChildren);
-                                    sharedPreferencesManager.setMyChildren(json);
-                                    getMyClasses(myID);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+                        childrenKeyList.add(childKey);
                     }
+
+                    getMyChildrenRecursive(0, childrenKeyList);
                 } else {
                     sharedPreferencesManager.deleteMyChildren();
-                    getMyClasses(myID);
+                    getMyClasses();
                 }
             }
 
@@ -226,10 +210,51 @@ public class UpdateDataFromFirebaseForLogin {
         });
     }
 
-    private static void getMyClasses(String myID) {
+    private static void getMyChildrenRecursive(final Integer index, final ArrayList<String> childrenKeyList) {
+        String childKey = childrenKeyList.get(index);
+        mDatabaseReference = mFirebaseDatabase.getReference("Student").child(childKey);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                childrenCounter++;
+                if (dataSnapshot.exists()) {
+                    Student childInstance = dataSnapshot.getValue(Student.class);
+                    childInstance.setStudentID(dataSnapshot.getKey());
+                    if (!childrenKeyHolder.contains(dataSnapshot.getKey())) {
+                        childrenKeyHolder.add(dataSnapshot.getKey());
+                        myChildren.add(childInstance);
+                    }
+                }
+
+                if (index == childrenKeyList.size() - 1) {
+                    sharedPreferencesManager.deleteMyChildren();
+                    Gson gson = new Gson();
+                    String json = gson.toJson(myChildren);
+                    sharedPreferencesManager.setMyChildren(json);
+                    getMyClasses();
+                } else {
+                    getMyChildrenRecursive(index + 1, childrenKeyList);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private static ArrayList<String> classesKeyHolder = new ArrayList<>();
+    private static void getMyClasses() {
+        if (mFirebaseUser == null) {
+            return;
+        }
+
         classesCounter = 0;
         myClasses.clear();
-        mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Class").child(myID);
+        classesKeyHolder.clear();
+        final ArrayList<String> classesKeyList = new ArrayList<>();
+        mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Class").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -238,36 +263,47 @@ public class UpdateDataFromFirebaseForLogin {
                     myClasses.clear();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()) {
                         final String classKey = postSnapShot.getKey();
-
-                        mDatabaseReference = mFirebaseDatabase.getReference("Class").child(classKey);
-                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                classesCounter++;
-                                if (dataSnapshot.exists()) {
-                                    Class classInstance = dataSnapshot.getValue(Class.class);
-                                    classInstance.setID(dataSnapshot.getKey());
-                                    myClasses.add(classInstance);
-                                }
-
-                                if (classesCount == classesCounter) {
-                                    sharedPreferencesManager.deleteMyClasses();
-                                    Gson gson = new Gson();
-                                    String json = gson.toJson(myClasses);
-                                    sharedPreferencesManager.setMyClasses(json);
-                                    loadClassesStudentsandParentsInfo();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
+                        classesKeyList.add(classKey);
                     }
+
+                    getMyClassesRecursive(0, classesKeyList);
                 } else {
                     sharedPreferencesManager.deleteMyClasses();
                     loadClassesStudentsandParentsInfo();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private static void getMyClassesRecursive(final Integer index, final ArrayList<String> classesKeyList) {
+        String classKey = classesKeyList.get(index);
+        mDatabaseReference = mFirebaseDatabase.getReference("Class").child(classKey);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                classesCounter++;
+                if (dataSnapshot.exists()) {
+                    Class classInstance = dataSnapshot.getValue(Class.class);
+                    classInstance.setID(dataSnapshot.getKey());
+                    if (!classesKeyHolder.contains(dataSnapshot.getKey())) {
+                        classesKeyHolder.add(dataSnapshot.getKey());
+                        myClasses.add(classInstance);
+                    }
+                }
+
+                if (index == classesKeyList.size() - 1) {
+                    sharedPreferencesManager.deleteMyClasses();
+                    Gson gson = new Gson();
+                    String json = gson.toJson(myClasses);
+                    sharedPreferencesManager.setMyClasses(json);
+                    loadClassesStudentsandParentsInfo();
+                } else {
+                    getMyClassesRecursive(index + 1, classesKeyList);
                 }
             }
 
@@ -594,15 +630,15 @@ public class UpdateDataFromFirebaseForLogin {
                                                     } catch (Exception e) {
 
                                                     }
+                                                }
 
-                                                    if (classStudentsForTeacherCounter2 == classStudentsForTeacherChildrenCount2) {
-                                                        classStudentsForTeacherCounter2 = 0;
-                                                        classStudentsForTeacherCounter1++;
-                                                        if (classStudentsForTeacherCounter1 == classStudentsForTeacherChildrenCount1) {
-                                                            Gson gson = new Gson();
-                                                            String json = gson.toJson(classStudentsForTeacherMap);
-                                                            sharedPreferencesManager.setClassStudentForTeacher(json);
-                                                        }
+                                                if (classStudentsForTeacherCounter2 == classStudentsForTeacherChildrenCount2) {
+                                                    classStudentsForTeacherCounter2 = 0;
+                                                    classStudentsForTeacherCounter1++;
+                                                    if (classStudentsForTeacherCounter1 == classStudentsForTeacherChildrenCount1) {
+                                                        Gson gson = new Gson();
+                                                        String json = gson.toJson(classStudentsForTeacherMap);
+                                                        sharedPreferencesManager.setClassStudentForTeacher(json);
                                                     }
                                                 }
                                             }
@@ -612,6 +648,13 @@ public class UpdateDataFromFirebaseForLogin {
 
                                             }
                                         });
+                                    }
+                                } else {
+                                    classStudentsForTeacherCounter1++;
+                                    if (classStudentsForTeacherCounter1 == classStudentsForTeacherChildrenCount1) {
+                                        Gson gson = new Gson();
+                                        String json = gson.toJson(classStudentsForTeacherMap);
+                                        sharedPreferencesManager.setClassStudentForTeacher(json);
                                     }
                                 }
                             }
@@ -675,22 +718,22 @@ public class UpdateDataFromFirebaseForLogin {
                                                     classStoryServer.setProfilePicURL(posterProfilePicURL);
                                                     classStoryServer.setLiked(liked);
                                                     parentClassStoryList.add(classStoryServer);
+                                                }
 
-                                                    if (parentFeedCounter == childrenCount) {
-                                                        if (parentClassStoryList.size() > 1) {
-                                                            Collections.sort(parentClassStoryList, new Comparator<ClassStory>() {
-                                                                @Override
-                                                                public int compare(ClassStory o1, ClassStory o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
-                                                        }
-
-                                                        Collections.reverse(parentClassStoryList);
-                                                        Gson gson = new Gson();
-                                                        String json = gson.toJson(parentClassStoryList);
-                                                        sharedPreferencesManager.setParentFeed(json);
+                                                if (parentFeedCounter == childrenCount) {
+                                                    if (parentClassStoryList.size() > 1) {
+                                                        Collections.sort(parentClassStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
                                                     }
+
+                                                    Collections.reverse(parentClassStoryList);
+                                                    Gson gson = new Gson();
+                                                    String json = gson.toJson(parentClassStoryList);
+                                                    sharedPreferencesManager.setParentFeed(json);
                                                 }
                                             }
 
@@ -716,22 +759,22 @@ public class UpdateDataFromFirebaseForLogin {
                                                     classStoryServer.setProfilePicURL(posterProfilePicURL);
                                                     classStoryServer.setLiked(liked);
                                                     parentClassStoryList.add(classStoryServer);
+                                                }
 
-                                                    if (parentFeedCounter == childrenCount) {
-                                                        if (parentClassStoryList.size() > 1) {
-                                                            Collections.sort(parentClassStoryList, new Comparator<ClassStory>() {
-                                                                @Override
-                                                                public int compare(ClassStory o1, ClassStory o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
-                                                        }
-
-                                                        Collections.reverse(parentClassStoryList);
-                                                        Gson gson = new Gson();
-                                                        String json = gson.toJson(parentClassStoryList);
-                                                        sharedPreferencesManager.setParentFeed(json);
+                                                if (parentFeedCounter == childrenCount) {
+                                                    if (parentClassStoryList.size() > 1) {
+                                                        Collections.sort(parentClassStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
                                                     }
+
+                                                    Collections.reverse(parentClassStoryList);
+                                                    Gson gson = new Gson();
+                                                    String json = gson.toJson(parentClassStoryList);
+                                                    sharedPreferencesManager.setParentFeed(json);
                                                 }
                                             }
 
@@ -757,22 +800,22 @@ public class UpdateDataFromFirebaseForLogin {
                                                     classStoryServer.setProfilePicURL(posterProfilePicURL);
                                                     classStoryServer.setLiked(liked);
                                                     parentClassStoryList.add(classStoryServer);
+                                                }
 
-                                                    if (parentFeedCounter == childrenCount) {
-                                                        if (parentClassStoryList.size() > 1) {
-                                                            Collections.sort(parentClassStoryList, new Comparator<ClassStory>() {
-                                                                @Override
-                                                                public int compare(ClassStory o1, ClassStory o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
-                                                        }
-
-                                                        Collections.reverse(parentClassStoryList);
-                                                        Gson gson = new Gson();
-                                                        String json = gson.toJson(parentClassStoryList);
-                                                        sharedPreferencesManager.setParentFeed(json);
+                                                if (parentFeedCounter == childrenCount) {
+                                                    if (parentClassStoryList.size() > 1) {
+                                                        Collections.sort(parentClassStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
                                                     }
+
+                                                    Collections.reverse(parentClassStoryList);
+                                                    Gson gson = new Gson();
+                                                    String json = gson.toJson(parentClassStoryList);
+                                                    sharedPreferencesManager.setParentFeed(json);
                                                 }
                                             }
 
@@ -846,22 +889,22 @@ public class UpdateDataFromFirebaseForLogin {
                                                     classStoryServer.setProfilePicURL(posterProfilePicURL);
                                                     classStoryServer.setLiked(liked);
                                                     teacherClassStoryList.add(classStoryServer);
+                                                }
 
-                                                    if (teacherFeedCounter == childrenCount) {
-                                                        if (teacherClassStoryList.size() > 1) {
-                                                            Collections.sort(teacherClassStoryList, new Comparator<ClassStory>() {
-                                                                @Override
-                                                                public int compare(ClassStory o1, ClassStory o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
-                                                        }
-
-                                                        Collections.reverse(teacherClassStoryList);
-                                                        Gson gson = new Gson();
-                                                        String json = gson.toJson(teacherClassStoryList);
-                                                        sharedPreferencesManager.setTeacherFeed(json);
+                                                if (teacherFeedCounter == childrenCount) {
+                                                    if (teacherClassStoryList.size() > 1) {
+                                                        Collections.sort(teacherClassStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
                                                     }
+
+                                                    Collections.reverse(teacherClassStoryList);
+                                                    Gson gson = new Gson();
+                                                    String json = gson.toJson(teacherClassStoryList);
+                                                    sharedPreferencesManager.setTeacherFeed(json);
                                                 }
                                             }
 
@@ -887,22 +930,22 @@ public class UpdateDataFromFirebaseForLogin {
                                                     classStoryServer.setProfilePicURL(posterProfilePicURL);
                                                     classStoryServer.setLiked(liked);
                                                     teacherClassStoryList.add(classStoryServer);
+                                                }
 
-                                                    if (teacherFeedCounter == childrenCount) {
-                                                        if (teacherClassStoryList.size() > 1) {
-                                                            Collections.sort(teacherClassStoryList, new Comparator<ClassStory>() {
-                                                                @Override
-                                                                public int compare(ClassStory o1, ClassStory o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
-                                                        }
-
-                                                        Collections.reverse(teacherClassStoryList);
-                                                        Gson gson = new Gson();
-                                                        String json = gson.toJson(teacherClassStoryList);
-                                                        sharedPreferencesManager.setTeacherFeed(json);
+                                                if (teacherFeedCounter == childrenCount) {
+                                                    if (teacherClassStoryList.size() > 1) {
+                                                        Collections.sort(teacherClassStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
                                                     }
+
+                                                    Collections.reverse(teacherClassStoryList);
+                                                    Gson gson = new Gson();
+                                                    String json = gson.toJson(teacherClassStoryList);
+                                                    sharedPreferencesManager.setTeacherFeed(json);
                                                 }
                                             }
 
@@ -928,22 +971,22 @@ public class UpdateDataFromFirebaseForLogin {
                                                     classStoryServer.setProfilePicURL(posterProfilePicURL);
                                                     classStoryServer.setLiked(liked);
                                                     teacherClassStoryList.add(classStoryServer);
+                                                }
 
-                                                    if (teacherFeedCounter == childrenCount) {
-                                                        if (teacherClassStoryList.size() > 1) {
-                                                            Collections.sort(teacherClassStoryList, new Comparator<ClassStory>() {
-                                                                @Override
-                                                                public int compare(ClassStory o1, ClassStory o2) {
-                                                                    return o1.getSortableDate().compareTo(o2.getSortableDate());
-                                                                }
-                                                            });
-                                                        }
-
-                                                        Collections.reverse(teacherClassStoryList);
-                                                        Gson gson = new Gson();
-                                                        String json = gson.toJson(teacherClassStoryList);
-                                                        sharedPreferencesManager.setTeacherFeed(json);
+                                                if (teacherFeedCounter == childrenCount) {
+                                                    if (teacherClassStoryList.size() > 1) {
+                                                        Collections.sort(teacherClassStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
                                                     }
+
+                                                    Collections.reverse(teacherClassStoryList);
+                                                    Gson gson = new Gson();
+                                                    String json = gson.toJson(teacherClassStoryList);
+                                                    sharedPreferencesManager.setTeacherFeed(json);
                                                 }
                                             }
 
@@ -999,7 +1042,13 @@ public class UpdateDataFromFirebaseForLogin {
                         message.setSenderID(chat.getSenderID());
                         message.setSortableTime(chat.getSortableDate());
 
-                        String otherPartyID = postSnapshot.getKey();
+                        String otherPartyID;
+                        if (chat.getSenderID().equals(mFirebaseUser.getUid())) {
+                            otherPartyID = chat.getReceiverID();
+                        } else {
+                            otherPartyID = chat.getSenderID();
+                        }
+
                         message.setOtherParty(otherPartyID);
                         subList.add(message);
                     }
@@ -1018,22 +1067,22 @@ public class UpdateDataFromFirebaseForLogin {
                                         newMessage.setName(parent.getFirstName() + " " + parent.getLastName());
                                         newMessage.setProfilepicUrl(parent.getProfilePicURL());
                                         inboxList.add(newMessage);
+                                    }
 
-                                        if (subList.size() == inboxList.size()) {
-                                            if (subList.size() > 1) {
-                                                Collections.sort(subList, new Comparator<MessageList>() {
-                                                    @Override
-                                                    public int compare(MessageList o1, MessageList o2) {
-                                                        return o1.getSortableTime().compareTo(o2.getSortableTime());
-                                                    }
-                                                });
-                                            }
-                                            Collections.reverse(subList);
-//                                            subList.add(0, new MessageList());
-                                            Gson gson = new Gson();
-                                            String json = gson.toJson(subList);
-                                            sharedPreferencesManager.setMessages(json);
+                                    if (subList.size() == inboxList.size()) {
+                                        if (subList.size() > 1) {
+                                            Collections.sort(subList, new Comparator<MessageList>() {
+                                                @Override
+                                                public int compare(MessageList o1, MessageList o2) {
+                                                    return o1.getSortableTime().compareTo(o2.getSortableTime());
+                                                }
+                                            });
                                         }
+                                        Collections.reverse(subList);
+//                                            subList.add(0, new MessageList());
+                                        Gson gson = new Gson();
+                                        String json = gson.toJson(subList);
+                                        sharedPreferencesManager.setMessages(json);
                                     }
                                 }
 
@@ -1052,22 +1101,22 @@ public class UpdateDataFromFirebaseForLogin {
                                         newMessage.setName(school.getSchoolName());
                                         newMessage.setProfilepicUrl(school.getProfilePhotoUrl());
                                         inboxList.add(newMessage);
+                                    }
 
-                                        if (subList.size() == inboxList.size()) {
-                                            if (subList.size() > 1) {
-                                                Collections.sort(subList, new Comparator<MessageList>() {
-                                                    @Override
-                                                    public int compare(MessageList o1, MessageList o2) {
-                                                        return o1.getSortableTime().compareTo(o2.getSortableTime());
-                                                    }
-                                                });
-                                            }
-                                            Collections.reverse(subList);
-//                                            subList.add(0, new MessageList());
-                                            Gson gson = new Gson();
-                                            String json = gson.toJson(subList);
-                                            sharedPreferencesManager.setMessages(json);
+                                    if (subList.size() == inboxList.size()) {
+                                        if (subList.size() > 1) {
+                                            Collections.sort(subList, new Comparator<MessageList>() {
+                                                @Override
+                                                public int compare(MessageList o1, MessageList o2) {
+                                                    return o1.getSortableTime().compareTo(o2.getSortableTime());
+                                                }
+                                            });
                                         }
+                                        Collections.reverse(subList);
+//                                            subList.add(0, new MessageList());
+                                        Gson gson = new Gson();
+                                        String json = gson.toJson(subList);
+                                        sharedPreferencesManager.setMessages(json);
                                     }
                                 }
 
@@ -1086,22 +1135,22 @@ public class UpdateDataFromFirebaseForLogin {
                                         newMessage.setName(admin.getDisplayName());
                                         newMessage.setProfilepicUrl(admin.getProfilePictureURL());
                                         inboxList.add(newMessage);
+                                    }
 
-                                        if (subList.size() == inboxList.size()) {
-                                            if (subList.size() > 1) {
-                                                Collections.sort(subList, new Comparator<MessageList>() {
-                                                    @Override
-                                                    public int compare(MessageList o1, MessageList o2) {
-                                                        return o1.getSortableTime().compareTo(o2.getSortableTime());
-                                                    }
-                                                });
-                                            }
-                                            Collections.reverse(subList);
-//                                            subList.add(0, new MessageList());
-                                            Gson gson = new Gson();
-                                            String json = gson.toJson(subList);
-                                            sharedPreferencesManager.setMessages(json);
+                                    if (subList.size() == inboxList.size()) {
+                                        if (subList.size() > 1) {
+                                            Collections.sort(subList, new Comparator<MessageList>() {
+                                                @Override
+                                                public int compare(MessageList o1, MessageList o2) {
+                                                    return o1.getSortableTime().compareTo(o2.getSortableTime());
+                                                }
+                                            });
                                         }
+                                        Collections.reverse(subList);
+//                                            subList.add(0, new MessageList());
+                                        Gson gson = new Gson();
+                                        String json = gson.toJson(subList);
+                                        sharedPreferencesManager.setMessages(json);
                                     }
                                 }
 
@@ -1126,7 +1175,7 @@ public class UpdateDataFromFirebaseForLogin {
 
     private static void loadParentNotification() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("NotificationParent").child(mFirebaseUser.getUid());
-        mDatabaseReference.orderByChild("time").limitToLast(50).addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference./*orderByChild("time").*/limitToLast(50).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
@@ -1150,9 +1199,9 @@ public class UpdateDataFromFirebaseForLogin {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         parentNotificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (parentNotificationCounter == childrenCount) {
                                         if (parentNotificationModelList.size() > 1) {
@@ -1190,9 +1239,9 @@ public class UpdateDataFromFirebaseForLogin {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         parentNotificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (parentNotificationCounter == childrenCount) {
                                         if (parentNotificationModelList.size() > 1) {
@@ -1230,9 +1279,9 @@ public class UpdateDataFromFirebaseForLogin {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         parentNotificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (parentNotificationCounter == childrenCount) {
                                         if (parentNotificationModelList.size() > 1) {
@@ -1272,7 +1321,7 @@ public class UpdateDataFromFirebaseForLogin {
 
     private static void loadTeacherNotification() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("NotificationTeacher").child(mFirebaseUser.getUid());
-        mDatabaseReference.orderByChild("time").limitToLast(50).addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference./*orderByChild("time").*/limitToLast(50).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -1296,9 +1345,9 @@ public class UpdateDataFromFirebaseForLogin {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         teacherNotificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (teacherNotificationCounter == childrenCount) {
                                         if (teacherNotificationModelList.size() > 1) {
@@ -1336,9 +1385,9 @@ public class UpdateDataFromFirebaseForLogin {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         teacherNotificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (teacherNotificationCounter == childrenCount) {
                                         if (teacherNotificationModelList.size() > 1) {
@@ -1376,9 +1425,9 @@ public class UpdateDataFromFirebaseForLogin {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         teacherNotificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (teacherNotificationCounter == childrenCount) {
                                         if (teacherNotificationModelList.size() > 1) {

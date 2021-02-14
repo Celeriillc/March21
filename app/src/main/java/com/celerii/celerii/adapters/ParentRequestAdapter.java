@@ -96,7 +96,7 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
 
             Drawable textDrawable;
             if (!parentSchoolConnectionRequest.getStudentName().isEmpty()) {
-                String[] nameArray = parentSchoolConnectionRequest.getStudentName().split(" ");
+                String[] nameArray = parentSchoolConnectionRequest.getStudentName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -122,7 +122,7 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
 
             Drawable textDrawable;
             if (!parentSchoolConnectionRequest.getRequestSenderName().isEmpty()) {
-                String[] nameArray = parentSchoolConnectionRequest.getRequestSenderName().split(" ");
+                String[] nameArray = parentSchoolConnectionRequest.getRequestSenderName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -169,13 +169,16 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
                             newConnectionMap.put("Student Connection Request Sender/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey + "/requestStatus", "Accepted");
                             newConnectionMap.put("Student Connection Request Sender/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey + "/requestResponder", mFirebaseUser.getUid());
                             newConnectionMap.put("Student Connection Request Sender/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey + "/requestResponse", "Accepted");
+                            NotificationModel senderNotification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), parentSchoolConnectionRequest.getRequestSenderID(), parentSchoolConnectionRequest.getRequestSenderAccountType(), parentSchoolConnectionRequest.getRequestSenderAccountType(), time, sorttableTime, requestKey, "Connection", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
 
                             if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("Parent")) {
                                 newConnectionMap.put("Student Parent/" + parentSchoolConnectionRequest.getStudentID() + "/" + parentSchoolConnectionRequest.getRequestSenderID(), true);
                                 newConnectionMap.put("Parents Students/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + parentSchoolConnectionRequest.getStudentID(), true);
+                                newConnectionMap.put("NotificationParent/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey, senderNotification);
                             } else if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("School")) {
                                 newConnectionMap.put("Student School/" + parentSchoolConnectionRequest.getStudentID() + "/" + parentSchoolConnectionRequest.getRequestSenderID(), true);
                                 newConnectionMap.put("School Students/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + parentSchoolConnectionRequest.getStudentID(), true);
+                                newConnectionMap.put("NotificationSchool/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey, senderNotification);
                             }
 
                             if (recipients == null) return;
@@ -185,25 +188,19 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
                                 String recipientID = recipients.get(i).split(" ")[0];
                                 String recipientAccountType = recipients.get(i).split(" ")[1];
 
-                                NotificationModel notification;
                                 newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestStatus", "Accepted");
                                 newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestResponder", mFirebaseUser.getUid());
                                 newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestResponse", "Accepted");
-                                newConnectionMap.put("NotificationSchool/" + recipientID + "/" + requestKey, null);
-                                newConnectionMap.put("NotificationParent/" + recipientID + "/" + requestKey, null);
-                                newConnectionMap.put("NotificationSchool/" + mFirebaseUser.getUid() + "/" + requestKey, null);
-                                newConnectionMap.put("NotificationParent/" + mFirebaseUser.getUid() + "/" + requestKey, null);
 
+                                NotificationModel notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, recipientAccountType, parentSchoolConnectionRequest.getRequestSenderAccountType(), time, sorttableTime, requestKey, "Connection", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
                                 if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("Parent")) {
-                                    notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, "Parent", "Parent", time, sorttableTime, requestKey, "Connection", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
                                     newConnectionMap.put("NotificationParent/" + recipientID + "/" + requestKey, notification);
                                 } else if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("School")) {
-                                    notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), recipientID, "School", "Parent", time, sorttableTime, requestKey, "Connection", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
                                     newConnectionMap.put("NotificationSchool/" + recipientID + "/" + requestKey, notification);
                                 }
                             }
 
-//                                newConnectionRef.updateChildren(newConnectionMap);
+                            newConnectionRef.updateChildren(newConnectionMap);
                             customProgressDialogOne.dismiss();
                         }
                     }
@@ -234,12 +231,11 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
                             DatabaseReference newConnectionRef = mFirebaseDatabase.getReference();
                             String requestKey = dataSnapshot.getKey();
                             ParentSchoolConnectionRequest parentSchoolConnectionRequest = dataSnapshot.getValue(ParentSchoolConnectionRequest.class);
+                            NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), parentSchoolConnectionRequest.getRequestSenderID(), parentSchoolConnectionRequest.getRequestSenderAccountType(), "Parent", time, sorttableTime, requestKey, "ConnectionRequestDeclined", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
 
                             if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("Parent")) {
-                                NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), parentSchoolConnectionRequest.getRequestSenderID(), "Parent", "Parent", time, sorttableTime, requestKey, "ConnectionRequestDeclined", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
                                 newConnectionMap.put("NotificationParent/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey, notification);
                             } else if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("School")) {
-                                NotificationModel notification = new NotificationModel(parentSchoolConnectionRequest.getRequestSenderID(), parentSchoolConnectionRequest.getRequestSenderID(), "School", "Parent", time, sorttableTime, requestKey, "ConnectionRequestDeclined", parentSchoolConnectionRequest.getStudentProfilePictureURL(), parentSchoolConnectionRequest.getStudentID(), false);
                                 newConnectionMap.put("NotificationSchool/" + parentSchoolConnectionRequest.getRequestSenderID() + "/" + requestKey, notification);
                             }
 
@@ -253,20 +249,15 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
 
                             for (int i = 0; i < recipients.size(); i++) {
                                 String recipientID = recipients.get(i).split(" ")[0];
-                                String recipientAccountType = recipients.get(i).split(" ")[1];
 
                                 newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestStatus", "Declined");
                                 newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestResponder", mFirebaseUser.getUid());
                                 newConnectionMap.put("Student Connection Request Recipients/" + recipientID + "/" + requestKey + "/requestResponse", "Declined");
                                 newConnectionMap.put("NotificationSchool/" + recipientID + "/" + requestKey, null);
                                 newConnectionMap.put("NotificationParent/" + recipientID + "/" + requestKey, null);
-
-//                                if (parentSchoolConnectionRequest.getRequestSenderAccountType().equals("Parent")) {
-//
-//                                }
                             }
 
-//                                newConnectionRef.updateChildren(newConnectionMap);
+                            newConnectionRef.updateChildren(newConnectionMap);
                             customProgressDialogOne.dismiss();
                         }
                     }

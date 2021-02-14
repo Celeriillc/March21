@@ -15,9 +15,11 @@ import android.widget.ImageView;
 
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.GalleryModel;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -27,7 +29,7 @@ import java.util.List;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHolder> {
 
-    private List<GalleryModel> galleryModelList;
+    private List<String> galleryModelList;
     private Context context;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -36,17 +38,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
         public MyViewHolder(final View view) {
             super(view);
             image = (ImageView) view.findViewById(R.id.item_img);
-
-            image.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
         }
     }
 
-    public GalleryAdapter(List<GalleryModel> galleryModelList, Context context) {
+    public GalleryAdapter(List<String> galleryModelList, Context context) {
         this.galleryModelList = galleryModelList;
         this.context = context;
     }
@@ -59,34 +54,25 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
     }
 
     @Override
-    public void onBindViewHolder(final MyViewHolder holder, int position) {
-        final GalleryModel model = galleryModelList.get(position);
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
+        final String model = galleryModelList.get(position);
 
-        if (!model.getURL().isEmpty()) {
-            Glide.with(context)
-                    .load(model.getURL())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .crossFade()
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .into(holder.image);
-        }
-        else {
-            Glide.with(context)
-                    .load(R.drawable.profileimageplaceholder)
-                    .crossFade()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .centerCrop()
-                    .into(holder.image);
-        }
+        Glide.with(context)
+                .load(model)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .crossFade()
+                .placeholder(R.drawable.profileimageplaceholder)
+                .error(R.drawable.profileimageplaceholder)
+                .centerCrop()
+                .into(holder.image);
+
 
         holder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle b = new Bundle();
-                b.putString("URL", model.getURL());
                 Intent I = new Intent(context, GalleryDetailActivity.class);
+                Bundle b = new Bundle();
+                b.putInt("currentImage", position);
                 I.putExtras(b);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     holder.image.setTransitionName("imageTransition");
@@ -104,10 +90,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
 
     @Override
     public int getItemCount() {
-        if (galleryModelList.size() <= 7) {
+//        if (galleryModelList.size() <= 7) {
             return galleryModelList.size();
-        } else {
-            return 7;
-        }
+//        } else {
+//            return 7;
+//        }
     }
 }

@@ -12,13 +12,16 @@
         android:layout_height="wrap_content"
         android:weightSum="1"
         android:orientation="horizontal"
-        android:padding="15dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:id="@+id/profilepictureclipper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="15dp"
             android:background="@drawable/circular_image_background_white">
 
             <ImageView
@@ -67,7 +70,7 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:gravity="center_horizontal|center_vertical"
-                    android:background="@drawable/roundedbutton"
+                    android:background="@drawable/rounded_button_green"
                     android:src="@drawable/ic_check_dark"/>
 
             </LinearLayout>
@@ -98,8 +101,8 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="0.2dp"
-        android:background="@color/colorLighterGray"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"/>
+        android:background="@color/colorLightGray"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"/>
 
 </LinearLayout>

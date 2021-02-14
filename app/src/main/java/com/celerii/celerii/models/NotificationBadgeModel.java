@@ -9,6 +9,8 @@ public class NotificationBadgeModel {
     int number;
 
     public NotificationBadgeModel() {
+        this.status = false;
+        this.number = 0;
     }
 
     public NotificationBadgeModel(Boolean status, int number) {

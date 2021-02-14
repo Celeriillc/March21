@@ -17,7 +17,14 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.Home.RemoteCampaignActivity"></activity>
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileMapActivity"></activity>
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileNotableAlumniActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileAwardsActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileEEAPActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileCoCurricularActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileOfferedSubjectsActivity" />
+        <activity android:name=".Activities.Utility.ApplicationLaunchActivity" />
+        <activity android:name=".Activities.Home.RemoteCampaignActivity" />
         <activity android:name=".Activities.Home.Teacher.TeacherRequestActivity" />
         <activity android:name=".Activities.Home.Parent.ParentsRequestActivity" />
 
@@ -35,7 +42,7 @@
         </service>
 
         <activity
-            android:name=".Activities.Utility.ApplicationLaunchActivity"
+            android:name=".Activities.Utility.SplashScreenActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize">
@@ -179,15 +186,14 @@
         <activity android:name=".Activities.Search.Parent.ParentSearchResultActivity" />
         <activity android:name=".Activities.StudentPerformance.Current.PerformanceCurrentDetailActivity" />
         <activity android:name=".Activities.Profiles.ClassProfileActivity" />
-        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileNoteActivity" />
-        <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileTableActivity" />
         <activity android:name=".Activities.StudentBehaviouralPerformance.AddYourRewardActivity" />
         <activity android:name=".Activities.StudentBehaviouralPerformance.StudentRewardHome" />
         <activity android:name=".Activities.StudentBehaviouralPerformance.BehaviouralResultActivity" />
         <activity android:name=".Activities.LoginAndSignup.FederatedSignInActivity" />
 
-        <meta-data android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
     </application>
 
 </manifest>

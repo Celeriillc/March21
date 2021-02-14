@@ -3,30 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black"
-    tools:context="com.celerii.celerii.Activities.Delete.GalleryDetailFragment">
+    android:background="@color/white"
+    tools:context="com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity">
 
-    <ImageView
-        android:id="@+id/close"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:paddingTop="25dp"
-        android:paddingStart="25dp"
-        android:src="@drawable/ic_arrow_back_white"/>
+    <include android:id="@+id/gallerytoolbar"
+        layout="@layout/gallery_toolbar" />
 
     <ProgressBar
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="center"
         android:id="@+id/imageloadprogress"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/fullimage"
+    <com.celerii.celerii.helperClasses.WrapContentViewPager
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter"
-        android:layout_gravity="center"/>
+        android:layout_marginTop="?attr/actionBarSize" />
+
+<!--    <ImageView-->
+<!--        android:id="@+id/fullimage"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:scaleType="fitCenter"/>-->
 
 </FrameLayout>

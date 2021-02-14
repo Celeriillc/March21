@@ -256,7 +256,13 @@ public class InboxFragment extends Fragment {
                         message.setSenderID(chat.getSenderID());
                         message.setSortableTime(chat.getSortableDate());
 
-                        String otherPartyID = postSnapshot.getKey();
+                        String otherPartyID;
+                        if (chat.getSenderID().equals(mFirebaseUser.getUid())) {
+                            otherPartyID = chat.getReceiverID();
+                        } else {
+                            otherPartyID = chat.getSenderID();
+                        }
+
                         message.setOtherParty(otherPartyID);
                         subList.add(message);
                     }
@@ -346,6 +352,7 @@ public class InboxFragment extends Fragment {
                                         Admin admin = dataSnapshot.getValue(Admin.class);
                                         newMessage.setName(admin.getDisplayName());
                                         newMessage.setProfilepicUrl(admin.getProfilePictureURL());
+//                                        newMessage.setOtherParty("Admin");
                                         inboxList.add(newMessage);
 
                                         if (subList.size() == inboxList.size()) {
@@ -397,10 +404,19 @@ public class InboxFragment extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+//        if (!hidden) {
+//
+//        } else {
+//
+//        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-
-//        UpdateDataFromFirebase.populateEssentials(getContext());
 
         Map<String, Object> updateBadgeMap = new HashMap<String, Object>();
         NotificationBadgeModel notificationBadgeModel = new NotificationBadgeModel(false, 0);
@@ -414,6 +430,7 @@ public class InboxFragment extends Fragment {
             featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
         }
         sessionStartTime = System.currentTimeMillis();
+//        UpdateDataFromFirebase.populateEssentials(getContext());
     }
 
     @Override
@@ -442,6 +459,7 @@ public class InboxFragment extends Fragment {
 
         DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
         featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+
     }
 
     @Override

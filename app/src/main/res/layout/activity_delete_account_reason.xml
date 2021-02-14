@@ -25,6 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
+                android:layout_marginBottom="20dp"
                 android:weightSum="1"
                 android:padding="15dp"
                 android:orientation="horizontal">
@@ -52,7 +53,7 @@
                     android:layout_gravity="center_vertical"
                     android:textColor="@android:color/black"
                     android:textStyle="bold"
-                    android:textSize="13sp"
+                    android:textSize="15sp"
                     android:text=""/>
 
 
@@ -62,21 +63,20 @@
                 android:id="@+id/chooseclasstoposttodescriptor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:padding="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:text="Choose the classes to post to:"/>
+                android:text="Choose the classes to post to:"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
-                android:textStyle="bold"
-                android:textColor="@color/colorLightGray"
-                android:textSize="12sp"
+                android:textColor="@color/colorBottomNavigationIconGray"
+                android:textSize="14sp"
                 android:text="You are about to delete your Celerii account. If you continue, you'll lose access to all custom information including Connections, Messages, Class Feeds, Class Accounts and Children accounts"/>
 
             <TextView
@@ -84,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
                 android:padding="15dp"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 android:text="Please tell us why you want to delete your account"/>
@@ -107,8 +107,8 @@
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
                     android:textStyle="bold"
-                    android:textColor="@color/colorLightGray"
-                    android:textSize="12sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
+                    android:textSize="14sp"
                     android:text="Login/Signup"/>
 
                 <View
@@ -130,8 +130,8 @@
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
                     android:textStyle="bold"
-                    android:textColor="@color/colorLightGray"
-                    android:textSize="12sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
+                    android:textSize="14sp"
                     android:text="Class Feed"/>
 
                 <View
@@ -153,8 +153,8 @@
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
                     android:textStyle="bold"
-                    android:textColor="@color/colorLightGray"
-                    android:textSize="12sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
+                    android:textSize="14sp"
                     android:text="Assignment Feed"/>
 
                 <View
@@ -176,8 +176,8 @@
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
                     android:textStyle="bold"
-                    android:textColor="@color/colorLightGray"
-                    android:textSize="12sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
+                    android:textSize="14sp"
                     android:text="Notifications"/>
 
                 <View
@@ -199,8 +199,8 @@
                     android:textAlignment="textStart"
                     android:layout_gravity="start"
                     android:textStyle="bold"
-                    android:textColor="@color/colorLightGray"
-                    android:textSize="12sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
+                    android:textSize="14sp"
                     android:text="Other"/>
 
                 <View
@@ -226,7 +226,7 @@
                 android:minLines="5"
                 android:gravity="top"
                 android:inputType="textMultiLine"
-                android:hint="Compose message"
+                android:hint="Tell us your reason"
                 android:background="@drawable/edittext_background"
                 android:focusable="true"
                 android:focusableInTouchMode="true"

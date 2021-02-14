@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
+    android:layout_width="330dp"
     android:layout_height="fill_parent"
     android:background="@drawable/rounded_dialog_background"
     android:weightSum="2">
@@ -12,8 +12,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:gravity="center"
-        android:padding="15dp"
+        android:padding="10dp"
         android:textStyle="bold"
+        android:textSize="15sp"
         android:textColor="@color/black"
         android:text="Delete Record?"/>
 
@@ -21,10 +22,12 @@
         android:id="@+id/dialogmessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
+        android:layout_gravity="center"
         android:padding="15dp"
-        android:textColor="@color/colorDarkGray"
+        android:textSize="15sp"
+        android:textColor="@color/colorBottomNavigationIconGray"
         android:text="Are you sure you want to delete this record? This can not be undone"/>
 
     <View
@@ -46,29 +49,12 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/delete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:gravity="center"
-            android:textSize="15sp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:text="Delete"
-            android:textAllCaps="false"
-            android:background="@drawable/roundedbutton"
-            style="?android:attr/borderlessButtonStyle" />
-
-        <Button
             android:id="@+id/cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="10dp"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="20dp"
             android:layout_marginEnd="10dp"
             android:gravity="center"
             android:textSize="15sp"
@@ -77,6 +63,23 @@
             android:text="Cancel"
             android:textAllCaps="false"
             android:background="@drawable/rounded_button_white_dark_gray_border"
+            style="?android:attr/borderlessButtonStyle" />
+
+        <Button
+            android:id="@+id/delete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:text="Delete"
+            android:textAllCaps="false"
+            android:background="@drawable/roundedbutton"
             style="?android:attr/borderlessButtonStyle" />
 
     </LinearLayout>

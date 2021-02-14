@@ -3,6 +3,7 @@ package com.celerii.celerii.Activities.Settings;
 import android.app.Dialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,9 +18,12 @@ import android.widget.TextView;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.ContactUsModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ContactUsActivity extends AppCompatActivity {
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -53,7 +58,8 @@ public class ContactUsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_us);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -88,6 +94,9 @@ public class ContactUsActivity extends AppCompatActivity {
                 if (!validate(messageString, "body", message))
                     return;
 
+                final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
+                progressDialog.show();
+
                 String date = Date.getDate();
                 String year = Date.getYear();
                 String month = Date.getMonth();
@@ -103,8 +112,15 @@ public class ContactUsActivity extends AppCompatActivity {
                 contactRef.updateChildren(newContactUsMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        CustomToast.blueBackgroundToast(ContactUsActivity.this, "Thank you for reaching out");
-                        finish();
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            CustomToast.blueBackgroundToast(ContactUsActivity.this, "Thank you for reaching out");
+                            finish();
+                        } else {
+                            progressDialog.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                        }
                     }
                 });
             }

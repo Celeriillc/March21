@@ -147,9 +147,10 @@ public class SearchResultsSchoolFragment extends Fragment {
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher School").child(mFirebaseUser.getUid());
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                existingConnections.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         existingConnections.add(postSnapshot.getKey());
@@ -171,20 +172,22 @@ public class SearchResultsSchoolFragment extends Fragment {
     void loadPendingIncomingRequests(){
         loopControl = 0;
         mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid());
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                loopControl = 0;
+                pendingIncomingRequests.clear();
                 if (dataSnapshot.exists()) {
 
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         String schoolKey = postSnapshot.getKey();
-                        loopControl++;
 
                         mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(schoolKey);
                         mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                loopControl++;
                                 if (dataSnapshot.exists()) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         SchoolTeacherConnectionRequest schoolTeacherConnectionRequest = postSnapshot.getValue(SchoolTeacherConnectionRequest.class);
@@ -221,20 +224,22 @@ public class SearchResultsSchoolFragment extends Fragment {
     void loadPendingOutgoingRequests() {
         loopControl = 0;
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher To School Request Teacher").child(mFirebaseUser.getUid());
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                loopControl = 0;
+                pendingOutgoingRequests.clear();
                 if (dataSnapshot.exists()){
 
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         String schoolKey = postSnapshot.getKey();
-                        loopControl++;
 
                         mDatabaseReference = mFirebaseDatabase.getReference("Teacher To School Request Teacher").child(mFirebaseUser.getUid()).child(schoolKey);
                         mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                loopControl++;
                                 if (dataSnapshot.exists()) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         TeacherSchoolConnectionRequest teacherSchoolConnectionRequest = postSnapshot.getValue(TeacherSchoolConnectionRequest.class);

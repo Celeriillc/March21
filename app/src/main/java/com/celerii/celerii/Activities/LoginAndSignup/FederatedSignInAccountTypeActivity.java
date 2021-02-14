@@ -18,9 +18,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
@@ -76,7 +79,7 @@ public class FederatedSignInAccountTypeActivity extends AppCompatActivity {
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
                 final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.custom_binary_selection_dialog);
+                dialog.setContentView(R.layout.custom_binary_selection_dialog_for_signup_two);
                 TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
                 Button parent = (Button) dialog.findViewById(R.id.optionone);
                 Button teacher = (Button) dialog.findViewById(R.id.optiontwo);
@@ -113,6 +116,8 @@ public class FederatedSignInAccountTypeActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 final String accountTypeString = accountType.getText().toString();
+                Analytics.signupAnalytics(mFirebaseUser.getUid(), accountTypeString);
+                Analytics.loginAnalytics(context, mFirebaseUser.getUid(), accountTypeString);
 
                 if (!validateAccountType(accountTypeString))
                     return;
@@ -127,10 +132,16 @@ public class FederatedSignInAccountTypeActivity extends AppCompatActivity {
                 mDatabaseReference.updateChildren(updateMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        progressDialog.dismiss();
-                        Intent I = new Intent(FederatedSignInAccountTypeActivity.this, SignUpActivityFive.class);
-                        startActivity(I);
-                        finish();
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            Intent I = new Intent(FederatedSignInAccountTypeActivity.this, SignUpActivityFive.class);
+                            startActivity(I);
+                            finish();
+                        } else {
+                            progressDialog.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                        }
                     }
                 });
 

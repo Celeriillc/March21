@@ -20,7 +20,9 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.BehaviouralRecordModel;
 import com.celerii.celerii.models.Class;
@@ -116,13 +118,15 @@ public class StudentRewardFragmentAdapter extends RecyclerView.Adapter<RecyclerV
 //                String studentID = classesStudentsAndParentsModel.getStudentID();
                 String parentID = classesStudentsAndParentsModel.getParentID();
 
-                try {
-                    if (!studentParentList.get(studentID).contains(parentID)) {
+                if (studentID.equals(classesStudentsAndParentsModel.getStudentID())) {
+                    try {
+                        if (!studentParentList.get(studentID).contains(parentID)) {
+                            studentParentList.get(studentID).add(parentID);
+                        }
+                    } catch (Exception e) {
+                        studentParentList.put(studentID, new ArrayList<String>());
                         studentParentList.get(studentID).add(parentID);
                     }
-                } catch (Exception e) {
-                    studentParentList.put(studentID, new ArrayList<String>());
-                    studentParentList.get(studentID).add(parentID);
                 }
             }
         }
@@ -227,17 +231,19 @@ public class StudentRewardFragmentAdapter extends RecyclerView.Adapter<RecyclerV
                         }
                     }
 
-                    mDatabaseReference.updateChildren(updater, new DatabaseReference.CompletionListener() {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                            if (databaseError == null) {
-                                progressDialog.dismiss();
-                                showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName);
-                            } else {
-                                showDialogWithMessage("Your behavioural report for " + studentName + " could not be added");
-                            }
-                        }
-                    });
+//                    mDatabaseReference.updateChildren(updater, new DatabaseReference.CompletionListener() {
+//                        @Override
+//                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                            if (databaseError == null) {
+//                                progressDialog.dismiss();
+//                                showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName);
+//                            } else {
+//                                progressDialog.dismiss();
+//                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+//                                ShowDialogWithMessage.showDialogWithMessage(context, message);
+//                            }
+//                        }
+//                    });
                 }
             });
 

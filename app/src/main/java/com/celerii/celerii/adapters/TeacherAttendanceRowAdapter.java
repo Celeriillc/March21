@@ -28,8 +28,11 @@ import com.celerii.celerii.Activities.StudentAttendance.TeacherAttendanceActivit
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
+import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.SubscriptionModel;
@@ -150,7 +153,7 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
                 ((HeaderViewHolder) holder).deleteRecordLayout.setVisibility(View.GONE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-                String errorMessage = "There is no " + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + " attendance information recorded for " + "<b>" + teacherAttendanceHeader.getClassName() + "</b>" + " on the " + Date.getFormalDocumentDate(teacherAttendanceHeader.getDate()) + ".";
+                String errorMessage = "There is no " + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + " attendance information recorded for " + "<b>" + teacherAttendanceHeader.getClassName() + "</b>" + " on the " + "<b>" + Date.getFormalDocumentDate(teacherAttendanceHeader.getDate()) + "</b>" + ".";
                 ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
             } else {
                 String myID = sharedPreferencesManager.getMyUserID();
@@ -249,7 +252,7 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
 
             Drawable textDrawable;
             if (!teacherAttendanceRow.getName().isEmpty()) {
-                String[] nameArray = teacherAttendanceRow.getName().split(" ");
+                String[] nameArray = teacherAttendanceRow.getName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -420,10 +423,13 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
             return;
         }
 
+        final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
         final String attendanceKey = teacherAttendanceHeader.getKey();
         final String activeClass = teacherAttendanceHeader.getClassID();
         final ArrayList<String> parentsList = new ArrayList<>();
         final Map<String, Object> deleteAttendance = new HashMap<String, Object>();
+
+        progressDialog.show();
 
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("AttendanceParentRecipients").child(attendanceKey);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -435,11 +441,11 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                     }
                 }
 
-                deleteAttendance.put("AttendenceClass/" + activeClass + "/" + attendanceKey, null);
+                deleteAttendance.put("AttendanceClass/" + activeClass + "/" + attendanceKey, null);
                 for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
                     if (!teacherAttendanceRowList.get(i).getStudentID().equals("")) {
-                        deleteAttendance.put("AttendenceClass-Students/" + activeClass + "/" + attendanceKey + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(), null);
-                        deleteAttendance.put("AttendenceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + attendanceKey, null);
+                        deleteAttendance.put("AttendanceClass-Students/" + activeClass + "/" + attendanceKey + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(), null);
+                        deleteAttendance.put("AttendanceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + attendanceKey, null);
                     }
                 }
 
@@ -453,9 +459,12 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                         if (databaseError == null) {
+                            progressDialog.dismiss();
                             showDialogWithMessageAndClose("Attendance record has been deleted");
                         } else {
-                            showDialogWithMessage("Attendance record could not be deleted");
+                            progressDialog.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
                         }
                     }
                 });

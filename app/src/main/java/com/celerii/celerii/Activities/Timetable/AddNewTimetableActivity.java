@@ -1,6 +1,7 @@
 package com.celerii.celerii.Activities.Timetable;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,7 +24,9 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.TeacherTimetableModel;
 import com.codetroopers.betterpickers.timepicker.TimePickerBuilder;
@@ -43,6 +46,7 @@ import java.util.HashMap;
 
 public class AddNewTimetableActivity extends AppCompatActivity implements TimePickerDialogFragment.TimePickerDialogHandler{
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
     CustomProgressDialogOne customProgressDialogOne;
 
@@ -59,6 +63,8 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
 
     String activeClassID = "";
     String activeClassName = "";
+    String activeClass;
+    Class activeClassModel;
     String hourOfTheDay;
     String minute;
 
@@ -72,8 +78,9 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_timetable);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
-        customProgressDialogOne = new CustomProgressDialogOne(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
+        customProgressDialogOne = new CustomProgressDialogOne(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -94,7 +101,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
         duration = (EditText) findViewById(R.id.duration);
         save = (Button) findViewById(R.id.save);
 
-        String activeClass = sharedPreferencesManager.getActiveClass();
+        activeClass = sharedPreferencesManager.getActiveClass();
 
         if (activeClass == null) {
             Gson gson = new Gson();
@@ -109,7 +116,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
                 sharedPreferencesManager.setActiveClass(activeClass);
                 gson = new Gson();
                 type = new TypeToken<Class>() {}.getType();
-                Class activeClassModel = gson.fromJson(activeClass, type);
+                activeClassModel = gson.fromJson(activeClass, type);
                 activeClassID = activeClassModel.getID();
                 activeClassName = activeClassModel.getClassName();
                 className.setText(activeClassName);
@@ -121,7 +128,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
             Boolean activeClassExist = false;
             Gson gson = new Gson();
             Type type = new TypeToken<Class>() {}.getType();
-            Class activeClassModel = gson.fromJson(activeClass, type);
+            activeClassModel = gson.fromJson(activeClass, type);
 
             String myClassesJSON = sharedPreferencesManager.getMyClasses();
             type = new TypeToken<ArrayList<Class>>() {}.getType();
@@ -139,17 +146,16 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
-                    }
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    showDialogWithMessageAndDisconnect("You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.");
+                    return;
                 }
-            } else {
-                showDialogWithMessageAndDisconnect("You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.");
-                return;
             }
 
+            type = new TypeToken<Class>() {}.getType();
             activeClassModel = gson.fromJson(activeClass, type);
             activeClassID = activeClassModel.getID();
             activeClassName = activeClassModel.getClassName();
@@ -190,7 +196,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
             public void onClick(View v) {
                 Intent intent = new Intent(AddNewTimetableActivity.this, EditClassActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("Class", className.getText().toString());
+                bundle.putString("Class", activeClass);
                 intent.putExtras(bundle);
                 startActivityForResult(intent, 0);
             }
@@ -235,6 +241,11 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
                     return;
                 }
 
+                if (day.getText().toString().equals("Saturday") || day.getText().toString().equals("Sunday")) {
+                    showDialogWithMessage("Timetable is not able to show entries for Saturdays and Sundays. Select a day from Monday to Friday.");
+                    return;
+                }
+
                 customProgressDialogOne.show();
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Timetable").child(mFirebaseUser.getUid()).push();
@@ -252,9 +263,15 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
                 mDatabaseReference.updateChildren(timetableMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        customProgressDialogOne.dismiss();
-                        String message = "Your timetable has been updated";
-                        showDialogWithMessageAndDisconnect(message);
+                        if (databaseError == null) {
+                            customProgressDialogOne.dismiss();
+                            String message = "Your timetable has been updated";
+                            showDialogWithMessageAndDisconnect(message);
+                        } else {
+                            customProgressDialogOne.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                        }
                     }
                 });
             }
@@ -265,7 +282,8 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     if (!duration.getText().toString().endsWith(" Minutes")) {
-                        duration.setText(duration.getText().toString() + " Minutes");
+                        String durationString = duration.getText().toString() + " Minutes";
+                        duration.setText(durationString);
                     }
                 } else {
                     duration.setText(duration.getText().toString().replace(" Minutes", ""));
@@ -365,9 +383,13 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
-                activeClassName = data.getStringExtra("Selected Class");
-                activeClassID = data.getStringExtra("Selected Class ID");
-                className.setText(data.getStringExtra("Selected Class"));
+                activeClass = data.getStringExtra("Selected Class");
+                Gson gson = new Gson();
+                Type type = new TypeToken<Class>() {}.getType();
+                activeClassModel = gson.fromJson(activeClass, type);
+                activeClassID = activeClassModel.getID();
+                activeClassName = activeClassModel.getClassName();
+                className.setText(activeClassName);
             }
         }
         else if (requestCode == 1) {

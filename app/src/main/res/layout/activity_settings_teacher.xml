@@ -28,8 +28,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0dp"
                     android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:textColor="@color/colorLightGray"
+                    android:textSize="15sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:text="Invite"/>
             </LinearLayout>
 
@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:textColor="@android:color/black"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:text="Invite Parents"/>
 
                 <TextView
@@ -64,6 +64,7 @@
                     android:layout_marginEnd="10dp"
                     android:layout_marginTop="5dp"
                     android:textSize="12sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:text="Celerii is more fun when parents interact with your posts and message you to discuss the status of your students, click here to invite them."/>
             </LinearLayout>
 
@@ -86,8 +87,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="00sp"
                     android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:textColor="@color/colorLightGray"
+                    android:textSize="15sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:text="Account"/>
             </LinearLayout>
 
@@ -111,7 +112,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Edit Profile"/>
 
@@ -137,7 +138,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Edit Email"/>
 
@@ -163,7 +164,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Change Password"/>
 
@@ -189,7 +190,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Delete Account"/>
 
@@ -221,8 +222,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0sp"
                     android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:textColor="@color/colorLightGray"
+                    android:textSize="15sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:text="Settings"/>
             </LinearLayout>
 
@@ -246,7 +247,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Push Notifications"/>
 
@@ -279,7 +280,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="App Updates"/>
 
@@ -311,8 +312,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0sp"
                     android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:textColor="@color/colorLightGray"
+                    android:textSize="15sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:text="Support and Feedback"/>
             </LinearLayout>
 
@@ -336,7 +337,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="FAQ"/>
 
@@ -362,7 +363,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Tutorials"/>
 
@@ -388,7 +389,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Report a Problem"/>
 
@@ -414,7 +415,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Report Abuse"/>
 
@@ -440,7 +441,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Contact Us"/>
 
@@ -465,8 +466,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="0sp"
                     android:textStyle="bold"
-                    android:textSize="12sp"
-                    android:textColor="@color/colorLightGray"
+                    android:textSize="15sp"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:text="About"/>
             </LinearLayout>
 
@@ -490,7 +491,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Blog"/>
 
@@ -516,7 +517,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Terms of Service"/>
 
@@ -542,7 +543,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="Privacy Policy"/>
 
@@ -568,7 +569,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="App Info"/>
 
@@ -594,7 +595,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textColor="@android:color/black"
                     android:text="About Us"/>
 

@@ -25,11 +25,13 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.TeacherHomeClassAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ManageKidsModel;
+import com.celerii.celerii.models.MessageList;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,6 +45,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,6 +70,7 @@ public class TeacherHomeClass extends Fragment {
     AHBottomNavigation bottomNavigation;
 
     private ArrayList<ManageKidsModel> manageKidsModelList;
+    HashMap<String, ManageKidsModel> manageKidsModelHashMap = new HashMap<>();
     public RecyclerView recyclerView;
     public TeacherHomeClassAdapter mAdapter;
     GridLayoutManager mLayoutManager;
@@ -117,7 +122,7 @@ public class TeacherHomeClass extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        loadFromSharedPreferences();
+                        loadFromFirebase();
                     }
                 }
         );
@@ -139,7 +144,7 @@ public class TeacherHomeClass extends Fragment {
             myClasses = gson.fromJson(myClassesJSON, type);
 
             if (myClasses != null) {
-                if (myClasses.size() > 1) {
+                if (myClasses.size() >= 1) {
                     gson = new Gson();
                     activeClass = gson.toJson(myClasses.get(0));
                     sharedPreferencesManager.setActiveClass(activeClass);
@@ -177,22 +182,20 @@ public class TeacherHomeClass extends Fragment {
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
-                    }
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return view;
                 }
-            } else {
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                mySwipeRefreshLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                errorLayoutButton.setText("Find my school");
-                errorLayoutButton.setVisibility(View.VISIBLE);
-                return view;
             }
         }
 
@@ -228,6 +231,7 @@ public class TeacherHomeClass extends Fragment {
         });
         loadFromSharedPreferences();
         recyclerView.setAdapter(mAdapter);
+        loadFromFirebase();
 
         return view;
     }
@@ -236,6 +240,7 @@ public class TeacherHomeClass extends Fragment {
     public void onResume() {
         super.onResume();
         loadFromSharedPreferences();
+        loadFromFirebase();
     }
 
     private static HashMap<String, HashMap<String, Student>> classStudentsForTeacherMap = new HashMap<>();
@@ -248,13 +253,19 @@ public class TeacherHomeClass extends Fragment {
 
         if (classStudentsForTeacherMap == null || classStudentsForTeacherMap.size() == 0) {
             mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
             progressLayout.setVisibility(View.GONE);
             mySwipeRefreshLayout.setVisibility(View.GONE);
-            errorLayoutText.setText(Html.fromHtml("Your classes have no students or you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-            errorLayoutButton.setText("Find my school");
-            errorLayoutButton.setVisibility(View.VISIBLE);
+            errorLayout.setVisibility(View.GONE);
+//            errorLayoutText.setText(Html.fromHtml("Your classes have no students or you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+//            errorLayoutButton.setText("Find my school");
+//            errorLayoutButton.setVisibility(View.VISIBLE);
         } else {
+            if (mAdapter == null) {
+                return;
+            }
+
+            ArrayList<ManageKidsModel> manageKidsModelListLocal = new ArrayList<>();
             manageKidsModelList.clear();
 
             if (sharedPreferencesManager.getActiveClass() != null) {
@@ -268,15 +279,30 @@ public class TeacherHomeClass extends Fragment {
             }
 
             HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClassID);
-            for (Map.Entry<String, Student> entry : classMap.entrySet()) {
-                String studentID = entry.getKey();
-                Student studentModel = entry.getValue();
-                String name = studentModel.getFirstName() + " " + studentModel.getLastName();
-                ManageKidsModel manageKidsModel = new ManageKidsModel(name, studentModel.getImageURL(), studentID);
-                manageKidsModelList.add(manageKidsModel);
+            if (classMap != null) {
+                for (Map.Entry<String, Student> entry : classMap.entrySet()) {
+                    String studentID = entry.getKey();
+                    Student studentModel = entry.getValue();
+                    String name = studentModel.getFirstName() + " " + studentModel.getLastName();
+                    ManageKidsModel manageKidsModel = new ManageKidsModel(name, studentModel.getImageURL(), studentID);
+                    manageKidsModelListLocal.add(manageKidsModel);
+                }
             }
 
-            manageKidsModelList.add(0, new ManageKidsModel());
+            if (manageKidsModelListLocal.size() > 1) {
+                Collections.sort(manageKidsModelListLocal, new Comparator<ManageKidsModel>() {
+                    @Override
+                    public int compare(ManageKidsModel o1, ManageKidsModel o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+            }
+
+            manageKidsModelListLocal.add(0, new ManageKidsModel());
+
+            manageKidsModelList.clear();
+            manageKidsModelList.addAll(manageKidsModelListLocal);
+
             mAdapter.notifyDataSetChanged();
             mySwipeRefreshLayout.setRefreshing(false);
             mySwipeRefreshLayout.setVisibility(View.VISIBLE);
@@ -290,21 +316,28 @@ public class TeacherHomeClass extends Fragment {
     void loadFromFirebase(){
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
             mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            errorLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            CustomToast.blueBackgroundToast(context, "No Internet");
+            return;
+        }
+
+        if (activeClassID == null) {
             return;
         }
 
         counter = 0;
+        manageKidsModelHashMap.clear();
+        final ArrayList<ManageKidsModel> manageKidsModelListLocal = new ArrayList<>();
+
         mDatabaseReference = mFirebaseDatabase.getReference().child("Class Students").child(activeClassID);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(postSnapshot.getKey());
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -314,13 +347,31 @@ public class TeacherHomeClass extends Fragment {
                                     Student student = dataSnapshot.getValue(Student.class);
                                     String name = student.getFirstName() + " " + student.getLastName();
                                     ManageKidsModel manageKidsModel = new ManageKidsModel(name, student.getImageURL(), dataSnapshot.getKey());
-                                    manageKidsModelList.add(manageKidsModel);
+
+                                    if (!manageKidsModelHashMap.containsKey(dataSnapshot.getKey())) {
+                                        manageKidsModelHashMap.put(dataSnapshot.getKey(), manageKidsModel);
+                                        manageKidsModelListLocal.add(manageKidsModel);
+                                    }
                                 }
 
-                                if (childrenCount == counter) {
-                                    manageKidsModelList.add(0, new ManageKidsModel());
+                                if (childrenCount == manageKidsModelListLocal.size()) {
+                                    if (manageKidsModelListLocal.size() > 1) {
+                                        Collections.sort(manageKidsModelListLocal, new Comparator<ManageKidsModel>() {
+                                            @Override
+                                            public int compare(ManageKidsModel o1, ManageKidsModel o2) {
+                                                return o1.getName().compareTo(o2.getName());
+                                            }
+                                        });
+                                    }
+
+                                    manageKidsModelListLocal.add(0, new ManageKidsModel());
+
+                                    manageKidsModelList.clear();
+                                    manageKidsModelList.addAll(manageKidsModelListLocal);
+
                                     mAdapter.notifyDataSetChanged();
                                     mySwipeRefreshLayout.setRefreshing(false);
+                                    mySwipeRefreshLayout.setVisibility(View.VISIBLE);
                                     recyclerView.setVisibility(View.VISIBLE);
                                     progressLayout.setVisibility(View.GONE);
                                     errorLayout.setVisibility(View.GONE);
@@ -335,10 +386,13 @@ public class TeacherHomeClass extends Fragment {
                     }
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
                     progressLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText("This class doesn't contain any students");
+                    errorLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.VISIBLE);
+//                    errorLayoutText.setText(Html.fromHtml("Your classes have no students or you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+//                    errorLayoutButton.setText("Find my school");
+//                    errorLayoutButton.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -354,6 +408,13 @@ public class TeacherHomeClass extends Fragment {
         super.onHiddenChanged(hidden);
 
         loadFromSharedPreferences();
+        loadFromFirebase();
+
+//        if (hidden) {
+//
+//        } else {
+//
+//        }
     }
 
     @Override
@@ -366,7 +427,7 @@ public class TeacherHomeClass extends Fragment {
             featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
         }
         sessionStartTime = System.currentTimeMillis();
-        UpdateDataFromFirebase.populateEssentials(getContext());
+//        UpdateDataFromFirebase.populateEssentials(getContext());
     }
 
     @Override

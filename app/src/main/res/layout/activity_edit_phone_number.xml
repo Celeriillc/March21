@@ -28,7 +28,7 @@
         android:layout_marginTop="20dp"
         android:layout_marginStart="15sp"
         android:text="Phone Number"
-        android:textColor="@color/colorLightGray"
+        android:textColor="@color/colorBottomNavigationIconGray"
         android:textSize="12sp"
         android:textStyle="bold" />
 
@@ -64,7 +64,7 @@
             android:layout_height="15dp"
             android:layout_marginStart="15dp"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_icons_google" />
+            android:src="@drawable/ic_nigeria" />
 
         <TextView
             android:layout_width="wrap_content"

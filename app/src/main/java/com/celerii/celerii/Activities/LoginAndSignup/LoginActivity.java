@@ -31,10 +31,13 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebaseForLogin;
 import com.celerii.celerii.models.Parent;
@@ -151,6 +154,7 @@ public class LoginActivity extends AppCompatActivity {
 
         sharedPreferencesManager = new SharedPreferencesManager(this);
         applicationLauncherSharedPreferences = new ApplicationLauncherSharedPreferences(this);
+        progressDialog = new CustomProgressDialogOne(LoginActivity.this);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -232,12 +236,12 @@ public class LoginActivity extends AppCompatActivity {
                 if (!isPasswordVisible) {
                     password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     password.setSelection(password.length());
-                    togglePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    togglePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isPasswordVisible = true;
                 } else {
                     password.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     password.setSelection(password.length());
-                    togglePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    togglePasswordVisibility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isPasswordVisible = false;
                 }
             }
@@ -273,8 +277,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
 
                 //authenticate user
-                progressDialog = new CustomProgressDialogOne(LoginActivity.this);
-                progressDialog.showWithMessage("Please hold a while we get things ready, this might take up to a minute depending on your connection strength.");
+                progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
 
                 mFirebaseAuth.signInWithEmailAndPassword(emailString, passwordString).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -296,6 +299,7 @@ public class LoginActivity extends AppCompatActivity {
                                         User user = dataSnapshot.getValue(User.class);
                                         activeAccount = user.getRole();
                                         if (user.getRole().equals("Parent") || user.getRole().equals("Teacher")) {
+                                            Analytics.loginAnalytics(context, mFirebaseUser.getUid(), activeAccount);
                                             UpdateDataFromFirebaseForLogin.populateEssentials(context, activeAccount, progressDialog);
                                         }
                                         else {
@@ -304,6 +308,7 @@ public class LoginActivity extends AppCompatActivity {
                                         }
                                     } else {
                                         activeAccount = "Parent";
+                                        Analytics.loginAnalytics(context, mFirebaseUser.getUid(), activeAccount);
                                         UpdateDataFromFirebaseForLogin.populateEssentials(context, activeAccount, progressDialog);
                                     }
                                 }
@@ -325,7 +330,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN_GOOGLE){
+        if (requestCode == RC_SIGN_IN_GOOGLE) {
             GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (googleSignInResult.isSuccess()){
                 GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
@@ -351,7 +356,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void FirebaseUserAuthGoogle(GoogleSignInAccount googleSignInAccount) {
-        progressDialog.show();
+        progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
         AuthCredential authCredential = GoogleAuthProvider.getCredential(googleSignInAccount.getIdToken(), null);
         mFirebaseAuth.signInWithCredential(authCredential).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -369,7 +374,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void FirebaseUserAuthFacebook(AccessToken facebookToken) {
-        progressDialog.show();
+        progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
         AuthCredential authCredential = FacebookAuthProvider.getCredential(facebookToken.getToken());
         mFirebaseAuth.signInWithCredential(authCredential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -387,7 +392,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void FirebaseUserAuthTwitter(TwitterSession twitterSession) {
-        progressDialog.show();
+        progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
         AuthCredential credential = TwitterAuthProvider.getCredential(twitterSession.getAuthToken().token, twitterSession.getAuthToken().secret);
         mFirebaseAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -415,9 +420,10 @@ public class LoginActivity extends AppCompatActivity {
                     User user = dataSnapshot.getValue(User.class);
                     String activeAccount = user.getRole();
                     if (activeAccount.equals("Parent") || activeAccount.equals("Teacher")) {
+                        Analytics.loginAnalytics(context, mFirebaseUser.getUid(), activeAccount);
                         UpdateDataFromFirebaseForLogin.populateEssentials(context, activeAccount, progressDialog);
                     } else {
-                        String message = "Celerii mobile only works with " + "<b>" + "Teacher" + "</b>" + " and " + "<b>" + "Parent" + "</b>" + " accounts. If your account is a " + "<b>" + "School" + "</b>" + " account, please use Celerii web at \n " + "<b>" + "www.celerii.io" + "</b";
+                        String message = "Celerii mobile only works with " + "<b>" + "Teacher" + "</b>" + " and " + "<b>" + "Parent" + "</b>" + " accounts. If your account is a " + "<b>" + "School" + "</b>" + " account, please use Celerii web at \n " + "<b>" + "www.celerii.com" + "</b";
                         showDialogWithMessageAndLogout(Html.fromHtml(message));
                     }
                 } else {
@@ -433,12 +439,19 @@ public class LoginActivity extends AppCompatActivity {
                     updateMap.put("Teacher/" + userID, teacher);
                     updateMap.put("UserRoles/" + userID, user);
                     updateMap.put("Email/" + refactoredEmail, "true");
+                    Analytics.signupAnalytics( userID, "Parent" );
 
                     mDatabaseReference = mFirebaseDatabase.getReference();
                     mDatabaseReference.updateChildren(updateMap, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                            saveToSharedPreferencesAndProceed("Parent", userID, userName, "");
+                            if (databaseError == null) {
+                                saveToSharedPreferencesAndProceed("Parent", userID, userName, "");
+                            } else {
+                                progressDialog.dismiss();
+                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                ShowDialogWithMessage.showDialogWithMessageAndDelete(context, message, mFirebaseUser);
+                            }
                         }
                     });
                 }
@@ -535,7 +548,9 @@ public class LoginActivity extends AppCompatActivity {
         OK.setText("OK");
 
         sharedPreferencesManager.clear();
-        mFirebaseAuth.signOut();
+        if (mFirebaseUser != null) {
+            mFirebaseAuth.signOut();
+        }
         applicationLauncherSharedPreferences.setLauncherActivity("IntroSlider");
 
         OK.setOnClickListener(new View.OnClickListener() {

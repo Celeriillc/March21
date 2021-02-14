@@ -30,7 +30,9 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.TeacherEnterResultsSharedPreferences;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.AcademicRecord;
@@ -180,25 +182,23 @@ public class EnterResultsActivity extends AppCompatActivity {
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
-                    }
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("New Class Result");
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);return;
                 }
-            } else {
-                setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle("New Class Result");
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeButtonEnabled(true);
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                mySwipeRefreshLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                errorLayoutButton.setText("Find my school");
-                errorLayoutButton.setVisibility(View.VISIBLE);return;
             }
         }
 
@@ -259,7 +259,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         subject = teacherEnterResultsSharedPreferences.getSubject();
         date = Date.getDate();
         sortableDate = Date.convertToSortableDate(date);
-        testType = "Continous Assessment";
+        testType = "Continuous Assessment";
         maximumScore = "100";
         percentageOfTotal = "30";
         year = Date.getYear();
@@ -293,6 +293,7 @@ public class EnterResultsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
+                    previousPercentageOfTotal = 0.0;
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         String key = postSnapshot.getKey();
                         AcademicRecord academicRecord = postSnapshot.getValue(AcademicRecord.class);
@@ -351,7 +352,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         subject = teacherEnterResultsSharedPreferences.getSubject();
         date = Date.getDate();
         sortableDate = Date.convertToSortableDate(date);
-        testType = "Continous Assessment";
+        testType = "Continuous Assessment";
         maximumScore = "100";
         percentageOfTotal = "30";
         year = Date.getYear();
@@ -472,26 +473,35 @@ public class EnterResultsActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
             errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("This class doesn't contain any students");
+            errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
         } else {
             enterResultRowList.clear();
             HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClass);
-            for (Map.Entry<String, Student> entry : classMap.entrySet()) {
-                String studentID = entry.getKey();
-                Student studentModel = entry.getValue();
-                String name = studentModel.getFirstName() + " " + studentModel.getLastName();
-                EnterResultRow enterResultRow = new EnterResultRow(name, studentModel.getImageURL(), "0");
-                enterResultRow.setStudentID(studentID);
-                enterResultRowList.add(enterResultRow);
+
+            if (classMap != null) {
+                for (Map.Entry<String, Student> entry : classMap.entrySet()) {
+                    String studentID = entry.getKey();
+                    Student studentModel = entry.getValue();
+                    String name = studentModel.getFirstName() + " " + studentModel.getLastName();
+                    EnterResultRow enterResultRow = new EnterResultRow(name, studentModel.getImageURL(), "0");
+                    enterResultRow.setStudentID(studentID);
+                    enterResultRowList.add(enterResultRow);
+                }
             }
 
-            enterResultRowList.add(0, new EnterResultRow());
-            enterResultRowList.add(new EnterResultRow());
-            recyclerView.setVisibility(View.VISIBLE);
             mySwipeRefreshLayout.setRefreshing(false);
             progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.GONE);
-            mAdapter.notifyDataSetChanged();
+            if (enterResultRowList.isEmpty()) {
+                recyclerView.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
+            } else {
+                enterResultRowList.add(0, new EnterResultRow());
+                enterResultRowList.add(new EnterResultRow());
+                recyclerView.setVisibility(View.VISIBLE);
+                errorLayout.setVisibility(View.GONE);
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -868,13 +878,19 @@ public class EnterResultsActivity extends AppCompatActivity {
         }
 
         mDatabaseReference = mFirebaseDatabase.getReference();
-        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                progressDialog.dismiss();
-                showDialogWithMessage("Results have been posted", true);
-            }
-        });
+//        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
+//            @Override
+//            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                if (databaseError == null) {
+//                    progressDialog.dismiss();
+//                    showDialogWithMessage("Results have been posted", true);
+//                } else {
+//                    progressDialog.dismiss();
+//                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+//                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+//                }
+//            }
+//        });
 
     }
 

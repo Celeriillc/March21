@@ -18,6 +18,7 @@
             android:id="@+id/subjectlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:padding="5dp"
             android:layout_marginTop="10dp"
             android:orientation="horizontal"
@@ -27,7 +28,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -44,12 +45,19 @@
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimaryPurple"
                 android:text="General"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_chevron_right_purple_24dp"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/datelayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:padding="5dp"
             android:orientation="horizontal"
             android:weightSum="3">
@@ -58,7 +66,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -75,15 +83,22 @@
                 android:textStyle="bold"
                 android:textColor="@color/colorPrimaryPurple"
                 android:text="December 12, 2019"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_chevron_right_purple_24dp"/>
         </LinearLayout>
 
         <View
-            android:layout_width="15dp"
-            android:layout_height="0.5dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
-            android:layout_marginStart="15dp"
-            android:background="#aaaaaa" />
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/colorLightGray" />
 
         <LinearLayout
             android:id="@+id/teacherlayout"
@@ -97,7 +112,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -108,7 +123,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:gravity="end"
                 android:textSize="13sp"
                 android:text="Esther, Oriabure"/>
@@ -126,7 +141,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -137,7 +152,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:gravity="end"
                 android:textSize="13sp"
                 android:text="Toulouse"/>
@@ -155,7 +170,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -166,7 +181,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:gravity="end"
                 android:textSize="13sp"
                 android:text="First Term"/>
@@ -184,7 +199,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -195,7 +210,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:gravity="end"
                 android:textSize="13sp"
                 android:text="32"/>
@@ -213,7 +228,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -224,7 +239,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:gravity="end"
                 android:textSize="13sp"
                 android:text="12"/>
@@ -242,7 +257,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -253,19 +268,20 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="15dp"
                 android:gravity="end"
                 android:textSize="13sp"
                 android:text="20"/>
         </LinearLayout>
 
         <View
-            android:layout_width="15dp"
-            android:layout_height="0.5dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
-            android:layout_marginStart="15dp"
-            android:background="#aaaaaa" />
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/colorLightGray" />
 
     </LinearLayout>
 
@@ -279,8 +295,8 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginBottom="20dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="@android:color/white"

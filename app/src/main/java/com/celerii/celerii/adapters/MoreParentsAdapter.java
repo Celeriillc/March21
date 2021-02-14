@@ -86,7 +86,7 @@ public class MoreParentsAdapter extends RecyclerView.Adapter<MoreParentsAdapter.
             holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
             holder.childName.setTextColor(ContextCompat.getColor(context, R.color.white));
         } else {
-            holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_corner_button_white_with_purple_border));
+            holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
             holder.childName.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
         }
 

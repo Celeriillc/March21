@@ -70,7 +70,7 @@ public class NewChatRowAdapter extends RecyclerView.Adapter<NewChatRowAdapter.My
 
         Drawable textDrawable;
         if (!newChatRowModel.getName().isEmpty()) {
-            String[] nameArray = newChatRowModel.getName().split(" ");
+            String[] nameArray = newChatRowModel.getName().replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

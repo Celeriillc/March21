@@ -10,23 +10,15 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_above="@id/dots"/>
+        android:layout_height="130dp"/>
 
     <LinearLayout
         android:id="@+id/dots"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_above="@id/next"
         android:gravity="center"
+        android:background="@color/white"
         android:orientation="horizontal" />
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-<!--        -->
-<!--    </LinearLayout>-->
 
     <Button
         android:id="@+id/next"
@@ -35,11 +27,13 @@
         android:layout_gravity="center"
         android:paddingStart="30dp"
         android:paddingEnd="30dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="15dp"
         android:textAllCaps="false"
         android:textStyle="bold"
         android:text="Find your child"
         android:textColor="@color/white"
-        android:background="@drawable/roundedbutton"/>
+        android:background="@drawable/roundedbutton"
+        style="?android:attr/borderlessButtonStyle"/>
 
 </LinearLayout>

@@ -58,18 +58,19 @@
     </style>
 
     <style name="customTabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <item name="tabIndicatorColor">@color/colorPrimaryPurple</item>
         <item name="tabIndicatorHeight">2dp</item>
+<!--        <item name="tabIndicator">@drawable/tab_indicator</item>-->
         <item name="tabPaddingStart">12dp</item>
         <item name="tabPaddingEnd">12dp</item>
         <item name="textAllCaps">false</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:dividerPadding">3dp</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/colorButtonBlue</item>
+        <item name="android:textColor">@color/black</item>
         <item name="android:divider">@android:color/black</item>
         <item name="tabBackground">?attr/selectableItemBackground</item>
-        <item name="tabSelectedTextColor">@color/black</item>
+        <item name="tabSelectedTextColor">@color/colorPrimaryPurple</item>
     </style>
 
     <style name="MyCustomBetterPickersDialogs" parent="BetterPickersRadialTimePickerDialog.PrimaryColor">

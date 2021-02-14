@@ -1,10 +1,13 @@
 package com.celerii.celerii.adapters;
 
 import android.content.Context;
+
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.celerii.celerii.R;
@@ -31,7 +34,8 @@ public class PerformanceCurrentDetailAdapter extends RecyclerView.Adapter<Perfor
     private Context context;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView examType, score, className, date, maxObtainable, percentageOfTotal, term, year, newBadge;
+        public TextView examType, score, className, date, maxObtainable, percentageOfTotal, term, year, newBadge, resultAsAt;
+        public ImageView examTypeIcon;
         public View clickableView;
 
         public MyViewHolder(final View view) {
@@ -45,6 +49,8 @@ public class PerformanceCurrentDetailAdapter extends RecyclerView.Adapter<Perfor
             term = (TextView) view.findViewById(R.id.term);
             year = (TextView) view.findViewById(R.id.year);
             newBadge = (TextView) view.findViewById(R.id.newbadge);
+            resultAsAt = (TextView) view.findViewById(R.id.resultasat);
+            examTypeIcon = (ImageView) view.findViewById(R.id.examtypeicon);
             clickableView = view;
         }
     }
@@ -83,6 +89,17 @@ public class PerformanceCurrentDetailAdapter extends RecyclerView.Adapter<Perfor
         holder.percentageOfTotal.setText(academicRecordStudent.getPercentageOfTotal() + "%");
         holder.term.setText(Term.Term(academicRecordStudent.getTerm()));
         holder.year.setText(academicRecordStudent.getAcademicYear());
+
+        if (academicRecordStudent.getTestType().equals("Continuous Assessment")) {
+            holder.examTypeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent));
+            holder.resultAsAt.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        } else if (academicRecordStudent.getTestType().equals("Examination")) {
+            holder.examTypeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
+            holder.resultAsAt.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+        } else {
+            holder.examTypeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_kilogarm_orange));
+            holder.resultAsAt.setTextColor(ContextCompat.getColor(context, R.color.colorKilogarmOrange));
+        }
 
         Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
         Gson gson = new Gson();

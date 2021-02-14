@@ -81,6 +81,8 @@ public class SettingsActivityParent extends AppCompatActivity {
         appInfo = (LinearLayout) findViewById(R.id.appinfolayout);
         aboutUs = (LinearLayout) findViewById(R.id.aboutuslayout);
 
+        appInfo.setVisibility(View.GONE);
+
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,7 +198,7 @@ public class SettingsActivityParent extends AppCompatActivity {
         blog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://stackoverflow.com/questions/23255026/open-chrome-app-with-url";
+                String url = "https://celerii.com/blog";
 //                try {
 //                    Intent i = new Intent("android.intent.action.MAIN");
 //                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
@@ -222,6 +224,7 @@ public class SettingsActivityParent extends AppCompatActivity {
         termsOfService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String url = "https://celerii.com/terms-of-service";
                 Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "Terms of Service");
@@ -234,6 +237,7 @@ public class SettingsActivityParent extends AppCompatActivity {
         privacyPolicy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String url = "https://celerii.com/privacy-policy";
                 Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "Privacy Policy");
@@ -246,6 +250,7 @@ public class SettingsActivityParent extends AppCompatActivity {
         appInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String url = "https://celerii.com/app-info";
                 Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "App Info");
@@ -258,6 +263,7 @@ public class SettingsActivityParent extends AppCompatActivity {
         aboutUs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String url = "https://celerii.com/about";
                 Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "About Us");

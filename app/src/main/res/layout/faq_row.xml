@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
     android:background="?android:attr/selectableItemBackground">
 
     <LinearLayout
@@ -11,35 +10,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="10dp"
-        android:paddingStart="15dp"
-        android:paddingEnd="15dp"
+        android:paddingTop="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         android:background="@android:color/white">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="10">
+            android:weightSum="1">
 
             <TextView
                 android:id="@+id/faqheader"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="9"
-                android:textStyle="bold"
-                android:textSize="16sp"
+                android:layout_weight="1"
+                android:textSize="14sp"
                 android:textColor="@android:color/black"
-                android:text="Lorem ipsum dolor sit amet, consectet adipisc elit, sed do eiusmod tempor Lorem ipsum dolor sit amet"/>
+                android:text=""/>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:gravity="end|center">
 
                 <ImageView
-                    android:layout_width="wrap_content"
+                    android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_chevron_right_black_24dp"/>
@@ -49,7 +46,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0.2dp"
-            android:background="#eeeeee"
-            android:layout_marginTop="10dp"/>
+            android:background="@color/colorLightGray"
+            android:layout_marginTop="20dp" />
+
     </LinearLayout>
 </LinearLayout>

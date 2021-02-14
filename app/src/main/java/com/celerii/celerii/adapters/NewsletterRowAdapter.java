@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Newsletters.NewsletterDetailActivity;
 import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.models.NewsletterRow;
 import com.bumptech.glide.Glide;
 
@@ -28,7 +29,7 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView newsletterTitle, newsletterDate, newsletterBody, newsletterPoster, noOfViews, noOfFavorites, noOfComments;
+        public TextView newsletterTitle, newsletterDate, newsletterPoster;
         public ImageView newsletterImage;
         public View clickableView;
 
@@ -36,11 +37,7 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
             super(view);
             newsletterTitle = (TextView) view.findViewById(R.id.newslettertitle);
             newsletterDate = (TextView) view.findViewById(R.id.newsletterdate);
-            newsletterBody = (TextView) view.findViewById(R.id.newsletterbody);
             newsletterPoster = (TextView) view.findViewById(R.id.newsletterposter);
-            noOfViews = (TextView) view.findViewById(R.id.newsletternoofviews);
-            noOfFavorites = (TextView) view.findViewById(R.id.newsletternumberoffavoirites);
-            noOfComments = (TextView) view.findViewById(R.id.newsletternoofcomments);
             newsletterImage = (ImageView) view.findViewById(R.id.newsletterimage);
             clickableView = view;
         }
@@ -63,46 +60,27 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
         final NewsletterRow newsletterRow = newsletterRowsList.get(position);
 
         holder.newsletterTitle.setText(newsletterRow.getNewsletterTitle());
-        holder.newsletterDate.setText(newsletterRow.getNewsletterDate());
-        holder.newsletterBody.setText(newsletterRow.getNewsletterBody());
-        holder.newsletterPoster.setText(newsletterRow.getNewsletterPoster());
+        holder.newsletterDate.setText(Date.getRelativeTimeSpan(newsletterRow.getNewsletterDate()));
+        holder.newsletterPoster.setText(newsletterRow.getSchoolID());
 
-        String noOfViews = String.valueOf(newsletterRow.getNoOfViews()) + " Views";
-        String noOfFavorites = String.valueOf(newsletterRow.getNoOfFavorites()) + " Favourites";
-        String noOfComments = String.valueOf(newsletterRow.getNoOfComments()) + " Comments";
-
-        holder.noOfViews.setText(noOfViews);
-        holder.noOfFavorites.setText(noOfFavorites);
-        holder.noOfComments.setText(noOfComments);
-
-        if (!newsletterRow.getNewsletterImageURL().isEmpty()) {
-            Glide.with(context)
-                    .load(newsletterRow.getNewsletterImageURL())
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
-                    .centerCrop()
-                    .into(holder.newsletterImage);
-        }
+        Glide.with(context)
+                .load(newsletterRow.getNewsletterImageURL())
+                .placeholder(R.drawable.profileimageplaceholder)
+                .error(R.drawable.profileimageplaceholder)
+                .into(holder.newsletterImage);
 
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String noOfViews = String.valueOf(newsletterRow.getNoOfViews());
-                String noOfFavorites = String.valueOf(newsletterRow.getNoOfFavorites());
-                String noOfComments = String.valueOf(newsletterRow.getNoOfComments());
-
-                Bundle b = new Bundle();
-                b.putString("date", newsletterRow.getNewsletterDate());
-                b.putString("body", newsletterRow.getNewsletterBody());
-                b.putString("title", newsletterRow.getNewsletterTitle());
-                b.putString("poster", newsletterRow.getNewsletterPoster());
-                b.putString("noOfViews", noOfViews);
-                b.putString("noOfFavorites", noOfFavorites);
-                b.putString("noOfComments", noOfComments);
-                b.putString("imageURL", newsletterRow.getNewsletterImageURL());
-                Intent I = new Intent(context, NewsletterDetailActivity.class);
-                I.putExtras(b);
-                context.startActivity(I);
+                Intent intent = new Intent(context, NewsletterDetailActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("title", newsletterRow.getNewsletterTitle());
+                bundle.putString("imageURL", newsletterRow.getNewsletterImageURL());
+                bundle.putString("date", newsletterRow.getNewsletterDate());
+                bundle.putString("poster", newsletterRow.getSchoolID());
+                bundle.putString("body", newsletterRow.getNewsletterBody());
+                intent.putExtras(bundle);
+                context.startActivity(intent);
             }
         });
     }

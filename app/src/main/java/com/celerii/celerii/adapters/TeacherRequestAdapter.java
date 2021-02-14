@@ -18,13 +18,19 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.TeacherSchoolConnectionRequest;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -95,7 +101,7 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
 
         Drawable textDrawable;
         if (!teacherSchoolConnectionRequest.getSchoolName().isEmpty()) {
-            String[] nameArray = teacherSchoolConnectionRequest.getSchoolName().split(" ");
+            String[] nameArray = teacherSchoolConnectionRequest.getSchoolName().replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {
@@ -114,6 +120,79 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
                     .centerCrop()
                     .into(holder.pic);
         }
+
+        holder.accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String time = Date.getDate();
+                String sortableTime = Date.convertToSortableDate(time);
+                final String entityId = teacherSchoolConnectionRequest.getSchool();
+
+                final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
+                final NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sortableTime, notificationPushID, "Connection", "", "", false);
+
+                mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId).child(teacherSchoolConnectionRequest.getKey());
+                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Map<String, Object> newConnectionMap = new HashMap<String, Object>();
+                        DatabaseReference newRef = mFirebaseDatabase.getReference();
+                        if (dataSnapshot.exists()) {
+                            String pendingRequestKey = dataSnapshot.getKey();
+                            newConnectionMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Accepted");
+                            newConnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Accepted");
+                            newConnectionMap.put("NotificationTeacher/" + mFirebaseUser.getUid() + "/" + pendingRequestKey, null);
+                        }
+                        newConnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), true);
+                        newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
+                        newConnectionMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notification);
+                        newRef.updateChildren(newConnectionMap);
+                        customProgressDialogOne.dismiss();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+
+        holder.decline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String time = Date.getDate();
+                String sortableTime = Date.convertToSortableDate(time);
+                final String entityId = teacherSchoolConnectionRequest.getSchool();
+
+                final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
+                final NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sortableTime, notificationPushID, "ConnectionRequestDeclined", "", "", false);
+
+                mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId).child(teacherSchoolConnectionRequest.getKey());
+                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Map<String, Object> newDeclinedMap = new HashMap<String, Object>();
+                        DatabaseReference newRef = mFirebaseDatabase.getReference();
+                        if (dataSnapshot.exists()) {
+                            String pendingRequestKey = dataSnapshot.getKey();
+                            newDeclinedMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Declined");
+                            newDeclinedMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Declined");
+                            newDeclinedMap.put("NotificationTeacher/" + mFirebaseUser.getUid() + "/" + pendingRequestKey, null);
+                        }
+                        newDeclinedMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notification);
+                        newRef.updateChildren(newDeclinedMap);
+
+                        customProgressDialogOne.dismiss();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
     }
 
     @Override

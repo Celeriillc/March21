@@ -65,12 +65,18 @@ public class StudentAcademicHistoryAdapter extends RecyclerView.Adapter<StudentA
         final StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = studentAcademicHistoryRowModelList.get(position);
 
         holder.kidName.setText(studentAcademicHistoryRowModel.getName());
-        holder.average.setText(studentAcademicHistoryRowModel.getAverage());
+        String average = "0%";
+        if (studentAcademicHistoryRowModel.getAverage() != null) {
+            if (!studentAcademicHistoryRowModel.getAverage().equals("")) {
+                average = studentAcademicHistoryRowModel.getAverage() + "%";
+            }
+        }
+        holder.average.setText(average);
         holder.clipper.setClipToOutline(true);
 
         Drawable textDrawable;
         if (!studentAcademicHistoryRowModel.getName().isEmpty()) {
-            String[] nameArray = studentAcademicHistoryRowModel.getName().split(" ");
+            String[] nameArray = studentAcademicHistoryRowModel.getName().replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

@@ -45,15 +45,18 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.Home.RemoteCampaignActivity;
+import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.Activities.Inbox.InboxFragment;
 import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
+import com.celerii.celerii.Activities.Search.Teacher.SearchActivity;
 import com.celerii.celerii.Activities.Settings.TutorialsActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
@@ -112,9 +115,12 @@ public class ParentMainActivityTwo extends AppCompatActivity {
     AHBottomNavigation bottomNavigation;
     FragmentTransaction mFragmentTransaction;
     Fragment frag1, frag2, frag3, frag4, active;
+    AHBottomNavigationItem item1, item2, item3, item4;
     Toolbar toolbar;
+    ImageView requestBadge;
     TextView toolbarTitle;
     String activeStudentID = "";
+    Boolean isPendingRequest = false;
 
     //Onboard variables
     Dialog dialog;
@@ -149,7 +155,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         dismissTutorialBalloon = (Button) findViewById(R.id.dismisstutorialballoon);
         setSupportActionBar(toolbar);
 //        getSupportActionBar().setTitle("Celerii Parent");
-        getSupportActionBar().setLogo(R.drawable.ic_icons_google);
+//        getSupportActionBar().setLogo(R.drawable.ic_celerii_logo_colored);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbarTitle.setText("Celerii Parent");
@@ -192,10 +198,13 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         }
 
         // Create items
-        AHBottomNavigationItem item1 = new AHBottomNavigationItem("Class Feed", R.drawable.ic_newspaper, R.color.colorPrimary);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Inbox", R.drawable.ic_chat_black_24dp, R.color.colorPrimary);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem("Notifications", R.drawable.ic_notifications_black_24dp, R.color.colorPrimary);
-        AHBottomNavigationItem item4 = new AHBottomNavigationItem("More", R.drawable.ic_more_black_24dp, R.color.colorPrimary);
+        item1 = new AHBottomNavigationItem("Class Feed", R.drawable.ic_file_text, R.color.colorPrimary);
+        item2 = new AHBottomNavigationItem("Inbox", R.drawable.ic_message_circle, R.color.colorPrimary);
+        item3 = new AHBottomNavigationItem("Notifications", R.drawable.ic_notifications, R.color.colorPrimary);
+        item4 = new AHBottomNavigationItem("More", R.drawable.ic_more_horizontal, R.color.colorPrimary);
+
+        // Set icons for items
+        item1.setDrawable(R.drawable.ic_file_text_filled);
 
         // Add items
         bottomNavigation.addItem(item1);
@@ -204,13 +213,13 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         bottomNavigation.addItem(item4);
 
         bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple));
-        bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.colorDeepGray));
-        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
+        bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.colorBottomNavigationIconGray));
+        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_HIDE);
         loadBadgesFromFirebase();
         initFCM();
         onBoardFirebaseCheck();
         onBoardingSearchBalloonCheck();
-//        tutorialFirebaseCheck();
+        tutorialFirebaseCheck();
         remoteCampaign();
         checkServerForApplicationUpdates();
         bottomNavigation.setCurrentItem(0);
@@ -243,7 +252,9 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                 mFragmentTransaction.commit();
                 bottomNavigation.setCurrentItem(1);
                 bottomNavigation.setNotification("", 1);
-                active = frag1;
+                active = frag2;
+                setIconDefaults();
+                item2.setDrawable(R.drawable.ic_message_circle_filled);
             } else if (fragNumber.equals("2")) {
                 mFragmentTransaction.add(R.id.frame_fragmentholder, frag4).hide(frag4);
                 mFragmentTransaction.add(R.id.frame_fragmentholder, frag2).hide(frag2);
@@ -252,7 +263,9 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                 mFragmentTransaction.commit();
                 bottomNavigation.setCurrentItem(2);
                 bottomNavigation.setNotification("", 2);
-                active = frag1;
+                active = frag3;
+                setIconDefaults();
+                item3.setDrawable(R.drawable.ic_notifications_filled);
             } else if (fragNumber.equals("3")) {
                 mFragmentTransaction.add(R.id.frame_fragmentholder, frag3).hide(frag3);
                 mFragmentTransaction.add(R.id.frame_fragmentholder, frag2).hide(frag2);
@@ -261,7 +274,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                 mFragmentTransaction.commit();
                 bottomNavigation.setCurrentItem(3);
                 bottomNavigation.setNotification("", 3);
-                active = frag1;
+                active = frag4;
+                setIconDefaults();
             } else {
                 mFragmentTransaction.add(R.id.frame_fragmentholder, frag4).hide(frag4);
                 mFragmentTransaction.add(R.id.frame_fragmentholder, frag3).hide(frag3);
@@ -271,7 +285,12 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                 bottomNavigation.setCurrentItem(0);
                 bottomNavigation.setNotification("", 0);
                 active = frag1;
+                setIconDefaults();
+                item1.setDrawable(R.drawable.ic_file_text_filled);
             }
+            sharedPreferencesManager.setActiveAccount("Parent");
+            mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+            mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue("Parent");
         } else {
             mFragmentTransaction.add(R.id.frame_fragmentholder, frag4).hide(frag4);
             mFragmentTransaction.add(R.id.frame_fragmentholder, frag3).hide(frag3);
@@ -281,6 +300,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             bottomNavigation.setCurrentItem(0);
             bottomNavigation.setNotification("", 0);
             active = frag1;
+            setIconDefaults();
+            item1.setDrawable(R.drawable.ic_file_text_filled);
         }
 
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
@@ -297,6 +318,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
 //                        getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag1).commit();
                         getSupportFragmentManager().beginTransaction().hide(active).show(frag1).commit();
                         active = frag1;
+                        setIconDefaults();
+                        item1.setDrawable(R.drawable.ic_file_text_filled);
                         return true;
                     case 1:
                         bottomNavBadgeRef = mFirebaseDatabase.getReference();
@@ -308,6 +331,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
 //                        getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag2).commit();
                         getSupportFragmentManager().beginTransaction().hide(active).show(frag2).commit();
                         active = frag2;
+                        setIconDefaults();
+                        item2.setDrawable(R.drawable.ic_message_circle_filled);
                         return true;
                     case 2:
                         bottomNavBadgeRef = mFirebaseDatabase.getReference();
@@ -319,6 +344,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
 //                        getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag3).commit();
                         getSupportFragmentManager().beginTransaction().hide(active).show(frag3).commit();
                         active = frag3;
+                        setIconDefaults();
+                        item3.setDrawable(R.drawable.ic_notifications_filled);
                         return true;
                     case 3:
                         bottomNavBadgeRef = mFirebaseDatabase.getReference();
@@ -330,6 +357,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
 //                        getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag4).commit();
                         getSupportFragmentManager().beginTransaction().hide(active).show(frag4).commit();
                         active = frag4;
+                        setIconDefaults();
                         return true;
                 }
                 return false;
@@ -370,6 +398,13 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         };
     }
 
+    private void setIconDefaults() {
+        item1.setDrawable(R.drawable.ic_file_text);
+        item2.setDrawable(R.drawable.ic_message_circle);
+        item3.setDrawable(R.drawable.ic_notifications);
+        item4.setDrawable(R.drawable.ic_more_horizontal);
+    }
+
     public AHBottomNavigation getData(){
         return bottomNavigation;
     }
@@ -377,6 +412,25 @@ public class ParentMainActivityTwo extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.home_menu, menu);
+
+        final MenuItem menuItem = menu.findItem(R.id.action_request);
+
+        View actionView = menuItem.getActionView();
+        requestBadge = (ImageView) actionView.findViewById(R.id.requestbadge);
+
+        if (isPendingRequest) {
+            requestBadge.setVisibility(View.VISIBLE);
+        } else {
+            requestBadge.setVisibility(View.GONE);
+        }
+
+        actionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOptionsItemSelected(menuItem);
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -467,7 +521,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                 URL myURL = new URL("https://businessday.ng/wp-content/uploads/2019/09/Untitled-design-2019-09-26T163510.353.png");
                 Bitmap bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
 
-                builder.setSmallIcon(R.drawable.ic_icons_google)
+                builder.setSmallIcon(R.drawable.ic_celerii_logo_colored)
                         .setLargeIcon(bitmap)
                         .setColor(ContextCompat.getColor(context, R.color.colorSecondaryPurple))
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
@@ -481,7 +535,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                         .addAction(R.mipmap.ic_launcher, "Decline", actionIntentDecline)
                         .setContentIntent(resultPendingIntent);
             } catch (Exception e) {
-                builder.setSmallIcon(R.drawable.ic_icons_google)
+                builder.setSmallIcon(R.drawable.ic_celerii_logo_colored)
                         .setColor(ContextCompat.getColor(context, R.color.colorSecondaryPurple))
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .setSubText("Clara Ikubese")
@@ -610,14 +664,37 @@ public class ParentMainActivityTwo extends AppCompatActivity {
 
             }
         });
+
+        mDatabaseReference = mFirebaseDatabase.getReference("Student Connection Request Recipients").child(mFirebaseUser.getUid());
+        mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    isPendingRequest = true;
+                    if (requestBadge != null) {
+                        requestBadge.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    isPendingRequest = false;
+                    if (requestBadge != null) {
+                        requestBadge.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         auth.addIdTokenListener(authIDTokenListener);
-        Analytics.loginAnalytics(context, mFirebaseUser.getUid(), "Parent");
-        sessionStartTime = System.currentTimeMillis();
+//        Analytics.loginAnalytics(context, mFirebaseUser.getUid(), "Parent");
+//        sessionStartTime = System.currentTimeMillis();
     }
 
     @Override
@@ -633,26 +710,26 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         tutorialBalloon.setVisibility(View.GONE);
         onBoardingSearchBalloon.setVisibility(View.GONE);
 
-        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String currentSessionLoginKey = sharedPreferencesManager.getCurrentLoginSessionKey();
-        String day_month_year = sharedPreferencesManager.getCurrentLoginSessionDayMonthYear();
-        String month_year = sharedPreferencesManager.getCurrentLoginSessionMonthYear();
-        String year = sharedPreferencesManager.getCurrentLoginSessionYear();
-        HashMap<String, Object> loginUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        loginUpdateMap.put("Analytics/User Login History/" + mFirebaseUserID + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        loginUpdateMap.put("Analytics/User Daily Login History/" + mFirebaseUserID + "/" + day_month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        loginUpdateMap.put("Analytics/User Monthly Login History/" + mFirebaseUserID + "/" + month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        loginUpdateMap.put("Analytics/User Yearly Login History/" + mFirebaseUserID + "/" + year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        loginUpdateMap.put("Analytics/Login History/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        loginUpdateMap.put("Analytics/Daily Login History/" + day_month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        loginUpdateMap.put("Analytics/Monthly Login History/" + month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        loginUpdateMap.put("Analytics/Yearly Login History/" + year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference loginUpdateRef = FirebaseDatabase.getInstance().getReference();
-        loginUpdateRef.updateChildren(loginUpdateMap);
+//        sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
+//        String currentSessionLoginKey = sharedPreferencesManager.getCurrentLoginSessionKey();
+//        String day_month_year = sharedPreferencesManager.getCurrentLoginSessionDayMonthYear();
+//        String month_year = sharedPreferencesManager.getCurrentLoginSessionMonthYear();
+//        String year = sharedPreferencesManager.getCurrentLoginSessionYear();
+//        HashMap<String, Object> loginUpdateMap = new HashMap<>();
+//        String mFirebaseUserID = mFirebaseUser.getUid();
+//
+//        loginUpdateMap.put("Analytics/User Login History/" + mFirebaseUserID + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//        loginUpdateMap.put("Analytics/User Daily Login History/" + mFirebaseUserID + "/" + day_month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//        loginUpdateMap.put("Analytics/User Monthly Login History/" + mFirebaseUserID + "/" + month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//        loginUpdateMap.put("Analytics/User Yearly Login History/" + mFirebaseUserID + "/" + year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//
+//        loginUpdateMap.put("Analytics/Login History/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//        loginUpdateMap.put("Analytics/Daily Login History/" + day_month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//        loginUpdateMap.put("Analytics/Monthly Login History/" + month_year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//        loginUpdateMap.put("Analytics/Yearly Login History/" + year + "/" + currentSessionLoginKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+//
+//        DatabaseReference loginUpdateRef = FirebaseDatabase.getInstance().getReference();
+//        loginUpdateRef.updateChildren(loginUpdateMap);
     }
 
     @Override
@@ -663,18 +740,25 @@ public class ParentMainActivityTwo extends AppCompatActivity {
 //            getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag1).commit();
             getSupportFragmentManager().beginTransaction().hide(active).show(frag1).commit();
             active = frag1;
+            setIconDefaults();
+            item1.setDrawable(R.drawable.ic_file_text_filled);
         } else if (currentItem == 1){
 //            getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag2).commit();
             getSupportFragmentManager().beginTransaction().hide(active).show(frag2).commit();
             active = frag2;
+            setIconDefaults();
+            item2.setDrawable(R.drawable.ic_message_circle_filled);
         } else if (currentItem == 2){
 //            getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag3).commit();
             getSupportFragmentManager().beginTransaction().hide(active).show(frag3).commit();
             active = frag3;
+            setIconDefaults();
+            item3.setDrawable(R.drawable.ic_notifications_filled);
         } else if (currentItem == 3){
 //            getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag4).commit();
             getSupportFragmentManager().beginTransaction().hide(active).show(frag4).commit();
             active = frag4;
+            setIconDefaults();
         }
         UpdateDataFromFirebase.populateEssentials(this);
         ServerDeviceTimeDifference.getDeviceServerTimeDifference(this);
@@ -730,8 +814,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         }
 
         layouts = new int[]{
-                R.layout.fragment_welcome_slide_one,
-                R.layout.fragment_welcome_slide_one};
+                R.layout.fragment_parent_on_boarding_one,
+                R.layout.fragment_parent_on_boarding_two};
 
 //      adding bottom dots
         addBottomDots(0);
@@ -744,6 +828,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(ParentMainActivityTwo.this, ParentSearchActivity.class);
+                startActivity(intent);
                 dialog.dismiss();
             }
         });
@@ -756,7 +842,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         for (int i = 0; i < dots.length; i++) {
             dots[i] = new TextView(this);
             dots[i].setText(Html.fromHtml("&#8226;"));
-            dots[i].setTextSize(25);
+            dots[i].setTextSize(60);
+            dots[i].setTextColor(ContextCompat.getColor(this, R.color.colorLightGray));
             LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             llp.setMargins(5, 0, 5, 0); //(left, top, right, bottom);
             dots[i].setLayoutParams(llp);
@@ -764,7 +851,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         }
 
         if (dots.length > 0) {
-            dots[currentPage].setTextColor(getResources().getColor(R.color.black));
+            dots[currentPage].setTextSize(60);
+            dots[currentPage].setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple));
         }
     }
 
@@ -789,11 +877,14 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             next.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Intent intent;
                     if (position == 0) {
-                        dialog.dismiss();
+                        intent = new Intent(ParentMainActivityTwo.this, ParentSearchActivity.class);
                     } else {
-                        dialog.dismiss();
+                        intent = new Intent(ParentMainActivityTwo.this, TutorialsActivity.class);
                     }
+                    startActivity(intent);
+                    dialog.dismiss();
                 }
             });
         }
@@ -872,16 +963,17 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                     final int numberOfAndroidLogins = (int) dataSnapshot.getChildrenCount();
 
                     mDatabaseReference = mFirebaseDatabase.getReference().child("Analytics").child("Feature Use Analytics User").child(mFirebaseUser.getUid()).child("Tutorials");
-                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    mDatabaseReference.orderByChild("accountType_platform").equalTo("Parent_Android").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists()) {
-//                                if (numberOfAndroidLogins == 3 || ((numberOfAndroidLogins != 0) && (numberOfAndroidLogins % 5) == 0)) {
-                                    tutorialBalloon.setVisibility(View.VISIBLE);
-                                    animateVisible(tutorialBalloon);
-//                                    tutorialBalloon.setVisibility(View.VISIBLE);
-                                    onBoardingSearchBalloon.setVisibility(View.GONE);
-//                                }
+                            if (!dataSnapshot.exists()) {
+                                if (numberOfAndroidLogins != 0)  {
+                                    if ((numberOfAndroidLogins % 3) == 0) {
+                                        tutorialBalloon.setVisibility(View.VISIBLE);
+                                        animateVisible(tutorialBalloon);
+                                        onBoardingSearchBalloon.setVisibility(View.GONE);
+                                    }
+                                }
                             }
                         }
 
@@ -989,11 +1081,22 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                     // If the update is downloaded but not installed, notify the user to complete the update.
                     popupSnackBarForCompleteUpdate();
                 } else if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                    if ((appUpdateInfo.availableVersionCode() % 10) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                         startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
-                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+//                        CustomToast.primaryBackgroundToast(context, "Version Code: " + appUpdateInfo.availableVersionCode() + "\n" +
+//                                "UpdatePriority: " + appUpdateInfo.updatePriority() + "\n");
+                    } else if ((appUpdateInfo.availableVersionCode() % 5) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
                         startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
+//                        CustomToast.primaryBackgroundToast(context, "Version Code: " + appUpdateInfo.availableVersionCode() + "\n" +
+//                                "UpdatePriority: " + appUpdateInfo.updatePriority() + "\n");
+                    } else {
+//                        CustomToast.primaryBackgroundToast(context, "Do nothing");
                     }
+//                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+//                        startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
+//                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+//                        startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
+//                    }
                 }
             }
         });

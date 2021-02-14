@@ -21,6 +21,7 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.SelectSubjectAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.ParentCheckAttendanceSharedPreferences;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.TeacherEnterResultsSharedPreferences;
@@ -113,7 +114,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
 
         selectSubjectModelList = new ArrayList<>();
         mAdapter = new SelectSubjectAdapter(selectSubjectModelList, selectedSubject, this);
-        loadFromFirebase();
+        loadFromSharedPreferences();
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -130,7 +131,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                 new IntentFilter("Selected Subject"));
     }
 
-    private void loadFromFirebase() {
+    private void loadFromSharedPreferences() {
         Gson gson = new Gson();
         subjectList = new ArrayList<>();
         String subjectJSON = sharedPreferencesManager.getSubjects();
@@ -143,8 +144,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
             errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("There are no subjects to assign to your timetable. If you're not connected to a school, use the search feature to search for a school and send a request.");
-            return;
+            errorLayoutText.setText("There are no subjects for you to access. If you're not connected to a school, use the search feature to search for a school and send a request.");
         } else {
             for (int i = 0; i < subjectList.size(); i++) {
                 SelectSubjectModel selectSubjectModel = new SelectSubjectModel(subjectList.get(i));
@@ -161,7 +161,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
         }
     }
 
-    private void loadFromFirebasep() {
+    private void loadFromFirebase() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("Class School").child(activeClass);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -182,14 +182,19 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
 
                                         SelectSubjectModel selectSubjectModel = new SelectSubjectModel(subject);
                                         selectSubjectModelList.add(selectSubjectModel);
-                                        mAdapter.notifyDataSetChanged();
 
                                         if (childrenCount == selectSubjectModelList.size()) {
                                             if (!selectSubjectModelList.contains(new SelectSubjectModel("General"))) selectSubjectModelList.add(0, new SelectSubjectModel("General"));
+                                            subjectList.clear();
+                                            for (int i = 0; i < selectSubjectModelList.size(); i++) {
+                                                subjectList.add(selectSubjectModelList.get(i).getSubject());
+                                            }
+
+                                            mAdapter.notifyDataSetChanged();
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(subjectList);
+                                            sharedPreferencesManager.setSubjects(json);
                                             mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.VISIBLE);
-                                            errorLayout.setVisibility(View.GONE);
                                         }
                                     }
                                 } else {
@@ -197,12 +202,19 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                                     recyclerView.setVisibility(View.GONE);
                                     progressLayout.setVisibility(View.GONE);
                                     errorLayout.setVisibility(View.VISIBLE);
+                                    errorLayoutText.setText("Your school hasn't registered any subjects yet use the search feature to search for a school and send a request.");
                                 }
                             }
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
+                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                recyclerView.setVisibility(View.GONE);
+                                progressLayout.setVisibility(View.GONE);
+                                errorLayout.setVisibility(View.VISIBLE);
+                                errorLayoutText.setText(message);
+                                return;
                             }
                         });
                     }
@@ -211,12 +223,18 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText("There are no subjects for you to access. If you're not connected to a school, use the search feature to search for a school and send a request.");
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(message);
             }
         });
     }

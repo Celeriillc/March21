@@ -27,7 +27,7 @@
             android:layout_alignParentTop="true"
             android:layout_gravity="center"
             android:layout_marginTop="120dp"
-            android:src="@drawable/ic_icons_google"/>
+            android:src="@drawable/ic_celerii_logo_colored"/>
 
         <TextView
             android:id="@+id/campaigntitle"

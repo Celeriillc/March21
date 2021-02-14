@@ -8,18 +8,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="15dp">
+        android:paddingBottom="0dp">
 
-        <TextView
-            android:id="@+id/examtype"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:gravity="center"
-            android:textSize="15sp"
-            android:paddingTop="20dp"/>
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:gravity="center">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/examtypeicon"
+                    android:layout_width="9dp"
+                    android:layout_height="9dp"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="4dp"
+                    android:src="@drawable/rounded_button_primary_purple"/>
+
+                <TextView
+                    android:id="@+id/examtype"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Continuous Assessment"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:gravity="center"
+                    android:textSize="15sp"
+                    android:paddingTop="30dp"/>
+            </LinearLayout>
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -63,10 +88,11 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/resultasat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -77,6 +103,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:weightSum="2"
             android:layout_marginTop="5dp">
 
@@ -84,7 +112,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -95,8 +122,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -104,6 +129,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:weightSum="2"
             android:layout_marginTop="3dp">
 
@@ -111,7 +138,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -122,8 +148,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -131,6 +155,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:weightSum="2"
             android:layout_marginTop="3dp">
 
@@ -138,7 +164,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -149,8 +174,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -158,6 +181,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:weightSum="2"
             android:layout_marginTop="3dp">
 
@@ -165,7 +190,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -176,8 +200,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -185,6 +207,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:weightSum="2"
             android:layout_marginTop="3dp">
 
@@ -192,7 +216,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -203,8 +226,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
 
@@ -212,6 +233,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:weightSum="2"
             android:layout_marginTop="3dp">
 
@@ -219,7 +242,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingStart="15dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
@@ -230,10 +252,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="end"
-                android:paddingEnd="15dp"
                 android:textSize="13sp"/>
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/colorLightGray" />
     </LinearLayout>
 </LinearLayout>
 

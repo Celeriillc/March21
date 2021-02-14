@@ -109,6 +109,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationImageURL = remoteMessage.getData().get("notificationImageURL");
             message = remoteMessage.getData().get("message");
             activityID = remoteMessage.getData().get("activityID");
+
+
+
             sendMessageNotification(dataType, accountType, title, from, object, notificationImageURL, message, activityID);
         }
     }
@@ -138,6 +141,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 break;
             case "Event":
                 notificationId = 4;
+                break;
+            case "EventReminder":
+                notificationId = 14;
                 break;
             case "Newsletter":
                 notificationId = 5;
@@ -214,9 +220,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     try {
                         URL myURL = new URL(notificationImageURL);
                         Bitmap bitmap = BitmapFactory.decodeStream(myURL.openConnection().getInputStream());
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                 .setLargeIcon(bitmap)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText(fullName)
                                 .setContentTitle(from)
@@ -229,8 +235,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 .setContentIntent(resultPendingIntent);
                     } catch(Exception e) {
                         System.out.println(e);
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText(fullName)
                                 .setContentTitle(from)
@@ -242,6 +248,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }
                     return null;
                 case "Event":
+                case "EventReminder":
                     resultIntent = new Intent(getBaseContext(), EventDetailActivity.class);
                     bundle = new Bundle();
                     bundle.putString("Event ID", activityID);
@@ -254,9 +261,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                     Bitmap bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), from));
 
-                    builder.setSmallIcon(R.drawable.ic_icons_google)
+                    builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                             .setLargeIcon(bitmap)
-                            .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                             .setSubText("Event")
                             .setContentTitle(from)
@@ -278,9 +285,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                     bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), from));
 
-                    builder.setSmallIcon(R.drawable.ic_icons_google)
+                    builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                             .setLargeIcon(bitmap)
-                            .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                             .setSubText("Newsletter")
                             .setContentTitle(from)
@@ -307,14 +314,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
                             } else {
                                 if (from != null && !from.isEmpty())
-                                    bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), from));
+                                    bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), object));
                                 else
                                     throw new Exception();
                             }
 
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                     .setLargeIcon(bitmap)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("Connection Request")
                                     .setContentTitle(object)
@@ -325,8 +332,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     .setContentIntent(resultPendingIntent);
                         } catch(Exception e) {
                             System.out.println(e);
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("Connection Request")
                                     .setContentTitle(object)
@@ -357,9 +364,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     throw new Exception();
                             }
 
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                     .setLargeIcon(bitmap)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("Connection Request")
                                     .setContentTitle(from)
@@ -370,8 +377,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     .setContentIntent(resultPendingIntent);
                         } catch(Exception e) {
                             System.out.println(e);
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("Connection Request")
                                     .setContentTitle(from)
@@ -401,14 +408,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
                             } else {
                                 if (from != null && !from.isEmpty())
-                                    bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), from));
+                                    bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), object));
                                 else
                                     throw new Exception();
                             }
 
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                     .setLargeIcon(bitmap)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText(fullName)
                                     .setContentTitle(object)
@@ -419,8 +426,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     .setContentIntent(resultPendingIntent);
                         } catch(Exception e) {
                             System.out.println(e);
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText(fullName)
                                     .setContentTitle(object)
@@ -451,9 +458,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     throw new Exception();
                             }
 
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                     .setLargeIcon(bitmap)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText(fullName)
                                     .setContentTitle(from)
@@ -464,8 +471,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     .setContentIntent(resultPendingIntent);
                         } catch(Exception e) {
                             System.out.println(e);
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText(fullName)
                                     .setContentTitle(from)
@@ -507,9 +514,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     throw new Exception();
                             }
 
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                     .setLargeIcon(bitmap)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("New Connection")
                                     .setContentTitle(object)
@@ -520,8 +527,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     .setContentIntent(resultPendingIntent);
                         } catch(Exception e) {
                             System.out.println(e);
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("New Connection")
                                     .setContentTitle(object)
@@ -553,9 +560,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     throw new Exception();
                             }
 
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                     .setLargeIcon(bitmap)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("New Connection")
                                     .setContentTitle(from)
@@ -566,8 +573,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                     .setContentIntent(resultPendingIntent);
                         } catch(Exception e) {
                             System.out.println(e);
-                            builder.setSmallIcon(R.drawable.ic_icons_google)
-                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                     .setSubText("New Connection")
                                     .setContentTitle(from)
@@ -607,9 +614,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 throw new Exception();
                         }
 
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                 .setLargeIcon(bitmap)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Academic Result")
                                 .setContentTitle(object)
@@ -620,8 +627,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 .setContentIntent(resultPendingIntent);
                     } catch(Exception e) {
                         System.out.println(e);
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Academic Result")
                                 .setContentTitle(object)
@@ -660,9 +667,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 throw new Exception();
                         }
 
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                 .setLargeIcon(bitmap)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Behavioural Result")
                                 .setContentTitle(object)
@@ -673,8 +680,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 .setContentIntent(resultPendingIntent);
                     } catch(Exception e) {
                         System.out.println(e);
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Behavioural Result")
                                 .setContentTitle(object)
@@ -713,9 +720,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 throw new Exception();
                         }
 
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                 .setLargeIcon(bitmap)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Attendance")
                                 .setContentTitle(object)
@@ -726,8 +733,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 .setContentIntent(resultPendingIntent);
                     } catch(Exception e) {
                         System.out.println(e);
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Attendance")
                                 .setContentTitle(object)
@@ -760,9 +767,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 throw new Exception();
                         }
 
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
                                 .setLargeIcon(bitmap)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Message")
                                 .setContentTitle(from)
@@ -773,8 +780,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                                 .setContentIntent(resultPendingIntent);
                     } catch(Exception e) {
                         System.out.println(e);
-                        builder.setSmallIcon(R.drawable.ic_icons_google)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorSecondaryPurple))
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
                                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                                 .setSubText("New Message")
                                 .setContentTitle(from)

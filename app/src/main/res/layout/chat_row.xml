@@ -3,60 +3,89 @@
     android:id="@+id/bubble_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="10dp"
-    android:layout_marginEnd="10dp"
-    android:layout_marginTop="1dp"
-    android:layout_marginBottom="1dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
     android:orientation="horizontal">
 
     <LinearLayout
         android:id="@+id/profilepictureclipper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
+        android:layout_marginEnd="15dp"
         android:background="@drawable/circular_image_background_white">
 
         <ImageView
             android:id="@+id/otherprofilepic"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:visibility="invisible"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:maxLines="1"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:text="Bereton" />
+
+        <TextView
+            android:id="@+id/message_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:text="Hi! new message Hi! new message Hi! new message Hi! new message"
+            android:textSize="15sp"
+            android:textColor="@android:color/black" />
 
         <LinearLayout
             android:id="@+id/imageClipper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:background="@drawable/rounded_corner_image_background">
 
             <ImageView
                 android:id="@+id/imagefile"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
+                android:layout_marginBottom="1dp"
+                android:adjustViewBounds="true"
                 android:maxWidth="150dp"
                 android:maxHeight="200dp"
-                android:scaleType="centerCrop"
-                android:layout_marginTop="1dp"
-                android:layout_marginBottom="1dp"
-                android:adjustViewBounds="true"/>
+                android:scaleType="centerCrop" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/message_text"
+            android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical"
             android:layout_gravity="center_vertical"
-            android:maxEms="12"
-            android:text="Hi! new message Hi! new message Hi! new message Hi! new message"
-            android:textSize="15sp"
-            android:textColor="@android:color/black" />
+            android:text="3 days ago"
+            android:textSize="15sp"/>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/colorLightGray" />
 
     </LinearLayout>
 

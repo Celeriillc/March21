@@ -138,31 +138,31 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
 
             if (xArray != null ) {
                 if (xArray.length > 1) {
-                    IAxisValueFormatter formatter = new IAxisValueFormatter() {
-
-                        @Override
-                        public String getFormattedValue(float value, AxisBase axis) {
-                            return xArrayModified[(int) value];
-                        }
-                    };
+//                    IAxisValueFormatter formatter = new IAxisValueFormatter() {
+//
+//                        @Override
+//                        public String getFormattedValue(float value, AxisBase axis) {
+//                            return xArrayModified[(int) value];
+//                        }
+//                    };
 
                     XAxis xAxis = ((HeaderViewHolder) holder).chart.getXAxis();
-                    xAxis.setGranularity(3f); // minimum axis-step (interval) is 1
-                    xAxis.setValueFormatter(formatter);
+                    xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
+//                    xAxis.setValueFormatter(formatter);
                     xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
                     xAxis.setDrawAxisLine(false);
-//                    xAxis.setDrawGridLines(false);
+                    xAxis.setDrawGridLines(false);
                     xAxis.setTextColor(Color.GRAY);
                     xAxis.setEnabled(false);
 
                     YAxis yAxis = ((HeaderViewHolder) holder).chart.getAxisLeft();
-//                    yAxis.setDrawGridLines(false);
-//                    yAxis.setDrawAxisLine(false);
+                    yAxis.setDrawGridLines(false);
+                    yAxis.setDrawAxisLine(false);
                     yAxis.setGranularity(25f);
                     yAxis.setAxisMinimum(0f);
                     yAxis.setAxisMaximum(100f);
-                    yAxis.setTextColor(Color.GRAY);
-//                    yAxis.setEnabled(false);
+                    yAxis.setTextColor(Color.BLACK);
+                    yAxis.setEnabled(false);
 
                     Legend legend = ((HeaderViewHolder) holder).chart.getLegend();
                     legend.setEnabled(false);
@@ -174,11 +174,16 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
                     }
 
                     LineDataSet dataSet = new LineDataSet(entries, "");
-                    dataSet.setColor(ContextCompat.getColor(context, R.color.colorTransparentPurple));
-                    dataSet.setLineWidth(1f);
-                    dataSet.setCircleColor(ContextCompat.getColor(context, R.color.colorTransparentPurple));
-                    dataSet.setDrawFilled(true);
-                    dataSet.setFillDrawable(ContextCompat.getDrawable(context, R.drawable.fade_accent_for_chart));
+                    dataSet.setColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+                    dataSet.setLineWidth(2f);
+                    dataSet.setCircleColor(ContextCompat.getColor(context, R.color.white));
+                    dataSet.setCircleRadius(5f);
+                    dataSet.setCircleHoleRadius(4f);
+                    dataSet.setCircleColorHole(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+                    dataSet.setDrawFilled(false);
+                    dataSet.setDrawHorizontalHighlightIndicator(false);
+                    dataSet.setDrawVerticalHighlightIndicator(false);
+//                    dataSet.setFillDrawable(ContextCompat.getDrawable(context, R.drawable.fade_accent_for_chart));
                     LineData lineData = new LineData(dataSet);
                     lineData.setDrawValues(false);
 
@@ -190,17 +195,18 @@ public class HistoryPerformanceAdapter extends RecyclerView.Adapter<RecyclerView
                     ((HeaderViewHolder) holder).chart.getDescription().setEnabled(true);
                     ((HeaderViewHolder) holder).chart.setDrawBorders(false);
                     ((HeaderViewHolder) holder).chart.setVisibleXRangeMaximum(6);
+                    ((HeaderViewHolder) holder).chart.moveViewToX(xArrayModified.length - 1);
                     ((HeaderViewHolder) holder).chart.setNoDataText("");
                     ((HeaderViewHolder) holder).chart.getDescription().setEnabled(false);
-                    ((HeaderViewHolder) holder).chart.getXAxis().setSpaceMin(0.05f);
-                    ((HeaderViewHolder) holder).chart.getXAxis().setSpaceMax(0.05f);
+                    ((HeaderViewHolder) holder).chart.getXAxis().setSpaceMin(1.05f);
+                    ((HeaderViewHolder) holder).chart.getXAxis().setSpaceMax(1.05f);
                     IMarker marker = new YourMarkerView(context, chartDataLabel, R.layout.marker_view);
                     ((HeaderViewHolder) holder).chart.setMarker(marker);
                     ((HeaderViewHolder) holder).chart.invalidate(); // refresh
                 }
             }
         }
-        else if (holder instanceof MyViewHolder){
+        else if (holder instanceof MyViewHolder) {
             final HistoryPerformanceBody historyPerformanceBody = this.historyPerformanceBodyList.get(position);
 
             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {

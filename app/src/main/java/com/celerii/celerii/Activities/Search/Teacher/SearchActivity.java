@@ -22,6 +22,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.SearchAnalyticsModel;
 import com.celerii.celerii.models.SearchHistoryHeader;
 import com.celerii.celerii.models.SearchHistoryRow;
+import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,9 +30,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class SearchActivity extends AppCompatActivity {
     Context context;
@@ -44,6 +49,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private ArrayList<SearchHistoryRow> searchHistoryRowList;
+    private ArrayList<String> connectedStudents;
     private SearchHistoryHeader searchHistoryHeader;
     public RecyclerView recyclerView;
     public SearchHistoryAdapter mAdapter;
@@ -108,9 +114,10 @@ public class SearchActivity extends AppCompatActivity {
         loading = false;
         searchHistoryHeader = new SearchHistoryHeader("Recent Search History", loading);
         searchHistoryRowList = new ArrayList<>();
+        connectedStudents = new ArrayList<>();
         searchHistoryRowList.add(new SearchHistoryRow());
         loadDetailsFromFirebase();
-        mAdapter = new SearchHistoryAdapter(searchHistoryRowList, searchHistoryHeader, this);
+        mAdapter = new SearchHistoryAdapter(searchHistoryRowList, connectedStudents, searchHistoryHeader, this);
         recyclerView.setAdapter(mAdapter);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -215,6 +222,46 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     void loadDetailsFromFirebase(){
+        Gson gson = new Gson();
+        ArrayList<Student> moreParentsModelListLocal;
+        String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+        Type type = new TypeToken<ArrayList<Student>>() {}.getType();
+        moreParentsModelListLocal = gson.fromJson(myChildrenJSON, type);
+
+        connectedStudents.clear();
+        if (moreParentsModelListLocal != null) {
+            if (moreParentsModelListLocal.size() > 0) {
+                for (Student student: moreParentsModelListLocal) {
+                    if (!connectedStudents.contains(student.getStudentID())) {
+                        connectedStudents.add(student.getStudentID());
+                    }
+                }
+            }
+        }
+
+        gson = new Gson();
+        String classStudentsForTeacherJSON = sharedPreferencesManager.getClassStudentForTeacher();
+        type = new TypeToken<HashMap<String, HashMap<String, Student>>>() {}.getType();
+        HashMap<String, HashMap<String, Student>> classStudentsForTeacherMap = gson.fromJson(classStudentsForTeacherJSON, type);
+
+        if (classStudentsForTeacherMap != null) {
+            if (classStudentsForTeacherMap.size() > 0) {
+                for (Map.Entry<String, HashMap<String, Student>> classMap: classStudentsForTeacherMap.entrySet()) {
+                    String activeClassID = classMap.getKey();
+                    HashMap<String, Student> classStudentMap = classStudentsForTeacherMap.get(activeClassID);
+                    if (classStudentMap != null) {
+                        if (classStudentMap.size() > 0) {
+                            for (Map.Entry<String, Student> entry : classStudentMap.entrySet()) {
+                                if (!connectedStudents.contains(entry.getKey())) {
+                                    connectedStudents.add(entry.getKey());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         mDatabaseReference = mFirebaseDatabase.getReference("MySearchHistory").child("Teachers").child(auth.getCurrentUser().getUid());
         mDatabaseReference.orderByChild("time").limitToLast(5).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

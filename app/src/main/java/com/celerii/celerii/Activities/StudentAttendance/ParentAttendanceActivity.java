@@ -102,6 +102,14 @@ public class ParentAttendanceActivity extends AppCompatActivity {
         Bundle b = getIntent().getExtras();
         String activeKid = b.getString("Child ID");
         parentActivity = b.getString("parentActivity");
+        if (parentActivity != null) {
+            if (!parentActivity.isEmpty()) {
+                sharedPreferencesManager.setActiveAccount(parentActivity);
+                mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+            }
+        }
+
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -215,7 +223,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
         parentAttendanceRowList = new ArrayList<>();
         loadHeader();
         loadFromFirebase();
-        mAdapter = new ParentAttendanceRowAdapter(parentAttendanceRowList, parentAttendanceHeader, childsFirstName.trim(), this, this);
+        mAdapter = new ParentAttendanceRowAdapter(parentAttendanceRowList, parentAttendanceHeader, childsFirstName.trim(), parentActivity, this, this);
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -275,7 +283,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
     private void loadFromFirebase() {
         isNewcounter = 0;
 
-        mDatabaseReference = mFirebaseDatabase.getReference().child("AttendenceStudent").child(childID);
+        mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceStudent").child(childID);
         mDatabaseReference.orderByChild("subject_term_year").equalTo(subject_term_year).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

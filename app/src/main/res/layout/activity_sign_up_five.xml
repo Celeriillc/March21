@@ -34,7 +34,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="30dp"
                 android:layout_marginStart="20dp"
-                android:src="@drawable/ic_icons_google" />
+                android:src="@drawable/ic_celerii_logo_colored" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -137,7 +137,8 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:text="Begin" />
+                android:text="Begin"
+                style="?android:attr/borderlessButtonStyle" />
 
         </LinearLayout>
 

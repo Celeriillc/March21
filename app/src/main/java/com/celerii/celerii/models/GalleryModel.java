@@ -8,6 +8,13 @@ public class GalleryModel{
     private String URL, ownerID;
 
     public GalleryModel() {
+        this.URL = "";
+        this.ownerID = "";
+    }
+
+    public GalleryModel(String URL) {
+        this.URL = URL;
+        this.ownerID = "";
     }
 
     public GalleryModel(String URL, String ownerID) {

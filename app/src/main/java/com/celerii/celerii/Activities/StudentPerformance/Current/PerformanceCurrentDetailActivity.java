@@ -51,6 +51,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     LinearLayoutManager mLayoutManager;
 
     String student, studentID, subject, term, year, subject_year_term;
+    String parentActivity;
     int isNewCounter = 0;
 
     String featureUseKey = "";
@@ -70,6 +71,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
         subject = bundle.getString("Subject");
         term = bundle.getString("Term");
         year = bundle.getString("Year");
+        parentActivity = bundle.getString("parentActivity");
         subject_year_term = subject + "_" + year + "_" + term;
 
         auth = FirebaseAuth.getInstance();
@@ -352,20 +354,42 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     }
 
     public void updateBadges() {
-        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-            HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
-            String subject_year_term = "";
-            if (academicRecordStudentList != null) {
-                for (int i = 0; i < academicRecordStudentList.size(); i++) {
-                    AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
-                    subject_year_term = academicRecordStudent.getSubject_AcademicYear_Term();
-                    String key = academicRecordStudent.getRecordKey();
-                    updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/" + key + "/status", false);
+        if (parentActivity != null) {
+            if (parentActivity.equals("Parent")) {
+                HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+                String subject_year_term = "";
+                if (academicRecordStudentList != null) {
+                    for (int i = 0; i < academicRecordStudentList.size(); i++) {
+                        AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
+                        subject_year_term = academicRecordStudent.getSubject_AcademicYear_Term();
+                        String key = academicRecordStudent.getRecordKey();
+                        updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/" + key + "/status", false);
+                    }
                 }
+                updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/status", false);
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
             }
-            updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/status", false);
-            mDatabaseReference = mFirebaseDatabase.getReference();
-            mDatabaseReference.updateChildren(updateBadgesMap);
+        } else {
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+                String subject_year_term = "";
+                if (academicRecordStudentList != null) {
+                    for (int i = 0; i < academicRecordStudentList.size(); i++) {
+                        AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
+                        subject_year_term = academicRecordStudent.getSubject_AcademicYear_Term();
+                        String key = academicRecordStudent.getRecordKey();
+                        updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/" + key + "/status", false);
+                    }
+                }
+                updateBadgesMap.put("AcademicRecordParentNotification/" + mFirebaseUser.getUid() + "/" + studentID + "/" + subject_year_term + "/status", false);
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
+            }
         }
+
+//        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+//
+//        }
     }
 }

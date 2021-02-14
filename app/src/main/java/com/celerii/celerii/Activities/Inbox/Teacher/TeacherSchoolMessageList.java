@@ -138,6 +138,7 @@ public class TeacherSchoolMessageList extends Fragment {
         }
 
         counter = 0;
+        newChatRowModelList.clear();
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher School").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

@@ -1,14 +1,9 @@
 package com.celerii.celerii.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.util.Pair;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,20 +18,29 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.bumptech.glide.Glide;
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
-import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherCreateClassPostActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.Activities.Profiles.TeacherProfileOneActivity;
+import com.celerii.celerii.R;
+import com.celerii.celerii.helperClasses.ClassStoryDiffUtil;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.WrapContentViewPager;
 import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.LikeNotification;
 import com.celerii.celerii.models.NotificationModel;
-import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -65,6 +69,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
     private DatabaseReference mDatabaseReference = mFirebaseDatabase.getReference();
     private FirebaseUser mFirebaseUser = auth.getCurrentUser();
     private SharedPreferencesManager sharedPreferencesManager;
+    private String[] imageArray;
 
     public static final int Header = 1;
     public static final int Normal = 2;
@@ -72,20 +77,24 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView poster, classreciepient, timestamp, story, url, noOfLikes, noOfComments;
-        public TextView commentPoster, comment, time;
-        public ImageView storyimage, profilepic, likebutton, commentbutton, commenterPic, posterPic;
-        public LinearLayout commentLayout, firstCommentLayout, createCommentLayout;
+        public TextView /*commentPoster,*/ comment, time;
+        public ImageView storyimage, profilepic, likebutton, commentbutton; //,commenterPic, posterPic;
+//        public LinearLayout commentLayout, firstCommentLayout, createCommentLayout;
 
-        public ImageView storyImageOne, storyImageTwo, storyImageThree, storyImageFour;
-        public LinearLayout layoutImageOne, layoutImageTwo, layoutImageThree;
-        public LinearLayout storyImageOneContainer, storyImageTwoContainer, storyImageThreeContainer;
-        public LinearLayout storyImageOneClipper, storyImageTwoClipper, storyImageThreeClipper, storyImageFourClipper;
-        public LinearLayout profilePictureClipper, profilePictureClipper2, commenterPictureClipper;
-        public RelativeLayout layoutImageFour;
-        public LinearLayout imageContainer;
-        public View moreImagesScrim;
-        public TextView moreImagesText;
+//        public ImageView storyImageOne, storyImageTwo, storyImageThree, storyImageFour;
+//        public LinearLayout layoutImageOne, layoutImageTwo, layoutImageThree;
+//        public LinearLayout storyImageOneContainer, storyImageTwoContainer, storyImageThreeContainer;
+//        public LinearLayout storyImageOneClipper, storyImageTwoClipper, storyImageThreeClipper, storyImageFourClipper;
+        public LinearLayout profilePictureClipper; //, profilePictureClipper2, commenterPictureClipper;
+//        public RelativeLayout layoutImageFour;
+//        public LinearLayout imageContainer;
+//        public View moreImagesScrim;
+//        public TextView moreImagesText;
 
+        public WrapContentViewPager viewPager;
+        public MyViewPagerAdapter myViewPagerAdapter;
+        public LinearLayout dotsLayout;
+        public TextView[] dots;
 
         public MyViewHolder(final View view) {
             super(view);
@@ -95,43 +104,46 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             story = (TextView) view.findViewById(R.id.txtstory);
             noOfLikes = (TextView) view.findViewById(R.id.likenumber);
             noOfComments = (TextView) view.findViewById(R.id.commentnumber);
-            commentPoster = (TextView) view.findViewById(R.id.commentposter);
-            comment = (TextView) view.findViewById(R.id.comment);
-            time = (TextView) view.findViewById(R.id.time);
+//            commentPoster = (TextView) view.findViewById(R.id.commentposter);
+//            comment = (TextView) view.findViewById(R.id.comment);
+//            time = (TextView) view.findViewById(R.id.time);
 //            storyimage = (ImageView) view.findViewById(R.id.storyimage);
             profilepic = (ImageView) view.findViewById(R.id.profilePic);
             likebutton = (ImageView) view.findViewById(R.id.likebutton);
             commentbutton = (ImageView) view.findViewById(R.id.commentbutton);
-            commenterPic = (ImageView) view.findViewById(R.id.commenterpic);
-            posterPic = (ImageView) view.findViewById(R.id.posterpic);
-            commentLayout = (LinearLayout) view.findViewById(R.id.commentlayout);
-            firstCommentLayout = (LinearLayout) view.findViewById(R.id.firstcommentlayout);
-            createCommentLayout = (LinearLayout) view.findViewById(R.id.createcommentlayout);
+//            commenterPic = (ImageView) view.findViewById(R.id.commenterpic);
+//            posterPic = (ImageView) view.findViewById(R.id.posterpic);
+//            commentLayout = (LinearLayout) view.findViewById(R.id.commentlayout);
+//            firstCommentLayout = (LinearLayout) view.findViewById(R.id.firstcommentlayout);
+//            createCommentLayout = (LinearLayout) view.findViewById(R.id.createcommentlayout);
 
-            storyImageOne = (ImageView) view.findViewById(R.id.storyimageone);
-            storyImageTwo = (ImageView) view.findViewById(R.id.storyimagetwo);
-            storyImageThree = (ImageView) view.findViewById(R.id.storyimagethree);
-            storyImageFour = (ImageView) view.findViewById(R.id.storyimagefour);
-            layoutImageOne = (LinearLayout) view.findViewById(R.id.layoutimageone);
-            layoutImageTwo = (LinearLayout) view.findViewById(R.id.layoutimagetwo);
-            layoutImageThree = (LinearLayout) view.findViewById(R.id.layoutimagethree);
-            layoutImageFour = (RelativeLayout) view.findViewById(R.id.layoutimagefour);
-            imageContainer = (LinearLayout) view.findViewById(R.id.imagecontainer);
-            moreImagesScrim = view.findViewById(R.id.moreimagesscrim);
-            moreImagesText = (TextView) view.findViewById(R.id.moreimagestext);
+//            storyImageOne = (ImageView) view.findViewById(R.id.storyimageone);
+//            storyImageTwo = (ImageView) view.findViewById(R.id.storyimagetwo);
+//            storyImageThree = (ImageView) view.findViewById(R.id.storyimagethree);
+//            storyImageFour = (ImageView) view.findViewById(R.id.storyimagefour);
+//            layoutImageOne = (LinearLayout) view.findViewById(R.id.layoutimageone);
+//            layoutImageTwo = (LinearLayout) view.findViewById(R.id.layoutimagetwo);
+//            layoutImageThree = (LinearLayout) view.findViewById(R.id.layoutimagethree);
+//            layoutImageFour = (RelativeLayout) view.findViewById(R.id.layoutimagefour);
+//            imageContainer = (LinearLayout) view.findViewById(R.id.imagecontainer);
+//            moreImagesScrim = view.findViewById(R.id.moreimagesscrim);
+//            moreImagesText = (TextView) view.findViewById(R.id.moreimagestext);
 
-            storyImageOneContainer = (LinearLayout) view.findViewById(R.id.storyimageonecontainer);
-            storyImageTwoContainer = (LinearLayout) view.findViewById(R.id.storyimagetwocontainer);
-            storyImageThreeContainer = (LinearLayout) view.findViewById(R.id.storyimagethreecontainer);
+//            storyImageOneContainer = (LinearLayout) view.findViewById(R.id.storyimageonecontainer);
+//            storyImageTwoContainer = (LinearLayout) view.findViewById(R.id.storyimagetwocontainer);
+//            storyImageThreeContainer = (LinearLayout) view.findViewById(R.id.storyimagethreecontainer);
 
-            storyImageOneClipper = (LinearLayout) view.findViewById(R.id.storyimageoneclipper);
-            storyImageTwoClipper = (LinearLayout) view.findViewById(R.id.storyimagetwoclipper);
-            storyImageThreeClipper = (LinearLayout) view.findViewById(R.id.storyimagethreeclipper);
-            storyImageFourClipper = (LinearLayout) view.findViewById(R.id.storyimagefourclipper);
+//            storyImageOneClipper = (LinearLayout) view.findViewById(R.id.storyimageoneclipper);
+//            storyImageTwoClipper = (LinearLayout) view.findViewById(R.id.storyimagetwoclipper);
+//            storyImageThreeClipper = (LinearLayout) view.findViewById(R.id.storyimagethreeclipper);
+//            storyImageFourClipper = (LinearLayout) view.findViewById(R.id.storyimagefourclipper);
 
             profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
-            profilePictureClipper2 = (LinearLayout) view.findViewById(R.id.profilepictureclipper2);
-            commenterPictureClipper = (LinearLayout) view.findViewById(R.id.commenterpictureclipper);
+//            profilePictureClipper2 = (LinearLayout) view.findViewById(R.id.profilepictureclipper2);
+//            commenterPictureClipper = (LinearLayout) view.findViewById(R.id.commenterpictureclipper);
+
+            viewPager = (WrapContentViewPager) view.findViewById(R.id.view_pager);
+            dotsLayout = (LinearLayout) view.findViewById(R.id.layoutDots);
         }
     }
 
@@ -205,8 +217,9 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             }
 
             Drawable textDrawable;
-            if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
-                String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+            String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+            if (!myName.trim().isEmpty()) {
+                String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -244,127 +257,194 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             final ClassStory classStory = classStoryList.get(position);
 
             final String[] imageArray = classStory.getImageURL().split(" ");
-            if (imageArray.length == 1 && imageArray[0].equals("")) {
-                ((MyViewHolder) holder).imageContainer.setVisibility(View.GONE);
-            } else {
-                ((MyViewHolder) holder).storyImageOneClipper.setClipToOutline(true);
-                ((MyViewHolder) holder).storyImageTwoClipper.setClipToOutline(true);
-                ((MyViewHolder) holder).storyImageThreeClipper.setClipToOutline(true);
-                ((MyViewHolder) holder).storyImageFourClipper.setClipToOutline(true);
-                if (imageArray.length == 1) {
-                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
-                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
-                    LinearLayout.LayoutParams paramOne = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2.0f);
-                    ((MyViewHolder) holder).storyImageOneContainer.setLayoutParams(paramOne);
-                } else if (imageArray.length == 2) {
-                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
-                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
-                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
-                    LinearLayout.LayoutParams paramTwo = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2.0f);
-                    ((MyViewHolder) holder).storyImageTwoContainer.setLayoutParams(paramTwo);
-                } else if (imageArray.length == 3) {
-                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
-                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
-                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
-                    loadImageWithGlide(imageArray[2], ((MyViewHolder) holder).storyImageThree);
-                    LinearLayout.LayoutParams paramThree = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2.0f);
-                    ((MyViewHolder) holder).storyImageThreeContainer.setLayoutParams(paramThree);
-                } else if (imageArray.length == 4) {
-                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
-                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
-                    loadImageWithGlide(imageArray[2], ((MyViewHolder) holder).storyImageThree);
-                    loadImageWithGlide(imageArray[3], ((MyViewHolder) holder).storyImageFour);
-                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
-                    ((MyViewHolder) holder).moreImagesScrim.setVisibility(View.GONE);
-                    ((MyViewHolder) holder).moreImagesText.setVisibility(View.GONE);
+            ((MyViewHolder) holder).dots = new TextView[imageArray.length];
+
+            if (imageArray.length <= 1 && imageArray[0].equals("")) {
+                ((MyViewHolder) holder).viewPager.setVisibility(View.GONE);
+                ((MyViewHolder) holder).dotsLayout.setVisibility(View.GONE);
+            }
+            else {
+                if (imageArray.length > 1) {
+                    ((MyViewHolder) holder).dotsLayout.setVisibility(View.VISIBLE);
                 } else {
-                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
-                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
-                    loadImageWithGlide(imageArray[2], ((MyViewHolder) holder).storyImageThree);
-                    loadImageWithGlide(imageArray[3], ((MyViewHolder) holder).storyImageFour);
-                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
-                    String remainingPictures = "+" + String.valueOf(imageArray.length - 4);
-                    ((MyViewHolder) holder).moreImagesText.setText(remainingPictures);
+                    ((MyViewHolder) holder).dotsLayout.setVisibility(View.GONE);
+                }
+                ((MyViewHolder) holder).viewPager.setVisibility(View.VISIBLE);
+
+                ((MyViewHolder) holder).dotsLayout.removeAllViews();
+                for (int i = 0; i < ((MyViewHolder) holder).dots.length; i++) {
+                    ((MyViewHolder) holder).dots[i] = new TextView(context);
+                    ((MyViewHolder) holder).dots[i].setText(Html.fromHtml("&#8226;"));
+                    ((MyViewHolder) holder).dots[i].setTextSize(20);
+                    ((MyViewHolder) holder).dots[i].setTextColor(ContextCompat.getColor(context, R.color.colorLightGray));
+                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    llp.setMargins(5, 0, 5, 0); //(left, top, right, bottom);
+                    ((MyViewHolder) holder).dots[i].setLayoutParams(llp);
+                    ((MyViewHolder) holder).dotsLayout.addView(((MyViewHolder) holder).dots[i]);
                 }
 
-                ((MyViewHolder) holder).storyImageOne.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Bundle b = new Bundle();
-                        b.putString("URL", imageArray[0]);
-                        Intent I = new Intent(context, GalleryDetailActivity.class);
-                        I.putExtras(b);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            ((MyViewHolder) holder).storyImageOne.setTransitionName("imageTransition");
-                            Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).storyImageOne, ((MyViewHolder) holder).storyImageOne.getTransitionName());
+                if (((MyViewHolder) holder).dots.length > 0) {
+                    ((MyViewHolder) holder).dots[((MyViewHolder) holder).viewPager.getCurrentItem()].setTextSize(25);
+                    ((MyViewHolder) holder).dots[((MyViewHolder) holder).viewPager.getCurrentItem()].setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+                }
 
-                            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).storyImageOne, ((MyViewHolder) holder).storyImageOne.getTransitionName());
-                            context.startActivity(I, optionsCompat.toBundle());
+                ((MyViewHolder) holder).myViewPagerAdapter = new MyViewPagerAdapter(context, imageArray);
+                ((MyViewHolder) holder).viewPager.setAdapter(((MyViewHolder) holder).myViewPagerAdapter);
+                ((MyViewHolder) holder).viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+                    @Override
+                    public void onPageSelected(int innerPosition) {
+                        ((MyViewHolder) holder).dotsLayout.removeAllViews();
+                        for (int i = 0; i < ((MyViewHolder) holder).dots.length; i++) {
+                            ((MyViewHolder) holder).dots[i] = new TextView(context);
+                            ((MyViewHolder) holder).dots[i].setText(Html.fromHtml("&#8226;"));
+                            ((MyViewHolder) holder).dots[i].setTextSize(20);
+                            ((MyViewHolder) holder).dots[i].setTextColor(ContextCompat.getColor(context, R.color.colorLightGray));
+                            LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            llp.setMargins(5, 0, 5, 0); //(left, top, right, bottom);
+                            ((MyViewHolder) holder).dots[i].setLayoutParams(llp);
+                            ((MyViewHolder) holder).dotsLayout.addView(((MyViewHolder) holder).dots[i]);
                         }
-                        else {
-                            context.startActivity(I);
+
+                        if (((MyViewHolder) holder).dots.length > 0) {
+                            ((MyViewHolder) holder).dots[innerPosition].setTextSize(25);
+                            ((MyViewHolder) holder).dots[innerPosition].setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
                         }
                     }
-                });
 
-                ((MyViewHolder) holder).storyImageTwo.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        Bundle b = new Bundle();
-                        b.putString("URL", imageArray[1]);
-                        Intent I = new Intent(context, GalleryDetailActivity.class);
-                        I.putExtras(b);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            ((MyViewHolder) holder).storyImageTwo.setTransitionName("imageTransition");
-                            Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).storyImageTwo, ((MyViewHolder) holder).storyImageTwo.getTransitionName());
+                    public void onPageScrolled(int arg0, float arg1, int arg2) {
 
-                            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).storyImageTwo, ((MyViewHolder) holder).storyImageTwo.getTransitionName());
-                            context.startActivity(I, optionsCompat.toBundle());
-                        }
-                        else {
-                            context.startActivity(I);
-                        }
                     }
-                });
 
-                ((MyViewHolder) holder).storyImageThree.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        Bundle b = new Bundle();
-                        b.putString("URL", imageArray[2]);
-                        Intent I = new Intent(context, GalleryDetailActivity.class);
-                        I.putExtras(b);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            ((MyViewHolder) holder).storyImageThree.setTransitionName("imageTransition");
-                            Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).storyImageThree, ((MyViewHolder) holder).storyImageThree.getTransitionName());
+                    public void onPageScrollStateChanged(int arg0) {
 
-                            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).storyImageThree, ((MyViewHolder) holder).storyImageThree.getTransitionName());
-                            context.startActivity(I, optionsCompat.toBundle());
-                        }
-                        else {
-                            context.startActivity(I);
-                        }
-                    }
-                });
-
-                ((MyViewHolder) holder).storyImageFour.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("postKey", classStory.getPostID());
-                        Intent I = new Intent(context, CommentStoryActivity.class);
-                        I.putExtras(bundle);
-                        context.startActivity(I);
                     }
                 });
             }
 
+//            if (imageArray.length == 1 && imageArray[0].equals("")) {
+//                ((MyViewHolder) holder).imageContainer.setVisibility(View.GONE);
+//            } else {
+//                ((MyViewHolder) holder).storyImageOneClipper.setClipToOutline(true);
+//                ((MyViewHolder) holder).storyImageTwoClipper.setClipToOutline(true);
+//                ((MyViewHolder) holder).storyImageThreeClipper.setClipToOutline(true);
+//                ((MyViewHolder) holder).storyImageFourClipper.setClipToOutline(true);
+//                if (imageArray.length == 1) {
+//                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+//                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
+//                    LinearLayout.LayoutParams paramOne = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2.0f);
+//                    ((MyViewHolder) holder).storyImageOneContainer.setLayoutParams(paramOne);
+//                } else if (imageArray.length == 2) {
+//                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+//                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
+//                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
+//                    LinearLayout.LayoutParams paramTwo = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2.0f);
+//                    ((MyViewHolder) holder).storyImageTwoContainer.setLayoutParams(paramTwo);
+//                } else if (imageArray.length == 3) {
+//                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+//                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
+//                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
+//                    loadImageWithGlide(imageArray[2], ((MyViewHolder) holder).storyImageThree);
+//                    LinearLayout.LayoutParams paramThree = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 2.0f);
+//                    ((MyViewHolder) holder).storyImageThreeContainer.setLayoutParams(paramThree);
+//                } else if (imageArray.length == 4) {
+//                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
+//                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
+//                    loadImageWithGlide(imageArray[2], ((MyViewHolder) holder).storyImageThree);
+//                    loadImageWithGlide(imageArray[3], ((MyViewHolder) holder).storyImageFour);
+//                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+//                    ((MyViewHolder) holder).moreImagesScrim.setVisibility(View.GONE);
+//                    ((MyViewHolder) holder).moreImagesText.setVisibility(View.GONE);
+//                } else {
+//                    loadImageWithGlide(imageArray[0], ((MyViewHolder) holder).storyImageOne);
+//                    loadImageWithGlide(imageArray[1], ((MyViewHolder) holder).storyImageTwo);
+//                    loadImageWithGlide(imageArray[2], ((MyViewHolder) holder).storyImageThree);
+//                    loadImageWithGlide(imageArray[3], ((MyViewHolder) holder).storyImageFour);
+//                    ((MyViewHolder) holder).imageContainer.setVisibility(View.VISIBLE);
+//                    String remainingPictures = "+" + String.valueOf(imageArray.length - 4);
+//                    ((MyViewHolder) holder).moreImagesText.setText(remainingPictures);
+//                }
+//
+//                ((MyViewHolder) holder).storyImageOne.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Bundle b = new Bundle();
+//                        b.putString("URL", imageArray[0]);
+//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        I.putExtras(b);
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                            ((MyViewHolder) holder).storyImageOne.setTransitionName("imageTransition");
+//                            Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).storyImageOne, ((MyViewHolder) holder).storyImageOne.getTransitionName());
+//
+//                            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).storyImageOne, ((MyViewHolder) holder).storyImageOne.getTransitionName());
+//                            context.startActivity(I, optionsCompat.toBundle());
+//                        }
+//                        else {
+//                            context.startActivity(I);
+//                        }
+//                    }
+//                });
+//
+//                ((MyViewHolder) holder).storyImageTwo.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Bundle b = new Bundle();
+//                        b.putString("URL", imageArray[1]);
+//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        I.putExtras(b);
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                            ((MyViewHolder) holder).storyImageTwo.setTransitionName("imageTransition");
+//                            Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).storyImageTwo, ((MyViewHolder) holder).storyImageTwo.getTransitionName());
+//
+//                            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).storyImageTwo, ((MyViewHolder) holder).storyImageTwo.getTransitionName());
+//                            context.startActivity(I, optionsCompat.toBundle());
+//                        }
+//                        else {
+//                            context.startActivity(I);
+//                        }
+//                    }
+//                });
+//
+//                ((MyViewHolder) holder).storyImageThree.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Bundle b = new Bundle();
+//                        b.putString("URL", imageArray[2]);
+//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        I.putExtras(b);
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                            ((MyViewHolder) holder).storyImageThree.setTransitionName("imageTransition");
+//                            Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).storyImageThree, ((MyViewHolder) holder).storyImageThree.getTransitionName());
+//
+//                            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).storyImageThree, ((MyViewHolder) holder).storyImageThree.getTransitionName());
+//                            context.startActivity(I, optionsCompat.toBundle());
+//                        }
+//                        else {
+//                            context.startActivity(I);
+//                        }
+//                    }
+//                });
+//
+//                ((MyViewHolder) holder).storyImageFour.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Bundle bundle = new Bundle();
+//                        bundle.putString("postKey", classStory.getPostID());
+//                        Intent I = new Intent(context, CommentStoryActivity.class);
+//                        I.putExtras(bundle);
+//                        context.startActivity(I);
+//                    }
+//                });
+//            }
+
             if (classStory.isLiked()) {
-                ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_favorite_black_24dp);
-                ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_favorite_black_24dp));
+                ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_like_filled);
+                ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_like_filled));
             } else {
-                ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_favorite_border_black_24dp);
-                ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_favorite_border_black_24dp));
+                ((MyViewHolder)holder).likebutton.setTag(R.drawable.ic_like);
+                ((MyViewHolder)holder).likebutton.setImageResource((R.drawable.ic_like));
             }
 
             ((MyViewHolder)holder).poster.setText(classStory.getPosterName());
@@ -372,8 +452,8 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             ((MyViewHolder)holder).timestamp.setText(Date.getRelativeTimeSpan(classStory.getDate()));
             ((MyViewHolder)holder).story.setText(classStory.getStory());
             ((MyViewHolder)holder).profilePictureClipper.setClipToOutline(true);
-            ((MyViewHolder)holder).profilePictureClipper2.setClipToOutline(true);
-            ((MyViewHolder)holder).commenterPictureClipper.setClipToOutline(true);
+//            ((MyViewHolder)holder).profilePictureClipper2.setClipToOutline(true);
+//            ((MyViewHolder)holder).commenterPictureClipper.setClipToOutline(true);
             if (classStory.getStory().equals("")) {
                 ((MyViewHolder)holder).story.setVisibility(View.GONE);
             } else {
@@ -381,13 +461,15 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             }
 
             String likes = String.valueOf(classStory.getNoOfLikes());
-            ((MyViewHolder)holder).noOfLikes.setText(likes);
+            String likeString = likes + " Likes";
+            ((MyViewHolder) holder).noOfLikes.setText(likeString);
             String comments = String.valueOf(classStory.getNumberOfComments());
-            ((MyViewHolder)holder).noOfComments.setText(comments);
+            String commentString = comments + " Comments";
+            ((MyViewHolder) holder).noOfComments.setText(commentString);
 
             Drawable textDrawable;
             if (!classStory.getPosterName().isEmpty()) {
-                String[] nameArray = classStory.getPosterName().split(" ");
+                String[] nameArray = classStory.getPosterName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -408,59 +490,60 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                         .into(((MyViewHolder) holder).profilepic);
             }
 
-            if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
-                String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
-//                Drawable textDrawable;
-                if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
-                } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
-                }
-                ((MyViewHolder) holder).posterPic.setImageDrawable(textDrawable);
-            } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
-            }
+//            String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+//            if (!myName.trim().equals("")) {
+//                String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
+////                Drawable textDrawable;
+//                if (nameArray.length == 1) {
+//                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+//                } else {
+//                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+//                }
+//                ((MyViewHolder) holder).posterPic.setImageDrawable(textDrawable);
+//            } else {
+//                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+//            }
+//
+//            if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
+//                Glide.with(context)
+//                        .load(sharedPreferencesManager.getMyPicURL())
+//                        .placeholder(textDrawable)
+//                        .error(textDrawable)
+//                        .centerCrop()
+//                        .bitmapTransform(new CropCircleTransformation(context))
+//                        .into(((MyViewHolder) holder).posterPic);
+//            }
 
-            if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
-                Glide.with(context)
-                        .load(sharedPreferencesManager.getMyPicURL())
-                        .placeholder(textDrawable)
-                        .error(textDrawable)
-                        .centerCrop()
-                        .bitmapTransform(new CropCircleTransformation(context))
-                        .into(((MyViewHolder) holder).posterPic);
-            }
-
-            if (classStory.getComment() != null) {
-                ((MyViewHolder) holder).firstCommentLayout.setVisibility(View.VISIBLE);
-                ((MyViewHolder) holder).commentPoster.setText(classStory.getComment().getPosterName());
-                ((MyViewHolder) holder).comment.setText(classStory.getComment().getComment());
-                ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpan(classStory.getComment().getTime()));
-
-                if (!classStory.getComment().getPosterName().isEmpty()) {
-                    String[] nameArray = classStory.getComment().getPosterName().split(" ");
-                    if (nameArray.length == 1) {
-                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
-                    } else {
-                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
-                    }
-                    ((MyViewHolder) holder).commenterPic.setImageDrawable(textDrawable);
-                } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
-                }
-
-                if (!classStory.getComment().getPosterPic().isEmpty()) {
-                    Glide.with(context)
-                            .load(classStory.getComment().getPosterPic())
-                            .placeholder(textDrawable)
-                            .error(textDrawable)
-                            .centerCrop()
-                            .bitmapTransform(new CropCircleTransformation(context))
-                            .into(((MyViewHolder) holder).commenterPic);
-                }
-            } else {
-                ((MyViewHolder) holder).firstCommentLayout.setVisibility(View.GONE);
-            }
+//            if (classStory.getComment() != null) {
+//                ((MyViewHolder) holder).firstCommentLayout.setVisibility(View.VISIBLE);
+//                ((MyViewHolder) holder).commentPoster.setText(classStory.getComment().getPosterName());
+//                ((MyViewHolder) holder).comment.setText(classStory.getComment().getComment());
+//                ((MyViewHolder) holder).time.setText(Date.getRelativeTimeSpan(classStory.getComment().getTime()));
+//
+//                if (!classStory.getComment().getPosterName().isEmpty()) {
+//                    String[] nameArray = classStory.getComment().getPosterName().replaceAll("\\s+", " ").split(" ");
+//                    if (nameArray.length == 1) {
+//                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+//                    } else {
+//                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+//                    }
+//                    ((MyViewHolder) holder).commenterPic.setImageDrawable(textDrawable);
+//                } else {
+//                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+//                }
+//
+//                if (!classStory.getComment().getPosterPic().isEmpty()) {
+//                    Glide.with(context)
+//                            .load(classStory.getComment().getPosterPic())
+//                            .placeholder(textDrawable)
+//                            .error(textDrawable)
+//                            .centerCrop()
+//                            .bitmapTransform(new CropCircleTransformation(context))
+//                            .into(((MyViewHolder) holder).commenterPic);
+//                }
+//            } else {
+//                ((MyViewHolder) holder).firstCommentLayout.setVisibility(View.GONE);
+//            }
 
             ((MyViewHolder)holder).poster.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -468,7 +551,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                     if (classStory.getPosterAccountType().equals("School")) {
                         Intent I = new Intent(context, SchoolProfileActivity.class);
                         Bundle b = new Bundle();
-                        b.putString("ID", classStory.getPosterID());
+                        b.putString("schoolID", classStory.getPosterID());
                         I.putExtras(b);
                         context.startActivity(I);
                     } else if (classStory.getPosterAccountType().equals("Teacher")) {
@@ -488,7 +571,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                     if (classStory.getPosterAccountType().equals("School")) {
                         Intent I = new Intent(context, SchoolProfileActivity.class);
                         Bundle b = new Bundle();
-                        b.putString("ID", classStory.getPosterID());
+                        b.putString("schoolID", classStory.getPosterID());
                         I.putExtras(b);
                         context.startActivity(I);
                     } else if (classStory.getPosterAccountType().equals("Teacher")) {
@@ -512,21 +595,37 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                             String time = Date.getDate();
                             String sortableTime = Date.convertToSortableDate(time);
                             boolean isSeen = false;
-                            NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), "Teacher",
+                            NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), classStory.getPosterAccountType(),
                                     sharedPreferencesManager.getActiveAccount(), time, sortableTime, classStory.getPostID(), "Like", "", "", isSeen);
 
-                            userUpdates.put("ClassStoryParentFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
-                            userUpdates.put("ClassStoryTeacherFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
-                            if (mFirebaseUser.getUid().equals(classStory.getPosterID())) {
-                                userUpdates.put("ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
+                            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                                userUpdates.put("ClassStoryParentFeed/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);
+                            } else {
+                                userUpdates.put("ClassStoryTeacherFeed/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);
+                                if (mFirebaseUser.getUid().equals(classStory.getPosterID())) {
+                                    userUpdates.put("ClassStoryTeacherTimeline/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);
+                                }
                             }
-                            userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + auth.getCurrentUser().getUid(), time);
-                            userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), true);
-                            if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
+
+                            userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), time);
+                            userUpdates.put("ClassStoryUserLikeHistory/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);
+                            if (!mFirebaseUser.getUid().equals(classStory.getPosterID())) {
                                 userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), new LikeNotification(auth.getCurrentUser().getUid(), time));
-                                userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), notificationModel);
+                                if (classStory.getPosterAccountType().equals("Teacher")) {
+                                    userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), notificationModel);
+                                } else if (classStory.getPosterAccountType().equals("School")) {
+                                    userUpdates.put("NotificationSchool/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), notificationModel);
+                                }
                             }
-                            mDatabaseReference.updateChildren(userUpdates);
+                            mDatabaseReference.updateChildren(userUpdates, new DatabaseReference.CompletionListener() {
+                                @Override
+                                public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
+                                    if (databaseError != null) {
+                                        int i=0;
+                                        i = 9+0;
+                                    }
+                                }
+                            });
                             DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("ClassStory/" + classStory.getPostID() + "/" + "noOfLikes");
                             updateLikeRef.runTransaction(new Transaction.Handler() {
                                 @Override
@@ -548,24 +647,42 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                                 }
                             });
                             animateHeart(((MyViewHolder) holder).likebutton);
-                            ((MyViewHolder) holder).likebutton.setImageResource((R.drawable.ic_favorite_black_24dp));
-                            ((MyViewHolder) holder).likebutton.setTag(R.drawable.ic_favorite_black_24dp);
+                            ((MyViewHolder) holder).likebutton.setImageResource((R.drawable.ic_like_filled));
+                            ((MyViewHolder) holder).likebutton.setTag(R.drawable.ic_like_filled);
                             classStory.setLiked(true);
 
                         } else {
                             mDatabaseReference = mFirebaseDatabase.getReference();
                             Map<String, Object> userUpdates = new HashMap<String, Object>();
-                            userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + auth.getCurrentUser().getUid(), null);
-                            userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), null);
-                            userUpdates.put("ClassStoryParentFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), false);
-                            userUpdates.put("ClassStoryTeacherFeed/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), false);
-                            if (auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
-                                userUpdates.put("ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), false);
+
+                            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                                userUpdates.put("ClassStoryParentFeed/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), false);
+                            } else {
+                                userUpdates.put("ClassStoryTeacherFeed/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), false);
+                                if (mFirebaseUser.getUid().equals(classStory.getPosterID())) {
+                                    userUpdates.put("ClassStoryTeacherTimeline/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), false);
+                                }
                             }
+
+                            userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), null);
+                            userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), null);
                             if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
                                 userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID(), null);
+                                if (classStory.getPosterAccountType().equals("Teacher")) {
+                                    userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), null);
+                                } else if (classStory.getPosterAccountType().equals("School")) {
+                                    userUpdates.put("NotificationSchool/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), null);
+                                }
                             }
-                            mDatabaseReference.updateChildren(userUpdates);
+                            mDatabaseReference.updateChildren(userUpdates, new DatabaseReference.CompletionListener() {
+                                @Override
+                                public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
+                                    if (databaseError != null) {
+                                        int i=0;
+                                        i = 9+0;
+                                    }
+                                }
+                            });
                             DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("ClassStory/" + classStory.getPostID() + "/" + "noOfLikes");
                             updateLikeRef.runTransaction(new Transaction.Handler() {
                                 @Override
@@ -586,8 +703,8 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
 
                                 }
                             });
-                            ((MyViewHolder) holder).likebutton.setImageResource((R.drawable.ic_favorite_border_black_24dp));
-                            ((MyViewHolder) holder).likebutton.setTag(R.drawable.ic_favorite_border_black_24dp);
+                            ((MyViewHolder) holder).likebutton.setImageResource((R.drawable.ic_like));
+                            ((MyViewHolder) holder).likebutton.setTag(R.drawable.ic_like);
                             animateHeart(((MyViewHolder) holder).likebutton);
                             classStory.setLiked(false);
 
@@ -643,20 +760,20 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                 }
             });
 
-            ((MyViewHolder)holder).commentLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!classStory.getPosterAccountType().equals("Admin")) {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("postKey", classStory.getPostID());
-                        Intent I = new Intent(context, CommentStoryActivity.class);
-                        I.putExtras(bundle);
-                        context.startActivity(I);
-                    } else {
-                        CustomToast.primaryBackgroundToast(context, "Comments for this post are turned off");
-                    }
-                }
-            });
+//            ((MyViewHolder)holder).commentLayout.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (!classStory.getPosterAccountType().equals("Admin")) {
+//                        Bundle bundle = new Bundle();
+//                        bundle.putString("postKey", classStory.getPostID());
+//                        Intent I = new Intent(context, CommentStoryActivity.class);
+//                        I.putExtras(bundle);
+//                        context.startActivity(I);
+//                    } else {
+//                        CustomToast.primaryBackgroundToast(context, "Comments for this post are turned off");
+//                    }
+//                }
+//            });
         }
     }
 
@@ -707,11 +824,57 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
         return animation;
     }
 
-    private void loadImageWithGlide(String url, ImageView imageView) {
-        Glide.with(context)
-                .load(url)
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
-                .into(imageView);
+    //View pager adapter
+    public class MyViewPagerAdapter extends PagerAdapter {
+        private LayoutInflater layoutInflater;
+        private Context context;
+        private String[] imageURLs;
+
+        public MyViewPagerAdapter(Context context, String[] imageURLs) {
+            this.context = context;
+            this.imageURLs = imageURLs;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+//            layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            ImageView imageView = new ImageView(context);
+
+            Glide.with(context)
+                    .load(imageURLs[position])
+                    .placeholder(R.drawable.profileimageplaceholder)
+                    .error(R.drawable.profileimageplaceholder)
+                    .into(imageView);
+
+            container.addView(imageView);
+
+            return imageView;
+        }
+
+        @Override
+        public int getCount() {
+            return imageURLs.length;
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object obj) {
+            return view == obj;
+        }
+
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            View view = (View) object;
+            container.removeView(view);
+        }
+    }
+
+    public void updateClassStoryListItems(List<ClassStory> classStoryNewList) {
+        final ClassStoryDiffUtil diffCallback = new ClassStoryDiffUtil(this.classStoryList, classStoryNewList);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        this.classStoryList.clear();
+        this.classStoryList.addAll(classStoryNewList);
+        diffResult.dispatchUpdatesTo(this);
     }
 }

@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
 import com.bumptech.glide.Glide;
@@ -34,7 +37,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,19 +59,23 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
     private SharedPreferencesManager sharedPreferencesManager;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView message, time, noOfmesages;
+        public TextView name, message, time, noOfmesages;
         public ImageView messageStatus, otherProfilePic, imageFile;
-        LinearLayout imageClipper, profilePictureClipper, layout;
+        public LinearLayout imageClipper, profilePictureClipper, layout;
+        public View divider;
 
         public MyViewHolder(final View view) {
             super(view);
+            name = (TextView) view.findViewById(R.id.name);
             message = (TextView) view.findViewById(R.id.message_text);
+            time = (TextView) view.findViewById(R.id.time);
             imageClipper = (LinearLayout) view.findViewById(R.id.imageClipper);
             profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             layout = (LinearLayout) view.findViewById(R.id.bubble_layout);
             messageStatus = (ImageView) view.findViewById(R.id.messagestatus);
             otherProfilePic = (ImageView) view.findViewById(R.id.otherprofilepic);
             imageFile = (ImageView) view.findViewById(R.id.imagefile);
+            divider = view.findViewById(R.id.divider);
         }
     }
 
@@ -97,38 +106,34 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             if (sharedPreferencesManager.getMyUserID().equals(chatList.getSenderID())){
                 path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getReceiverID() + "/" + chatList.getMessageID() + "/seen";
                 pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getReceiverID() + "/seen";
+                Map<String, Object> userUpdates = new HashMap<String, Object>();
+                userUpdates.put(path, true);
+                userUpdates.put(pathToRecents, true);
+                mDatabaseReference.updateChildren(userUpdates);
             } else if (sharedPreferencesManager.getMyUserID().equals(chatList.getReceiverID())){
                 path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/" + chatList.getMessageID() + "/seen";
                 pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/seen";
+                Map<String, Object> userUpdates = new HashMap<String, Object>();
+                userUpdates.put(path, true);
+                userUpdates.put(pathToRecents, true);
+                mDatabaseReference.updateChildren(userUpdates);
             } else {
                 path = "";
                 pathToRecents = "";
             }
-
-            Map<String, Object> userUpdates = new HashMap<String, Object>();
-            userUpdates.put(path, true);
-            userUpdates.put(pathToRecents, true);
-
-            mDatabaseReference.updateChildren(userUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-
-                }
-            });
         }
 
         if (chatList.isMine()){
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(chatList.getReceiverID())
-                    .child(chatList.getSenderID()).child(chatList.getMessageID()).child("seen");
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(chatList.getReceiverID()).child(chatList.getSenderID()).child(chatList.getMessageID()).child("seen");
             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()){
                         boolean isSeen = dataSnapshot.getValue(boolean.class);
                         if (isSeen) {
-                            ((MyViewHolder) holder).messageStatus.setImageResource(R.drawable.ic_read_all_black_24dp);
+                            (holder).messageStatus.setImageResource(R.drawable.ic_read_all_black_24dp);
                         } else {
-                            ((MyViewHolder) holder).messageStatus.setImageResource(R.drawable.ic_sent_black_24dp);
+                            (holder).messageStatus.setImageResource(R.drawable.ic_sent_black_24dp);
                         }
                     }
                 }
@@ -143,8 +148,13 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         ((MyViewHolder) holder).imageFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Gson gson = new Gson();
+                ArrayList<String> imageList = new ArrayList<>();
+                imageList.add(chatList.getFileURL());
+                String urlJson = gson.toJson(imageList);
+                sharedPreferencesManager.setSchoolGallery(urlJson);
                 Bundle b = new Bundle();
-                b.putString("URL", chatList.getFileURL());
+                b.putInt("currentImage", 0);
                 Intent I = new Intent(context, GalleryDetailActivity.class);
                 I.putExtras(b);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -163,43 +173,182 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         ((MyViewHolder) holder).otherProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle b = new Bundle();
-                b.putString("URL", chatList.getOtherProfilePicURL());
-                Intent I = new Intent(context, GalleryDetailActivity.class);
-                I.putExtras(b);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ((MyViewHolder) holder).otherProfilePic.setTransitionName("imageTransition");
-                    Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).otherProfilePic, ((MyViewHolder) holder).otherProfilePic.getTransitionName());
-
-                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).otherProfilePic, ((MyViewHolder) holder).otherProfilePic.getTransitionName());
-                    context.startActivity(I, optionsCompat.toBundle());
-                }
-                else {
-                    context.startActivity(I);
-                }
+//                Bundle b = new Bundle();
+//                b.putString("URL", chatList.getOtherProfilePicURL());
+//                Intent I = new Intent(context, GalleryDetailActivity.class);
+//                I.putExtras(b);
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                    ((MyViewHolder) holder).otherProfilePic.setTransitionName("imageTransition");
+//                    Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).otherProfilePic, ((MyViewHolder) holder).otherProfilePic.getTransitionName());
+//
+//                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).otherProfilePic, ((MyViewHolder) holder).otherProfilePic.getTransitionName());
+//                    context.startActivity(I, optionsCompat.toBundle());
+//                }
+//                else {
+//                    context.startActivity(I);
+//                }
             }
         });
 
 //            !chatList.getFileURL().isEmpty() && chatList.getFileURL() != null
-        if (!chatList.getFileURL().equals("")){
-            ((MyViewHolder) holder).message.setVisibility(View.GONE);
-            if (chatList.isMine()) {
-                ((MyViewHolder) holder).layout.setGravity(Gravity.END);
-                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
-                ((MyViewHolder) holder).otherProfilePic.setVisibility(View.GONE);
-                imageBackgroundForIsMine(((MyViewHolder) holder), position);
-
-            } else {
-                ((MyViewHolder) holder).layout.setGravity(Gravity.START);
-                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
-                imageBackgroundForNotIsMine(((MyViewHolder) holder), position);
-            }
-        }else{
-            ((MyViewHolder) holder).imageFile.setVisibility(View.GONE);
-            ((MyViewHolder) holder).message.setVisibility(View.VISIBLE);
-            ((MyViewHolder) holder).message.setText(chatList.getMessage());
-            chatBubbleBackground(((MyViewHolder) holder), position);
+        (holder).message.setText(chatList.getMessage());
+//        if (chatList.getMessage().equals("")) {
+//            (holder).message.setVisibility(View.GONE);
+//        }
+        Glide.with(context)
+                .load(chatList.getFileURL())
+                .fitCenter()
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .into(holder.imageFile);
+        if (chatList.getFileURL().isEmpty()) {
+            holder.message.setVisibility(View.VISIBLE);
+            holder.imageClipper.setVisibility(View.GONE);
+        } else {
+            holder.message.setVisibility(View.GONE);
+            holder.imageClipper.setVisibility(View.VISIBLE);
         }
+        if (position == chatsList.size() - 1) {
+            holder.divider.setVisibility(View.GONE);
+        } else {
+            holder.divider.setVisibility(View.VISIBLE);
+        }
+        holder.time.setText(Date.getRelativeTimeSpan(chatList.getDatestamp()));
+
+        if (chatList.isMine()) {
+            String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+            holder.name.setText(myName);
+
+            Drawable textDrawable;
+            if (!myName.isEmpty()) {
+                String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 4);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 4);
+                }
+                holder.otherProfilePic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(sharedPreferencesManager.getMyPicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(holder.otherProfilePic);
+            }
+
+//            try {
+//                if (chatsList.get(position + 1).isMine()) {
+//                    holder.divider.setVisibility(View.GONE);
+//                    holder.time.setVisibility(View.GONE);
+//                    if (chatList.getFileURL().equals("")) {
+//                        holder.imageClipper.setVisibility(View.GONE);
+//                    } else {
+//                        holder.message.setVisibility(View.GONE);
+//                    }
+//                }
+//            } catch (Exception e) {
+//                Log.d("Out of Range", "Out of Range");
+//            }
+//
+//            try {
+//                if (chatsList.get(position - 1).isMine()) {
+//                    holder.otherProfilePic.setVisibility(View.GONE);
+//                    holder.name.setVisibility(View.GONE);
+//                    if (chatList.getFileURL().equals("")) {
+//                        holder.imageClipper.setVisibility(View.GONE);
+//                    } else {
+//                        holder.message.setVisibility(View.GONE);
+//                    }
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(210, 0, 0, 0);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            } catch (Exception e) {
+//                Log.d("Out of Range", "Out of Range");
+//            }
+        } else {
+            holder.name.setText(chatTitle);
+            Drawable textDrawable;
+            if (!chatTitle.isEmpty()) {
+                String[] nameArray = chatTitle.replaceAll("\\s+", " ").split(" ");
+                if (nameArray.length == 1) {
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 1);
+                } else {
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 1);
+                }
+                holder.otherProfilePic.setImageDrawable(textDrawable);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            }
+
+            if (!chatList.getOtherProfilePicURL().isEmpty()) {
+                Glide.with(context)
+                        .load(chatList.getOtherProfilePicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(holder.otherProfilePic);
+            }
+
+//            try {
+//                if (!chatsList.get(position + 1).isMine()) {
+//                    holder.divider.setVisibility(View.GONE);
+//                    holder.time.setVisibility(View.GONE);
+//                    if (chatList.getFileURL().equals("")) {
+//                        holder.imageClipper.setVisibility(View.GONE);
+//                    } else {
+//                        holder.message.setVisibility(View.GONE);
+//                    }
+//                }
+//            } catch (Exception e) {
+//                Log.d("Out of Range", "Out of Range");
+//            }
+//
+//            try {
+//                if (!chatsList.get(position - 1).isMine()) {
+//                    holder.otherProfilePic.setVisibility(View.GONE);
+//                    holder.name.setVisibility(View.GONE);
+//                    if (chatList.getFileURL().equals("")) {
+//                        holder.imageClipper.setVisibility(View.GONE);
+//                    } else {
+//                        holder.message.setVisibility(View.GONE);
+//                    }
+//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
+//                    marginParams.setMargins(210, 0, 0, 0);
+//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+//                    holder.layout.setLayoutParams(layoutParams);
+//                }
+//            } catch (Exception e) {
+//                Log.d("Out of Range", "Out of Range");
+//            }
+        }
+
+//        if (!chatList.getFileURL().equals("")){
+//            ((MyViewHolder) holder).message.setVisibility(View.GONE);
+//            if (chatList.isMine()) {
+//                ((MyViewHolder) holder).layout.setGravity(Gravity.END);
+//                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
+//                ((MyViewHolder) holder).otherProfilePic.setVisibility(View.GONE);
+//                imageBackgroundForIsMine(((MyViewHolder) holder), position);
+//
+//            } else {
+//                ((MyViewHolder) holder).layout.setGravity(Gravity.START);
+//                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
+//                imageBackgroundForNotIsMine(((MyViewHolder) holder), position);
+//            }
+//        }else{
+//            ((MyViewHolder) holder).imageFile.setVisibility(View.GONE);
+//            ((MyViewHolder) holder).message.setVisibility(View.VISIBLE);
+//            ((MyViewHolder) holder).message.setText(chatList.getMessage());
+//            chatBubbleBackground(((MyViewHolder) holder), position);
+//        }
     }
 
     public int getItemCount() {
@@ -224,7 +373,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             } else {
                 Drawable textDrawable;
                 if (!chatTitle.isEmpty()) {
-                    String[] nameArray = chatTitle.split(" ");
+                    String[] nameArray = chatTitle.replaceAll("\\s+", " ").split(" ");
                     if (nameArray.length == 1) {
                         textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                     } else {

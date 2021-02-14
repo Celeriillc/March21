@@ -5,7 +5,8 @@
     <item
         android:id="@+id/action_request"
         android:title="Requests"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_request"
+        app:actionLayout="@layout/custom_request_icon_with_badge"
         app:showAsAction="always"/>
 
     <item

@@ -87,9 +87,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="50dp"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:text="First Name"
-                    android:textColor="@color/colorLightGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -98,8 +98,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="20sp"
                     android:layout_marginBottom="5dp"
                     android:hint="First Name"
                     android:maxLines="1"
@@ -120,9 +120,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:text="Middle Name"
-                    android:textColor="@color/colorLightGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -131,8 +131,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="20sp"
                     android:layout_marginBottom="5dp"
                     android:hint="Middle Name"
                     android:maxLines="1"
@@ -153,9 +153,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:text="Last Name"
-                    android:textColor="@color/colorLightGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -164,8 +164,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="20sp"
                     android:layout_marginBottom="5dp"
                     android:hint="Last Name"
                     android:maxLines="1"
@@ -186,9 +186,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:text="Gender"
-                    android:textColor="@color/colorLightGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -200,8 +200,8 @@
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="20sp"
                     android:layout_marginBottom="5dp"
                     android:textSize="12sp"
                     android:textColor="@android:color/black"
@@ -221,9 +221,9 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:textStyle="bold"
-                    android:textColor="@color/colorDeepGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="15sp"
                     android:text="Other Information"/>
             </LinearLayout>
@@ -232,8 +232,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:background="#aaaaaa"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="15dp"/>
+                android:layout_marginStart="20sp"
+                android:layout_marginEnd="20sp"/>
 
             <LinearLayout
                 android:id="@+id/phonenumberlayout"
@@ -246,9 +246,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:text="Phone Number"
-                    android:textColor="@color/colorLightGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -257,14 +257,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp">
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="20sp">
 
                     <TextView
                         android:id="@+id/phonenumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingStart="80dp"
+                        android:paddingStart="85dp"
                         android:paddingEnd="15dp"
                         android:gravity="center_vertical"
                         android:layout_centerVertical="true"
@@ -279,9 +279,9 @@
                         android:id="@+id/flag"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
-                        android:layout_marginStart="15dp"
+                        android:layout_marginStart="20sp"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/ic_icons_google" />
+                        android:src="@drawable/ic_nigeria" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -307,9 +307,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:layout_marginStart="15sp"
+                    android:layout_marginStart="20sp"
                     android:text="Occupation"
-                    android:textColor="@color/colorLightGray"
+                    android:textColor="@color/colorBottomNavigationIconGray"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -318,9 +318,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginTop="5dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="20sp"
+                    android:layout_marginBottom="30dp"
                     android:hint="Occupation"
                     android:maxLines="1"
                     android:inputType="text"

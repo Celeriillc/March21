@@ -104,8 +104,9 @@ public class InviteParentsHomeAdapter extends RecyclerView.Adapter<RecyclerView.
             ((MyViewHolder) holder).clipper.setClipToOutline(true);
 
             Drawable textDrawable;
-            if (!student.getFirstName().isEmpty() && !student.getLastName().isEmpty()) {
-                String[] nameArray = (student.getFirstName() + " " + student.getLastName()).split(" ");
+            String studentName = student.getFirstName() + " " + student.getLastName();
+            if (!studentName.trim().isEmpty()) {
+                String[] nameArray = studentName.replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

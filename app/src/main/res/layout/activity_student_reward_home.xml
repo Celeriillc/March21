@@ -15,20 +15,29 @@
         android:id="@+id/studentlayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
+        android:padding="20dp"
         android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/studentpic"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_icons_google"/>
+        <LinearLayout
+            android:id="@+id/profilepictureclipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/circular_image_background_white">
+
+            <ImageView
+                android:id="@+id/studentpic"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/roundedbutton"/>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/studentname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="15dp"
             android:layout_gravity="center_vertical"
             android:textColor="@android:color/black"
             android:textStyle="bold"

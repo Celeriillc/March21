@@ -22,7 +22,9 @@ import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.AcademicRecord;
@@ -184,7 +186,7 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
 
             Drawable textDrawable;
             if (!kidScoreForTeachersModel.getKidName().isEmpty()) {
-                String[] nameArray = kidScoreForTeachersModel.getKidName().split(" ");
+                String[] nameArray = kidScoreForTeachersModel.getKidName().replaceAll("\\s+", " ").split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -317,8 +319,11 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
                                     progressDialog.dismiss();
                                     ((Activity) context).finish();
                                 } else {
-                                    String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
-                                    showDialogWithMessage(message);
+                                    progressDialog.dismiss();
+                                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+//                                    String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
+//                                    showDialogWithMessage(message);
                                 }
                             }
                         });

@@ -1,14 +1,20 @@
 package com.celerii.celerii.adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,31 +36,33 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     SharedPreferencesManager sharedPreferencesManager;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView status, tier, date, expiry;
+        public TextView status, /*tier, date,*/ expiry;
+        public ImageView image;
         public View view;
 
         public MyViewHolder(final View view) {
             super(view);
             status = (TextView) view.findViewById(R.id.status);
-            tier = (TextView) view.findViewById(R.id.tier);
-            date = (TextView) view.findViewById(R.id.date);
+//            tier = (TextView) view.findViewById(R.id.tier);
+//            date = (TextView) view.findViewById(R.id.date);
             expiry = (TextView) view.findViewById(R.id.expiry);
+            image = (ImageView) view.findViewById(R.id.image);
             this.view = view;
         }
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
-        public TextView status, tier, date, expiry, errorLayoutText;
+        public TextView /*status, tier, date, expiry,*/ errorLayoutText;
         RelativeLayout errorLayout;
         LinearLayout chiefLayout;
         public Button subscribe;
 
         public HeaderViewHolder(View view) {
             super(view);
-            status = (TextView) view.findViewById(R.id.status);
-            tier = (TextView) view.findViewById(R.id.tier);
-            date = (TextView) view.findViewById(R.id.date);
-            expiry = (TextView) view.findViewById(R.id.expiry);
+//            status = (TextView) view.findViewById(R.id.status);
+//            tier = (TextView) view.findViewById(R.id.tier);
+//            date = (TextView) view.findViewById(R.id.date);
+//            expiry = (TextView) view.findViewById(R.id.expiry);
             errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
             errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
             chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
@@ -98,7 +106,7 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
 
             if (!Date.compareDates(Date.getDate(), subscriptionModel.getExpiryDate())) {
-                ((HeaderViewHolder) holder).status.setText("Active");
+//                ((HeaderViewHolder) holder).status.setText("Active");
                 ((HeaderViewHolder) holder).subscribe.setText("Cancel Subscription");
                 ((HeaderViewHolder) holder).subscribe.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent));
                 ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
@@ -108,32 +116,71 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     }
                 });
             } else {
-                ((HeaderViewHolder) holder).status.setText("Inactive");
+//                ((HeaderViewHolder) holder).status.setText("Inactive");
                 ((HeaderViewHolder) holder).subscribe.setText("Subscribe");
-                ((HeaderViewHolder) holder).subscribe.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
+                ((HeaderViewHolder) holder).subscribe.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedbutton));
                 ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        int f = 0;
                     }
                 });
             }
 
-            ((HeaderViewHolder) holder).tier.setText(subscriptionModel.getSubscriptionTier());
-            ((HeaderViewHolder) holder).date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
-            ((HeaderViewHolder) holder).expiry.setText(Date.getFormalDocumentDate(subscriptionModel.getExpiryDate()));
+//            ((HeaderViewHolder) holder).tier.setText(subscriptionModel.getSubscriptionTier());
+//            ((HeaderViewHolder) holder).date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
+//            ((HeaderViewHolder) holder).expiry.setText(Date.getFormalDocumentDate(subscriptionModel.getExpiryDate()));
 
         } else if (holder instanceof MyViewHolder){
             final SubscriptionModel subscriptionModel = subscriptionModelList.get(position);
 
             if (!Date.compareDates(Date.getDate(), subscriptionModel.getExpiryDate())) {
                 ((MyViewHolder) holder).status.setText("Active");
+                ((MyViewHolder) holder).image.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_attendance_present_24dp));
             } else {
-                ((MyViewHolder) holder).status.setText("Inactive");
+                ((MyViewHolder) holder).status.setText("Expired");
+                ((MyViewHolder) holder).image.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_attendance_absent_24dp));
             }
-            ((MyViewHolder) holder).tier.setText(subscriptionModel.getSubscriptionTier());
-            ((MyViewHolder) holder).date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
+//            ((MyViewHolder) holder).tier.setText(subscriptionModel.getSubscriptionTier());
+//            ((MyViewHolder) holder).date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
             ((MyViewHolder) holder).expiry.setText(Date.getFormalDocumentDate(subscriptionModel.getExpiryDate()));
+
+            ((MyViewHolder) holder).view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+                    int width = metrics.widthPixels;
+                    int height = metrics.heightPixels;
+                    final Dialog dialog = new Dialog(context);
+                    dialog.setContentView(R.layout.custom_subscription_detail_dialog);
+                    TextView statusField = (TextView) dialog.findViewById(R.id.status);
+                    TextView tier = (TextView) dialog.findViewById(R.id.tier);
+                    TextView date = (TextView) dialog.findViewById(R.id.date);
+                    TextView expiry = (TextView) dialog.findViewById(R.id.expiry);
+                    Button close = (Button) dialog.findViewById(R.id.close);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.show();
+
+                    String status = "";
+                    if (!Date.compareDates(Date.getDate(), subscriptionModel.getExpiryDate())) {
+                        status = "Active";
+                    } else {
+                        status = "Expired";
+                    }
+
+                    statusField.setText(status);
+                    tier.setText(subscriptionModel.getSubscriptionTier());
+                    date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
+                    expiry.setText(Date.getFormalDocumentDate(subscriptionModel.getExpiryDate()));
+
+                    close.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                        }
+                    });
+                }
+            });
         }
     }
 

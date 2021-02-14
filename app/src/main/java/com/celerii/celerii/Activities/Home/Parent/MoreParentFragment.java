@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,7 +103,7 @@ public class MoreParentFragment extends Fragment {
     int childrenCounter = 0;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
-    TextView parentName, editMyProfile;
+    TextView parentName, email;
     ImageView parentProfilePic, subscriptionFlag, paymentFlag;
     LinearLayout profilePictureLayout, noKidLabel;
     Button searchButton;
@@ -145,7 +146,7 @@ public class MoreParentFragment extends Fragment {
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
         parentName = (TextView) view.findViewById(R.id.myprofilename);
-        editMyProfile = (TextView) view.findViewById(R.id.editmyprofile);
+        email = (TextView) view.findViewById(R.id.email);
         parentProfilePic = (ImageView) view.findViewById(R.id.myprofileimage);
         subscriptionFlag = (ImageView) view.findViewById(R.id.subscriptionflag);
         paymentFlag = (ImageView) view.findViewById(R.id.paymentflag);
@@ -407,7 +408,7 @@ public class MoreParentFragment extends Fragment {
         if (mFirebaseUser == null) {
             return;
         }
-        UpdateDataFromFirebase.populateEssentials(context);
+//        UpdateDataFromFirebase.populateEssentials(context);
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -597,6 +598,7 @@ public class MoreParentFragment extends Fragment {
 
     void loadHeader() {
         parentName.setText(sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName());
+        email.setText(mFirebaseUser.getEmail());
         profilePictureLayout.setClipToOutline(true);
 
         if (moreParentsModelList.size() <= 0){
@@ -608,12 +610,13 @@ public class MoreParentFragment extends Fragment {
         }
 
         Drawable textDrawable;
-        if (!sharedPreferencesManager.getMyFirstName().isEmpty() || !sharedPreferencesManager.getMyLastName().isEmpty()) {
-            String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+        String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+        if (!myName.trim().isEmpty()) {
+            String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 100);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 100);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 100);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 100);
             }
             parentProfilePic.setImageDrawable(textDrawable);
         } else {
@@ -621,13 +624,17 @@ public class MoreParentFragment extends Fragment {
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
-            Glide.with(context)
-                    .load(sharedPreferencesManager.getMyPicURL())
-                    .placeholder(textDrawable)
-                    .error(textDrawable)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(parentProfilePic);
+            try {
+                Glide.with(context)
+                        .load(sharedPreferencesManager.getMyPicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(parentProfilePic);
+            } catch (Exception e) {
+                return;
+            }
         }
 
         parentName.setOnClickListener(new View.OnClickListener() {
@@ -729,7 +736,29 @@ public class MoreParentFragment extends Fragment {
         Type type = new TypeToken<Student>() {}.getType();
         Student activeKidModel = gson.fromJson(activeKid, type);
 
-        if (activeKid != null){
+        if (activeKid != null) {
+            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+            type = new TypeToken<ArrayList<Student>>() {}.getType();
+            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+            ArrayList<String> myChildrenString = new ArrayList<>();
+
+            if (myChildren != null) {
+                for (Student student : myChildren) {
+                    myChildrenString.add(gson.toJson(student));
+                }
+
+                final int indexOfActiveKid = myChildrenString.indexOf(activeKid);
+                if (indexOfActiveKid < myChildrenString.size()) {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            recyclerView.smoothScrollToPosition(indexOfActiveKid);
+                        }
+                    }, 100);
+                }
+            }
+
             String firstName = activeKidModel.getFirstName();
             prf = firstName + "'s Profile";
             sub = firstName + "'s Subscription Status";
@@ -1013,6 +1042,35 @@ public class MoreParentFragment extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        Gson gson = new Gson();
+        String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+        String activeKid = sharedPreferencesManager.getActiveKid();
+        Type type = new TypeToken<ArrayList<Student>>() {}.getType();
+        ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+        ArrayList<String> myChildrenString = new ArrayList<>();
+
+        if (myChildren != null) {
+            for (Student student : myChildren) {
+                myChildrenString.add(gson.toJson(student));
+            }
+
+            final int indexOfActiveKid = myChildrenString.indexOf(activeKid);
+            if (indexOfActiveKid < myChildrenString.size()) {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(indexOfActiveKid);
+                    }
+                }, 100);
+            }
+        }
+    }
+
+    @Override
     public void onResume() {
         loadDataFromSharedPreferences();
         loadBasicInfo();
@@ -1031,14 +1089,12 @@ public class MoreParentFragment extends Fragment {
             bottomNavBadgeRef.updateChildren(bottomNavBadgeMap);
         }
 
-
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
         } else {
             featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
         }
         sessionStartTime = System.currentTimeMillis();
-
 //        UpdateDataFromFirebase.populateEssentials(getContext());
         super.onResume();
     }

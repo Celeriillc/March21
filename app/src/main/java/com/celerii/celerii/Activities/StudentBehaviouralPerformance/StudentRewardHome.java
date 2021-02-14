@@ -1,12 +1,19 @@
 package com.celerii.celerii.Activities.StudentBehaviouralPerformance;
 
+import android.content.Context;
 import android.content.Intent;
+
+import com.celerii.celerii.adapters.InboxAdapter;
+import com.celerii.celerii.helperClasses.CreateTextDrawable;
+import com.celerii.celerii.models.Student;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
@@ -18,6 +25,7 @@ import android.widget.TextView;
 import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
 import com.celerii.celerii.R;
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +34,9 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class StudentRewardHome extends AppCompatActivity {
 
+    Context context;
     ImageView studentPic;
-    LinearLayout studentLayout;
+    LinearLayout studentProfilePictureClipper, studentLayout;
     TextView studentFullName;
     Toolbar toolbar;
     TabLayout tabLayout;
@@ -41,12 +50,14 @@ public class StudentRewardHome extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_reward_home);
 
+        context = this;
         bundle = getIntent().getExtras();
         studentID = bundle.getString("studentID");
         studentName = bundle.getString("studentName");
         studentPicURL = bundle.getString("studentPicURL");
 
         studentPic = (ImageView) findViewById(R.id.studentpic);
+        studentProfilePictureClipper = (LinearLayout) findViewById(R.id.profilepictureclipper);
         studentLayout = (LinearLayout) findViewById(R.id.studentlayout);
         studentFullName = (TextView) findViewById(R.id.studentname);
 
@@ -62,20 +73,40 @@ public class StudentRewardHome extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
 
         studentFullName.setText(studentName);
-        Glide.with(this)
-                .load(studentPicURL)
-                .centerCrop()
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
-                .bitmapTransform(new CropCircleTransformation(this))
-                .into(studentPic);
+        studentProfilePictureClipper.setClipToOutline(true);
+
+        Drawable textDrawable;
+        if (!studentName.isEmpty()) {
+            String[] nameArray = studentName.replaceAll("\\s+", " ").split(" ");
+            if (nameArray.length == 1) {
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+            } else {
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
+            }
+            studentPic.setImageDrawable(textDrawable);
+        } else {
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+        }
+
+        if (!studentPicURL.isEmpty()) {
+            Glide.with(context)
+                    .load(studentPicURL)
+                    .placeholder(textDrawable)
+                    .error(textDrawable)
+                    .centerCrop()
+                    .bitmapTransform(new CropCircleTransformation(context))
+                    .into(studentPic);
+        }
 
         studentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(StudentRewardHome.this, StudentProfileActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("childID", studentID);
+                Gson gson = new Gson();
+                Student student = new Student(studentName, studentID, studentPicURL);
+                String studentCred = gson.toJson(student);
+                bundle.putString("childID", studentCred);
                 I.putExtras(bundle);
                 startActivity(I);
             }

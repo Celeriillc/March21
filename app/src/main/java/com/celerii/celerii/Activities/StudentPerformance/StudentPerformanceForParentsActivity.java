@@ -70,6 +70,13 @@ public class StudentPerformanceForParentsActivity extends AppCompatActivity {
         Bundle b = getIntent().getExtras();
         activeStudent = b.getString("Child ID");
         parentActivity = b.getString("parentActivity");
+        if (parentActivity != null) {
+            if (!parentActivity.isEmpty()) {
+                sharedPreferencesManager.setActiveAccount(parentActivity);
+                mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+            }
+        }
 
         if (activeStudent != null){
             Gson gson = new Gson();
@@ -82,7 +89,7 @@ public class StudentPerformanceForParentsActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(activeStudentName.trim()  + "'s Performance History"); //Replace
+        getSupportActionBar().setTitle(activeStudentName.trim()  + "'s Current Performance"); //Replace
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -124,6 +131,7 @@ public class StudentPerformanceForParentsActivity extends AppCompatActivity {
     public String getData(){
         return activeStudent;
     }
+    public String getParentActivity() {  return parentActivity; }
 
     private void setupViewPager(ViewPager viewPager) {
         StudentPerformanceForParentsActivity.ViewPagerAdapter adapter = new StudentPerformanceForParentsActivity.ViewPagerAdapter(getSupportFragmentManager());

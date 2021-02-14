@@ -25,9 +25,7 @@
             style="@style/customTabLayout"
             android:background="@color/white"
             app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
-            app:tabGravity="fill"
-            app:tabIndicatorColor="@color/colorAccent"
-            app:tabIndicatorHeight="2dp"/>
+            app:tabGravity="fill"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

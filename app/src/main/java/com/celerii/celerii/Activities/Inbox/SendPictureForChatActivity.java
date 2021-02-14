@@ -81,7 +81,7 @@ public class SendPictureForChatActivity extends AppCompatActivity {
 
             if (bitmap != null) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 Glide.with(this)
                         .load(stream.toByteArray())
                         .bitmapTransform(new BlurTransformation(context, 20))

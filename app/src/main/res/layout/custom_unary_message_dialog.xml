@@ -10,15 +10,20 @@
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/dialogmessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
         android:gravity="center"
-        android:padding="15dp"
-        android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:paddingStart="25dp"
+        android:paddingEnd="25dp"
+        android:textSize="15sp"
+        android:textColor="@color/colorBottomNavigationIconGray"
         android:text=""/>
 
     <View

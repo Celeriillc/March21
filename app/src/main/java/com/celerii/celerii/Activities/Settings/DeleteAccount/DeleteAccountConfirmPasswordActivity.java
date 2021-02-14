@@ -30,8 +30,10 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.LogoutProtocol;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -135,12 +137,12 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
                 if (!isPasswordVisible) {
                     password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     password.setSelection(password.length());
-                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isPasswordVisible = true;
                 } else {
                     password.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     password.setSelection(password.length());
-                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isPasswordVisible = false;
                 }
             }
@@ -252,14 +254,14 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
                                                                                     mDatabaseReference.updateChildren(deleteAccountReverseUpdatemap);
                                                                                     progressDialog.dismiss();
                                                                                     String messageString = "An error occurred while deleting your account and could not be completed. Please try again";
-                                                                                    showDialogWithMessage(Html.fromHtml(messageString));
+                                                                                    ShowDialogWithMessage.showDialogWithMessage(context, messageString);
                                                                                 }
                                                                             }
                                                                         });
                                                                     } else {
                                                                         progressDialog.dismiss();
-                                                                        String messageString = "An error occurred while deleting your account and could not be completed. Please try again";
-                                                                        showDialogWithMessage(Html.fromHtml(messageString));
+                                                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                                        showDialogWithMessage(Html.fromHtml(message));
                                                                     }
                                                                 }
                                                             });
@@ -302,8 +304,8 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
                                                                             });
                                                                         } else {
                                                                             progressDialog.dismiss();
-                                                                            String messageString = "An error occurred while deleting your account and could not be completed. Please try again";
-                                                                            showDialogWithMessage(Html.fromHtml(messageString));
+                                                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                                            showDialogWithMessage(Html.fromHtml(message));
                                                                         }
                                                                     }
                                                                 });
@@ -351,8 +353,8 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
                                                                             });
                                                                         } else {
                                                                             progressDialog.dismiss();
-                                                                            String messageString = "An error occurred while deleting your account and could not be completed. Please try again";
-                                                                            showDialogWithMessage(Html.fromHtml(messageString));
+                                                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                                            showDialogWithMessage(Html.fromHtml(message));
                                                                         }
                                                                     }
                                                                 });
@@ -397,8 +399,8 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
                                                                             });
                                                                         } else {
                                                                             progressDialog.dismiss();
-                                                                            String messageString = "An error occurred while deleting your account and could not be completed. Please try again";
-                                                                            showDialogWithMessage(Html.fromHtml(messageString));
+                                                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                                            showDialogWithMessage(Html.fromHtml(message));
                                                                         }
                                                                     }
                                                                 });

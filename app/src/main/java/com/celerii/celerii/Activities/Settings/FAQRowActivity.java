@@ -117,9 +117,9 @@ public class FAQRowActivity extends AppCompatActivity {
 
     private void loadFromFirebase() {
         if (activeAccount.equals("Teacher")){
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher FAQ");
+            mDatabaseReference = mFirebaseDatabase.getReference().child("FAQ").child("Teacher");
         } else if (activeAccount.equals("Parent")){
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Parent FAQ");
+            mDatabaseReference = mFirebaseDatabase.getReference().child("FAQ").child("Parent");
         }
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

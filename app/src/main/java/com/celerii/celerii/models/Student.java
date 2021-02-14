@@ -34,6 +34,19 @@ public class Student {
         this.bio = "";
     }
 
+    public Student(String firstName, String studentID, String imageURL){
+        this.firstName = firstName;
+        this.lastName = "";
+        this.middleName = "";
+        this.searchableFirstName = firstName.toLowerCase();
+        this.searchableLastName = "";
+        this.searchableMiddleName = "";
+        this.imageURL = imageURL;
+        this.gender = "";
+        this.studentID = studentID;
+        this.bio = "";
+    }
+
     public Student(String firstName, String lastName, String imageURL, String studentID) {
         this.firstName = firstName;
         this.lastName = lastName;

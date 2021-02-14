@@ -16,6 +16,9 @@ import android.widget.TextView;
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Home.NotificationDetailActivity;
+import com.celerii.celerii.Activities.Home.Parent.ParentsRequestActivity;
+import com.celerii.celerii.Activities.Home.Teacher.TeacherRequestActivity;
+import com.celerii.celerii.Activities.Profiles.ParentProfileActivity;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.Activities.StudentAttendance.ParentAttendanceActivity;
 import com.celerii.celerii.Activities.StudentBehaviouralPerformance.BehaviouralResultActivity;
@@ -29,6 +32,7 @@ import com.celerii.celerii.models.NotificationModel;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
 import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.Teacher;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -120,34 +124,42 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
         } else if (notificationType.equals("Newsletter")){
             notification = "<b>" + notificationSubject + "</b>" + " published a new school newsletter for you.";
         } else if (notificationType.equals("ConnectionRequest")){ //TODO: Remove
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                notification = "<b>" + notificationSubject + "</b>" + " has requested to connect to " + "<b>" + notificationModel.getObject() + "</b>" + "'s account";
+            if (notificationModel.getToAccountType().equals("Parent")) {
+                notification = "<b>" + notificationSubject + "</b>" + " has requested to connect to " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
             } else {
                 notification = "<b>" + notificationSubject + "</b>" + " has requested to connect to your account";
             }
-            holder.connectionRequest.setVisibility(View.VISIBLE);
+//            holder.connectionRequest.setVisibility(View.VISIBLE);
         } else if (notificationType.equals("ConnectionRequestDeclined")){
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                notification = "Your request to connect to " + "<b>" + notificationModel.getObject() + "</b>" + "'s account has been declined by " + "<b>" + notificationSubject + "</b>";
+            if (notificationModel.getToAccountType().equals("Parent")) {
+                notification = "Your request to connect to " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account has been declined by " + "<b>" + notificationSubject + "</b>";
             } else {
                 notification = "Your request to connect to " + "<b>" + notificationSubject + "</b>" + " has been declined by them";
             }
         } else if (notificationType.equals("Disconnection")){
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                notification = "<b>" + notificationSubject + "</b>" + " has disconnected from " + "<b>" + notificationModel.getObject() + "</b>" + "'s account";
+            if (notificationModel.getToAccountType().equals("Parent")) {
+                if (notificationModel.getFromID().equals(mFirebaseUser.getUid())) {
+                    notification = "You have disconnected from " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
+                } else {
+                    notification = "<b>" + notificationSubject + "</b>" + " has disconnected from " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
+                }
             } else {
                 notification = "<b>" + notificationSubject + "</b>" + " has disconnected from your account";
             }
         } else if (notificationType.equals("Connection")){
-            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                notification = "<b>" + notificationSubject + "</b>" + " has connected to " + "<b>" + notificationModel.getObject() + "</b>" + "'s account";
+            if (notificationModel.getToAccountType().equals("Parent")) {
+                if (notificationModel.getFromID().equals(mFirebaseUser.getUid())) {
+                    notification = "You have connected to " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
+                } else {
+                    notification = "<b>" + notificationSubject + "</b>" + " has connected to " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
+                }
             } else {
                 notification = "<b>" + notificationSubject + "</b>" + " has connected to your account";
             }
-        } else if (notificationType.equals("NewResultPost")){
-            notification = "<b>" + notificationSubject + "</b>" + " has posted new academic results for " + "<b>" + notificationModel.getObjectName() + "</b>";
+        } else if (notificationType.equals("NewResultPost")) {
+            notification = "<b>" + notificationSubject + "</b>" + " has posted a new academic result for " + "<b>" + notificationModel.getObjectName() + "</b>";
         } else if (notificationType.equals("NewBehaviouralPost")){
-            notification = "<b>" + notificationSubject + "</b>" + " has posted new behavioural results for " + "<b>" + notificationModel.getObjectName() + "</b>";
+            notification = "<b>" + notificationSubject + "</b>" + " has posted a new behavioural result for " + "<b>" + notificationModel.getObjectName() + "</b>";
         } else if (notificationType.equals("NewAttendancePost")){
             notification = "<b>" + notificationSubject + "</b>" + " has posted a new attendance record for " + "<b>" + notificationModel.getObjectName() + "</b>";
         } else {
@@ -165,12 +177,24 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     .centerCrop()
                     .into(holder.notificationType);
         } else {
-            holder.notificationType.setVisibility(View.GONE);
+            holder.notificationType.setVisibility(View.INVISIBLE);
+        }
+
+        String picName = notificationSubject;
+        String picPictureURL = notificationModel.getFromProfilePicture();
+
+        if (notificationModel.getToAccountType().equals("Parent")) {
+            if (notificationType.equals("ConnectionRequest") || notificationType.equals("ConnectionRequestDeclined") || notificationType.equals("Disconnection") ||
+                    notificationType.equals("Connection") || notificationType.equals("NewResultPost") || notificationType.equals("NewBehaviouralPost") ||
+                    notificationType.equals("NewAttendancePost")) {
+                picName = notificationModel.getObjectName();
+                picPictureURL = notificationModel.getNotificationImageURL();
+            }
         }
 
         Drawable textDrawable;
-        if (!notificationModel.getFromName().isEmpty()) {
-            String[] nameArray = notificationModel.getFromName().split(" ");
+        if (!picName.isEmpty()) {
+            String[] nameArray = picName.replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {
@@ -181,9 +205,9 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
         }
 
-        if (!notificationModel.getFromProfilePicture().isEmpty()) {
+        if (!picPictureURL.isEmpty()) {
             Glide.with(context)
-                    .load(notificationModel.getFromProfilePicture())
+                    .load(picPictureURL)
                     .placeholder(textDrawable)
                     .error(textDrawable)
                     .centerCrop()
@@ -381,7 +405,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                                 newDeclinedMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Declined");
                                 newDeclinedMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Declined");
                                 newDeclinedMap.put("NotificationTeacher/" + mFirebaseUser.getUid() + "/" + pendingRequestKey, null);
-                                newDeclinedMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notificationModel);
+                                newDeclinedMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notification);
                                 newRef.updateChildren(newDeclinedMap);
                             }
 
@@ -425,27 +449,32 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     Intent I = new Intent(context, EventDetailActivity.class);
                     I.putExtras(b);
                     context.startActivity(I);
-                } else if (notificationType.equals("Connection")) {
-                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                        Bundle b = new Bundle();
-                        b.putString("postKey", notificationModel.getActivityID());
-                        b.putString("notificationType", "Connection");
-                        Intent I = new Intent(context, NotificationDetailActivity.class);
-                        I.putExtras(b);
+                } else if (notificationType.equals("ConnectionRequest")) {
+                    if (notificationModel.getFromAccountType().equals("Parent")) {
+                        Intent I = new Intent(context, ParentsRequestActivity.class);
                         context.startActivity(I);
+                    } else {
+                        Intent I = new Intent(context, TeacherRequestActivity.class);
+                        context.startActivity(I);
+                    }
+                } else if (notificationType.equals("Connection")) {
+                    if (notificationModel.getFromAccountType().equals("Parent")) {
+                        Intent intent;
+                        Bundle b = new Bundle();
+                        if (notificationModel.getFromAccountType().equals("Parent")) {
+                            intent = new Intent(context, ParentProfileActivity.class);
+                            b.putString("parentID", notificationModel.getFromID());
+                        } else {
+                            intent = new Intent(context, SchoolProfileActivity.class);
+                            b.putString("School ID", notificationModel.getFromID());
+                        }
+                        intent.putExtras(b);
+                        context.startActivity(intent);
+
                     } else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
                         Intent I = new Intent(context, SchoolProfileActivity.class);
                         Bundle b = new Bundle();
                         b.putString("School ID", notificationModel.getFromID());
-                        I.putExtras(b);
-                        context.startActivity(I);
-                    }
-                } else if (notificationType.equals("ConnectionRequestDeclined")) {
-                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                        Bundle b = new Bundle();
-                        b.putString("postKey", notificationModel.getActivityID());
-                        b.putString("notificationType", "ConnectionRequestDeclined");
-                        Intent I = new Intent(context, NotificationDetailActivity.class);
                         I.putExtras(b);
                         context.startActivity(I);
                     }

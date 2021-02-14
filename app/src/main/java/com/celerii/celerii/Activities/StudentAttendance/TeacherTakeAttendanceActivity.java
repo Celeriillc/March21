@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,9 +31,13 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
+import com.celerii.celerii.helperClasses.Month;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.TeacherTakeAttendanceSharedPreferences;
 import com.celerii.celerii.helperClasses.Term;
+import com.celerii.celerii.models.AcademicRecord;
 import com.celerii.celerii.models.AttendanceStatusModel;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
@@ -171,26 +177,24 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
-                    }
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("Take Class Attendance");
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return;
                 }
-            } else {
-                setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle("Take Class Attendance");
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeButtonEnabled(true);
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                mySwipeRefreshLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                errorLayoutButton.setText("Find my school");
-                errorLayoutButton.setVisibility(View.VISIBLE);
-                return;
             }
         }
 
@@ -353,7 +357,12 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-
+                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                        mySwipeRefreshLayout.setRefreshing(false);
+                                        recyclerView.setVisibility(View.GONE);
+                                        progressLayout.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.VISIBLE);
+                                        errorLayoutText.setText(Html.fromHtml(message));
                                     }
                                 });
                             }
@@ -366,14 +375,24 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml(message));
                     }
                 });
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml(message));
             }
         });
     }
@@ -425,7 +444,12 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
+                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                recyclerView.setVisibility(View.GONE);
+                                progressLayout.setVisibility(View.GONE);
+                                errorLayout.setVisibility(View.VISIBLE);
+                                errorLayoutText.setText(Html.fromHtml(message));
                             }
                         });
                     }
@@ -434,13 +458,18 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText("This class doesn't contain any students");
+                    errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml(message));
             }
         });
     }
@@ -482,61 +511,138 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
             return;
         }
 
-        final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(TeacherTakeAttendanceActivity.this);
-        progressDialog.show();
+        mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(activeClass);
+        mDatabaseReference.orderByChild("year_month_day").equalTo(year_month_day).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    boolean recordExists = false;
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        AcademicRecord academicRecordPrevious = postSnapshot.getValue(AcademicRecord.class);
+                        if (academicRecordPrevious.getSubject().equals(subject)) {
+                            recordExists = true;
+                        }
+                    }
 
-        mDatabaseReference = mFirebaseDatabase.getReference("AttendanceClass").child(activeClass).push();
-        String pushID = mDatabaseReference.getKey();
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        teacherAttendanceHeader.setDate(date);
-        teacherAttendanceHeader.setKey(pushID);
-
-        Map<String, Object> newAttendance = new HashMap<String, Object>();
-        newAttendance.put("AttendanceClass/" + activeClass + "/" + pushID, teacherAttendanceHeader);
-        for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
-            if (!teacherAttendanceRowList.get(i).getStudentID().equals("")) {
-                newAttendance.put("AttendanceClass-Students/" + activeClass + "/" + pushID + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(),
-                        new AttendanceStatusModel(teacherAttendanceRowList.get(i).getAttendanceStatus(), ""));
-
-                TeacherAttendanceRow studentAttendance = teacherAttendanceRowList.get(i);
-                studentAttendance.setTeacherID(auth.getCurrentUser().getUid());
-                studentAttendance.setSubject(subject);
-                studentAttendance.setClassID(activeClass);
-                studentAttendance.setSchoolID(schoolID);
-                studentAttendance.setSortableDate(sortableDate);
-                studentAttendance.setSubject_term_year(subject_term_year);
-                studentAttendance.setYear_month_day(year_month_day);
-                studentAttendance.setKey(pushID);
-                newAttendance.put("AttandenceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + pushID, studentAttendance);
-
-                String studentID = teacherAttendanceRowList.get(i).getStudentID();
-                ArrayList<String> parentIDList = studentParentList.get(studentID);
-                if (parentIDList != null) {
-                    for (int j = 0; j < parentIDList.size(); j++) {
-                        String parentID = parentIDList.get(j);
-                        NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewAttendancePost", teacherAttendanceRowList.get(i).getImageURL(), teacherAttendanceRowList.get(i).getStudentID(), teacherAttendanceRowList.get(i).getName(), false);
-                        newAttendance.put("AttendanceParentNotification/" + parentID + "/" + studentID + "/status", true);
-                        newAttendance.put("AttendanceParentNotification/" + parentID + "/" + studentID + "/" + pushID + "/status", true);
-                        newAttendance.put("AttendanceParentRecipients/" + pushID + "/" + parentID, true);
-                        newAttendance.put("NotificationParent/" + parentID + "/" + pushID, notificationModel);
-                        newAttendance.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
-                        newAttendance.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+                    if (recordExists) {
+                        showDialogWithMessage("An attendance record already exists for " + subject + " for " + Month.Month(Integer.parseInt(month) - 1) + " " + day + ", " + year);
+                        return;
                     }
                 }
-            }
-        }
 
-        mDatabaseReference.updateChildren(newAttendance, new DatabaseReference.CompletionListener() {
+                final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(TeacherTakeAttendanceActivity.this);
+                progressDialog.show();
+
+                int present = 0;
+                int absent = 0;
+                int late = 0;
+                mDatabaseReference = mFirebaseDatabase.getReference("AttendanceClass").child(activeClass).push();
+                String pushID = mDatabaseReference.getKey();
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                teacherAttendanceHeader.setDate(date);
+                teacherAttendanceHeader.setKey(pushID);
+
+                Map<String, Object> newAttendance = new HashMap<String, Object>();
+                for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
+                    if (!teacherAttendanceRowList.get(i).getStudentID().equals("")) {
+                        if (teacherAttendanceRowList.get(i).getAttendanceStatus().equals("Present")) {
+                            present++;
+                        } else if (teacherAttendanceRowList.get(i).getAttendanceStatus().equals("Absent")) {
+                            absent++;
+                        } else {
+                            late++;
+                        }
+
+                        teacherAttendanceHeader.setPresent(String.valueOf(present));
+                        teacherAttendanceHeader.setAbsent(String.valueOf(absent));
+                        teacherAttendanceHeader.setLate(String.valueOf(late));
+
+                        newAttendance.put("AttendanceClass-Students/" + activeClass + "/" + pushID + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(),
+                                new AttendanceStatusModel(teacherAttendanceRowList.get(i).getAttendanceStatus(), ""));
+
+                        TeacherAttendanceRow studentAttendance = teacherAttendanceRowList.get(i);
+                        studentAttendance.setTeacherID(auth.getCurrentUser().getUid());
+                        studentAttendance.setSubject(subject);
+                        studentAttendance.setClassID(activeClass);
+                        studentAttendance.setSchoolID(schoolID);
+                        studentAttendance.setSortableDate(sortableDate);
+                        studentAttendance.setSubject_term_year(subject_term_year);
+                        studentAttendance.setYear_month_day(year_month_day);
+                        studentAttendance.setKey(pushID);
+                        newAttendance.put("AttendanceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + pushID, studentAttendance);
+
+                        String studentID = teacherAttendanceRowList.get(i).getStudentID();
+                        ArrayList<String> parentIDList = studentParentList.get(studentID);
+                        if (parentIDList != null) {
+                            for (int j = 0; j < parentIDList.size(); j++) {
+                                String parentID = parentIDList.get(j);
+                                NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewAttendancePost", teacherAttendanceRowList.get(i).getImageURL(), teacherAttendanceRowList.get(i).getStudentID(), teacherAttendanceRowList.get(i).getName(), false);
+                                newAttendance.put("AttendanceParentNotification/" + parentID + "/" + studentID + "/status", true);
+                                newAttendance.put("AttendanceParentNotification/" + parentID + "/" + studentID + "/" + pushID + "/status", true);
+                                newAttendance.put("AttendanceParentRecipients/" + pushID + "/" + parentID, true);
+                                newAttendance.put("NotificationParent/" + parentID + "/" + pushID, notificationModel);
+                                newAttendance.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
+                                newAttendance.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+                            }
+                        }
+                    }
+                }
+                newAttendance.put("AttendanceClass/" + activeClass + "/" + pushID, teacherAttendanceHeader);
+
+                mDatabaseReference.updateChildren(newAttendance, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            progressDialog.dismiss();
+                            ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + subject + "</b>" +  " attendance for " + "<b>" + className + "</b>" + " has been posted"));
+                        } else {
+                            progressDialog.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            showDialogWithMessage(message);
+                        }
+                    }
+                });
+            }
+
             @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                //ProgressBar Hold
-                progressDialog.dismiss();
-                showDialogWithMessage("Attendance has been posted");
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml(message));
             }
         });
     }
 
     void showDialogWithMessage (String messageString) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
+    void showDialogWithMessageAndClose (String messageString) {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.custom_unary_message_dialog);
         dialog.setCancelable(false);

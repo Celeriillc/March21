@@ -17,8 +17,10 @@ import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -90,7 +92,7 @@ public class SendPictureForEditProfileActivity extends AppCompatActivity {
 
             if (bitmap != null) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 Glide.with(this)
                         .load(stream.toByteArray())
                         .bitmapTransform(new BlurTransformation(context, 20))
@@ -148,25 +150,31 @@ public class SendPictureForEditProfileActivity extends AppCompatActivity {
                             mDatabaseReference.updateChildren(updater, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    progressDialog.dismiss();
+                                    if (databaseError == null) {
+                                        progressDialog.dismiss();
 
-                                    final Dialog dialog = new Dialog(context);
-                                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
-                                    dialog.setCancelable(false);
-                                    dialog.setCanceledOnTouchOutside(false);
-                                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
-                                    TextView close = (TextView) dialog.findViewById(R.id.close);
-                                    dialog.show();
+                                        final Dialog dialog = new Dialog(context);
+                                        dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                                        dialog.setCancelable(false);
+                                        dialog.setCanceledOnTouchOutside(false);
+                                        TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                                        TextView close = (TextView) dialog.findViewById(R.id.close);
+                                        dialog.show();
 
-                                    dialogMessage.setText("Profile picture uploaded successfully!");
+                                        dialogMessage.setText("Profile picture uploaded successfully!");
 
-                                    close.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            finish();
-                                            dialog.dismiss();
-                                        }
-                                    });
+                                        close.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                finish();
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                    } else {
+                                        progressDialog.dismiss();
+                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                        ShowDialogWithMessage.showDialogWithMessage(context, message);
+                                    }
                                 }
                             });
                         }

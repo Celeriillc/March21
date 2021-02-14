@@ -33,6 +33,7 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.ClassStory;
@@ -42,6 +43,7 @@ import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.Parent;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.School;
+import com.celerii.celerii.models.SubscriptionModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -54,6 +56,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +86,7 @@ public class CommentStoryActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
 
     TextView addComment;
-    LinearLayout sendComment;
+    ImageView sendComment;
     String comment, posterName, posterImageURL;
     int commentCounter = 0;
     Comment newComment = new Comment();
@@ -114,6 +117,13 @@ public class CommentStoryActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         storyKey = bundle.getString("postKey");
         parentActivity = bundle.getString("parentActivity");
+        if (parentActivity != null) {
+            if (!parentActivity.isEmpty()) {
+                sharedPreferencesManager.setActiveAccount(parentActivity);
+                mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+            }
+        }
 
         mtoolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(mtoolbar);
@@ -123,7 +133,7 @@ public class CommentStoryActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         addComment = (TextView) findViewById(R.id.messageedittext);
-        sendComment = (LinearLayout) findViewById(R.id.clipper);
+        sendComment = (ImageView) findViewById(R.id.sendMessageButton);
         myProfilePic = (ImageView) findViewById(R.id.posterpic);
         addComment.setEnabled(false);
         sendComment.setEnabled(false);
@@ -275,8 +285,9 @@ public class CommentStoryActivity extends AppCompatActivity {
 
     private void loadCommentsFromFirebase() {
         Drawable textDrawable;
-        if (!sharedPreferencesManager.getMyFirstName().isEmpty() && !sharedPreferencesManager.getMyLastName().isEmpty()) {
-            String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+        String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+        if (!myName.trim().isEmpty()) {
+            String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {
@@ -368,6 +379,14 @@ public class CommentStoryActivity extends AppCompatActivity {
                                                     addComment.setEnabled(true);
                                                     sendComment.setEnabled(true);
                                                     sendComment.setAlpha(1f);
+                                                    if (commentList.size() > 1) {
+                                                        Collections.sort(commentList, new Comparator<Comment>() {
+                                                            @Override
+                                                            public int compare(Comment o1, Comment o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
+                                                    }
                                                     Collections.reverse(commentList);
                                                     commentList.add(0, new Comment());
                                                     mAdapter.notifyDataSetChanged();
@@ -380,7 +399,13 @@ public class CommentStoryActivity extends AppCompatActivity {
 
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
-
+                                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                recyclerView.setVisibility(View.GONE);
+                                                progressLayout.setVisibility(View.GONE);
+                                                errorLayout.setVisibility(View.VISIBLE);
+                                                errorLayoutText.setText(message);
+                                                return;
                                             }
                                         });
                                     } else {
@@ -403,6 +428,14 @@ public class CommentStoryActivity extends AppCompatActivity {
                                                     addComment.setEnabled(true);
                                                     sendComment.setEnabled(true);
                                                     sendComment.setAlpha(1f);
+                                                    if (commentList.size() > 1) {
+                                                        Collections.sort(commentList, new Comparator<Comment>() {
+                                                            @Override
+                                                            public int compare(Comment o1, Comment o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
+                                                    }
                                                     Collections.reverse(commentList);
                                                     commentList.add(0, new Comment());
                                                     mAdapter.notifyDataSetChanged();
@@ -415,7 +448,13 @@ public class CommentStoryActivity extends AppCompatActivity {
 
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
-
+                                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                recyclerView.setVisibility(View.GONE);
+                                                progressLayout.setVisibility(View.GONE);
+                                                errorLayout.setVisibility(View.VISIBLE);
+                                                errorLayoutText.setText(message);
+                                                return;
                                             }
                                         });
                                     }
@@ -436,7 +475,13 @@ public class CommentStoryActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText(message);
+                            return;
                         }
                     });
                 } else {
@@ -450,7 +495,13 @@ public class CommentStoryActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(message);
+                return;
             }
         });
     }

@@ -2,54 +2,20 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".Activities.Profiles.SchoolProfile.SchoolGalleryActivity">
 
     <include android:id="@+id/hometoolbar"
-        layout="@layout/home_toolbar"/>
+        layout="@layout/home_toolbar" />
 
-    <LinearLayout
-        android:id="@+id/errorlayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:visibility="gone"
-        android:layout_marginTop="?attr/actionBarSize">
+    <include android:id="@+id/errorlayout"
+        layout="@layout/error_layout"/>
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:scaleType="centerCrop" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_margin="15dp"
-            android:text="FAQs are not available at this time, please try again in a few minutes"
-            android:textSize="20sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/progresslayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:visibility="gone"
-        android:layout_marginTop="?attr/actionBarSize">
-
-        <ProgressBar
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical|center_horizontal"/>
-
-    </LinearLayout>
+    <include android:id="@+id/progresslayout"
+        layout="@layout/progress_layout"/>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -58,8 +24,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"/>
+            android:layout_height="wrap_content"
+            android:foregroundGravity="top"
+            android:background="@android:color/white" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

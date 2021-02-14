@@ -102,6 +102,17 @@ public class ParentHomeClassFeed extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+//        if (hidden) {
+//
+//        } else {
+//
+//        }
+    }
+
+    @Override
     public void onResume() {
         setRetainInstance(true);
         super.onResume();
@@ -245,6 +256,162 @@ public class ParentHomeClassFeed extends Fragment {
             }
         });
 
+//        DatabaseReference childEventRef = mFirebaseDatabase.getReference("ClassStoryParentFeed").child(mFirebaseUser.getUid());
+//        childEventRef.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(final DataSnapshot dataSnapshot, String s) {
+//                if (classStoryList.size() > 0) {
+//                    final String storyKey = dataSnapshot.getKey();
+//                    final Boolean liked = dataSnapshot.getValue(Boolean.class);
+//                    if (!storyKeyList.contains(storyKey)) {
+//                        mDatabaseReference = mFirebaseDatabase.getReference("ClassStory").child(storyKey);
+//                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                if (dataSnapshot.exists()) {
+//                                    final ClassStory newClassStory = dataSnapshot.getValue(ClassStory.class);
+//                                    String posterAccountType = newClassStory.getPosterAccountType();
+//
+//                                    if (posterAccountType.equals("School")) {
+//                                        String schoolID = newClassStory.getPosterID();
+//                                        mDatabaseReference = mFirebaseDatabase.getReference("School/" + schoolID);
+//                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                            @Override
+//                                            public void onDataChange(DataSnapshot dataSnapshot) {
+//                                                if (dataSnapshot.exists()) {
+//                                                    School school = dataSnapshot.getValue(School.class);
+//                                                    posterName = school.getSchoolName();
+//                                                    posterProfilePicURL = school.getProfilePhotoUrl();
+//
+//                                                    newClassStory.setPosterName(posterName);
+//                                                    newClassStory.setProfilePicURL(posterProfilePicURL);
+//                                                    newClassStory.setLiked(liked);
+//
+//                                                    if (classStoryList.size() > 0) {
+//                                                        if (!Date.compareDates(classStoryList.get(0).getDate(), newClassStory.getDate())) {
+//                                                            classStoryList.add(0, newClassStory);
+//                                                            storyKeyList.add(storyKey);
+//                                                            mAdapter.notifyDataSetChanged();
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//
+//                                            @Override
+//                                            public void onCancelled(DatabaseError databaseError) {
+//
+//                                            }
+//                                        });
+//                                    }
+//                                    else if (posterAccountType.equals("Teacher") || posterAccountType.equals("Parent")) {
+//                                        String teacherID = newClassStory.getPosterID();
+//                                        mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
+//                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                            @Override
+//                                            public void onDataChange(DataSnapshot dataSnapshot) {
+//                                                if (dataSnapshot.exists()) {
+//                                                    Teacher teacher = dataSnapshot.getValue(Teacher.class);
+//                                                    posterName = teacher.getFirstName() + " " + teacher.getLastName();
+//                                                    posterProfilePicURL = teacher.getProfilePicURL();
+//
+//                                                    newClassStory.setPosterName(posterName);
+//                                                    newClassStory.setProfilePicURL(posterProfilePicURL);
+//                                                    newClassStory.setLiked(liked);
+//
+//                                                    if (classStoryList.size() > 0) {
+//                                                        if (!Date.compareDates(classStoryList.get(0).getDate(), newClassStory.getDate())) {
+//                                                            classStoryList.add(0, newClassStory);
+//                                                            storyKeyList.add(storyKey);
+//                                                            mAdapter.notifyDataSetChanged();
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//
+//                                            @Override
+//                                            public void onCancelled(DatabaseError databaseError) {
+//
+//                                            }
+//                                        });
+//                                    }
+//                                    else {
+//                                        String adminID = newClassStory.getPosterID();
+//                                        mDatabaseReference = mFirebaseDatabase.getReference("Admin/" + adminID);
+//                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                            @Override
+//                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                                if (dataSnapshot.exists()) {
+//                                                    Admin admin = dataSnapshot.getValue(Admin.class);
+//                                                    posterName = admin.getDisplayName();
+//                                                    posterProfilePicURL = admin.getProfilePictureURL();
+//
+//                                                    newClassStory.setPosterName(posterName);
+//                                                    newClassStory.setProfilePicURL(posterProfilePicURL);
+//                                                    newClassStory.setLiked(liked);
+//
+//                                                    if (classStoryList.size() > 0) {
+//                                                        if (!Date.compareDates(classStoryList.get(0).getDate(), newClassStory.getDate())) {
+//                                                            classStoryList.add(0, newClassStory);
+//                                                            storyKeyList.add(storyKey);
+//                                                            mAdapter.notifyDataSetChanged();
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//
+//                                            @Override
+//                                            public void onCancelled(@NonNull DatabaseError error) {
+//
+//                                            }
+//                                        });
+//                                    }
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(@NonNull DatabaseError error) {
+//
+//                            }
+//                        });
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//                String changedClassStoryKey = dataSnapshot.getKey();
+//                ClassStory changedClassStory = dataSnapshot.getValue(ClassStory.class);
+//
+//                for (int i = 0; i < classStoryList.size(); i++){
+//                    if (classStoryList.get(i).getPostID() != null) {
+//                        if (classStoryList.get(i).getPostID().equals(changedClassStoryKey) && changedClassStory != null) {
+//                            classStoryList.get(i).setNoOfLikes(changedClassStory.getNoOfLikes());
+//                            classStoryList.get(i).setNumberOfComments(changedClassStory.getNumberOfComments());
+//                            classStoryList.get(i).setComment(changedClassStory.getComment());
+//                            break;
+//                        }
+//                    }
+//                }
+//
+//                mAdapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -286,13 +453,13 @@ public class ParentHomeClassFeed extends Fragment {
 
     private void loadFromSharedPreferences() {
         Gson gson = new Gson();
-        classStoryList = new ArrayList<>();
+        ArrayList<ClassStory> classStoryListLocal = new ArrayList<>();
         String messagesJSON = sharedPreferencesManager.getParentFeed();
         Type type = new TypeToken<ArrayList<ClassStory>>() {}.getType();
-        classStoryList = gson.fromJson(messagesJSON, type);
+        classStoryListLocal = gson.fromJson(messagesJSON, type);
 
-        if (classStoryList == null) {
-            classStoryList = new ArrayList<>();
+        if (classStoryListLocal == null) {
+            classStoryListLocal = new ArrayList<>();
             mySwipeRefreshLayout.setRefreshing(false);
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
@@ -302,12 +469,15 @@ public class ParentHomeClassFeed extends Fragment {
             errorLayoutButton.setText("Find my child");
             errorLayoutButton.setVisibility(View.VISIBLE);
         } else {
-            for (ClassStory classStory: classStoryList) {
+            for (ClassStory classStory: classStoryListLocal) {
                 if (!storyKeyList.contains(classStory.getPostID())) {
                     storyKeyList.add(classStory.getPostID());
                 }
             }
-            classStoryList.add(new ClassStory());
+            classStoryListLocal.add(new ClassStory());
+            classStoryList.clear();
+            classStoryList.addAll(classStoryListLocal);
+
             mAdapter = new ClassStoryAdapter(classStoryList, true, context);
             recyclerView.setAdapter(mAdapter);
             mySwipeRefreshLayout.setRefreshing(false);

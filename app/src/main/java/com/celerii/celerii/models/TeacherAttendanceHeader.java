@@ -8,19 +8,32 @@ public class TeacherAttendanceHeader {
     String className, subject, term, date, teacher, noOfStudents, noOfBoys, noOfGirls, key;
     String day, month, year, sortableDate, teacherID, classID, schoolID;
     String month_year, term_year, subject_term_year, year_month_day;
+    String present, absent, late;
 
     public TeacherAttendanceHeader() {
         this.className = "";
         this.subject = "";
         this.term = "";
+        this.date = "";
         this.teacher = "";
         this.noOfStudents = "";
         this.noOfBoys = "";
         this.noOfGirls = "";
+        this.key = "";
         this.day = "";
         this.month = "";
         this.year = "";
-        this.date = "";
+        this.sortableDate = "";
+        this.teacherID = "";
+        this.classID = "";
+        this.schoolID = "";
+        this.month_year = "";
+        this.term_year = "";
+        this.subject_term_year = "";
+        this.year_month_day = "";
+        this.present = "0";
+        this.absent = "0";
+        this.late = "0";
     }
 
     public TeacherAttendanceHeader(String className, String subject, String term, String date, String teacher, String noOfStudents, String noOfBoys, String noOfGirls) {
@@ -205,5 +218,29 @@ public class TeacherAttendanceHeader {
 
     public void setYear_month_day(String year_month_day) {
         this.year_month_day = year_month_day;
+    }
+
+    public String getPresent() {
+        return present;
+    }
+
+    public void setPresent(String present) {
+        this.present = present;
+    }
+
+    public String getAbsent() {
+        return absent;
+    }
+
+    public void setAbsent(String absent) {
+        this.absent = absent;
+    }
+
+    public String getLate() {
+        return late;
+    }
+
+    public void setLate(String late) {
+        this.late = late;
     }
 }

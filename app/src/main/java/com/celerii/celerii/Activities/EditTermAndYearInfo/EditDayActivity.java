@@ -34,6 +34,7 @@ import java.util.HashMap;
 
 public class EditDayActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
     TeacherTakeAttendanceSharedPreferences teacherTakeAttendanceSharedPreferences;
     TeacherEnterResultsSharedPreferences teacherEnterResultsSharedPreferences;
@@ -65,6 +66,8 @@ public class EditDayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_day);
 
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
         teacherTakeAttendanceSharedPreferences = new TeacherTakeAttendanceSharedPreferences(this);
         teacherEnterResultsSharedPreferences = new TeacherEnterResultsSharedPreferences(this);
         parentCheckAttendanceSharedPreferences = new ParentCheckAttendanceSharedPreferences(this);

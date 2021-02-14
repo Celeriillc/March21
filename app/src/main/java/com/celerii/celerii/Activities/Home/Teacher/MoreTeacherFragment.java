@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ import com.celerii.celerii.Activities.StudentPerformance.EnterResultsActivity;
 import com.celerii.celerii.Activities.StudentPerformance.History.StudentAcademicHistoryActivity;
 import com.celerii.celerii.Activities.TeacherPerformance.TeacherPerformanceRowActivity;
 import com.celerii.celerii.Activities.Timetable.TeacherTimetableActivity;
+import com.celerii.celerii.Activities.Utility.SwitchActivityParentTeacher;
 import com.celerii.celerii.Activities.Utility.SwitchActivityTeacherParent;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.MoreTeacherAdapter;
@@ -91,7 +93,7 @@ public class MoreTeacherFragment extends Fragment {
     SharedPreferencesManager sharedPreferencesManager;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
-    TextView teacherName, editMyProfile;
+    TextView teacherName, email;
     ImageView teacherProfilePic;
     LinearLayout profilePictureLayout, noClassLabel;
     Button searchButton;
@@ -138,7 +140,7 @@ public class MoreTeacherFragment extends Fragment {
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
         teacherName = (TextView) view.findViewById(R.id.myprofilename);
-//        editMyProfile = (TextView) view.findViewById(R.id.editmyprofile);
+        email = (TextView) view.findViewById(R.id.email);
         teacherProfilePic = (ImageView) view.findViewById(R.id.myprofileimage);
         profilePictureLayout = (LinearLayout) view.findViewById(R.id.profilepicturelayout);
         noClassLabel = (LinearLayout) view.findViewById(R.id.noclasslabel);
@@ -377,6 +379,7 @@ public class MoreTeacherFragment extends Fragment {
             mAdapter.notifyDataSetChanged();
         }
 
+        mySwipeRefreshLayout.setRefreshing(false);
         loadHeader();
         loadFooter();
     }
@@ -385,7 +388,7 @@ public class MoreTeacherFragment extends Fragment {
         if (mFirebaseUser == null) {
             return;
         }
-        UpdateDataFromFirebase.populateEssentials(context);
+//        UpdateDataFromFirebase.populateEssentials(context);
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -575,6 +578,7 @@ public class MoreTeacherFragment extends Fragment {
 
     public void loadHeader() {
         teacherName.setText(sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName());
+        email.setText(mFirebaseUser.getEmail());
         profilePictureLayout.setClipToOutline(true);
 
         if (moreTeachersModelList.size() <= 0){
@@ -586,12 +590,13 @@ public class MoreTeacherFragment extends Fragment {
         }
 
         Drawable textDrawable;
-        if (!sharedPreferencesManager.getMyFirstName().isEmpty() || !sharedPreferencesManager.getMyLastName().isEmpty()) {
-            String[] nameArray = (sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName()).split(" ");
+        String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
+        if (!myName.trim().isEmpty()) {
+            String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 100);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 100);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 100);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 100);
             }
             teacherProfilePic.setImageDrawable(textDrawable);
         } else {
@@ -599,13 +604,17 @@ public class MoreTeacherFragment extends Fragment {
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
-            Glide.with(context)
-                    .load(sharedPreferencesManager.getMyPicURL())
-                    .placeholder(textDrawable)
-                    .error(textDrawable)
-                    .centerCrop()
-                    .bitmapTransform(new CropCircleTransformation(context))
-                    .into(teacherProfilePic);
+            try {
+                Glide.with(context)
+                        .load(sharedPreferencesManager.getMyPicURL())
+                        .placeholder(textDrawable)
+                        .error(textDrawable)
+                        .centerCrop()
+                        .bitmapTransform(new CropCircleTransformation(context))
+                        .into(teacherProfilePic);
+            } catch (Exception e) {
+                return;
+            }
         }
 
 //        editMyProfile.setOnClickListener(new View.OnClickListener() {
@@ -668,7 +677,7 @@ public class MoreTeacherFragment extends Fragment {
             myClasses = gson.fromJson(myClassesJSON, type);
 
             if (myClasses != null) {
-                if (myClasses.size() > 1) {
+                if (myClasses.size() >= 1) {
                     gson = new Gson();
                     activeClass = gson.toJson(myClasses.get(0));
                     sharedPreferencesManager.setActiveClass(activeClass);
@@ -696,20 +705,40 @@ public class MoreTeacherFragment extends Fragment {
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
                         gson = new Gson();
                         activeClass = gson.toJson(myClasses.get(0));
                         sharedPreferencesManager.setActiveClass(activeClass);
-                    }
                 }
             }
         }
 
         Gson gson = new Gson();
         Type type = new TypeToken<Class>() {}.getType();
-        Class activeClassModel = gson.fromJson(activeClass, type);
+        final Class activeClassModel = gson.fromJson(activeClass, type);
 
         if (activeClass != null){
+            String myClassesJSON = sharedPreferencesManager.getMyClasses();
+            type = new TypeToken<ArrayList<Class>>() {}.getType();
+            ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
+            ArrayList<String> myClassesString = new ArrayList<>();
+
+            if (myClasses != null) {
+                for (Class classInstance : myClasses) {
+                    myClassesString.add(gson.toJson(classInstance));
+                }
+
+                final int indexOfActiveClass = myClassesString.indexOf(activeClass);
+                if (indexOfActiveClass < myClassesString.size()) {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            recyclerView.smoothScrollToPosition(indexOfActiveClass);
+                        }
+                    }, 100);
+                }
+            }
+
             String className = activeClassModel.getClassName();
             prf = className + "'s Profile";
             att = "Take " + className + "'s Attendance";
@@ -731,11 +760,21 @@ public class MoreTeacherFragment extends Fragment {
         switchAccount.setText(swt);
         logout.setText(lgt);
 
-        profile.setOnClickListener(new View.OnClickListener() {
+        profileLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                    Intent I = new Intent(context, TeacherAttendanceActivity.class);
                 Intent I = new Intent(context, ClassProfileActivity.class);
+                Bundle bundle = new Bundle();
+
+                String activeClassID = null;
+                if (activeClassModel != null) {
+                    Gson gson = new Gson();
+                    activeClassID = gson.toJson(activeClassModel);
+                }
+
+                bundle.putString("ClassID", activeClassID);
+                I.putExtras(bundle);
                 context.startActivity(I);
             }
         });
@@ -876,23 +915,21 @@ public class MoreTeacherFragment extends Fragment {
 
     @Override
     public void onResume() {
+
         loadDataFromSharedPreferences();
         loadBasicInfo();
         loadUpBadgesAndMarkers();
-
         DatabaseReference bottomNavBadgeRef = mFirebaseDatabase.getReference();
         HashMap<String, Object> bottomNavBadgeMap = new HashMap<String, Object>();
         NotificationBadgeModel notificationBadgeModel = new NotificationBadgeModel(false, 0);
         bottomNavBadgeMap.put("Notification Badges/Teachers/" + mFirebaseUser.getUid() + "/More", notificationBadgeModel);
         bottomNavBadgeRef.updateChildren(bottomNavBadgeMap);
-
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             featureUseKey = Analytics.featureAnalytics("Parent", mFirebaseUser.getUid(), featureName);
         } else {
             featureUseKey = Analytics.featureAnalytics("Teacher", mFirebaseUser.getUid(), featureName);
         }
         sessionStartTime = System.currentTimeMillis();
-
 //        UpdateDataFromFirebase.populateEssentials(getContext());
         super.onResume();
     }
@@ -923,5 +960,34 @@ public class MoreTeacherFragment extends Fragment {
 
         DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
         featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        Gson gson = new Gson();
+        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        String activeClass = sharedPreferencesManager.getActiveClass();
+        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+        ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
+        ArrayList<String> myClassesString = new ArrayList<>();
+
+        if (myClasses != null) {
+            for (Class classInstance : myClasses) {
+                myClassesString.add(gson.toJson(classInstance));
+            }
+
+            final int indexOfActiveClass = myClassesString.indexOf(activeClass);
+            if (indexOfActiveClass < myClassesString.size()) {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(indexOfActiveClass);
+                    }
+                }, 100);
+            }
+        }
     }
 }

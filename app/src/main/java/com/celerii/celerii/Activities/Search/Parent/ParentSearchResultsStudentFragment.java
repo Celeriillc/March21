@@ -148,9 +148,10 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference("Parents Students").child(mFirebaseUser.getUid());
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                existingConnections.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         existingConnections.add(postSnapshot.getKey());
@@ -173,6 +174,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                pendingIncomingRequests.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         pendingIncomingRequests.add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
@@ -192,9 +194,10 @@ public class ParentSearchResultsStudentFragment extends Fragment {
 
     void loadPendingOutgoingRequests(){
         mDatabaseReference = mFirebaseDatabase.getReference("Student Connection Request Sender").child(mFirebaseUser.getUid());
-        mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                pendingOutgoingRequests.clear();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         pendingOutgoingRequests.add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
@@ -224,6 +227,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         counter = 0;
         searchResultsRowList.clear();
         studentMap.clear();
+        searchMap.clear();
         searchCheckerMap.clear();
 
         queryArray = query.toLowerCase().split(" ");
@@ -570,9 +574,9 @@ public class ParentSearchResultsStudentFragment extends Fragment {
                                                 String studentPicURL = student.getImageURL();
                                                 SearchResultsRow searchHistoryRow;
                                                 if (studentMiddleName.equals("")) {
-                                                    searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentLastName, null, studentPicURL, "Student");
+                                                    searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentLastName, "", studentPicURL, "Student");
                                                 } else {
-                                                    searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentMiddleName + " " + studentLastName, null, studentPicURL, "Student");
+                                                    searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentMiddleName + " " + studentLastName, "", studentPicURL, "Student");
                                                 }
                                                 searchResultsRowList.add(searchHistoryRow);
                                                 studentMap.put(studentKey, student);

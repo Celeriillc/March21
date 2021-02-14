@@ -5,13 +5,18 @@ package com.celerii.celerii.models;
  */
 
 public class School {
-    String schoolName, state, location, country, city, aboutUs, yearOfEstablishment, motto, numberOfEmployees, size, schoolFeesRange;
+    String schoolName, schoolType, curriculum, mission, vision, history, state, location, country, city, aboutUs, yearOfEstablishment, motto, numberOfEmployees, size, schoolFeesRange;
     String profilePhotoUrl, backgroundPhotoUrl, email, website;
     String searchableSchoolName, searchableLocation;
     Boolean isDeleted;
 
     public School() {
         schoolName = "";
+        schoolType = "";
+        curriculum = "";
+        mission = "";
+        vision = "";
+        history = "";
         state = "";
         location = "";
         country = "";
@@ -37,6 +42,46 @@ public class School {
 
     public void setSchoolName(String schoolName) {
         this.schoolName = schoolName;
+    }
+
+    public String getSchoolType() {
+        return schoolType;
+    }
+
+    public void setSchoolType(String schoolType) {
+        this.schoolType = schoolType;
+    }
+
+    public String getCurriculum() {
+        return curriculum;
+    }
+
+    public void setCurriculum(String curriculum) {
+        this.curriculum = curriculum;
+    }
+
+    public String getMission() {
+        return mission;
+    }
+
+    public void setMission(String mission) {
+        this.mission = mission;
+    }
+
+    public String getVision() {
+        return vision;
+    }
+
+    public void setVision(String vision) {
+        this.vision = vision;
+    }
+
+    public String getHistory() {
+        return history;
+    }
+
+    public void setHistory(String history) {
+        this.history = history;
     }
 
     public String getState() {

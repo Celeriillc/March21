@@ -54,7 +54,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="Mon"/>
@@ -71,7 +71,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="Tues"/>
@@ -88,7 +88,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="Wed"/>
@@ -105,7 +105,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="Thurs"/>
@@ -122,7 +122,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="Fri"/>
@@ -147,7 +147,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="6 AM"/>
@@ -221,12 +221,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -237,7 +242,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="7 AM"/>
@@ -311,6 +316,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -327,7 +337,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="8 AM"/>
@@ -401,12 +411,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -417,7 +432,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="9 AM"/>
@@ -491,6 +506,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -507,7 +527,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="10 AM"/>
@@ -581,12 +601,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -597,7 +622,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="11 AM"/>
@@ -671,6 +696,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -687,7 +717,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="12 PM"/>
@@ -761,12 +791,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -777,7 +812,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="1 PM"/>
@@ -851,6 +886,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -867,7 +907,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="2 PM"/>
@@ -941,12 +981,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -957,7 +1002,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="3 PM"/>
@@ -1031,6 +1076,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -1047,7 +1097,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="4 PM"/>
@@ -1121,12 +1171,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1137,7 +1192,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="5 PM"/>
@@ -1211,6 +1266,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -1227,7 +1287,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="6 PM"/>
@@ -1301,12 +1361,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1317,7 +1382,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="7 PM"/>
@@ -1391,6 +1456,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -1407,7 +1477,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="8 PM"/>
@@ -1481,12 +1551,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1497,7 +1572,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="9 PM"/>
@@ -1571,6 +1646,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -1587,7 +1667,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="10 PM"/>
@@ -1661,12 +1741,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1677,7 +1762,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="11 PM"/>
@@ -1751,6 +1836,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -1767,7 +1857,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="12 AM"/>
@@ -1841,12 +1931,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1857,7 +1952,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="1 AM"/>
@@ -1931,6 +2026,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -1947,7 +2047,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="2 AM"/>
@@ -2021,12 +2121,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -2037,7 +2142,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="3 AM"/>
@@ -2111,6 +2216,11 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -2127,7 +2237,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="4 AM"/>
@@ -2201,12 +2311,17 @@
 
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:weightSum="6"
                     android:orientation="horizontal"
-                    android:background="@color/colorLighterGray">
+                    android:background="@color/white">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -2217,7 +2332,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorDeepGray"
+                            android:textColor="@color/black"
                             android:textStyle="bold"
                             android:textSize="12sp"
                             android:text="5 AM"/>
@@ -2290,6 +2405,11 @@
                     </LinearLayout>
 
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:background="@color/colorLightGray"/>
 
             </LinearLayout>
         </RelativeLayout>

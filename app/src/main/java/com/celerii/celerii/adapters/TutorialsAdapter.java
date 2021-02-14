@@ -40,7 +40,6 @@ public class TutorialsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         public HeaderViewHolder(View view) {
             super(view);
-
             tutorialHeader = (TextView) view.findViewById(R.id.tutorialheader);
         }
     }

@@ -10,13 +10,16 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.celerii.celerii.models.Class;
+
 import com.celerii.celerii.R;
+import com.google.gson.Gson;
 
 import java.util.List;
 
 public class SelectClassAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<String> selectClassModelList;
-    private String selectedClass;
+    private List<Class> selectClassModelList;
+    private String selectedClassString;
     private Context context;
     public static final int Header = 1;
     public static final int Normal = 2;
@@ -40,10 +43,10 @@ public class SelectClassAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public SelectClassAdapter(List<String> selectClassModelList, String selectedClass, Context context) {
+    public SelectClassAdapter(List<Class> selectClassModelList, String selectedClassString, Context context) {
         this.selectClassModelList = selectClassModelList;
         this.context = context;
-        this.selectedClass = selectedClass;
+        this.selectedClassString = selectedClassString;
     }
 
     @Override
@@ -68,28 +71,30 @@ public class SelectClassAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ((HeaderViewHolder) holder).header.setText("Select Class");
         }
         else if (holder instanceof MyViewHolder) {
-            final String selectClassModel = selectClassModelList.get(position);
+            final Class selectClassModel = selectClassModelList.get(position);
+            Gson gson = new Gson();
+            final String selectedClassModelString = gson.toJson(selectClassModel);
 
-            ((MyViewHolder) holder).className.setText(selectClassModel);
+            ((MyViewHolder) holder).className.setText(selectClassModel.getClassName());
 
-            if (selectedClass == null){
-                selectedClass = selectClassModel;
+            if (selectedClassString == null){
+                selectedClassString = selectedClassModelString;
                 ((MyViewHolder) holder).className.setChecked(true);
-            } else if (selectedClass.equals(selectClassModel)){
+            } else if (selectedClassString.equals(selectedClassModelString)){
                 ((MyViewHolder) holder).className.setChecked(true);
-            } else if (!selectedClass.equals(selectClassModel)){
+            } else if (!selectedClassString.equals(selectedClassModelString)){
                 ((MyViewHolder) holder).className.setChecked(false);
             }
 
             Intent intent = new Intent("Selected Class");
-            intent.putExtra("SelectedClass", selectedClass);
+            intent.putExtra("SelectedClass", selectedClassString);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
             ((MyViewHolder) holder).className.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     ((MyViewHolder) holder).className.setChecked(true);
-                    selectedClass = selectClassModel;
+                    selectedClassString = selectedClassModelString;
                     notifyDataSetChanged();
                 }
             });

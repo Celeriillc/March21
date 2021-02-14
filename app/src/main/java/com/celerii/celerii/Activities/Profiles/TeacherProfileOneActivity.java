@@ -23,6 +23,7 @@ import com.celerii.celerii.Activities.Inbox.ChatActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.InboxAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -158,6 +159,15 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
     }
 
     void loadFromFirebase(){
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            superLayout.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+            return;
+        }
+
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher").child(teacherID);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -174,11 +184,11 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
 
                         Drawable textDrawable;
                         if (!teacherName.isEmpty()) {
-                            String[] nameArray = teacherName.split(" ");
+                            String[] nameArray = teacherName.replaceAll("\\s+", " ").split(" ");
                             if (nameArray.length == 1) {
-                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                             } else {
-                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
+                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 150);
                             }
                             profilePic.setImageDrawable(textDrawable);
                         } else {
@@ -195,51 +205,25 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                                     .into(profilePic);
                         }
 
-                        mDatabaseReference = mFirebaseDatabase.getReference("TeacherActivityStatistics").child(teacherID);
+                        mDatabaseReference = mFirebaseDatabase.getReference("Teacher Bio").child(teacherID);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()){
-                                    TeacherActivityStatistics teacherActivityStatistics = dataSnapshot.getValue(TeacherActivityStatistics.class);
-                                    pointsAwarded.setText(String.valueOf(teacherActivityStatistics.getTotalPointsAwarded()));
-                                    pointsFined.setText(String.valueOf(teacherActivityStatistics.getTotalPointsFined()));
-                                    classPost.setText(String.valueOf(teacherActivityStatistics.getTotalClassPosts()));
-                                    postLikes.setText(String.valueOf(teacherActivityStatistics.getTotalPostLikes()));
+                                    String bio = dataSnapshot.getValue(String.class);
+                                    teacherBio.setVisibility(View.VISIBLE);
+                                    teacherBio.setText(bio);
                                 }
-
                                 else {
-                                    pointsAwarded.setText("0");
-                                    pointsFined.setText("0");
-                                    classPost.setText("0");
-                                    postLikes.setText("0");
+                                    teacherBio.setText("No available bio");
                                 }
-
-                                mDatabaseReference = mFirebaseDatabase.getReference("Teacher Bio").child(teacherID);
-                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if (dataSnapshot.exists()){
-                                            String bio = dataSnapshot.getValue(String.class);
-                                            teacherBio.setVisibility(View.VISIBLE);
-                                            teacherBio.setText(bio);
-                                        }
-                                        else {
-                                            teacherBio.setText("No available bio");
-                                        }
 
 //                                                if (!maritalStatusShowStatus) { maritalStatusLayout.setVisibility(View.GONE); }
 
-                                        superLayout.setVisibility(View.VISIBLE);
-                                        progressLayout.setVisibility(View.GONE);
-                                        mySwipeRefreshLayout.setRefreshing(false);
-                                        errorLayout.setVisibility(View.GONE);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
+                                superLayout.setVisibility(View.VISIBLE);
+                                progressLayout.setVisibility(View.GONE);
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                errorLayout.setVisibility(View.GONE);
                             }
 
                             @Override
@@ -247,6 +231,32 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
 
                             }
                         });
+
+//                        mDatabaseReference = mFirebaseDatabase.getReference("TeacherActivityStatistics").child(teacherID);
+//                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(DataSnapshot dataSnapshot) {
+//                                if (dataSnapshot.exists()){
+//                                    TeacherActivityStatistics teacherActivityStatistics = dataSnapshot.getValue(TeacherActivityStatistics.class);
+//                                    pointsAwarded.setText(String.valueOf(teacherActivityStatistics.getTotalPointsAwarded()));
+//                                    pointsFined.setText(String.valueOf(teacherActivityStatistics.getTotalPointsFined()));
+//                                    classPost.setText(String.valueOf(teacherActivityStatistics.getTotalClassPosts()));
+//                                    postLikes.setText(String.valueOf(teacherActivityStatistics.getTotalPostLikes()));
+//                                }
+//
+//                                else {
+//                                    pointsAwarded.setText("0");
+//                                    pointsFined.setText("0");
+//                                    classPost.setText("0");
+//                                    postLikes.setText("0");
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(DatabaseError databaseError) {
+//
+//                            }
+//                        });
                     } else {
                         superLayout.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);

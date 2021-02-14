@@ -30,11 +30,15 @@ import com.celerii.celerii.helperClasses.ParentCheckAttendanceSharedPreferences;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.TeacherEnterResultsSharedPreferences;
 import com.celerii.celerii.helperClasses.TeacherTakeAttendanceSharedPreferences;
+import com.celerii.celerii.models.Class;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -53,8 +57,7 @@ public class EditClassActivity extends AppCompatActivity {
     SwipeRefreshLayout mySwipeRefreshLayout;
     RelativeLayout errorLayout, progressLayout;
 
-    private ArrayList<String> selectClassModelList;
-    HashMap<String, String> classNameClassIDMap = new HashMap<>();
+    private ArrayList<Class> selectClassModelList;
     public RecyclerView recyclerView;
     public SelectClassAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -65,7 +68,8 @@ public class EditClassActivity extends AppCompatActivity {
     String sessionDurationInSeconds = "0";
 
     Toolbar toolbar;
-    String selectedClass;
+    Class selectedClass;
+    String selectedClassString = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +82,7 @@ public class EditClassActivity extends AppCompatActivity {
         parentCheckAttendanceSharedPreferences = new ParentCheckAttendanceSharedPreferences(this);
 
         Bundle bundle = getIntent().getExtras();
-        selectedClass = bundle.getString("Class");
+        selectedClassString = bundle.getString("Class");
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -103,7 +107,7 @@ public class EditClassActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         selectClassModelList = new ArrayList<>();
-        mAdapter = new SelectClassAdapter(selectClassModelList, selectedClass, this);
+        mAdapter = new SelectClassAdapter(selectClassModelList, selectedClassString, this);
         loadStaticData();
         recyclerView.setAdapter(mAdapter);
 
@@ -122,26 +126,26 @@ public class EditClassActivity extends AppCompatActivity {
     }
 
     private void loadStaticData() {
-//        Set<String> classSet = sharedPreferencesManager.getMyClasses();
-//        ArrayList<String> classes = new ArrayList<>();
-//        selectClassModelList.add("");
-//        if (classSet != null) {
-//            classes = new ArrayList<>(classSet);
-//            for (int i = 0; i < classes.size(); i++) {
-//                classNameClassIDMap.put(classes.get(i).split(" ")[1], classes.get(i).split(" ")[0]);
-//                selectClassModelList.add(classes.get(i).split(" ")[1]);
-//            }
-//        } else {
-//            String message = "You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.";
-//            showDialogWithMessageAndDisconnect(message);
-//            return;
-//        }
-//
-//        mySwipeRefreshLayout.setRefreshing(false);
-//        progressLayout.setVisibility(View.GONE);
-//        recyclerView.setVisibility(View.VISIBLE);
-//        errorLayout.setVisibility(View.GONE);
-//        mAdapter.notifyDataSetChanged();
+        Gson gson = new Gson();
+        ArrayList<Class> moreTeachersModelListLocal = new ArrayList<>();
+        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+        moreTeachersModelListLocal = gson.fromJson(myClassesJSON, type);
+
+        if (moreTeachersModelListLocal == null) {
+            String message = "You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.";
+            showDialogWithMessageAndDisconnect(message);
+        } else {
+            selectClassModelList.clear();
+            selectClassModelList.addAll(moreTeachersModelListLocal);
+            selectClassModelList.add(0, new Class());
+            mySwipeRefreshLayout.setRefreshing(false);
+            progressLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            errorLayout.setVisibility(View.GONE);
+            mAdapter.notifyDataSetChanged();
+        }
+
     }
 
     @Override
@@ -153,7 +157,7 @@ public class EditClassActivity extends AppCompatActivity {
     public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            selectedClass = intent.getStringExtra("SelectedClass");
+            selectedClassString = intent.getStringExtra("SelectedClass");
         }
     };
 
@@ -189,19 +193,18 @@ public class EditClassActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            if (selectedClass == null) {return false;}
+            if (selectedClassString == null) {return false;}
             Intent intent = new Intent();
 
-            intent.putExtra("Selected Class", selectedClass);
+            intent.putExtra("Selected Class", selectedClassString);
             setResult(RESULT_OK, intent);
             finish();
         }
         else if (id == R.id.action_send){
-            if (selectedClass == null) {return false;}
+            if (selectedClassString == null) {return false;}
             Intent intent = new Intent();
 
-            intent.putExtra("Selected Class", selectedClass);
-            intent.putExtra("Selected Class ID", classNameClassIDMap.get(selectedClass));
+            intent.putExtra("Selected Class", selectedClassString);
             setResult(RESULT_OK, intent);
             finish();
         }

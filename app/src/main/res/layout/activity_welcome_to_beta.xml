@@ -27,7 +27,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="50dp"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_icons_google" />
+                android:src="@drawable/ic_celerii_logo_colored" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -45,9 +45,10 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
-                android:textColor="@color/colorDarkGray"
+                android:textColor="@color/colorBottomNavigationIconGray"
                 android:textSize="17sp"
-                android:text="We're preparing a smooth experience for you. Before you begin, upload a photo (optional). Photos allow schools to verify your identity and respond to you faster"/>
+                android:text="Thank you for signing up for Celerii's beta program, you're helping us create a more stable and useful service
+for you. \n\nPlease use the feedback features to reach us and we will revert as quickly as we can. \n\nWelcome!"/>
 
             <Button
                 android:id="@+id/continuebutton"
@@ -61,7 +62,8 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:text="Continue" />
+                android:text="Continue"
+                style="?android:attr/borderlessButtonStyle" />
 
         </LinearLayout>
 

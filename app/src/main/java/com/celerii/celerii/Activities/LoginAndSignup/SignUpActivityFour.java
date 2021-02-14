@@ -27,7 +27,9 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.Parent;
 import com.celerii.celerii.models.Teacher;
 import com.celerii.celerii.models.User;
@@ -99,12 +101,12 @@ public class SignUpActivityFour extends AppCompatActivity {
                 if (!isPasswordVisible) {
                     password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
                     password.setSelection(password.length());
-                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_search_black_24dp));
+                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye));
                     isPasswordVisible = true;
                 } else {
                     password.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     password.setSelection(password.length());
-                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_view_password_eye_24));
+                    togglePasswordVisisbility.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_eye_off));
                     isPasswordVisible = false;
                 }
             }
@@ -129,7 +131,7 @@ public class SignUpActivityFour extends AppCompatActivity {
                 auth.createUserWithEmailAndPassword(email, passwordString).addOnCompleteListener(SignUpActivityFour.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             sharedPreferencesManager.clear();
                             String refactoredEmail = email.replace(".", "_fullStop_");
                             activeUserID = auth.getCurrentUser().getUid();
@@ -144,7 +146,8 @@ public class SignUpActivityFour extends AppCompatActivity {
                             updateMap.put("UserRoles/" + activeUserID, user);
                             updateMap.put("Email/" + refactoredEmail, "true");
 //                            updateMap.put("UserRoles/Tokens/" + deviceID, token);
-                            Analytics.signupAnalytics( activeUserID, accountType );
+                            Analytics.signupAnalytics(activeUserID, accountType);
+                            Analytics.loginAnalytics(context, activeUserID, accountType);
 
                             mDatabaseReference = mFirebaseDatabase.getReference();
                             mDatabaseReference.updateChildren(updateMap, new DatabaseReference.CompletionListener() {
@@ -155,6 +158,14 @@ public class SignUpActivityFour extends AppCompatActivity {
                                         return;
                                     }
                                     saveToSharedPreferencesAndProceed();
+
+//                                    if (databaseError == null) {
+//                                        saveToSharedPreferencesAndProceed();
+//                                    } else {
+//                                        progressDialog.dismiss();
+//                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+//                                        ShowDialogWithMessage.showDialogWithMessageAndDelete(context, message, auth.getCurrentUser());
+//                                    }
                                 }
                             });
                         } else {

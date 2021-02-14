@@ -158,7 +158,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
             return;
         }
 
-        mDatabaseReference = mFirebaseDatabase.getReference().child("AttendenceStudent").child(activeKidID).child(key);
+        mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceStudent").child(activeKidID).child(key);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -307,7 +307,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
         featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
         featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("AttendenceStudent/" + activeKidID + "/" + key + "/remark", remark.getText().toString());
+        featureUseUpdateMap.put("AttendanceStudent/" + activeKidID + "/" + key + "/remark", remark.getText().toString());
 
         DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
         featureUseUpdateRef.updateChildren(featureUseUpdateMap);

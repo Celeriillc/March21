@@ -34,8 +34,11 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -257,10 +260,16 @@ public class SignUpActivityFive extends AppCompatActivity {
 //                    finishAffinity();
 //                }
 
+                if (databaseError == null) {
+                    progressDialog.dismiss();
+                } else {
+                    progressDialog.dismiss();
+                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                    CustomToast.primaryBackgroundToast(context, message);
+                }
                 applicationLauncherSharedPreferences.setLauncherActivity("WelcomeToBeta");
                 Intent I = new Intent(SignUpActivityFive.this, WelcomeToBetaActivity.class);
                 startActivity(I);
-                progressDialog.dismiss();
                 finishAffinity();
             }
         });
@@ -557,24 +566,30 @@ public class SignUpActivityFive extends AppCompatActivity {
                         mDatabaseReference.updateChildren(newPhotoMap, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                progressDialog.dismiss();
-                                sharedPreferencesManager.setMyPicURL(downloadURL);
-                                final Dialog dialog = new Dialog(context);
-                                dialog.setContentView(R.layout.custom_upload_successful_dialog);
-                                dialog.setCancelable(false);
-                                dialog.setCanceledOnTouchOutside(false);
-                                TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
-                                TextView close = (TextView) dialog.findViewById(R.id.close);
-                                dialog.show();
+                                if (databaseError == null) {
+                                    progressDialog.dismiss();
+                                    sharedPreferencesManager.setMyPicURL(downloadURL);
+                                    final Dialog dialog = new Dialog(context);
+                                    dialog.setContentView(R.layout.custom_upload_successful_dialog);
+                                    dialog.setCancelable(false);
+                                    dialog.setCanceledOnTouchOutside(false);
+                                    TextView dialogMessage = (TextView) dialog.findViewById(R.id.dialogmessage);
+                                    TextView close = (TextView) dialog.findViewById(R.id.close);
+                                    dialog.show();
 
-                                dialogMessage.setText("Picture uploaded successfully!");
+                                    dialogMessage.setText("Picture uploaded successfully!");
 
-                                close.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        dialog.dismiss();
-                                    }
-                                });
+                                    close.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                } else {
+                                    progressDialog.dismiss();
+                                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+                                }
                             }
                         });
                     }

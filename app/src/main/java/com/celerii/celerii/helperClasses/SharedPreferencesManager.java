@@ -51,6 +51,7 @@ public class SharedPreferencesManager {
     static final String my_referral_text = "myReferralText";
     static final String my_referral_subject = "myReferralSubject";
     static final String my_secondary_referral_subject = "mySecondaryReferralSubject";
+    static final String school_gallery = "schoolGallery";
 
     public SharedPreferencesManager(Context context) {
         this.context = context;
@@ -685,6 +686,22 @@ public class SharedPreferencesManager {
     }
     //endregion
 
+    //region SchoolGallery
+    public String getSchoolGallery() {
+        return prefs.getString(school_gallery, "");
+    }
+
+    public void setSchoolGallery(String school_gallery_) {
+        editor.putString(school_gallery, school_gallery_);
+        editor.commit();
+    }
+
+    public void deleteSchoolGallery() {
+        editor.remove(school_gallery);
+        editor.commit();
+    }
+    //endregion
+
     public void clear() {
         deleteActiveAccount();
         deleteMyUserID();
@@ -721,5 +738,6 @@ public class SharedPreferencesManager {
         deleteMyReferralText();
         deleteMyReferralSubject();
         deleteMySecondaryReferralSubject();
+        deleteSchoolGallery();
     }
 }

@@ -20,7 +20,9 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.AcademicRecord;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -77,6 +79,7 @@ public class EnterResultsEditPercentageOfTotalScoreActivity extends AppCompatAct
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
+                    previousPercentageOfTotal = 0.0;
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         AcademicRecord academicRecord = postSnapshot.getValue(AcademicRecord.class);
                         previousPercentageOfTotal += Double.valueOf(academicRecord.getPercentageOfTotal());
@@ -88,7 +91,8 @@ public class EnterResultsEditPercentageOfTotalScoreActivity extends AppCompatAct
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                ShowDialogWithMessage.showDialogWithMessageAndClose(context, message);
             }
         });
 

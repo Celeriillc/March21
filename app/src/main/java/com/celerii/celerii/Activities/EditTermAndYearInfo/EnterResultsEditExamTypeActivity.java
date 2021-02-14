@@ -69,9 +69,9 @@ public class EnterResultsEditExamTypeActivity extends AppCompatActivity {
         other = (RadioButton) findViewById(R.id.other);
         testtypeGroup = (RadioGroup) findViewById(R.id.testtypegroup);
 
-        if (testType.equals("Continous Assessment")){
+        if (testType.equals("Continuous Assessment")){
             ca.setChecked(true);
-            selectedTestType = "Continous Assessment";
+            selectedTestType = "Continuous Assessment";
         } else if (testType.equals("Examination")){
             exam.setChecked(true);
             selectedTestType = "Examination";
@@ -141,7 +141,7 @@ public class EnterResultsEditExamTypeActivity extends AppCompatActivity {
             if (selectedTestType == null) {return false;}
 
             if (ca.isChecked()){
-                selectedTestType = "Continous Assessment";
+                selectedTestType = "Continuous Assessment";
             } else if (exam.isChecked()){
                 selectedTestType = "Examination";
             } else {

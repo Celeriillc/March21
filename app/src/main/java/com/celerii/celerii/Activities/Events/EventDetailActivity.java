@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.Day;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Time;
 import com.celerii.celerii.models.EventsRow;
@@ -31,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.twitter.sdk.android.core.models.Image;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,6 +53,7 @@ public class EventDetailActivity extends AppCompatActivity {
     Toolbar toolbar;
     LinearLayout background;
     TextView eventTitle, eventDate, eventTime, eventSchool, eventDescription;
+    ImageView timeIcon;
 
     String eventID, parentActivity;
     int colorNumber = 0;
@@ -76,6 +80,13 @@ public class EventDetailActivity extends AppCompatActivity {
         eventID = b.getString("Event ID");
         colorNumber = Integer.valueOf(b.getString("Color Number"));
         parentActivity = b.getString("parentActivity");
+        if (parentActivity != null) {
+            if (!parentActivity.isEmpty()) {
+                sharedPreferencesManager.setActiveAccount(parentActivity);
+                mDatabaseReference = mFirebaseDatabase.getReference("UserRoles");
+                mDatabaseReference.child(sharedPreferencesManager.getMyUserID()).child("role").setValue(parentActivity);
+            }
+        }
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -93,6 +104,7 @@ public class EventDetailActivity extends AppCompatActivity {
         eventTime = (TextView) findViewById(R.id.eventtime);
         eventSchool = (TextView) findViewById(R.id.eventschool);
         eventDescription = (TextView) findViewById(R.id.eventdescription);
+        timeIcon = (ImageView) findViewById(R.id.timeicon);
 
         progressLayout.setVisibility(View.VISIBLE);
         background.setVisibility(View.GONE);
@@ -121,10 +133,10 @@ public class EventDetailActivity extends AppCompatActivity {
                             } else {
                                 eventRow.setSchoolID("This school account has been deleted or doesn't exist");
                             }
-                            if (colorNumber == 0) { background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_primary_purple)); }
-                            else if (colorNumber == 1) { background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_accent)); }
-                            else if (colorNumber == 2) { background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_instagram_blue)); }
-                            else { background.setBackground(ContextCompat.getDrawable(context, R.drawable.event_card_accent_secondary)); }
+                            if (colorNumber == 0) { timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_primary_purple)); }
+                            else if (colorNumber == 1) { timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_accent)); }
+                            else if (colorNumber == 2) { timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_instagram_blue)); }
+                            else { timeIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.event_card_accent_secondary)); }
 
                             String[] datearray = eventRow.getEventDate().split(" ")[0].split("/");
                             Calendar c = Calendar.getInstance();
@@ -145,7 +157,12 @@ public class EventDetailActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            progressLayout.setVisibility(View.GONE);
+                            background.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText(message);
+                            return;
                         }
                     });
 
@@ -159,7 +176,12 @@ public class EventDetailActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                progressLayout.setVisibility(View.GONE);
+                background.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(message);
+                return;
             }
         });
     }

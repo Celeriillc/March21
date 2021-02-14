@@ -1,14 +1,19 @@
 package com.celerii.celerii.adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,7 +24,10 @@ import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.SearchHistoryHeader;
 import com.celerii.celerii.models.SearchHistoryRow;
+import com.celerii.celerii.models.Student;
+import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +38,7 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     SharedPreferencesManager sharedPreferencesManager;
     private List<SearchHistoryRow> searchHistoryRowList;
+    private List<String> connectedStudents;
     private SearchHistoryHeader searchHistoryHeader;
     private Context context;
     public static final int Header = 1;
@@ -63,9 +72,10 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    public SearchHistoryAdapter(List<SearchHistoryRow> searchHistoryRowList, SearchHistoryHeader searchHistoryHeader, Context context) {
+    public SearchHistoryAdapter(List<SearchHistoryRow> searchHistoryRowList, ArrayList<String> connectedStudents, SearchHistoryHeader searchHistoryHeader, Context context) {
         sharedPreferencesManager = new SharedPreferencesManager(context);
         this.searchHistoryRowList = searchHistoryRowList;
+        this.connectedStudents = connectedStudents;
         this.searchHistoryHeader = searchHistoryHeader;
         this.context = context;
     }
@@ -116,11 +126,22 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
                 @Override
                 public void onClick(View v) {
                     if (searchHistoryRow.getEntityType().equals("Student")){
-                        Bundle b = new Bundle();
-                        b.putString("childID", searchHistoryRow.getEntityId());
-                        Intent I = new Intent(context, StudentProfileActivity.class);
-                        I.putExtras(b);
-                        context.startActivity(I);
+                        String entityName = searchHistoryRow.getEntityName();
+                        if (connectedStudents.contains(searchHistoryRow.getEntityId())) {
+                            Bundle b = new Bundle();
+                            Gson gson = new Gson();
+                            Student student = new Student(searchHistoryRow.getEntityName(), searchHistoryRow.getEntityId(), "");
+                            String studentCred = gson.toJson(student);
+                            b.putString("childID", studentCred);
+                            Intent I = new Intent(context, StudentProfileActivity.class);
+                            I.putExtras(b);
+                            context.startActivity(I);
+                        } else {
+                            String messageString = "You don't have the permission to view " + "<b>" + entityName + "</b>" + "'s information. If you" +
+                                    " know " + "<b>" + entityName + "</b>" + " and would like to access their information, send a connection request to their school by using" +
+                                    " the " + "<b>" + "Connect" + "</b>" + " button.";
+                            showDialogWithMessage(Html.fromHtml(messageString));
+                        }
                     } else if (searchHistoryRow.getEntityType().equals("School")){
                         Bundle b = new Bundle();
                         b.putString("schoolID", searchHistoryRow.getEntityId());
@@ -155,5 +176,31 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private boolean isPositionFooter (int position) {
         return position == searchHistoryRowList.size () + 1;
+    }
+
+    void showDialogWithMessage (Spanned messageString) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

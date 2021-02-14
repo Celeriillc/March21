@@ -27,6 +27,7 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.Admin;
@@ -211,7 +212,7 @@ public class ParentHomeNotification extends Fragment {
 
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("NotificationParent").child(mFirebaseUser.getUid());
-        mDatabaseReference.orderByChild("time").limitToLast(50).addValueEventListener(new ValueEventListener() {
+        mDatabaseReference./*orderByChild("time").*/limitToLast(50).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
@@ -236,9 +237,9 @@ public class ParentHomeNotification extends Fragment {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         notificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (counter == childrenCount) {
                                         if (notificationModelList.size() > 1) {
@@ -282,9 +283,9 @@ public class ParentHomeNotification extends Fragment {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         notificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (counter == childrenCount) {
                                         if (notificationModelList.size() > 1) {
@@ -328,9 +329,9 @@ public class ParentHomeNotification extends Fragment {
                                     } else {
                                         notificationModel.setFromName("A user");
                                     }
-                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
+//                                    if (!notificationModel.getNotificationType().equals("ConnectionRequest")) {
                                         notificationModelList.add(notificationModel);
-                                    }
+//                                    }
 
                                     if (counter == childrenCount) {
                                         if (notificationModelList.size() > 1) {
@@ -376,9 +377,25 @@ public class ParentHomeNotification extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(message);
             }
         });
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+//        if (hidden) {
+//
+//        } else {
+//
+//        }
     }
 
     @Override
@@ -432,13 +449,11 @@ public class ParentHomeNotification extends Fragment {
     public void onStart() {
         super.onStart();
 
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
 
     }
 }

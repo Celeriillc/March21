@@ -24,6 +24,7 @@
             android:id="@+id/termlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:layout_marginTop="10dp"
             android:padding="5dp"
             android:orientation="horizontal"
@@ -33,7 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -50,12 +51,19 @@
                 android:textSize="13sp"
                 android:textColor="@color/colorPrimaryPurple"
                 android:text=""/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_chevron_right_purple_24dp"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/yearlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:padding="5dp"
             android:orientation="horizontal"
             android:weightSum="3">
@@ -64,7 +72,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -81,13 +89,20 @@
                 android:textSize="13sp"
                 android:textColor="@color/colorPrimaryPurple"
                 android:text=""/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_chevron_right_purple_24dp"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/subjectlayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp"
             android:padding="5dp"
             android:orientation="horizontal"
             android:weightSum="3">
@@ -96,7 +111,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textSize="13sp"
                 android:textColor="@android:color/black"
@@ -113,9 +128,79 @@
                 android:textSize="13sp"
                 android:textColor="@color/colorPrimaryPurple"
                 android:text=""/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_chevron_right_purple_24dp"/>
         </LinearLayout>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="15dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:weightSum="3"
+            android:background="@color/colorLighterGray">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Class"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Date"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@android:color/black"
+                android:text="Status"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+<!--    <View-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0.2dp"-->
+<!--        android:layout_marginTop="0dp"-->
+<!--        android:layout_marginBottom="20dp"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:layout_marginEnd="20dp"-->
+<!--        android:background="@color/colorLightGray" />-->
 
 <!--    <View-->
 <!--        android:layout_width="match_parent"-->
@@ -148,9 +233,8 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:layout_margin="15dp"
+            android:textColor="@color/colorBottomNavigationIconGray"
             android:text="There is no attendance recorded this term"
             android:textSize="15sp"/>
-
-
     </LinearLayout>
 </LinearLayout>

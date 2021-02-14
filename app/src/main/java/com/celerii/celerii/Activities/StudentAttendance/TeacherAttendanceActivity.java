@@ -161,26 +161,24 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
 
             if (!activeClassExist) {
                 if (myClasses.size() > 0) {
-                    if (myClasses.size() > 1) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
-                    }
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("View Attendance Records");
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return;
                 }
-            } else {
-                setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle("View Attendance Records");
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeButtonEnabled(true);
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                mySwipeRefreshLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                errorLayoutButton.setText("Find my school");
-                errorLayoutButton.setVisibility(View.VISIBLE);
-                return;
             }
         }
 
@@ -245,7 +243,7 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
         teacherAttendanceHeader.setDate(date);
         teacherAttendanceHeader.setSubject(subject);
         teacherAttendanceHeader.setClassID(activeClass);
-        teacherAttendanceHeader.setClassName("");
+        teacherAttendanceHeader.setClassName(className);
         teacherAttendanceHeader.setTeacher("");
         teacherAttendanceHeader.setTerm("");
         teacherAttendanceHeader.setNoOfStudents("");
@@ -253,7 +251,7 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
         teacherAttendanceHeader.setNoOfGirls("");
         teacherAttendanceRowList.clear();
 
-        headerDatabaseReference = mFirebaseDatabase.getReference().child("AttendenceClass").child(activeClass);
+        headerDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(activeClass);
         headerDatabaseReference.orderByChild("year_month_day").equalTo(year_month_day).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -288,7 +286,7 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
                     }
 
                     counter = 0;
-                    DatabaseReference bodyDatabaseReference = mFirebaseDatabase.getReference("AttendenceClass-Students/" + activeClass + "/" + attendanceKey + "/Students");
+                    DatabaseReference bodyDatabaseReference = mFirebaseDatabase.getReference("AttendanceClass-Students/" + activeClass + "/" + attendanceKey + "/Students");
                     bodyDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {

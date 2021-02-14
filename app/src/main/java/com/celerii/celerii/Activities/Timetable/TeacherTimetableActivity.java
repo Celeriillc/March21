@@ -1,9 +1,12 @@
 package com.celerii.celerii.Activities.Timetable;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,6 +56,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TeacherTimetableActivity extends AppCompatActivity {
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     Toolbar toolbar;
@@ -81,7 +85,8 @@ public class TeacherTimetableActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -99,7 +104,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
     void loadLayout() {
         setContentView(R.layout.activity_teacher_timetable);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -117,7 +122,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         superRelativeLayout = (RelativeLayout) findViewById(R.id.superrelativelayout);
         progressBar = (RelativeLayout) findViewById(R.id.progresslayout);
         addNewActivity = (FloatingActionButton) findViewById(R.id.addnewactivity);
-        customProgressDialogOne = new CustomProgressDialogOne(this);
+        customProgressDialogOne = new CustomProgressDialogOne(context);
         teacherTimetableModelList = new ArrayList<>();
 
         progressBar.setVisibility(View.VISIBLE);
@@ -158,7 +163,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         TeacherTimetableModel teacherTimetableModel = postSnapshot.getValue(TeacherTimetableModel.class);
                         loadView(getTimeControl(getHour(teacherTimetableModel.getTimeOfTheDay())), heightOfHour, teacherTimetableModel.getDayOfTheWeek(),
-                                getMinute(teacherTimetableModel.getTimeOfTheDay()), Integer.valueOf(teacherTimetableModel.getDuration()), teacherTimetableModel.getSubject(),
+                                getMinute(teacherTimetableModel.getTimeOfTheDay()), Integer.parseInt(teacherTimetableModel.getDuration()), teacherTimetableModel.getSubject(),
                                 teacherTimetableModel.getClassName(), teacherTimetableModel);
                         teacherTimetableModelList.add(teacherTimetableModel);
                     }
@@ -293,7 +298,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         }
     }
 
-    void loadView(int hour, int height_dp, String day, int minute, int duration, String subjectString, String classNameString, final TeacherTimetableModel teacherTimetableModel) {
+    void loadView(final int hour, int height_dp, final String day, final int minute, final int duration, final String subjectString, final String classNameString, final TeacherTimetableModel teacherTimetableModel) {
         Resources r = this.getResources();
         int unit_height_dp = (int) ((duration / 60.0) * height_dp);
         int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height_dp, r.getDisplayMetrics());
@@ -315,13 +320,20 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 3 + 1);
         if (randomNum == 0) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_primary_purple)); }
         else if (randomNum == 1) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_accent)); }
-        else if (randomNum == 2) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_instagram_blue)); }
+        else if (randomNum == 2) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_primary_purple)); }
 //        else if (randomNum == 3) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_teal_green)); }
 //        else if (randomNum == 4) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_kilogarm_yellow)); }
 //        else if (randomNum == 5) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_kilogarm_orange)); }
 //        else if (randomNum == 6) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_dark_gray)); }
 //        else if (randomNum == 7) { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_green)); }
-        else { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_accent_secondary)); }
+        else { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_accent)); }
+//        else { parent.setBackground(ContextCompat.getDrawable(this, R.drawable.timetable_card_kilogarm_yellow)); }
+
+        LinearLayout subParent = new LinearLayout(this);
+        subParent.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams subParentLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        parent.setGravity(Gravity.CENTER);
+        subParent.setGravity(Gravity.CENTER);
 
         TextView subject = new TextView(this);
         LinearLayout.LayoutParams subjectLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -333,7 +345,10 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         subject.setSingleLine(true);
         subject.setText(subjectString);
         subject.setLayoutParams(subjectLayoutParams);
-        parent.addView(subject);
+//        if (randomNum == 0) { subject.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple)); }
+//        else if (randomNum == 1) { subject.setTextColor(ContextCompat.getColor(this, R.color.accent)); }
+//        else { subject.setTextColor(ContextCompat.getColor(this, R.color.colorKilogarmOrange)); }
+        subParent.addView(subject);
 
         TextView classTV = new TextView(this);
         LinearLayout.LayoutParams classLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -345,7 +360,11 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         classTV.setSingleLine(true);
         classTV.setText(classNameString);
         classTV.setLayoutParams(subjectLayoutParams);
-        parent.addView(classTV);
+//        if (randomNum == 0) { classTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple)); }
+//        else if (randomNum == 1) { classTV.setTextColor(ContextCompat.getColor(this, R.color.accent)); }
+//        else { classTV.setTextColor(ContextCompat.getColor(this, R.color.colorKilogarmOrange)); }
+        subParent.addView(classTV);
+        parent.addView(subParent);
 
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((width / 6), unit_height);
         layoutParams.setMargins(paddingStart, paddingTop, 0, 0);
@@ -355,8 +374,17 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         parent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(TeacherTimetableActivity.this, TimetableDetailActivity.class);
-                startActivity(intent);
+                String time = "";
+                int hour = getHour(teacherTimetableModel.getTimeOfTheDay());
+                if (hour < 13) {
+                    time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "AM";
+                } else {
+                    time = String.valueOf(Date.makeTwoDigits(hour - 12)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "PM";
+                }
+
+                String durationString = String.valueOf(duration) + " Minutes";
+
+                viewDetails(classNameString, subjectString, day, time, durationString);
             }
         });
 
@@ -460,6 +488,35 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         }
     }
 
+    void viewDetails(String classNameString, String subjectString, String dayString, String timeString, String durationString) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_timetable_detail_dialog);
+        TextView className = (TextView) dialog.findViewById(R.id.classname);
+        TextView subject = (TextView) dialog.findViewById(R.id.subject);
+        TextView day = (TextView) dialog.findViewById(R.id.day);
+        TextView time = (TextView) dialog.findViewById(R.id.time);
+        TextView duration = (TextView) dialog.findViewById(R.id.duration);
+        Button close = (Button) dialog.findViewById(R.id.close);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+
+        className.setText(classNameString);
+        subject.setText(subjectString);
+        day.setText(dayString);
+        time.setText(timeString);
+        duration.setText(durationString);
+
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+    }
+
     void deleteActivity(final TeacherTimetableModel teacherTimetableModel) {
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
@@ -500,9 +557,15 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                 mDatabaseReference.updateChildren(timeTableUpdateMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        customProgressDialogOne.dismiss();
-                        String message = "This timetable activity was successfully deleted";
-                        showDialogWithMessage(message);
+                        if (databaseError == null) {
+                            customProgressDialogOne.dismiss();
+                            String message = "This timetable activity was successfully deleted";
+                            showDialogWithMessageForDelete(message);
+                        } else {
+                            customProgressDialogOne.dismiss();
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                        }
                     }
                 });
             }
@@ -538,6 +601,35 @@ public class TeacherTimetableActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+            }
+        });
+    }
+
+    void showDialogWithMessageForDelete (String messageString) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                progressBar.setVisibility(View.VISIBLE);
+                superLayout.setVisibility(View.GONE);
+                loadLayout();
             }
         });
     }

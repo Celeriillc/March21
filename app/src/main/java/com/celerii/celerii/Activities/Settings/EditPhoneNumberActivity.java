@@ -1,6 +1,7 @@
 package com.celerii.celerii.Activities.Settings;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 
 public class EditPhoneNumberActivity extends AppCompatActivity {
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth mFirebaseAuth;
@@ -56,6 +58,7 @@ public class EditPhoneNumberActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_phone_number);
 
+        context = this;
         sharedPreferencesManager = new SharedPreferencesManager(this);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -139,7 +142,7 @@ public class EditPhoneNumberActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        UpdateDataFromFirebase.populateEssentials(getBaseContext());
+        UpdateDataFromFirebase.populateEssentials(context);
     }
 
     @Override
@@ -200,5 +203,6 @@ public class EditPhoneNumberActivity extends AppCompatActivity {
                 this.finish();
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
