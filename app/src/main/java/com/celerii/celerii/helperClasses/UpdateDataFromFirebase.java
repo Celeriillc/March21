@@ -383,6 +383,16 @@ public class UpdateDataFromFirebase {
                                                                             sharedPreferencesManager.setClassesStudentParent(json);
                                                                         }
                                                                     }
+                                                                } else {
+                                                                    ClassesStudentsAndParentsModel classesStudentsAndParentsModel = new ClassesStudentsAndParentsModel(classKey, schoolKey, studentKey, "");
+                                                                    String existenceChecker = classKey + schoolKey + studentKey;
+                                                                    if (!classesStudentsAndParentsModelMap.containsKey(existenceChecker)) {
+                                                                        classesStudentsAndParentsModelList.add(classesStudentsAndParentsModel);
+                                                                        classesStudentsAndParentsModelMap.put(existenceChecker, classesStudentsAndParentsModel);
+                                                                        Gson gson = new Gson();
+                                                                        String json = gson.toJson(classesStudentsAndParentsModelList);
+                                                                        sharedPreferencesManager.setClassesStudentParent(json);
+                                                                    }
                                                                 }
                                                             }
 
@@ -471,6 +481,16 @@ public class UpdateDataFromFirebase {
                                                                             sharedPreferencesManager.setStudentsSchoolsClassesTeachers(json);
                                                                         }
                                                                     }
+                                                                } else {
+                                                                    StudentsSchoolsClassesandTeachersModel  studentsSchoolsClassesandTeachersModel = new StudentsSchoolsClassesandTeachersModel(studentKey, schoolKey, classKey, "");
+                                                                    String existenceChecker = studentKey + schoolKey + classKey;
+                                                                    if (!studentsSchoolsClassesandTeachersModelMap.containsKey(existenceChecker)) {
+                                                                        studentsSchoolsClassesandTeachersModelList.add(studentsSchoolsClassesandTeachersModel);
+                                                                        studentsSchoolsClassesandTeachersModelMap.put(existenceChecker, studentsSchoolsClassesandTeachersModel);
+                                                                        Gson gson = new Gson();
+                                                                        String json = gson.toJson(studentsSchoolsClassesandTeachersModelList);
+                                                                        sharedPreferencesManager.setStudentsSchoolsClassesTeachers(json);
+                                                                    }
                                                                 }
                                                             }
 
@@ -479,6 +499,16 @@ public class UpdateDataFromFirebase {
 
                                                             }
                                                         });
+                                                    }
+                                                } else {
+                                                    StudentsSchoolsClassesandTeachersModel  studentsSchoolsClassesandTeachersModel = new StudentsSchoolsClassesandTeachersModel(studentKey, schoolKey, "", "");
+                                                    String existenceChecker = studentKey + schoolKey;
+                                                    if (!studentsSchoolsClassesandTeachersModelMap.containsKey(existenceChecker)) {
+                                                        studentsSchoolsClassesandTeachersModelList.add(studentsSchoolsClassesandTeachersModel);
+                                                        studentsSchoolsClassesandTeachersModelMap.put(existenceChecker, studentsSchoolsClassesandTeachersModel);
+                                                        Gson gson = new Gson();
+                                                        String json = gson.toJson(studentsSchoolsClassesandTeachersModelList);
+                                                        sharedPreferencesManager.setStudentsSchoolsClassesTeachers(json);
                                                     }
                                                 }
                                             }

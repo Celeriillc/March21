@@ -170,9 +170,9 @@ public class ChatActivity extends AppCompatActivity {
 
         chatsList = new ArrayList<>();
         chatMaps = new HashMap<>();
-        loadMessagesFromFirebase();
         mAdapter = new ChatRowAdapter(chatsList, nameOfChatPartner, this);
         recyclerView.setAdapter(mAdapter);
+        loadMessagesFromFirebase();
 
         sendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -269,6 +269,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     receiverNode = IDofChatPartner;
                     chatsList.clear();
+                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot : dataSnapshot.getChildren()){
                         String messageID = postSnapShot.getKey();
                         Chats chat = postSnapShot.getValue(Chats.class);
@@ -289,9 +290,10 @@ public class ChatActivity extends AppCompatActivity {
                     mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            receiverNode = "Admin";
                             if (dataSnapshot.exists()) {
+                                receiverNode = "Admin";
                                 chatsList.clear();
+                                mAdapter.notifyDataSetChanged();
                                 for (DataSnapshot postSnapShot : dataSnapshot.getChildren()){
                                     String messageID = postSnapShot.getKey();
                                     Chats chat = postSnapShot.getValue(Chats.class);
@@ -326,7 +328,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void postMessageToFirebase(String fileURL){
+    private void postMessageToFirebase(String fileURL) {
         if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
             String messageString = "Your device is not connected to the internet. Check your connection and try again.";
             showDialogWithMessage(messageString);
@@ -341,23 +343,26 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             message = "Image";
         }
+        if (!receiverNode.equals("Admin")) {
+            receiverNode = IDofChatPartner;
+        }
         final String senderId = mFirebaseUser.getUid();
-        final String recieverId = IDofChatPartner;
+        final String receiverId = IDofChatPartner;
         boolean isSeen = false;
         boolean isMine = true;
         boolean isRow = false;
         String date = Date.getDate();
         String sortableDate = Date.convertToSortableDate(date);
-        final Chats senderChat = new Chats(message, senderId, recieverId, date, sortableDate, isSeen, isMine, fileURL, "", isRow);
-        final Chats recieverChat = new Chats(message, senderId, recieverId, date, sortableDate, isSeen, !isMine, fileURL, sharedPreferencesManager.getMyPicURL(), isRow);
+        final Chats senderChat = new Chats(message, senderId, receiverId, date, sortableDate, isSeen, isMine, fileURL, "", isRow);
+        final Chats receiverChat = new Chats(message, senderId, receiverId, date, sortableDate, isSeen, !isMine, fileURL, sharedPreferencesManager.getMyPicURL(), isRow);
 
         Map<String, Object> newChatMessageMap = new HashMap<String, Object>();
         newChatMessageMap.put("Messages/" + senderId + "/" + receiverNode + "/" + senderKey, senderChat);
-        newChatMessageMap.put("Messages/" + receiverNode + "/" + senderId + "/" + senderKey, recieverChat);
+        newChatMessageMap.put("Messages/" + receiverNode + "/" + senderId + "/" + senderKey, receiverChat);
         newChatMessageMap.put("Messages Recent/" + senderId + "/" + receiverNode, senderChat);
-        newChatMessageMap.put("Messages Recent/" + receiverNode + "/" + senderId, recieverChat);
-        newChatMessageMap.put("Notification Badges/General/" + receiverNode + "/Inbox/status", true);
-        DatabaseReference updateBottomNotificationBadgeRef = mFirebaseDatabase.getReference("Notification Badges/General/" + receiverNode + "/Inbox/number");
+        newChatMessageMap.put("Messages Recent/" + receiverNode + "/" + senderId, receiverChat);
+        newChatMessageMap.put("Notification Badges/General/" + receiverId + "/Inbox/status", true);
+        DatabaseReference updateBottomNotificationBadgeRef = mFirebaseDatabase.getReference("Notification Badges/General/" + receiverId + "/Inbox/number");
         updateBottomNotificationBadgeRef.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
@@ -427,17 +432,17 @@ public class ChatActivity extends AppCompatActivity {
 //            }
         } else {
             CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/Chat/Sent");
-
-            if(!directory.exists() && !directory.isDirectory()) {
-                if (directory.mkdirs()) {
-                    file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                } else {
-                    file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                }
-            } else {
-                file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-            }
+//            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/Chat/Sent");
+//
+//            if(!directory.exists() && !directory.isDirectory()) {
+//                if (directory.mkdirs()) {
+//                    file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                } else {
+//                    file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                }
+//            } else {
+//                file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//            }
 //            uri = Uri.fromFile(file);
 //            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 //            CamIntent.putExtra("return-data", true);
@@ -482,17 +487,17 @@ public class ChatActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
                     CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/Chat/Sent");
-
-                    if(!directory.exists() && !directory.isDirectory()) {
-                        if (directory.mkdirs()) {
-                            file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        } else {
-                            file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        }
-                    } else {
-                        file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                    }
+//                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/Chat/Sent");
+//
+//                    if(!directory.exists() && !directory.isDirectory()) {
+//                        if (directory.mkdirs()) {
+//                            file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        } else {
+//                            file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        }
+//                    } else {
+//                        file = new File(directory, "CeleriiChat" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                    }
 //                    uri = Uri.fromFile(file);
 //                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 //                    CamIntent.putExtra("return-data", true);
@@ -550,7 +555,7 @@ public class ChatActivity extends AppCompatActivity {
                     byte[] byteArray = stream.toByteArray();
 
                     String sortableDate = Date.convertToSortableDate(Date.getDate());
-                    mStorageReference = mFirebaseStorage.getReference().child("Chat/" + mFirebaseUser.getUid() + "/" + IDofChatPartner + "/" + sortableDate + ".jpg");
+                    mStorageReference = mFirebaseStorage.getReference().child("Chat/" + mFirebaseUser.getUid() + "/" + IDofChatPartner + "/" + sortableDate);
                     UploadTask uploadTask = mStorageReference.putBytes(byteArray);
                     Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
@@ -648,27 +653,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override

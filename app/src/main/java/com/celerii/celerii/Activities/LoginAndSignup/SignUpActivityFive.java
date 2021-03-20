@@ -350,17 +350,17 @@ public class SignUpActivityFive extends AppCompatActivity {
 
         } else {
             CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
-
-            if(!directory.exists() && !directory.isDirectory()) {
-                if (directory.mkdirs()) {
-                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                } else {
-                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                }
-            } else {
-                file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-            }
+//            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
+//
+//            if(!directory.exists() && !directory.isDirectory()) {
+//                if (directory.mkdirs()) {
+//                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                } else {
+//                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                }
+//            } else {
+//                file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//            }
 //            uri = Uri.fromFile(file);
 //            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 //            CamIntent.putExtra("return-data", true);
@@ -376,17 +376,17 @@ public class SignUpActivityFive extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
                     CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
-
-                    if(!directory.exists() && !directory.isDirectory()) {
-                        if (directory.mkdirs()) {
-                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        } else {
-                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        }
-                    } else {
-                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                    }
+//                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
+//
+//                    if(!directory.exists() && !directory.isDirectory()) {
+//                        if (directory.mkdirs()) {
+//                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        } else {
+//                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        }
+//                    } else {
+//                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                    }
 //                    uri = Uri.fromFile(file);
 //                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 //                    CamIntent.putExtra("return-data", true);
@@ -540,7 +540,7 @@ public class SignUpActivityFive extends AppCompatActivity {
             byte[] byteArray = stream.toByteArray();
 
             String sortableDate = Date.convertToSortableDate(Date.getDate());
-            mStorageReference = mFirebaseStorage.getReference().child("ProfilePictures/" + UID + "/" + sortableDate + ".jpg");
+            mStorageReference = mFirebaseStorage.getReference().child("CeleriiProfilePicture/" + UID + "/profilepicture");
             UploadTask uploadTask = mStorageReference.putBytes(byteArray);
             Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override

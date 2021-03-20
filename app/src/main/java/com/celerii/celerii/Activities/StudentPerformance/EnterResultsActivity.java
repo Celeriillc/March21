@@ -143,9 +143,25 @@ public class EnterResultsActivity extends AppCompatActivity {
             myClasses = gson.fromJson(myClassesJSON, type);
 
             if (myClasses != null) {
-                gson = new Gson();
-                activeClass = gson.toJson(myClasses.get(0));
-                sharedPreferencesManager.setActiveClass(activeClass);
+                if (myClasses.size() > 0) {
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("New Class Result");
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return;
+                }
             } else {
                 setSupportActionBar(toolbar);
                 getSupportActionBar().setTitle("New Class Result");
@@ -158,7 +174,8 @@ public class EnterResultsActivity extends AppCompatActivity {
                 errorLayout.setVisibility(View.VISIBLE);
                 errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
                 errorLayoutButton.setText("Find my school");
-                errorLayoutButton.setVisibility(View.VISIBLE);return;
+                errorLayoutButton.setVisibility(View.VISIBLE);
+                return;
             }
         } else {
             Boolean activeClassExist = false;
@@ -451,13 +468,15 @@ public class EnterResultsActivity extends AppCompatActivity {
                 String studentID = classesStudentsAndParentsModel.getStudentID();
                 String parentID = classesStudentsAndParentsModel.getParentID();
 
-                try {
-                    if (!studentParentList.get(studentID).contains(parentID)) {
+                if (!parentID.isEmpty()) {
+                    try {
+                        if (!studentParentList.get(studentID).contains(parentID)) {
+                            studentParentList.get(studentID).add(parentID);
+                        }
+                    } catch (Exception e) {
+                        studentParentList.put(studentID, new ArrayList<String>());
                         studentParentList.get(studentID).add(parentID);
                     }
-                } catch (Exception e) {
-                    studentParentList.put(studentID, new ArrayList<String>());
-                    studentParentList.get(studentID).add(parentID);
                 }
             }
         }
@@ -476,6 +495,7 @@ public class EnterResultsActivity extends AppCompatActivity {
             errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
         } else {
             enterResultRowList.clear();
+            mAdapter.notifyDataSetChanged();
             HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClass);
 
             if (classMap != null) {
@@ -498,6 +518,7 @@ public class EnterResultsActivity extends AppCompatActivity {
             } else {
                 enterResultRowList.add(0, new EnterResultRow());
                 enterResultRowList.add(new EnterResultRow());
+                recyclerView.setItemViewCacheSize(enterResultRowList.size());
                 recyclerView.setVisibility(View.VISIBLE);
                 errorLayout.setVisibility(View.GONE);
                 mAdapter.notifyDataSetChanged();
@@ -554,6 +575,7 @@ public class EnterResultsActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             enterResultRowList.clear();
+                            mAdapter.notifyDataSetChanged();
                             final int childrenCount = (int) dataSnapshot.getChildrenCount();
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 String childKey = postSnapshot.getKey();
@@ -627,27 +649,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override
@@ -794,15 +796,15 @@ public class EnterResultsActivity extends AppCompatActivity {
         final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(EnterResultsActivity.this);
         progressDialog.show();
 
-        for (int i = 0; i < recyclerView.getChildCount(); i++) {
-            try {
-                EnterResultAdapter.MyViewHolder holder = (EnterResultAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                assert holder != null;
-                enterResultRowList.get(i).setScore(holder.score.getText().toString());
-            } catch (Exception e) {
-                continue;
-            }
-        }
+//        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//            try {
+//                EnterResultAdapter.MyViewHolder holder = (EnterResultAdapter.MyViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                assert holder != null;
+//                enterResultRowList.get(i).setScore(holder.score.getText().toString());
+//            } catch (Exception e) {
+//                continue;
+//            }
+//        }
 
         date = Date.getDate();
         sortableDate = Date.convertToSortableDate(date);
@@ -825,8 +827,14 @@ public class EnterResultsActivity extends AppCompatActivity {
         //TODO: Check for null scores
         for (int i = 0; i < enterResultRowList.size(); i++) {
             if (enterResultRowList.get(i).getStudentID() != null) {
+                int scoreInteger = Integer.parseInt(enterResultRowList.get(i).getScore());
+                int maximumScoreInteger = Integer.parseInt(maximumScore);
                 if (enterResultRowList.get(i).getScore().equals("")) {
-                    showDialogWithMessage("A student score can not be empty. Please check your entry and try again", false);
+                    showDialogWithMessage("A student score can not be empty. Please verify your entry and try again", false);
+                    progressDialog.dismiss();
+                    return;
+                } else if (scoreInteger > maximumScoreInteger) {
+                    showDialogWithMessage(enterResultRowList.get(i).getName() +  "'s score is more than the maximum obtainable for this test. Please verify your entry and try again", false);
                     progressDialog.dismiss();
                     return;
                 } else {
@@ -864,34 +872,36 @@ public class EnterResultsActivity extends AppCompatActivity {
                 if (parentIDList != null) {
                     for (int j = 0; j < parentIDList.size(); j++) {
                         String parentID = parentIDList.get(j);
-                        NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewResultPost", enterResultRowList.get(i).getImageURL(), enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getName(), false);
-                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
-                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/status", true);
-                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/" + pushID + "/status", true);
-                        newResultEntry.put("AcademicRecordParentRecipients/" + pushID + "/" + parentID, true);
-                        newResultEntry.put("NotificationParent/" + parentID + "/" + pushID, notificationModel);
-                        newResultEntry.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
-                        newResultEntry.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+
+                        if (!parentID.isEmpty()) {
+                            NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewResultPost", enterResultRowList.get(i).getImageURL(), enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getName(), false);
+                            newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
+                            newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/status", true);
+                            newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/" + pushID + "/status", true);
+                            newResultEntry.put("AcademicRecordParentRecipients/" + pushID + "/" + parentID, true);
+                            newResultEntry.put("NotificationParent/" + parentID + "/" + pushID, notificationModel);
+                            newResultEntry.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
+                            newResultEntry.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+                        }
                     }
                 }
             }
         }
 
         mDatabaseReference = mFirebaseDatabase.getReference();
-//        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
-//            @Override
-//            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-//                if (databaseError == null) {
-//                    progressDialog.dismiss();
-//                    showDialogWithMessage("Results have been posted", true);
-//                } else {
-//                    progressDialog.dismiss();
-//                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-//                    ShowDialogWithMessage.showDialogWithMessage(context, message);
-//                }
-//            }
-//        });
-
+        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    progressDialog.dismiss();
+                    showDialogWithMessage("Results have been posted", true);
+                } else {
+                    progressDialog.dismiss();
+                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+                }
+            }
+        });
     }
 
     public void saveToCloud() {

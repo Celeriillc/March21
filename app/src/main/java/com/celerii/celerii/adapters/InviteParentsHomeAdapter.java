@@ -132,7 +132,7 @@ public class InviteParentsHomeAdapter extends RecyclerView.Adapter<RecyclerView.
                 public void onClick(View v) {
                     final CustomProgressDialogOne customProgressDialogOne = new CustomProgressDialogOne(context);
                     customProgressDialogOne.show();
-                    String link = "https://celerii.io/?invitedby=" + activeAccountID + "&studentid=" + student.getStudentID();
+                    String link = "https://celerii.com/?invitedby=" + activeAccountID + "&invitedbyaccounttype=" + "Teacher" + "&studentid=" + student.getStudentID();
                     Task<ShortDynamicLink> shortLinkTask = FirebaseDynamicLinks.getInstance().createDynamicLink()
                             .setLink(Uri.parse(link))
                             .setDomainUriPrefix("https://celerii.page.link")
@@ -143,7 +143,7 @@ public class InviteParentsHomeAdapter extends RecyclerView.Adapter<RecyclerView.
                                     if (task.isSuccessful()) {
                                         referralLink = task.getResult().getShortLink().toString();
                                     } else {
-                                        referralLink = "https://celerii.io/";
+                                        referralLink = "https://celerii.com/";
                                     }
 
                                     Bundle bundle = new Bundle();

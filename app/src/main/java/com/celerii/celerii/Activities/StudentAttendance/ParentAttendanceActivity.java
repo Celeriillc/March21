@@ -133,9 +133,25 @@ public class ParentAttendanceActivity extends AppCompatActivity {
             myChildren = gson.fromJson(myChildrenJSON, type);
 
             if (myChildren != null) {
-                gson = new Gson();
-                activeKid = gson.toJson(myChildren.get(0));
-                sharedPreferencesManager.setActiveKid(activeKid);
+                if (myChildren.size() > 0) {
+                    gson = new Gson();
+                    activeKid = gson.toJson(myChildren.get(0));
+                    sharedPreferencesManager.setActiveKid(activeKid);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("Attendance");
+                    getSupportActionBar().setHomeButtonEnabled(true);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my child");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return;
+                }
             } else {
                 setSupportActionBar(toolbar);
                 getSupportActionBar().setTitle("Attendance");
@@ -221,10 +237,10 @@ public class ParentAttendanceActivity extends AppCompatActivity {
 
         parentAttendanceHeader = new ParentAttendanceHeader("July", "2018", subject);
         parentAttendanceRowList = new ArrayList<>();
-        loadHeader();
-        loadFromFirebase();
         mAdapter = new ParentAttendanceRowAdapter(parentAttendanceRowList, parentAttendanceHeader, childsFirstName.trim(), parentActivity, this, this);
         recyclerView.setAdapter(mAdapter);
+        loadHeader();
+        loadFromFirebase();
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -289,6 +305,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
                     parentAttendanceRowList.clear();
+                    mAdapter.notifyDataSetChanged();
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         final ParentAttendanceRow parentAttendanceRow = postSnapshot.getValue(ParentAttendanceRow.class);
@@ -388,27 +405,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     public void updateBadges() {

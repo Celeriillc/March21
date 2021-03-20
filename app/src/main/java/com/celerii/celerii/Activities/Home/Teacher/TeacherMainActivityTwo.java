@@ -149,12 +149,12 @@ public class TeacherMainActivityTwo extends AppCompatActivity {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
-        if (mFirebaseUser == null){
+        if (mFirebaseUser == null) {
             sharedPreferencesManager.clear();
             Intent I = new Intent(TeacherMainActivityTwo.this, IntroSlider.class);
             applicationLauncherSharedPreferences.setLauncherActivity("IntroSlider");
             startActivity(I);
-            finish();
+            finishAffinity();
             return;
         }
 

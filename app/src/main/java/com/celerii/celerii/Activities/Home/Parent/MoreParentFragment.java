@@ -2,8 +2,11 @@ package com.celerii.celerii.Activities.Home.Parent;
 
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -14,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -307,6 +311,7 @@ public class MoreParentFragment extends Fragment {
 
         childrenCounter = 0;
         myChildren.clear();
+//        mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference("Parents Students").child(mFirebaseUser.getUid());
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -314,6 +319,7 @@ public class MoreParentFragment extends Fragment {
                 if (dataSnapshot.exists()){
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     myChildren.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()){
                         final String childKey = postSnapShot.getKey();
 
@@ -356,6 +362,7 @@ public class MoreParentFragment extends Fragment {
 
         classesCounter = 0;
         myClasses.clear();
+//        mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher Class").child(mFirebaseUser.getUid());
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -363,6 +370,7 @@ public class MoreParentFragment extends Fragment {
                 if (dataSnapshot.exists()){
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     myClasses.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()){
                         final String classKey = postSnapShot.getKey();
 
@@ -467,6 +475,7 @@ public class MoreParentFragment extends Fragment {
         childrenCounter = 0;
         myChildren.clear();
         childrenKeyHolder.clear();
+//        mAdapter.notifyDataSetChanged();
         final ArrayList<String> childrenKeyList = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference().child("Parents Students").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -475,6 +484,7 @@ public class MoreParentFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     myChildren.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()) {
                         final String childKey = postSnapShot.getKey();
                         childrenKeyList.add(childKey);
@@ -536,6 +546,7 @@ public class MoreParentFragment extends Fragment {
         classesCounter = 0;
         myClasses.clear();
         classesKeyHolder.clear();
+//        mAdapter.notifyDataSetChanged();
         final ArrayList<String> classesKeyList = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Class").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -544,6 +555,7 @@ public class MoreParentFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     final int classesCount = (int) dataSnapshot.getChildrenCount();
                     myClasses.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()) {
                         final String classKey = postSnapShot.getKey();
                         classesKeyList.add(classKey);
@@ -552,6 +564,8 @@ public class MoreParentFragment extends Fragment {
                     getMyClassesRecursive(0, classesKeyList);
                 } else {
                     sharedPreferencesManager.deleteMyClasses();
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    loadDataFromSharedPreferences();
                 }
             }
 
@@ -580,6 +594,7 @@ public class MoreParentFragment extends Fragment {
 
                 if (index == classesKeyList.size() - 1) {
                     sharedPreferencesManager.deleteMyClasses();
+                    mySwipeRefreshLayout.setRefreshing(false);
                     Gson gson = new Gson();
                     String json = gson.toJson(myClasses);
                     sharedPreferencesManager.setMyClasses(json);
@@ -695,7 +710,7 @@ public class MoreParentFragment extends Fragment {
             myChildren = gson.fromJson(myChildrenJSON, type);
 
             if (myChildren != null) {
-                if (myChildren.size() > 1) {
+                if (myChildren.size() > 0) {
                     gson = new Gson();
                     activeKid = gson.toJson(myChildren.get(0));
                     sharedPreferencesManager.setActiveKid(activeKid);
@@ -711,24 +726,32 @@ public class MoreParentFragment extends Fragment {
             type = new TypeToken<ArrayList<Student>>() {}.getType();
             ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
 
-            for (Student student: myChildren) {
-                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
-                    activeKidExist = true;
-                    activeKidModel = student;
-                    activeKid = gson.toJson(activeKidModel);
-                    sharedPreferencesManager.setActiveKid(activeKid);
-                    break;
-                }
-            }
-
-            if (!activeKidExist) {
+            if (myChildren != null) {
                 if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeKid = gson.toJson(myChildren.get(0));
-                        sharedPreferencesManager.setActiveKid(activeKid);
+                    for (Student student : myChildren) {
+                        if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                            activeKidExist = true;
+                            activeKidModel = student;
+                            activeKid = gson.toJson(activeKidModel);
+                            sharedPreferencesManager.setActiveKid(activeKid);
+                            break;
+                        }
                     }
+
+                    if (!activeKidExist) {
+                        if (myChildren.size() > 0) {
+                            gson = new Gson();
+                            activeKid = gson.toJson(myChildren.get(0));
+                            sharedPreferencesManager.setActiveKid(activeKid);
+                        }
+                    }
+                } else {
+                    activeKid = null;
+                    sharedPreferencesManager.deleteActiveKid();
                 }
+            } else {
+                activeKid = null;
+                sharedPreferencesManager.deleteActiveKid();
             }
         }
 
@@ -743,19 +766,21 @@ public class MoreParentFragment extends Fragment {
             ArrayList<String> myChildrenString = new ArrayList<>();
 
             if (myChildren != null) {
-                for (Student student : myChildren) {
-                    myChildrenString.add(gson.toJson(student));
-                }
+                if (myChildren.size() > 0) {
+                    for (Student student : myChildren) {
+                        myChildrenString.add(gson.toJson(student));
+                    }
 
-                final int indexOfActiveKid = myChildrenString.indexOf(activeKid);
-                if (indexOfActiveKid < myChildrenString.size()) {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            recyclerView.smoothScrollToPosition(indexOfActiveKid);
-                        }
-                    }, 100);
+                    final int indexOfActiveKid = myChildrenString.indexOf(activeKid);
+                    if (indexOfActiveKid < myChildrenString.size()) {
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                recyclerView.smoothScrollToPosition(indexOfActiveKid);
+                            }
+                        }, 100);
+                    }
                 }
             }
 
@@ -903,7 +928,6 @@ public class MoreParentFragment extends Fragment {
                 Intent I = new Intent(context, SwitchActivityParentTeacher.class);
                 context.startActivity(I);
                 ((Activity)context).finish();
-//                    loginTeacher("Teacher", ((FooterViewHolder) holder).coordinatorLayout);
             }
         });
         logoutLayout.setOnClickListener(new View.OnClickListener() {
@@ -915,7 +939,7 @@ public class MoreParentFragment extends Fragment {
                     CustomToast.blueBackgroundToast(context, messageString);
                     return;
                 }
-                LogoutProtocol.logout(context, "You're being logged out");
+                logoutConfirmation();
             }
         });
     }
@@ -1046,26 +1070,32 @@ public class MoreParentFragment extends Fragment {
         super.onHiddenChanged(hidden);
 
         Gson gson = new Gson();
-        String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+        String myChildrenJSON;
         String activeKid = sharedPreferencesManager.getActiveKid();
-        Type type = new TypeToken<ArrayList<Student>>() {}.getType();
-        ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
-        ArrayList<String> myChildrenString = new ArrayList<>();
 
-        if (myChildren != null) {
-            for (Student student : myChildren) {
-                myChildrenString.add(gson.toJson(student));
-            }
+        if (activeKid != null) {
+            myChildrenJSON = sharedPreferencesManager.getMyChildren();
+            Type type = new TypeToken<ArrayList<Student>>() {}.getType();
+            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+            ArrayList<String> myChildrenString = new ArrayList<>();
 
-            final int indexOfActiveKid = myChildrenString.indexOf(activeKid);
-            if (indexOfActiveKid < myChildrenString.size()) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        recyclerView.smoothScrollToPosition(indexOfActiveKid);
+            if (myChildren != null) {
+                if (myChildren.size() > 0) {
+                    for (Student student : myChildren) {
+                        myChildrenString.add(gson.toJson(student));
                     }
-                }, 100);
+
+                    final int indexOfActiveKid = myChildrenString.indexOf(activeKid);
+                    if (indexOfActiveKid < myChildrenString.size()) {
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                recyclerView.smoothScrollToPosition(indexOfActiveKid);
+                            }
+                        }, 100);
+                    }
+                }
             }
         }
     }
@@ -1104,26 +1134,38 @@ public class MoreParentFragment extends Fragment {
         super.onPause();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
+    }
 
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
+    private void logoutConfirmation() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog_with_cancel);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button delete = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
 
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        message.setText("Are you sure you want to logout of Celerii?");
 
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
+        delete.setText("Logout");
+        cancel.setText("Cancel");
 
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LogoutProtocol.logout(context, "You're being logged out");
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

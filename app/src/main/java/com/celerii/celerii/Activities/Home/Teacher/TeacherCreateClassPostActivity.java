@@ -530,12 +530,16 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         } else {
             for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
                  if (classParentMap.containsKey(classesStudentsAndParentsModelList.get(i).getClassID())) {
-                     if (!classParentMap.get(classesStudentsAndParentsModelList.get(i).getClassID()).contains(classesStudentsAndParentsModelList.get(i).getParentID())) {
-                         classParentMap.get(classesStudentsAndParentsModelList.get(i).getClassID()).add(classesStudentsAndParentsModelList.get(i).getParentID());
+                     if (!classesStudentsAndParentsModelList.get(i).getParentID().isEmpty()) {
+                         if (!classParentMap.get(classesStudentsAndParentsModelList.get(i).getClassID()).contains(classesStudentsAndParentsModelList.get(i).getParentID())) {
+                             classParentMap.get(classesStudentsAndParentsModelList.get(i).getClassID()).add(classesStudentsAndParentsModelList.get(i).getParentID());
+                         }
                      }
                  } else {
-                     classParentMap.put(classesStudentsAndParentsModelList.get(i).getClassID(), new ArrayList<String>());
-                     classParentMap.get(classesStudentsAndParentsModelList.get(i).getClassID()).add(classesStudentsAndParentsModelList.get(i).getParentID());
+                     if (!classesStudentsAndParentsModelList.get(i).getParentID().isEmpty()) {
+                         classParentMap.put(classesStudentsAndParentsModelList.get(i).getClassID(), new ArrayList<String>());
+                         classParentMap.get(classesStudentsAndParentsModelList.get(i).getClassID()).add(classesStudentsAndParentsModelList.get(i).getParentID());
+                     }
                  }
 
                  if (classSchoolMap.containsKey(classesStudentsAndParentsModelList.get(i).getClassID())) {
@@ -565,7 +569,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
 
-            mStorageReference = mFirebaseStorage.getReference().child("ClassStory/" + UID + "/" + sortableDate + "_" + index + ".jpg");
+            mStorageReference = mFirebaseStorage.getReference().child("ClassStory/" + UID + "/" + sortableDate + "_" + index);
             UploadTask uploadTask = mStorageReference.putBytes(byteArray);
             Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
@@ -672,9 +676,9 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
                 for (int i = 0; i < classReciepients.size(); i++){
-                    String classStoryRecipientsPush = "ClassStoryReciepients/" + pushID + "/";
-                    newStory.put(classStoryRecipientsPush + classReciepients.get(i), true);
-                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                    String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
+                    newStory.put(classStoryRecipientsPush + classReciepients.get(i), false);
+                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, false);
                 }
                 for (int i = 0; i < schoolReciepients.size(); i++) {
                     newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
@@ -951,17 +955,17 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
         } else {
             CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ClassFeedPicture");
-
-            if(!directory.exists() && !directory.isDirectory()) {
-                if (directory.mkdirs()) {
-                    file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                } else {
-                    file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                }
-            } else {
-                file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-            }
+//            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ClassFeedPicture");
+//
+//            if(!directory.exists() && !directory.isDirectory()) {
+//                if (directory.mkdirs()) {
+//                    file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                } else {
+//                    file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                }
+//            } else {
+//                file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//            }
 //            uri = Uri.fromFile(file);
 //            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 //            CamIntent.putExtra("return-data", true);
@@ -996,17 +1000,17 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
                     CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ClassFeedPicture");
-
-                    if(!directory.exists() && !directory.isDirectory()) {
-                        if (directory.mkdirs()) {
-                            file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        } else {
-                            file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        }
-                    } else {
-                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                    }
+//                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ClassFeedPicture");
+//
+//                    if(!directory.exists() && !directory.isDirectory()) {
+//                        if (directory.mkdirs()) {
+//                            file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        } else {
+//                            file = new File(directory, "CeleriiClassFeedPicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        }
+//                    } else {
+//                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                    }
 
 //                    uri = Uri.fromFile(file);
 //                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
@@ -1091,27 +1095,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     void loadImageViews(Bitmap bitmap) {

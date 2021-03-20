@@ -129,6 +129,7 @@ public class SetupSchoolListActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
                     setupSchoolListRowList.clear();
+                    mAdapter.notifyDataSetChanged();
                     setupSchoolListRowList.add(new SetupSchoolListRow());
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         School school = postSnapshot.getValue(School.class);

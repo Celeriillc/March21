@@ -25,11 +25,13 @@ import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
+import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.AcademicRecord;
 import com.celerii.celerii.models.AcademicRecordTeacher;
+import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.KidScoreForTeachersModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,7 +40,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +55,7 @@ import java.util.Map;
 
 public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<TeacherAcademicRecordDetailAdapter.MyViewHolder>{
 
+    SharedPreferencesManager sharedPreferencesManager;
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
@@ -85,6 +91,7 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
     public TeacherAcademicRecordDetailAdapter(List<AcademicRecordTeacher> AcademicRecordTeacherList, Context context) {
         this.AcademicRecordTeacherList = AcademicRecordTeacherList;
         this.context = context;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
@@ -184,80 +191,104 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
         final String key = academicRecordTeacher.getRecordKey();
         final String teacherID = academicRecordTeacher.getTeacherID();
         final String classID = academicRecordTeacher.getClassID();
+        final String className = academicRecordTeacher.getClassName();
         final String schoolID = academicRecordTeacher.getSchoolID();
 
         final HashMap<String, Object> deleteMap = new HashMap<>();
         final ArrayList<String> parentsList = new ArrayList<>();
         final ArrayList<String> studentsList = new ArrayList<>();
 
-        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher").child(teacherID).child(subject_year_term);
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                numberOfRemainingResults = 0;
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        if (!postSnapshot.getKey().equals(key)) {
-                            numberOfRemainingResults++;
-                        }
-                    }
-                }
+        Gson gson = new Gson();
+        ArrayList<Class> myClasses = new ArrayList<>();
+        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+        myClasses = gson.fromJson(myClassesJSON, type);
 
-                mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
+        if (myClasses != null) {
+            boolean hasClass = false;
+            for (Class classInstance: myClasses) {
+                if (classInstance.getID().equals(classID)) {
+                    hasClass = true;
+                    break;
+                }
+            }
+
+            if (hasClass) {
+                mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher").child(teacherID).child(subject_year_term);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        numberOfRemainingResults = 0;
                         if (dataSnapshot.exists()) {
-                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                parentsList.add(postSnapshot.getKey());
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                if (!postSnapshot.getKey().equals(key)) {
+                                    numberOfRemainingResults++;
+                                }
                             }
                         }
 
-                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                        studentsList.add(postSnapshot.getKey());
+                                        parentsList.add(postSnapshot.getKey());
                                     }
                                 }
 
-                                deleteMap.put("AcademicRecordClass/" + classID + "/" + subject_year_term + "/" + key, null);
-                                deleteMap.put("AcademicRecordTeacher/" +  teacherID + "/" + subject_year_term + "/" + key, null);
-
-                                for (String parent: parentsList) {
-                                    deleteMap.put("AcademicRecordParentRecipients/" + key + "/" + parent, null);
-                                    deleteMap.put("NotificationParent/" + parent + "/" + key, null);
-                                }
-
-                                for (String student: studentsList) {
-                                    deleteMap.put("AcademicRecordStudent/" + student + "/" + subject_year_term + "/" + key, null);
-                                    deleteMap.put("AcademicRecordClass-Student/" + classID + "/" + subject_year_term + "/" + key, null);
-                                    deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
-                                }
-
-                                DatabaseReference updateRef = mFirebaseDatabase.getReference();
-                                updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
+                                mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        if (databaseError == null) {
-                                            if (numberOfRemainingResults == 0) {
-                                                progressDialog.dismiss();
-                                                ((Activity) context).finish();
-//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
-//                                                notifyDataSetChanged();
-                                            } else {
-                                                progressDialog.dismiss();
-//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
-//                                                notifyDataSetChanged();
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                                studentsList.add(postSnapshot.getKey());
                                             }
-                                        } else {
-//                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
-                                            progressDialog.dismiss();
-                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-                                            ShowDialogWithMessage.showDialogWithMessage(context, message);
                                         }
+
+                                        deleteMap.put("AcademicRecordClass/" + classID + "/" + subject_year_term + "/" + key, null);
+                                        deleteMap.put("AcademicRecordTeacher/" +  teacherID + "/" + subject_year_term + "/" + key, null);
+
+                                        for (String parent: parentsList) {
+                                            deleteMap.put("AcademicRecordParentRecipients/" + key + "/" + parent, null);
+                                            deleteMap.put("NotificationParent/" + parent + "/" + key, null);
+                                        }
+
+                                        for (String student: studentsList) {
+                                            deleteMap.put("AcademicRecordStudent/" + student + "/" + subject_year_term + "/" + key, null);
+                                            deleteMap.put("AcademicRecordClass-Student/" + classID + "/" + subject_year_term + "/" + key, null);
+                                            deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
+                                        }
+
+                                        DatabaseReference updateRef = mFirebaseDatabase.getReference();
+                                        updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
+                                            @Override
+                                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                                if (databaseError == null) {
+                                                    if (numberOfRemainingResults == 0) {
+                                                        progressDialog.dismiss();
+                                                        ((Activity) context).finish();
+//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
+//                                                notifyDataSetChanged();
+                                                    } else {
+                                                        progressDialog.dismiss();
+//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
+//                                                notifyDataSetChanged();
+                                                    }
+                                                } else {
+//                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
+                                                    progressDialog.dismiss();
+                                                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
                                     }
                                 });
                             }
@@ -274,13 +305,18 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
 
                     }
                 });
+            } else {
+                progressDialog.dismiss();
+                String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
+                showDialogWithMessage(message);
             }
+        } else {
+            progressDialog.dismiss();
+            String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
+            showDialogWithMessage(message);
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
     }
 
     private double newClassAverage = 0.0;

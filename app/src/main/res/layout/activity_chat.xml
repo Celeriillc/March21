@@ -82,7 +82,7 @@
                     android:id="@+id/attachments"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:background="@drawable/ic_camera"
+                    android:background="@drawable/ic_camera_chat"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/sendlayout"
                     android:layout_marginStart="5dp"

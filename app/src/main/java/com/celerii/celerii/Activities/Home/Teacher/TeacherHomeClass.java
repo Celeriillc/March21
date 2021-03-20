@@ -144,10 +144,20 @@ public class TeacherHomeClass extends Fragment {
             myClasses = gson.fromJson(myClassesJSON, type);
 
             if (myClasses != null) {
-                if (myClasses.size() >= 1) {
+                if (myClasses.size() > 0) {
                     gson = new Gson();
                     activeClass = gson.toJson(myClasses.get(0));
                     sharedPreferencesManager.setActiveClass(activeClass);
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my school");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
+                    return view;
                 }
             } else {
                 mySwipeRefreshLayout.setRefreshing(false);
@@ -170,32 +180,44 @@ public class TeacherHomeClass extends Fragment {
             type = new TypeToken<ArrayList<Class>>() {}.getType();
             ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
 
-            for (Class classInstance: myClasses) {
-                if (activeClassModel.getID().equals(classInstance.getID())) {
-                    activeClassExist = true;
-                    activeClassModel = classInstance;
-                    activeClass = gson.toJson(activeClassModel);
-                    sharedPreferencesManager.setActiveClass(activeClass);
-                    break;
+            if (myClasses != null) {
+                for (Class classInstance : myClasses) {
+                    if (activeClassModel.getID().equals(classInstance.getID())) {
+                        activeClassExist = true;
+                        activeClassModel = classInstance;
+                        activeClass = gson.toJson(activeClassModel);
+                        sharedPreferencesManager.setActiveClass(activeClass);
+                        break;
+                    }
                 }
-            }
 
-            if (!activeClassExist) {
-                if (myClasses.size() > 0) {
-                    gson = new Gson();
-                    activeClass = gson.toJson(myClasses.get(0));
-                    sharedPreferencesManager.setActiveClass(activeClass);
-                } else {
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                    errorLayoutButton.setText("Find my school");
-                    errorLayoutButton.setVisibility(View.VISIBLE);
-                    return view;
+                if (!activeClassExist) {
+                    if (myClasses.size() > 0) {
+                        gson = new Gson();
+                        activeClass = gson.toJson(myClasses.get(0));
+                        sharedPreferencesManager.setActiveClass(activeClass);
+                    } else {
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my school");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                        return view;
+                    }
                 }
+            } else {
+                mySwipeRefreshLayout.setRefreshing(false);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
+                mySwipeRefreshLayout.setVisibility(View.GONE);
+                errorLayout.setVisibility(View.VISIBLE);
+                errorLayoutText.setText(Html.fromHtml("You're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                errorLayoutButton.setText("Find my school");
+                errorLayoutButton.setVisibility(View.VISIBLE);
+                return view;
             }
         }
 
@@ -251,15 +273,21 @@ public class TeacherHomeClass extends Fragment {
         Type type = new TypeToken<HashMap<String, HashMap<String, Student>>>() {}.getType();
         classStudentsForTeacherMap = gson.fromJson(classStudentsForTeacherJSON, type);
 
-        if (classStudentsForTeacherMap == null || classStudentsForTeacherMap.size() == 0) {
+        if (classStudentsForTeacherMap == null) {
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.GONE);
+            progressLayout.setVisibility(View.GONE);
+            mySwipeRefreshLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText(Html.fromHtml("Your classes have no students or you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+            errorLayoutButton.setText("Find my school");
+            errorLayoutButton.setVisibility(View.VISIBLE);
+        } else if (classStudentsForTeacherMap.size() == 0) {
             mySwipeRefreshLayout.setRefreshing(false);
             recyclerView.setVisibility(View.VISIBLE);
             progressLayout.setVisibility(View.GONE);
             mySwipeRefreshLayout.setVisibility(View.GONE);
             errorLayout.setVisibility(View.GONE);
-//            errorLayoutText.setText(Html.fromHtml("Your classes have no students or you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-//            errorLayoutButton.setText("Find my school");
-//            errorLayoutButton.setVisibility(View.VISIBLE);
         } else {
             if (mAdapter == null) {
                 return;
@@ -267,6 +295,7 @@ public class TeacherHomeClass extends Fragment {
 
             ArrayList<ManageKidsModel> manageKidsModelListLocal = new ArrayList<>();
             manageKidsModelList.clear();
+            mAdapter.notifyDataSetChanged();
 
             if (sharedPreferencesManager.getActiveClass() != null) {
                 gson = new Gson();
@@ -329,6 +358,7 @@ public class TeacherHomeClass extends Fragment {
 
         counter = 0;
         manageKidsModelHashMap.clear();
+        mAdapter.notifyDataSetChanged();
         final ArrayList<ManageKidsModel> manageKidsModelListLocal = new ArrayList<>();
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Class Students").child(activeClassID);
@@ -435,26 +465,6 @@ public class TeacherHomeClass extends Fragment {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 }

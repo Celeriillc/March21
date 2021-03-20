@@ -166,63 +166,92 @@ public class ParentSchoolMessageList extends Fragment {
         } else {
             for (int i = 0; i < studentsSchoolsClassesandTeachersModelList.size(); i++) {
                 final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel = studentsSchoolsClassesandTeachersModelList.get(i);
-                mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(studentsSchoolsClassesandTeachersModel.getSchoolID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            School school = dataSnapshot.getValue(School.class);
-                            final String schoolID = dataSnapshot.getKey();
-                            final String schoolName = school.getSchoolName();
-                            final String schoolProfilePictureURL = school.getProfilePhotoUrl();
+                if (!studentsSchoolsClassesandTeachersModel.getSchoolID().isEmpty()) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(studentsSchoolsClassesandTeachersModel.getSchoolID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                School school = dataSnapshot.getValue(School.class);
+                                final String schoolID = dataSnapshot.getKey();
+                                final String schoolName = school.getSchoolName();
+                                final String schoolProfilePictureURL = school.getProfilePhotoUrl();
 
-                            mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentsSchoolsClassesandTeachersModel.getStudentID());
-                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    counterSchool++;
-                                    if (dataSnapshot.exists()) {
-                                        Student student = dataSnapshot.getValue(Student.class);
-                                        String studentFirstName = student.getFirstName();
-                                        String relationship = studentFirstName + "'s School";
+                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentsSchoolsClassesandTeachersModel.getStudentID());
+                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        counterSchool++;
+                                        if (dataSnapshot.exists()) {
+                                            Student student = dataSnapshot.getValue(Student.class);
+                                            String studentFirstName = student.getFirstName();
+                                            String relationship = studentFirstName + "'s School";
 
-                                        NewChatRowModel newChatRowModel = new NewChatRowModel(schoolName, relationship, schoolProfilePictureURL, schoolID);
-                                        if (!schoolList.containsKey(schoolID)){
-                                            schoolList.put(schoolID, newChatRowModel);
-                                            newChatRowModelList.add(newChatRowModel);
-                                        }
+                                            NewChatRowModel newChatRowModel = new NewChatRowModel(schoolName, relationship, schoolProfilePictureURL, schoolID);
+                                            if (!schoolList.containsKey(schoolID)) {
+                                                schoolList.put(schoolID, newChatRowModel);
+                                                newChatRowModelList.add(newChatRowModel);
+                                            }
 
-                                        if (counterSchool == studentsSchoolsClassesandTeachersModelList.size()) {
-                                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                                @Override
-                                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                                    return o1.getName().compareTo(o2.getName());
-                                                }
-                                            });
-                                            mAdapter.notifyDataSetChanged();
-                                            mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            errorLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.VISIBLE);
+                                            if (counterSchool == studentsSchoolsClassesandTeachersModelList.size()) {
+                                                Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                    @Override
+                                                    public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                        return o1.getName().compareTo(o2.getName());
+                                                    }
+                                                });
+                                                mAdapter.notifyDataSetChanged();
+                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                progressLayout.setVisibility(View.GONE);
+                                                errorLayout.setVisibility(View.GONE);
+                                                recyclerView.setVisibility(View.VISIBLE);
+                                            }
                                         }
                                     }
-                                }
 
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                counterSchool++;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                } else {
+                    counterSchool++;
+
+                    if (counterSchool == studentsSchoolsClassesandTeachersModelList.size()) {
+                        if (newChatRowModelList.size() > 0) {
+                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
                                 @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
+                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                    return o1.getName().compareTo(o2.getName());
                                 }
                             });
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
                         } else {
-                            counterSchool++;
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            mySwipeRefreshLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText(Html.fromHtml("You don't have any schools to message at this time. If you're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                            errorLayoutButton.setText("Find my child");
+                            errorLayoutButton.setVisibility(View.VISIBLE);
                         }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                }
             }
         }
 
@@ -353,26 +382,6 @@ public class ParentSchoolMessageList extends Fragment {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 }

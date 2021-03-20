@@ -422,7 +422,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_performance" />
+                            android:src="@drawable/ic_percent" />
 
                         <TextView
                             android:id="@+id/performance"

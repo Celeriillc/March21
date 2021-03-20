@@ -117,6 +117,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
     double schoolTotalScore = 0.0;
     double schoolAverageScore = 0.0;
     int schoolCounter = 0;
+    int totalChildrenCount = 0;
     int counter;
     ArrayList<String> classes = new ArrayList<>();
     ArrayList<Address> addresses = new ArrayList<>();
@@ -1107,6 +1108,8 @@ public class SchoolProfileActivity extends AppCompatActivity {
         schoolTotalScore = 0.0;
         schoolAverageScore = 0.0;
         schoolCounter = 0;
+        totalChildrenCount = 0;
+        counter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference().child("School Class").child(schoolID);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1117,13 +1120,15 @@ public class SchoolProfileActivity extends AppCompatActivity {
                         final String classID = postSnapshot.getKey();
 
                         normalizedAverageList = new ArrayList<>();
-                        counter = 0;
+//                        counter = 0;
                         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(classID);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
+                                    totalChildrenCount += childrenCount;
+                                    schoolCounter++;
 
                                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                                         String subject_year_term = postSnapshot.getKey();
@@ -1157,7 +1162,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                     }
                                                     counter++;
 
-                                                    if (counter == childrenCount) {
+                                                    if (counter == totalChildrenCount) {
                                                         double average = 0.0;
                                                         double total = 0.0;
 
@@ -1168,7 +1173,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                             average = total / normalizedAverageList.size();
                                                         }
                                                         schoolTotalScore += average;
-                                                        schoolCounter++;
+//                                                        schoolCounter++;
                                                         counter = 0;
                                                         normalizedAverageList.clear();
 
@@ -1192,7 +1197,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                         } else {
                                             counter++;
 
-                                            if (counter == childrenCount) {
+                                            if (counter == totalChildrenCount) {
                                                 double average = 0.0;
                                                 double total = 0.0;
 
@@ -1203,7 +1208,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                     average = total / normalizedAverageList.size();
                                                 }
                                                 schoolTotalScore += average;
-                                                schoolCounter++;
+//                                                schoolCounter++;
                                                 counter = 0;
                                                 normalizedAverageList.clear();
 
@@ -1462,27 +1467,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override

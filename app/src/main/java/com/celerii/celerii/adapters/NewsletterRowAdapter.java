@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Newsletters.NewsletterDetailActivity;
+import com.celerii.celerii.Activities.Newsletters.NewsletterDetailKTActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.models.NewsletterRow;
@@ -72,7 +73,7 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, NewsletterDetailActivity.class);
+                Intent intent = new Intent(context, NewsletterDetailKTActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("title", newsletterRow.getNewsletterTitle());
                 bundle.putString("imageURL", newsletterRow.getNewsletterImageURL());

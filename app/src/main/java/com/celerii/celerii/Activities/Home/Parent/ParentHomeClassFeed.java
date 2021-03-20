@@ -137,27 +137,7 @@ public class ParentHomeClassFeed extends Fragment {
         super.onPause();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override
@@ -202,7 +182,7 @@ public class ParentHomeClassFeed extends Fragment {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 int id = mLayoutManager.findLastCompletelyVisibleItemPosition();
-                if(id >= classStoryList.size() - 1 && classStoryList.size() != 0 && id > 0){
+                if(id >= classStoryList.size() - 1 && classStoryList.size() != 0 && id > 0 && storyKeyList.size() >= numberOfPostsPerLoad){
                     loadMoreParentFeed(getLastKey());
                 }
             }
@@ -512,9 +492,10 @@ public class ParentHomeClassFeed extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 classStoryList.clear();
                 storyKeyList.clear();
+                mAdapter.notifyDataSetChanged();
                 stillLoading = true;
                 mAdapter.stillLoading = true;
-//                mAdapter.notifyDataSetChanged();
+                mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     counter = 0;
                     childrenCount = (int) dataSnapshot.getChildrenCount();
@@ -565,6 +546,8 @@ public class ParentHomeClassFeed extends Fragment {
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
 //                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        stillLoading = false;
+                                                        mAdapter.stillLoading = false;
                                                         mAdapter.notifyDataSetChanged();
                                                     }
                                                 }
@@ -609,6 +592,8 @@ public class ParentHomeClassFeed extends Fragment {
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
 //                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        stillLoading = false;
+                                                        mAdapter.stillLoading = false;
                                                         mAdapter.notifyDataSetChanged();
                                                     }
                                                 }
@@ -653,6 +638,8 @@ public class ParentHomeClassFeed extends Fragment {
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
 //                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                        stillLoading = false;
+                                                        mAdapter.stillLoading = false;
                                                         mAdapter.notifyDataSetChanged();
                                                     }
                                                 }
@@ -683,6 +670,8 @@ public class ParentHomeClassFeed extends Fragment {
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
 //                                                        recyclerView.setVisibility(View.VISIBLE);
+                                        stillLoading = false;
+                                        mAdapter.stillLoading = false;
                                         mAdapter.notifyDataSetChanged();
                                     }
                                 }
@@ -694,6 +683,8 @@ public class ParentHomeClassFeed extends Fragment {
                             }
                         });
                     }
+//                    mAdapter.stillLoading = false;
+//                    mAdapter.notifyDataSetChanged();
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
@@ -773,6 +764,8 @@ public class ParentHomeClassFeed extends Fragment {
                                                         progressLayout.setVisibility(View.GONE);
                                                         errorLayout.setVisibility(View.GONE);
                                                         recyclerView.setVisibility(View.VISIBLE);
+//                                                        stillLoading = false;
+//                                                        mAdapter.stillLoading = false;
                                                         mAdapter.notifyDataSetChanged();
                                                     }
                                                 }
@@ -815,6 +808,8 @@ public class ParentHomeClassFeed extends Fragment {
                                                         progressLayout.setVisibility(View.GONE);
                                                         errorLayout.setVisibility(View.GONE);
                                                         recyclerView.setVisibility(View.VISIBLE);
+//                                                        stillLoading = false;
+//                                                        mAdapter.stillLoading = false;
                                                         mAdapter.notifyDataSetChanged();
                                                     }
                                                 }
@@ -857,6 +852,8 @@ public class ParentHomeClassFeed extends Fragment {
                                                         progressLayout.setVisibility(View.GONE);
                                                         errorLayout.setVisibility(View.GONE);
                                                         recyclerView.setVisibility(View.VISIBLE);
+//                                                        stillLoading = false;
+//                                                        mAdapter.stillLoading = false;
                                                         mAdapter.notifyDataSetChanged();
                                                     }
                                                 }
@@ -885,6 +882,8 @@ public class ParentHomeClassFeed extends Fragment {
                                         progressLayout.setVisibility(View.GONE);
                                         errorLayout.setVisibility(View.GONE);
                                         recyclerView.setVisibility(View.VISIBLE);
+//                                        stillLoading = false;
+//                                        mAdapter.stillLoading = false;
                                         mAdapter.notifyDataSetChanged();
                                     }
                                 }
@@ -896,6 +895,11 @@ public class ParentHomeClassFeed extends Fragment {
                             }
                         });
                     }
+//                    if (counter == childrenCount) {
+//                        stillLoading = false;
+//                        mAdapter.stillLoading = false;
+//                        mAdapter.notifyDataSetChanged();
+//                    }
                 } else {
                     mAdapter.stillLoading = false;
                     mAdapter.notifyDataSetChanged();

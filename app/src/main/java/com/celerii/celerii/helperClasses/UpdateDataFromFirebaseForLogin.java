@@ -372,6 +372,16 @@ public class UpdateDataFromFirebaseForLogin {
                                                                             sharedPreferencesManager.setClassesStudentParent(json);
                                                                         }
                                                                     }
+                                                                } else {
+                                                                    ClassesStudentsAndParentsModel classesStudentsAndParentsModel = new ClassesStudentsAndParentsModel(classKey, schoolKey, studentKey, "");
+                                                                    String existenceChecker = classKey + schoolKey + studentKey;
+                                                                    if (!classesStudentsAndParentsModelMap.containsKey(existenceChecker)) {
+                                                                        classesStudentsAndParentsModelList.add(classesStudentsAndParentsModel);
+                                                                        classesStudentsAndParentsModelMap.put(existenceChecker, classesStudentsAndParentsModel);
+                                                                        Gson gson = new Gson();
+                                                                        String json = gson.toJson(classesStudentsAndParentsModelList);
+                                                                        sharedPreferencesManager.setClassesStudentParent(json);
+                                                                    }
                                                                 }
                                                             }
 

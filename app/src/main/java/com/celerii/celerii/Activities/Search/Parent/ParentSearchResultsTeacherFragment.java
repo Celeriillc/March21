@@ -118,9 +118,9 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
         existingConnections = new ArrayList<>();
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
-        loadTeacherDataFromFirebase();
         mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
         recyclerView.setAdapter(mAdapter);
+        loadTeacherDataFromFirebase();
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -164,76 +164,98 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
         } else {
             for (int i = 0; i < studentsSchoolsClassesandTeachersModelList.size(); i++) {
                 final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel = studentsSchoolsClassesandTeachersModelList.get(i);
-                mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        counter++;
-                        if (dataSnapshot.exists()) {
-                            Teacher teacher = dataSnapshot.getValue(Teacher.class);
-                            String teacherKey = dataSnapshot.getKey();
-                            String teacherName = teacher.getLastName() + " " + teacher.getFirstName();
-                            String teacherFirstName = teacher.getFirstName();
-                            String teacherLastName = teacher.getLastName();
-                            String teacherMiddleName = teacher.getMiddleName();
-                            String teacherPicURL = teacher.getProfilePicURL();
-                            String searchSubject = teacherLastName + " " + teacherFirstName + " " + teacherMiddleName;
+                if (!studentsSchoolsClassesandTeachersModel.getTeacherID().isEmpty()) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            counter++;
+                            if (dataSnapshot.exists()) {
+                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
+                                String teacherKey = dataSnapshot.getKey();
+                                String teacherName = teacher.getLastName() + " " + teacher.getFirstName();
+                                String teacherFirstName = teacher.getFirstName();
+                                String teacherLastName = teacher.getLastName();
+                                String teacherMiddleName = teacher.getMiddleName();
+                                String teacherPicURL = teacher.getProfilePicURL();
+                                String searchSubject = teacherLastName + " " + teacherFirstName + " " + teacherMiddleName;
 
-                            if (StringComparer.contains(query, searchSubject)) {
-                                if (!teachersList.containsKey(teacherKey)) {
-                                    SearchResultsRow searchResultsRow = new SearchResultsRow(teacherKey, searchSubject, "", teacherPicURL, "Teacher");
-                                    if (!teacher.getDeleted()) {
-                                        searchResultsRowList.add(searchResultsRow);
+                                if (StringComparer.contains(query, searchSubject)) {
+                                    if (!teachersList.containsKey(teacherKey)) {
+                                        SearchResultsRow searchResultsRow = new SearchResultsRow(teacherKey, searchSubject, "", teacherPicURL, "Teacher");
+                                        if (!teacher.getDeleted()) {
+                                            searchResultsRowList.add(searchResultsRow);
+                                        }
+                                        teacherMap.put(teacherKey, teacher);
+                                        teachersList.put(teacherKey, searchResultsRow);
                                     }
-                                    teacherMap.put(teacherKey, teacher);
-                                    teachersList.put(teacherKey, searchResultsRow);
-                                }
 
-                                if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
-                                    sendSearchAnalytics();
+                                    if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                                        sendSearchAnalytics();
 
-                                    if (searchResultsRowList.size() > 0) {
-                                        //Collections.shuffle(searchResultsRowList);
-                                        mAdapter.notifyDataSetChanged();
-                                        mySwipeRefreshLayout.setRefreshing(false);
-                                        progressLayout.setVisibility(View.GONE);
-                                        errorLayout.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.VISIBLE);
-                                    } else {
-                                        mySwipeRefreshLayout.setRefreshing(false);
-                                        progressLayout.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.GONE);
-                                        errorLayout.setVisibility(View.VISIBLE);
-                                        errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
+                                        if (searchResultsRowList.size() > 0) {
+                                            //Collections.shuffle(searchResultsRowList);
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
+                                        }
                                     }
-                                }
-                            } else {
-                                if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
-                                    sendSearchAnalytics();
-                                    if (searchResultsRowList.size() > 0) {
-                                        //Collections.shuffle(searchResultsRowList);
-                                        mAdapter.notifyDataSetChanged();
-                                        mySwipeRefreshLayout.setRefreshing(false);
-                                        progressLayout.setVisibility(View.GONE);
-                                        errorLayout.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.VISIBLE);
-                                    } else {
-                                        mySwipeRefreshLayout.setRefreshing(false);
-                                        progressLayout.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.GONE);
-                                        errorLayout.setVisibility(View.VISIBLE);
-                                        errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
+                                } else {
+                                    if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                                        sendSearchAnalytics();
+                                        if (searchResultsRowList.size() > 0) {
+                                            //Collections.shuffle(searchResultsRowList);
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
+                        }
+                    });
+                } else {
+                    counter++;
+                    if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                        sendSearchAnalytics();
+
+                        if (searchResultsRowList.size() > 0) {
+                            //Collections.shuffle(searchResultsRowList);
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                        } else {
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
+                        }
                     }
-                });
+                }
             }
         }
 
@@ -432,26 +454,6 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 }

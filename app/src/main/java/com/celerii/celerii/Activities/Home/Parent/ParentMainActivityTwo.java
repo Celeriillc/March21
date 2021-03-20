@@ -58,6 +58,7 @@ import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
 import com.celerii.celerii.Activities.Search.Teacher.SearchActivity;
 import com.celerii.celerii.Activities.Settings.TutorialsActivity;
+import com.celerii.celerii.Activities.Utility.HTMLViewerActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
@@ -169,7 +170,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             myChildren = gson.fromJson(myChildrenJSON, type);
 
             if (myChildren != null) {
-                if (myChildren.size() > 1) {
+                if (myChildren.size() > 0) {
                     gson = new Gson();
                     activeStudent = gson.toJson(myChildren.get(0));
                     sharedPreferencesManager.setActiveKid(activeStudent);
@@ -193,7 +194,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             Intent I = new Intent(ParentMainActivityTwo.this, IntroSlider.class);
             applicationLauncherSharedPreferences.setLauncherActivity("IntroSlider");
             startActivity(I);
-            finish();
+            finishAffinity();
             return;
         }
 

@@ -198,7 +198,7 @@ public class SettingsActivityTeacher extends AppCompatActivity {
         blog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://celerii.com/blog";
+                String url = "https://celerii.com/blogs";
 //                try {
 //                    Intent i = new Intent("android.intent.action.MAIN");
 //                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
@@ -224,11 +224,11 @@ public class SettingsActivityTeacher extends AppCompatActivity {
         termsOfService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://celerii.com/terms-of-service";
+                String url = "https://celerii.com/tos#terms-of-service";
                 Intent I = new Intent(SettingsActivityTeacher.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "Terms of Service");
-                bundle.putString("URL", "");
+                bundle.putString("URL", url);
                 I.putExtras(bundle);
                 startActivity(I);
             }
@@ -237,11 +237,11 @@ public class SettingsActivityTeacher extends AppCompatActivity {
         privacyPolicy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://celerii.com/privacy-policy";
+                String url = "https://celerii.com/tos#privacy-policy";
                 Intent I = new Intent(SettingsActivityTeacher.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "Privacy Policy");
-                bundle.putString("URL", "");
+                bundle.putString("URL", url);
                 I.putExtras(bundle);
                 startActivity(I);
             }
@@ -254,7 +254,7 @@ public class SettingsActivityTeacher extends AppCompatActivity {
                 Intent I = new Intent(SettingsActivityTeacher.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "App Info");
-                bundle.putString("URL", "");
+                bundle.putString("URL", url);
                 I.putExtras(bundle);
                 startActivity(I);
             }
@@ -267,7 +267,7 @@ public class SettingsActivityTeacher extends AppCompatActivity {
                 Intent I = new Intent(SettingsActivityTeacher.this, BrowserActivityForInfo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Header", "About Us");
-                bundle.putString("URL", "");
+                bundle.putString("URL", url);
                 I.putExtras(bundle);
                 startActivity(I);
             }
@@ -291,27 +291,7 @@ public class SettingsActivityTeacher extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override

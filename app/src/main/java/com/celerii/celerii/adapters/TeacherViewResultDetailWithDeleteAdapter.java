@@ -29,6 +29,7 @@ import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.TypeConverterClass;
 import com.celerii.celerii.models.AcademicRecord;
 import com.celerii.celerii.models.AcademicRecordTeacher;
+import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.KidScoreForTeachersModel;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.Student;
@@ -57,6 +58,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    SharedPreferencesManager sharedPreferencesManager;
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
@@ -114,6 +116,7 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
+        sharedPreferencesManager = new SharedPreferencesManager(context);
         this.recordID = recordID;
     }
 
@@ -269,6 +272,7 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
         final String key = academicRecordTeacher.getRecordKey();
         final String teacherID = academicRecordTeacher.getTeacherID();
         final String classID = academicRecordTeacher.getClassID();
+        final String className = academicRecordTeacher.getClassName();
         final String schoolID = academicRecordTeacher.getSchoolID();
 
         final HashMap<String, Object> deleteMap = new HashMap<>();
@@ -277,54 +281,77 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
 
         progressDialog.show();
 
-        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                        parentsList.add(postSnapshot.getKey());
-                    }
-                }
+        Gson gson = new Gson();
+        ArrayList<Class> myClasses = new ArrayList<>();
+        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+        myClasses = gson.fromJson(myClassesJSON, type);
 
-                mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+        if (myClasses != null) {
+            boolean hasClass = false;
+            for (Class classInstance: myClasses) {
+                if (classInstance.getID().equals(classID)) {
+                    hasClass = true;
+                    break;
+                }
+            }
+
+            if (hasClass) {
+                mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                studentsList.add(postSnapshot.getKey());
+                                parentsList.add(postSnapshot.getKey());
                             }
                         }
 
-                        deleteMap.put("AcademicRecordClass/" + classID + "/" + subject_year_term + "/" + key, null);
-                        deleteMap.put("AcademicRecordTeacher/" +  teacherID + "/" + subject_year_term + "/" + key, null);
-
-                        for (String parent: parentsList) {
-                            deleteMap.put("AcademicRecordParentRecipients/" + key + "/" + parent, null);
-                            deleteMap.put("NotificationParent/" + parent + "/" + key, null);
-                        }
-
-                        for (String student: studentsList) {
-                            deleteMap.put("AcademicRecordStudent/" + student + "/" + subject_year_term + "/" + key, null);
-                            deleteMap.put("AcademicRecordClass-Student/" + classID + "/" + subject_year_term + "/" + key, null);
-                            deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
-                        }
-
-                        DatabaseReference updateRef = mFirebaseDatabase.getReference();
-                        updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
+                        mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                if (databaseError == null) {
-                                    progressDialog.dismiss();
-                                    ((Activity) context).finish();
-                                } else {
-                                    progressDialog.dismiss();
-                                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-                                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                        studentsList.add(postSnapshot.getKey());
+                                    }
+                                }
+
+                                deleteMap.put("AcademicRecordClass/" + classID + "/" + subject_year_term + "/" + key, null);
+                                deleteMap.put("AcademicRecordTeacher/" +  teacherID + "/" + subject_year_term + "/" + key, null);
+
+                                for (String parent: parentsList) {
+                                    deleteMap.put("AcademicRecordParentRecipients/" + key + "/" + parent, null);
+                                    deleteMap.put("NotificationParent/" + parent + "/" + key, null);
+                                }
+
+                                for (String student: studentsList) {
+                                    deleteMap.put("AcademicRecordStudent/" + student + "/" + subject_year_term + "/" + key, null);
+                                    deleteMap.put("AcademicRecordClass-Student/" + classID + "/" + subject_year_term + "/" + key, null);
+                                    deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
+                                }
+
+                                DatabaseReference updateRef = mFirebaseDatabase.getReference();
+                                updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        if (databaseError == null) {
+                                            progressDialog.dismiss();
+                                            ((Activity) context).finish();
+                                        } else {
+                                            progressDialog.dismiss();
+                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                            ShowDialogWithMessage.showDialogWithMessage(context, message);
 //                                    String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
 //                                    showDialogWithMessage(message);
-                                }
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
                             }
                         });
                     }
@@ -334,13 +361,16 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
 
                     }
                 });
+            } else {
+                progressDialog.dismiss();
+                String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
+                showDialogWithMessage(message);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        } else {
+            progressDialog.dismiss();
+            String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
+            showDialogWithMessage(message);
+        }
     }
 
     private double newClassAverage = 0.0;

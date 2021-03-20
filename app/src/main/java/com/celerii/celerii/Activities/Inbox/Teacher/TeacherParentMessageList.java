@@ -140,7 +140,7 @@ public class TeacherParentMessageList extends Fragment {
         return view;
     }
 
-    void loadFromFirebase(){
+    void loadFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
             mySwipeRefreshLayout.setRefreshing(false);
             recyclerView.setVisibility(View.GONE);
@@ -170,68 +170,96 @@ public class TeacherParentMessageList extends Fragment {
         } else {
             for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
                 final ClassesStudentsAndParentsModel classesStudentsAndParentsModel = classesStudentsAndParentsModelList.get(i);
-                mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Parent parent = dataSnapshot.getValue(Parent.class);
-                            final String parentID = dataSnapshot.getKey();
-                            final String parentName = parent.getLastName() + " " + parent.getFirstName();
-                            final String parentProfilePictureURL = parent.getProfilePicURL();
+                if (!classesStudentsAndParentsModel.getParentID().isEmpty()) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                Parent parent = dataSnapshot.getValue(Parent.class);
+                                final String parentID = dataSnapshot.getKey();
+                                final String parentName = parent.getLastName() + " " + parent.getFirstName();
+                                final String parentProfilePictureURL = parent.getProfilePicURL();
 
-                            mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(classesStudentsAndParentsModel.getStudentID());
-                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    counter++;
-                                    if (dataSnapshot.exists()) {
-                                        Student student = dataSnapshot.getValue(Student.class);
-                                        String studentFirstName = student.getFirstName();
-                                        String relationship = studentFirstName + "'s parent";
+                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(classesStudentsAndParentsModel.getStudentID());
+                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        counter++;
+                                        if (dataSnapshot.exists()) {
+                                            Student student = dataSnapshot.getValue(Student.class);
+                                            String studentFirstName = student.getFirstName();
+                                            String relationship = studentFirstName + "'s parent";
 
-                                        NewChatRowModel newChatRowModel = new NewChatRowModel(parentName, relationship, parentProfilePictureURL, parentID);
-                                        if (!parentList.containsKey(parentID)){
-                                            parentList.put(parentID, newChatRowModel);
-                                            newChatRowModelList.add(newChatRowModel);
-                                        }
-
-                                        if (counter == classesStudentsAndParentsModelList.size()) {
-                                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                                @Override
-                                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                                    return o1.getName().compareTo(o2.getName());
+                                            NewChatRowModel newChatRowModel = new NewChatRowModel(parentName, relationship, parentProfilePictureURL, parentID);
+                                            if (!parentList.containsKey(parentID)) {
+                                                parentList.put(parentID, newChatRowModel);
+                                                if (!newChatRowModel.getIDofPartner().equals(mFirebaseUser.getUid())) {
+                                                    newChatRowModelList.add(newChatRowModel);
                                                 }
-                                            });
-                                            mAdapter.notifyDataSetChanged();
-                                            mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            errorLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.VISIBLE);
+                                            }
+
+                                            if (counter == classesStudentsAndParentsModelList.size()) {
+                                                Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                    @Override
+                                                    public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                        return o1.getName().compareTo(o2.getName());
+                                                    }
+                                                });
+                                                mAdapter.notifyDataSetChanged();
+                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                progressLayout.setVisibility(View.GONE);
+                                                errorLayout.setVisibility(View.GONE);
+                                                recyclerView.setVisibility(View.VISIBLE);
+                                            }
                                         }
                                     }
-                                }
 
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                counter++;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                } else {
+                    counter++;
+
+                    if (counter == classesStudentsAndParentsModelList.size()) {
+                        if (newChatRowModelList.size() > 0) {
+                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
                                 @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
+                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                    return o1.getName().compareTo(o2.getName());
                                 }
                             });
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
                         } else {
-                            counter++;
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            mySwipeRefreshLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText(Html.fromHtml("You don't have any parents to message at this time. If you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                            errorLayoutButton.setText("Find my school");
+                            errorLayoutButton.setVisibility(View.VISIBLE);
                         }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                }
             }
         }
-
-
-
 
 //        mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Class").child(mFirebaseUser.getUid());
 //        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -366,26 +394,6 @@ public class TeacherParentMessageList extends Fragment {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 }

@@ -271,27 +271,7 @@ public class EditParentProfileActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override
@@ -335,14 +315,20 @@ public class EditParentProfileActivity extends AppCompatActivity {
             if (byteArray == null) {
                 HashMap<String, Object> editProfileMap = new HashMap<String, Object>();
                 editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/searchableFirstName", firstNameString.toLowerCase());
                 editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/searchableMiddleName", middleNameString.toLowerCase());
                 editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/searchableLastName", lastNameString.toLowerCase());
                 editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
                 editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
 
                 editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/searchableFirstName", firstNameString.toLowerCase());
                 editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/searchableMiddleName", middleNameString.toLowerCase());
                 editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/searchableLastName", lastNameString.toLowerCase());
                 editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
                 editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
                 editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/occupation", occupation.getText().toString().trim());
@@ -384,7 +370,7 @@ public class EditParentProfileActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                mStorageReference = mFirebaseStorage.getReference().child("CeleriiProfilePicture/" + mFirebaseUser.getUid() + "/CeleriiProfilePicture_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                mStorageReference = mFirebaseStorage.getReference().child("CeleriiProfilePicture/" + mFirebaseUser.getUid() + "/profilepicture");
                 UploadTask uploadTask = mStorageReference.putBytes(byteArray);
                 Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                     @Override
@@ -403,15 +389,21 @@ public class EditParentProfileActivity extends AppCompatActivity {
 
                             HashMap<String, Object> editProfileMap = new HashMap<String, Object>();
                             editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/searchableFirstName", firstNameString.toLowerCase());
                             editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/searchableMiddleName", middleNameString.toLowerCase());
                             editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                            editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/searchableLastName", lastNameString.toLowerCase());
                             editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/profilePicURL", downloadURL);
                             editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
                             editProfileMap.put("Teacher/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
 
                             editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/firstName", firstNameString);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/searchableFirstName", firstNameString.toLowerCase());
                             editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/middleName", middleNameString);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/searchableMiddleName", middleNameString.toLowerCase());
                             editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/lastName", lastNameString);
+                            editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/searchableLastName", lastNameString.toLowerCase());
                             editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/profilePicURL", downloadURL);
                             editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/gender", gender.getText().toString().trim());
                             editProfileMap.put("Parent/" + auth.getCurrentUser().getUid() + "/phone", phoneNumber.getText().toString().trim());
@@ -598,17 +590,17 @@ public class EditParentProfileActivity extends AppCompatActivity {
                     REQUESTPPERMISSIONCODECAMERA);
         } else {
             CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
-
-            if(!directory.exists() && !directory.isDirectory()) {
-                if (directory.mkdirs()) {
-                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                } else {
-                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                }
-            } else {
-                file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-            }
+//            File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
+//
+//            if(!directory.exists() && !directory.isDirectory()) {
+//                if (directory.mkdirs()) {
+//                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                } else {
+//                    file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                }
+//            } else {
+//                file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//            }
 //            uri = Uri.fromFile(file);
 //            CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 //            CamIntent.putExtra("return-data", true);
@@ -624,17 +616,17 @@ public class EditParentProfileActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
                     CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
-
-                    if(!directory.exists() && !directory.isDirectory()) {
-                        if (directory.mkdirs()) {
-                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        } else {
-                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                        }
-                    } else {
-                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                    }
+//                    File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"Celerii/Images/ProfilePicture");
+//
+//                    if(!directory.exists() && !directory.isDirectory()) {
+//                        if (directory.mkdirs()) {
+//                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        } else {
+//                            file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                        }
+//                    } else {
+//                        file = new File(directory, "CeleriiProfilePicture" + "_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                    }
 
 //                    uri = Uri.fromFile(file);
 //                    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);

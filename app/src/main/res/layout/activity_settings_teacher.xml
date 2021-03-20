@@ -241,6 +241,7 @@
                 android:padding="10dp"
                 android:orientation="vertical"
                 android:clickable="true"
+                android:visibility="gone"
                 android:background="?android:attr/selectableItemBackground">
 
                 <TextView

@@ -34,6 +34,7 @@ import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.Term;
+import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.SubscriptionModel;
 import com.celerii.celerii.models.TeacherAttendanceHeader;
@@ -426,55 +427,82 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
         final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
         final String attendanceKey = teacherAttendanceHeader.getKey();
         final String activeClass = teacherAttendanceHeader.getClassID();
+        final String activeClassName = teacherAttendanceHeader.getClassName();
         final ArrayList<String> parentsList = new ArrayList<>();
         final Map<String, Object> deleteAttendance = new HashMap<String, Object>();
 
         progressDialog.show();
 
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("AttendanceParentRecipients").child(attendanceKey);
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        parentsList.add(postSnapshot.getKey());
-                    }
-                }
+        Gson gson = new Gson();
+        ArrayList<Class> myClasses = new ArrayList<>();
+        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+        myClasses = gson.fromJson(myClassesJSON, type);
 
-                deleteAttendance.put("AttendanceClass/" + activeClass + "/" + attendanceKey, null);
-                for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
-                    if (!teacherAttendanceRowList.get(i).getStudentID().equals("")) {
-                        deleteAttendance.put("AttendanceClass-Students/" + activeClass + "/" + attendanceKey + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(), null);
-                        deleteAttendance.put("AttendanceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + attendanceKey, null);
-                    }
+        if (myClasses != null) {
+            boolean hasClass = false;
+            for (Class classInstance: myClasses) {
+                if (classInstance.getID().equals(activeClass)) {
+                    hasClass = true;
+                    break;
                 }
+            }
 
-                for (String parentID: parentsList) {
-                    deleteAttendance.put("AttendanceParentRecipients/" + attendanceKey + "/" + parentID, null);
-                    deleteAttendance.put("NotificationParent/" + parentID + "/" + attendanceKey, null);
-                }
-
-                mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                mDatabaseReference.updateChildren(deleteAttendance, new DatabaseReference.CompletionListener() {
+            if (hasClass) {
+                mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("AttendanceParentRecipients").child(attendanceKey);
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        if (databaseError == null) {
-                            progressDialog.dismiss();
-                            showDialogWithMessageAndClose("Attendance record has been deleted");
-                        } else {
-                            progressDialog.dismiss();
-                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-                            ShowDialogWithMessage.showDialogWithMessage(context, message);
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                parentsList.add(postSnapshot.getKey());
+                            }
                         }
+
+                        deleteAttendance.put("AttendanceClass/" + activeClass + "/" + attendanceKey, null);
+                        for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
+                            if (!teacherAttendanceRowList.get(i).getStudentID().equals("")) {
+                                deleteAttendance.put("AttendanceClass-Students/" + activeClass + "/" + attendanceKey + "/Students/" + teacherAttendanceRowList.get(i).getStudentID(), null);
+                                deleteAttendance.put("AttendanceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + attendanceKey, null);
+                            }
+                        }
+
+                        for (String parentID: parentsList) {
+                            deleteAttendance.put("AttendanceParentRecipients/" + attendanceKey + "/" + parentID, null);
+                            deleteAttendance.put("NotificationParent/" + parentID + "/" + attendanceKey, null);
+                        }
+
+                        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                        mDatabaseReference.updateChildren(deleteAttendance, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError == null) {
+                                    progressDialog.dismiss();
+                                    showDialogWithMessageAndClose("Attendance record has been deleted");
+                                } else {
+                                    progressDialog.dismiss();
+                                    String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                    ShowDialogWithMessage.showDialogWithMessage(context, message);
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
                     }
                 });
+            } else {
+                progressDialog.dismiss();
+                String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + activeClassName + "</b>" + ".";
+                showDialogWithMessage(message);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        } else {
+            progressDialog.dismiss();
+            String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + activeClassName + "</b>" + ".";
+            showDialogWithMessage(message);
+        }
     }
 
     private void showDialogWithMessageAndClose (String messageString) {

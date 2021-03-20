@@ -27,6 +27,7 @@ import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.ApplicationLauncherSharedPreferences;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -185,6 +186,12 @@ public class FederatedSignInActivity extends AppCompatActivity {
         google.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
+                }
+
                 googleUserSignInMethod();
             }
         });
@@ -194,6 +201,12 @@ public class FederatedSignInActivity extends AppCompatActivity {
         facebook.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
+                }
+
                 LoginManager.getInstance().logInWithReadPermissions(FederatedSignInActivity.this, Arrays.asList("public_profile", "email"));
             }
         });
@@ -203,6 +216,12 @@ public class FederatedSignInActivity extends AppCompatActivity {
         twitter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
+                }
+
                 mTwitterAuthClient.authorize(FederatedSignInActivity.this, new com.twitter.sdk.android.core.Callback<TwitterSession>() {
                     @Override
                     public void success(Result<TwitterSession> twitterSessionResult) {

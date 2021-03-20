@@ -127,9 +127,26 @@ public class CurrentFragment extends Fragment {
             myChildren = gson.fromJson(myChildrenJSON, type);
 
             if (myChildren != null) {
-                gson = new Gson();
-                activeStudent = gson.toJson(myChildren.get(0));
-                sharedPreferencesManager.setActiveKid(activeStudent);
+                if (myChildren.size() > 0) {
+                    gson = new Gson();
+                    activeStudent = gson.toJson(myChildren.get(0));
+                    sharedPreferencesManager.setActiveKid(activeStudent);
+                } else {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                    } else {
+                        errorLayoutText.setText("You do not have the permission to view this student's academic record");
+                    }
+
+                    return view;
+                }
             } else {
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
@@ -212,9 +229,9 @@ public class CurrentFragment extends Fragment {
         performanceCurrentHeader = new PerformanceCurrentHeader();
         performanceCurrentModelList = new ArrayList<>();
 //        subjectList = new ArrayList<>();
-        loadNewDetailsFromFirebase();
         mAdapter = new PerformanceCurrentAdapter(performanceCurrentModelList, performanceCurrentHeader, getActivity(), getContext(), activeStudentID, parentActivity);
         recyclerView.setAdapter(mAdapter);
+        loadNewDetailsFromFirebase();
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -260,6 +277,7 @@ public class CurrentFragment extends Fragment {
 
         year_term = year + "_" + term;
         performanceCurrentModelList.clear();
+        mAdapter.notifyDataSetChanged();
         updateBadges();
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -790,27 +808,7 @@ public class CurrentFragment extends Fragment {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override

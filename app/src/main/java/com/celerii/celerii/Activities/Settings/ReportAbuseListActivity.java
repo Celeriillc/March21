@@ -148,27 +148,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override
@@ -206,58 +186,86 @@ public class ReportAbuseListActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
             errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("You do not have any Parents to report at this time");
+            errorLayoutText.setText("You do not have any parents or schools to report at this time");
         } else {
             counter = 0;
             reportUserModelList.clear();
             reportUserModelMap.clear();
+            mAdapter.notifyDataSetChanged();
             for (final ClassesStudentsAndParentsModel classesStudentsAndParentsModel : classesStudentsAndParentsModelList) {
-                mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        counter++;
-                        if (dataSnapshot.exists()) {
-                            Parent parent = dataSnapshot.getValue(Parent.class);
-                            String parentID = dataSnapshot.getKey();
-                            ReportUserModel reportUser = new ReportUserModel(parent.getFirstName() + " " + parent.getLastName(), parent.getProfilePicURL(), parentID);
-                            if (!parent.getDeleted()) {
-                                if (!reportUserModelMap.containsKey(parentID)) {
-                                    reportUserModelList.add(reportUser);
-                                    reportUserModelMap.put(parentID, reportUser);
+                if (!classesStudentsAndParentsModel.getParentID().isEmpty()) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            counter++;
+                            if (dataSnapshot.exists()) {
+                                Parent parent = dataSnapshot.getValue(Parent.class);
+                                String parentID = dataSnapshot.getKey();
+                                ReportUserModel reportUser = new ReportUserModel(parent.getFirstName() + " " + parent.getLastName(), parent.getProfilePicURL(), parentID);
+                                if (!parent.getDeleted()) {
+                                    if (!reportUserModelMap.containsKey(parentID)) {
+                                        reportUserModelList.add(reportUser);
+                                        reportUserModelMap.put(parentID, reportUser);
+                                    }
+                                }
+                            }
+
+                            if ((counter / 2) == classesStudentsAndParentsModelList.size()) {
+                                if (reportUserModelList.size() > 0) {
+                                    Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                        @Override
+                                        public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                            return o1.getName().compareTo(o2.getName());
+                                        }
+                                    });
+                                    reportUserModelList.add(0, new ReportUserModel());
+                                    mAdapter.notifyDataSetChanged();
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    progressLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    errorLayout.setVisibility(View.GONE);
+                                } else {
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    recyclerView.setVisibility(View.GONE);
+                                    progressLayout.setVisibility(View.GONE);
+                                    errorLayout.setVisibility(View.VISIBLE);
+                                    errorLayoutText.setText("You do not have any parents or schools to report at this time");
                                 }
                             }
                         }
 
-                        if ((counter / 2) == classesStudentsAndParentsModelList.size()) {
-                            if (reportUserModelList.size() > 0) {
-                                Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
-                                    @Override
-                                    public int compare(ReportUserModel o1, ReportUserModel o2) {
-                                        return o1.getName().compareTo(o2.getName());
-                                    }
-                                });
-                                reportUserModelList.add(0, new ReportUserModel());
-                                mAdapter.notifyDataSetChanged();
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                progressLayout.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                                errorLayout.setVisibility(View.GONE);
-                            } else {
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                recyclerView.setVisibility(View.GONE);
-                                progressLayout.setVisibility(View.GONE);
-                                errorLayout.setVisibility(View.VISIBLE);
-                                errorLayoutText.setText("You do not have any parents or schools to report at this time");
-                            }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                } else {
+                    counter++;
+
+                    if ((counter / 2) == classesStudentsAndParentsModelList.size()) {
+                        if (reportUserModelList.size() > 0) {
+                            Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                @Override
+                                public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                    return o1.getName().compareTo(o2.getName());
+                                }
+                            });
+                            reportUserModelList.add(0, new ReportUserModel());
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            errorLayout.setVisibility(View.GONE);
+                        } else {
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText("You do not have any parents or schools to report at this time");
                         }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(classesStudentsAndParentsModel.getSchoolID());
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -332,105 +340,158 @@ public class ReportAbuseListActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
             errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("You do not have any Teachers to report at this time");
+            errorLayoutText.setText("You do not have any teachers or schools to report at this time");
         } else {
             counter = 0;
             reportUserModelList.clear();
             reportUserModelMap.clear();
+            mAdapter.notifyDataSetChanged();
             for (final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel : studentsSchoolsClassesandTeachersModelList) {
-                mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        counter++;
-                        if (dataSnapshot.exists()) {
-                            Teacher teacher = dataSnapshot.getValue(Teacher.class);
-                            String teacherID = dataSnapshot.getKey();
-                            ReportUserModel reportUser = new ReportUserModel(teacher.getFirstName() + " " + teacher.getLastName(), teacher.getProfilePicURL(), teacherID);
-                            if (!teacher.getDeleted()) {
-                                if (!reportUserModelMap.containsKey(teacherID)) {
-                                    reportUserModelList.add(reportUser);
-                                    reportUserModelMap.put(teacherID, reportUser);
+                if (!studentsSchoolsClassesandTeachersModel.getTeacherID().isEmpty()) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            counter++;
+                            if (dataSnapshot.exists()) {
+                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
+                                String teacherID = dataSnapshot.getKey();
+                                ReportUserModel reportUser = new ReportUserModel(teacher.getFirstName() + " " + teacher.getLastName(), teacher.getProfilePicURL(), teacherID);
+                                if (!teacher.getDeleted()) {
+                                    if (!reportUserModelMap.containsKey(teacherID)) {
+                                        reportUserModelList.add(reportUser);
+                                        reportUserModelMap.put(teacherID, reportUser);
+                                    }
+                                }
+                            }
+
+                            if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
+                                if (reportUserModelList.size() > 0) {
+                                    Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                        @Override
+                                        public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                            return o1.getName().compareTo(o2.getName());
+                                        }
+                                    });
+                                    reportUserModelList.add(0, new ReportUserModel());
+                                    mAdapter.notifyDataSetChanged();
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    progressLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    errorLayout.setVisibility(View.GONE);
+                                } else {
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    recyclerView.setVisibility(View.GONE);
+                                    progressLayout.setVisibility(View.GONE);
+                                    errorLayout.setVisibility(View.VISIBLE);
+                                    errorLayoutText.setText("You do not have any teacher or schools to report at this time");
                                 }
                             }
                         }
 
-                        if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
-                            if (reportUserModelList.size() > 0) {
-                                Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
-                                    @Override
-                                    public int compare(ReportUserModel o1, ReportUserModel o2) {
-                                        return o1.getName().compareTo(o2.getName());
-                                    }
-                                });
-                                reportUserModelList.add(0, new ReportUserModel());
-                                mAdapter.notifyDataSetChanged();
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                progressLayout.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                                errorLayout.setVisibility(View.GONE);
-                            } else {
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                recyclerView.setVisibility(View.GONE);
-                                progressLayout.setVisibility(View.GONE);
-                                errorLayout.setVisibility(View.VISIBLE);
-                                errorLayoutText.setText("You do not have any teacher or schools to report at this time");
-                            }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                } else {
+                    counter++;
+                    if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
+                        if (reportUserModelList.size() > 0) {
+                            Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                @Override
+                                public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                    return o1.getName().compareTo(o2.getName());
+                                }
+                            });
+                            reportUserModelList.add(0, new ReportUserModel());
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            errorLayout.setVisibility(View.GONE);
+                        } else {
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText("You do not have any teacher or schools to report at this time");
                         }
                     }
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                if (!studentsSchoolsClassesandTeachersModel.getSchoolID().isEmpty()) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(studentsSchoolsClassesandTeachersModel.getSchoolID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            counter++;
+                            if (dataSnapshot.exists()) {
+                                School school = dataSnapshot.getValue(School.class);
+                                String schoolID = dataSnapshot.getKey();
+                                ReportUserModel reportUser = new ReportUserModel(school.getSchoolName(), school.getProfilePhotoUrl(), schoolID);
+                                if (!school.getDeleted()) {
+                                    if (!reportUserModelMap.containsKey(schoolID)) {
+                                        reportUserModelList.add(reportUser);
+                                        reportUserModelMap.put(schoolID, reportUser);
+                                    }
+                                }
+                            }
 
-                    }
-                });
-
-                mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(studentsSchoolsClassesandTeachersModel.getSchoolID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        counter++;
-                        if (dataSnapshot.exists()) {
-                            School school = dataSnapshot.getValue(School.class);
-                            String schoolID = dataSnapshot.getKey();
-                            ReportUserModel reportUser = new ReportUserModel(school.getSchoolName(), school.getProfilePhotoUrl(), schoolID);
-                            if (!school.getDeleted()) {
-                                if (!reportUserModelMap.containsKey(schoolID)) {
-                                    reportUserModelList.add(reportUser);
-                                    reportUserModelMap.put(schoolID, reportUser);
+                            if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
+                                if (reportUserModelList.size() > 0) {
+                                    Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                        @Override
+                                        public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                            return o1.getName().compareTo(o2.getName());
+                                        }
+                                    });
+                                    reportUserModelList.add(0, new ReportUserModel());
+                                    mAdapter.notifyDataSetChanged();
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    progressLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    errorLayout.setVisibility(View.GONE);
+                                } else {
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    recyclerView.setVisibility(View.GONE);
+                                    progressLayout.setVisibility(View.GONE);
+                                    errorLayout.setVisibility(View.VISIBLE);
+                                    errorLayoutText.setText("You do not have any teacher or schools to report at this time");
                                 }
                             }
                         }
 
-                        if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
-                            if (reportUserModelList.size() > 0) {
-                                Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
-                                    @Override
-                                    public int compare(ReportUserModel o1, ReportUserModel o2) {
-                                        return o1.getName().compareTo(o2.getName());
-                                    }
-                                });
-                                reportUserModelList.add(0, new ReportUserModel());
-                                mAdapter.notifyDataSetChanged();
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                progressLayout.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                                errorLayout.setVisibility(View.GONE);
-                            } else {
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                recyclerView.setVisibility(View.GONE);
-                                progressLayout.setVisibility(View.GONE);
-                                errorLayout.setVisibility(View.VISIBLE);
-                                errorLayoutText.setText("You do not have any teacher or schools to report at this time");
-                            }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                } else {
+                    counter++;
+                    if ((counter / 2) == studentsSchoolsClassesandTeachersModelList.size()) {
+                        if (reportUserModelList.size() > 0) {
+                            Collections.sort(reportUserModelList, new Comparator<ReportUserModel>() {
+                                @Override
+                                public int compare(ReportUserModel o1, ReportUserModel o2) {
+                                    return o1.getName().compareTo(o2.getName());
+                                }
+                            });
+                            reportUserModelList.add(0, new ReportUserModel());
+                            mAdapter.notifyDataSetChanged();
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            progressLayout.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            errorLayout.setVisibility(View.GONE);
+                        } else {
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            recyclerView.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText("You do not have any teacher or schools to report at this time");
                         }
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+                }
             }
         }
 

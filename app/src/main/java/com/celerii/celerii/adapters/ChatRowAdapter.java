@@ -12,6 +12,7 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -191,7 +192,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         });
 
 //            !chatList.getFileURL().isEmpty() && chatList.getFileURL() != null
-        (holder).message.setText(chatList.getMessage());
+        (holder).message.setText(Html.fromHtml(chatList.getMessage()));
 //        if (chatList.getMessage().equals("")) {
 //            (holder).message.setVisibility(View.GONE);
 //        }

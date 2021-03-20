@@ -236,6 +236,7 @@ public class SearchResultsAllFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     searchResultsRowList.clear();
+                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         School school = postSnapshot.getValue(School.class);
                         String schoolName = school.getSchoolName();
@@ -382,6 +383,7 @@ public class SearchResultsAllFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
                     searchResultsRowList.clear();
+                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         School school = postSnapshot.getValue(School.class);
                         String schoolName = school.getSchoolName();

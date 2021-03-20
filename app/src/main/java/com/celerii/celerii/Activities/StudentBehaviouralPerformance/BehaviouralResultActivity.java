@@ -128,9 +128,29 @@ public class BehaviouralResultActivity extends AppCompatActivity {
             myChildren = gson.fromJson(myChildrenJSON, type);
 
             if (myChildren != null) {
-                gson = new Gson();
-                activeStudent = gson.toJson(myChildren.get(0));
-                sharedPreferencesManager.setActiveKid(activeStudent);
+                if (myChildren.size() > 0) {
+                    gson = new Gson();
+                    activeStudent = gson.toJson(myChildren.get(0));
+                    sharedPreferencesManager.setActiveKid(activeStudent);
+                } else {
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle("Behavioural Performance");
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setDisplayShowTitleEnabled(true);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                    } else {
+                        errorLayoutText.setText("You do not have the permission to view this child's behavioural record");
+                    }
+                    return;
+                }
             } else {
                 setSupportActionBar(toolbar);
                 getSupportActionBar().setTitle("Behavioural Performance");
@@ -222,9 +242,9 @@ public class BehaviouralResultActivity extends AppCompatActivity {
 
         behaviouralResultsHeaderModel = new BehaviouralResultsHeaderModel();
         behaviouralResultRowModelList = new ArrayList<>();
-        loadDetailsFromFirebase();
         mAdapter = new BehaviouralResultAdapter(behaviouralResultRowModelList, behaviouralResultsHeaderModel, this);
         recyclerView.setAdapter(mAdapter);
+        loadDetailsFromFirebase();
 
         year = Date.getYear();
         term = Term.getTermShort();
@@ -253,6 +273,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
 
         updateBadges();
         behaviouralResultRowModelList.clear();
+        mAdapter.notifyDataSetChanged();
         totalPointsEarned = 0;
         totalPointsFined = 0;
         pointsEarnedThisTerm = 0;
@@ -493,27 +514,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
         updateBadgesForAllCurrent();
     }
 

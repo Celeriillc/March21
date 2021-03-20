@@ -195,6 +195,12 @@ public class LoginActivity extends AppCompatActivity {
         google.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
+                }
+
                 googleUserSignInMethod();
             }
         });
@@ -204,6 +210,12 @@ public class LoginActivity extends AppCompatActivity {
         facebook.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
+                }
+
                 LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile", "email"));
             }
         });
@@ -213,6 +225,12 @@ public class LoginActivity extends AppCompatActivity {
         twitter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(messageString);
+                    return;
+                }
+
                 mTwitterAuthClient.authorize(LoginActivity.this, new com.twitter.sdk.android.core.Callback<TwitterSession>() {
                     @Override
                     public void success(Result<TwitterSession> twitterSessionResult) {
@@ -273,8 +291,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!validateEmail(emailString))
                     return;
-                if (!validatePassword(passwordString))
-                    return;
+//                if (!validatePassword(passwordString))
+//                    return;
 
                 //authenticate user
                 progressDialog.showWithMessage("Please hold a little while we get things ready, this might take up to a minute depending on your connection strength.");
@@ -290,7 +308,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             sharedPreferencesManager.clear();
                             mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                            UpdateDataFromFirebase.populateEssentials(context);
+//                            UpdateDataFromFirebase.populateEssentials(context);
                             mDatabaseReference = mFirebaseDatabase.getReference().child("UserRoles").child(mFirebaseUser.getUid());
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
@@ -301,8 +319,7 @@ public class LoginActivity extends AppCompatActivity {
                                         if (user.getRole().equals("Parent") || user.getRole().equals("Teacher")) {
                                             Analytics.loginAnalytics(context, mFirebaseUser.getUid(), activeAccount);
                                             UpdateDataFromFirebaseForLogin.populateEssentials(context, activeAccount, progressDialog);
-                                        }
-                                        else {
+                                        } else {
                                             String message = "Celerii mobile only works with " + "<b>" + "Teacher" + "</b>" + " and " + "<b>" + "Parent" + "</b>" + " accounts. If your account is a " + "<b>" + "School" + "</b>" + " account, please use Celerii web at \n " + "<b>" + "www.celerii.io" + "</b";
                                             showDialogWithMessageAndLogout(Html.fromHtml(message));
                                         }
@@ -423,7 +440,8 @@ public class LoginActivity extends AppCompatActivity {
                         Analytics.loginAnalytics(context, mFirebaseUser.getUid(), activeAccount);
                         UpdateDataFromFirebaseForLogin.populateEssentials(context, activeAccount, progressDialog);
                     } else {
-                        String message = "Celerii mobile only works with " + "<b>" + "Teacher" + "</b>" + " and " + "<b>" + "Parent" + "</b>" + " accounts. If your account is a " + "<b>" + "School" + "</b>" + " account, please use Celerii web at \n " + "<b>" + "www.celerii.com" + "</b";
+                        progressDialog.dismiss();
+                        String message = "Celerii Android only works with " + "<b>" + "Teacher" + "</b>" + " and " + "<b>" + "Parent" + "</b>" + " accounts. If your account is a " + "<b>" + "School" + "</b>" + " account, please use Celerii web at \n " + "<b>" + "www.celerii.com" + "</b";
                         showDialogWithMessageAndLogout(Html.fromHtml(message));
                     }
                 } else {

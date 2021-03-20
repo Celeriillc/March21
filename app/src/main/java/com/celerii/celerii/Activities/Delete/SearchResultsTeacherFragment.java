@@ -132,6 +132,7 @@ public class SearchResultsTeacherFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
                     searchResultsRowList.clear();
+                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
                         mDatabaseReference = mFirebaseDatabase.getReference("Student").child(postSnapshot.getKey());

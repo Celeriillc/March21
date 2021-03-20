@@ -118,14 +118,16 @@ public class StudentRewardFragmentAdapter extends RecyclerView.Adapter<RecyclerV
 //                String studentID = classesStudentsAndParentsModel.getStudentID();
                 String parentID = classesStudentsAndParentsModel.getParentID();
 
-                if (studentID.equals(classesStudentsAndParentsModel.getStudentID())) {
-                    try {
-                        if (!studentParentList.get(studentID).contains(parentID)) {
+                if (!parentID.isEmpty()) {
+                    if (studentID.equals(classesStudentsAndParentsModel.getStudentID())) {
+                        try {
+                            if (!studentParentList.get(studentID).contains(parentID)) {
+                                studentParentList.get(studentID).add(parentID);
+                            }
+                        } catch (Exception e) {
+                            studentParentList.put(studentID, new ArrayList<String>());
                             studentParentList.get(studentID).add(parentID);
                         }
-                    } catch (Exception e) {
-                        studentParentList.put(studentID, new ArrayList<String>());
-                        studentParentList.get(studentID).add(parentID);
                     }
                 }
             }
@@ -219,31 +221,33 @@ public class StudentRewardFragmentAdapter extends RecyclerView.Adapter<RecyclerV
                     if (parentIDList != null) {
                         for (int j = 0; j < parentIDList.size(); j++) {
                             String parentID = parentIDList.get(j);
-                            NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID,
-                                    "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushKey,
-                                    "NewBehaviouralPost", studentPicURL, studentID, studentName, false);
-                            updater.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
-                            updater.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + parentID + "/" + studentID + "/" + pushKey + "/status", true);
-                            updater.put("BehaviouralRecord/BehaviouralRecordParentRecipients/" + pushKey + "/" + parentID, true);
-                            updater.put("NotificationParent/" + parentID + "/" + pushKey, notificationModel);
-                            updater.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
-                            updater.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+                            if (!parentID.isEmpty()) {
+                                NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID,
+                                        "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushKey,
+                                        "NewBehaviouralPost", studentPicURL, studentID, studentName, false);
+                                updater.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
+                                updater.put("BehaviouralRecord/BehaviouralRecordParentNotification/" + parentID + "/" + studentID + "/" + pushKey + "/status", true);
+                                updater.put("BehaviouralRecord/BehaviouralRecordParentRecipients/" + pushKey + "/" + parentID, true);
+                                updater.put("NotificationParent/" + parentID + "/" + pushKey, notificationModel);
+                                updater.put("Notification Badges/Parents/" + parentID + "/Notifications/status", true);
+                                updater.put("Notification Badges/Parents/" + parentID + "/More/status", true);
+                            }
                         }
                     }
 
-//                    mDatabaseReference.updateChildren(updater, new DatabaseReference.CompletionListener() {
-//                        @Override
-//                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-//                            if (databaseError == null) {
-//                                progressDialog.dismiss();
-//                                showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName);
-//                            } else {
-//                                progressDialog.dismiss();
-//                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-//                                ShowDialogWithMessage.showDialogWithMessage(context, message);
-//                            }
-//                        }
-//                    });
+                    mDatabaseReference.updateChildren(updater, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError == null) {
+                                progressDialog.dismiss();
+                                showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName);
+                            } else {
+                                progressDialog.dismiss();
+                                String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                ShowDialogWithMessage.showDialogWithMessage(context, message);
+                            }
+                        }
+                    });
                 }
             });
 

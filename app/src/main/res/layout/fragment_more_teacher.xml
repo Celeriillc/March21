@@ -335,7 +335,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_class_attendance" />
+                            android:src="@drawable/ic_file" />
 
                         <TextView
                             android:id="@+id/attendancerecords"
@@ -479,7 +479,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_analytics" />
+                            android:src="@drawable/ic_percent" />
 
                         <TextView
                             android:id="@+id/personalperformance"

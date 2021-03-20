@@ -610,7 +610,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                             userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), time);
                             userUpdates.put("ClassStoryUserLikeHistory/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);
                             if (!mFirebaseUser.getUid().equals(classStory.getPosterID())) {
-                                userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), new LikeNotification(auth.getCurrentUser().getUid(), time));
+//                                userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), new LikeNotification(auth.getCurrentUser().getUid(), time));
                                 if (classStory.getPosterAccountType().equals("Teacher")) {
                                     userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), notificationModel);
                                 } else if (classStory.getPosterAccountType().equals("School")) {
@@ -621,8 +621,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                                 @Override
                                 public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
                                     if (databaseError != null) {
-                                        int i=0;
-                                        i = 9+0;
+
                                     }
                                 }
                             });
@@ -667,7 +666,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                             userUpdates.put("ClassStoryLike/" + classStory.getPostID() + "/" + mFirebaseUser.getUid(), null);
                             userUpdates.put("ClassStoryUserLikeHistory/" + auth.getCurrentUser().getUid() + "/" + classStory.getPostID(), null);
                             if (!auth.getCurrentUser().getUid().equals(classStory.getPosterID())) {
-                                userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID(), null);
+//                                userUpdates.put("ClassStoryLikeNotification/" + classStory.getPosterID() + "/" + classStory.getPostID(), null);
                                 if (classStory.getPosterAccountType().equals("Teacher")) {
                                     userUpdates.put("NotificationTeacher/" + classStory.getPosterID() + "/" + classStory.getPostID() + "_" + mFirebaseUser.getUid(), null);
                                 } else if (classStory.getPosterAccountType().equals("School")) {
@@ -678,8 +677,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                                 @Override
                                 public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
                                     if (databaseError != null) {
-                                        int i=0;
-                                        i = 9+0;
+
                                     }
                                 }
                             });

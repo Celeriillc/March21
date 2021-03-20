@@ -241,6 +241,7 @@ public class TeacherCreateAssignmentPostActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()){
                     classList.clear();
+                    mAdapter.notifyDataSetChanged();
                     final String classKey = postSnapshot.getKey();
                     DatabaseReference newRef = FirebaseDatabase.getInstance().getReference("Class/" + classKey);
                     newRef.addListenerForSingleValueEvent(new ValueEventListener() {

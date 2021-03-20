@@ -124,6 +124,8 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
         holder.accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                customProgressDialogOne.show();
+
                 String time = Date.getDate();
                 String sortableTime = Date.convertToSortableDate(time);
                 final String entityId = teacherSchoolConnectionRequest.getSchool();
@@ -132,7 +134,7 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
                 final NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sortableTime, notificationPushID, "Connection", "", "", false);
 
                 mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId).child(teacherSchoolConnectionRequest.getKey());
-                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Map<String, Object> newConnectionMap = new HashMap<String, Object>();
@@ -161,6 +163,8 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
         holder.decline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                customProgressDialogOne.show();
+
                 String time = Date.getDate();
                 String sortableTime = Date.convertToSortableDate(time);
                 final String entityId = teacherSchoolConnectionRequest.getSchool();
@@ -169,7 +173,7 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
                 final NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sortableTime, notificationPushID, "ConnectionRequestDeclined", "", "", false);
 
                 mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId).child(teacherSchoolConnectionRequest.getKey());
-                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Map<String, Object> newDeclinedMap = new HashMap<String, Object>();

@@ -116,11 +116,12 @@ public class FederatedSignInAccountTypeActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 final String accountTypeString = accountType.getText().toString();
-                Analytics.signupAnalytics(mFirebaseUser.getUid(), accountTypeString);
-                Analytics.loginAnalytics(context, mFirebaseUser.getUid(), accountTypeString);
 
                 if (!validateAccountType(accountTypeString))
                     return;
+
+                Analytics.signupAnalytics(mFirebaseUser.getUid(), accountTypeString);
+                Analytics.loginAnalytics(context, mFirebaseUser.getUid(), accountTypeString);
 
                 sharedPreferencesManager.setActiveAccount(accountTypeString);
                 applicationLauncherSharedPreferences.setLauncherActivity("SignupFive");

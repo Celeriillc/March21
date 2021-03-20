@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
@@ -26,6 +29,7 @@ import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditSubjec
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.StudentPerformance.EnterResultsActivity;
 import com.celerii.celerii.R;
+//import com.celerii.celerii.databinding.EnterResultRowBinding;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
@@ -38,6 +42,7 @@ import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialo
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
+
 
 /**
  * Created by DELL on 8/18/2017.
@@ -54,17 +59,28 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
+        public MyCustomEditTextListener myCustomEditTextListener;
         public TextView studentName;
         public EditText score;
         public ImageView studentPic;
         public View clickableView;
 
-        public MyViewHolder(final View view) {
+        public MyViewHolder(final View view, MyCustomEditTextListener myCustomEditTextListener) {
             super(view);
             studentName = (TextView) view.findViewById(R.id.kidname);
             score = (EditText) view.findViewById(R.id.kidscore);
+            this.myCustomEditTextListener = myCustomEditTextListener;
+            score.addTextChangedListener(myCustomEditTextListener);
             studentPic = (ImageView) view.findViewById(R.id.kidPicture);
             clickableView = view;
+        }
+
+        void enableTextWatcher() {
+            score.addTextChangedListener(myCustomEditTextListener);
+        }
+
+        void disableTextWatcher() {
+            score.removeTextChangedListener(myCustomEditTextListener);
         }
     }
 
@@ -118,7 +134,9 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         switch (viewType) {
             case Normal:
                 rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.enter_result_row, parent, false);
-                return new EnterResultAdapter.MyViewHolder(rowView);
+                MyViewHolder vh = new MyViewHolder(rowView, new MyCustomEditTextListener());
+                return vh;
+//                return new EnterResultAdapter.MyViewHolder(rowView);
             case Header:
                 rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.enter_result_header, parent, false);
                 return new EnterResultAdapter.HeaderViewHolder(rowView);
@@ -127,7 +145,9 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 return new EnterResultAdapter.FooterViewHolder(rowView);
             default:
                 rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.enter_result_row, parent, false);
-                return new EnterResultAdapter.MyViewHolder(rowView);
+                vh = new MyViewHolder(rowView, new MyCustomEditTextListener());
+                return vh;
+//                return new EnterResultAdapter.MyViewHolder(rowView);
         }
     }
 
@@ -235,6 +255,7 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         } else {
             final EnterResultRow enterResultRow = enterResultRowList.get(position);
 
+            ((MyViewHolder)holder).myCustomEditTextListener.updatePosition(((MyViewHolder)holder).getAdapterPosition());
             ((MyViewHolder)holder).studentName.setText(enterResultRow.getName());
 
             Drawable textDrawable;
@@ -275,37 +296,6 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                 }
             });
-
-            ((MyViewHolder) holder).score.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                    String score = ((MyViewHolder) holder).score.getText().toString();
-//                    if (score.equals("")){
-//                        score = "0";
-//                    }
-//                    enterResultRow.setScore(score);
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    String score = ((MyViewHolder) holder).score.getText().toString();
-                    if (score.equals("")){
-                        score = "0";
-                    }
-                    if (Double.valueOf(score) > Double.valueOf(enterResultHeader.getMaxScore())) {
-                        ((MyViewHolder) holder).score.setText("0");
-                        CustomToast.blueBackgroundToast(context, "Error: The entered score is greater than the max obtainable");
-                    }
-//                    else {
-//                        enterResultRowList.get(position).setScore(score);
-//                    }
-                }
-            });
         }
     }
 
@@ -325,11 +315,53 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return Normal;
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     private boolean isPositionHeader (int position) {
         return position == 0;
     }
 
     private boolean isPositionFooter (int position) {
         return position == enterResultRowList.size () - 1;
+    }
+
+    @Override
+    public void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder) {
+        if (holder instanceof MyViewHolder) {
+            ((MyViewHolder) holder).enableTextWatcher();
+        }
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+        if (holder instanceof MyViewHolder) {
+            ((MyViewHolder) holder).disableTextWatcher();
+        }
+    }
+
+    private class MyCustomEditTextListener implements TextWatcher {
+        private int position;
+
+        public void updatePosition(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            enterResultRowList.get(position).setScore(charSequence.toString());
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
     }
 }

@@ -153,11 +153,15 @@ public class SignUpActivityFour extends AppCompatActivity {
                             mDatabaseReference.updateChildren(updateMap, new DatabaseReference.CompletionListener() {
                                 @Override
                                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    if (databaseError != null) {
-                                        //TODO: Delete user
+                                    if (databaseError == null) {
+                                        saveToSharedPreferencesAndProceed();
                                         return;
+                                    } else {
+                                        progressDialog.dismiss();
+                                        String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                        ShowDialogWithMessage.showDialogWithMessageAndDelete(context, message, auth.getCurrentUser());
                                     }
-                                    saveToSharedPreferencesAndProceed();
+
 
 //                                    if (databaseError == null) {
 //                                        saveToSharedPreferencesAndProceed();

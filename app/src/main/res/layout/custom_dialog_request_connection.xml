@@ -54,7 +54,7 @@
             android:textStyle="bold"
             android:text="Cancel"
             android:textAllCaps="false"
-            android:background="@drawable/rounded_button_white_dark_gray_border"
+            android:background="@drawable/rounded_button_white_light_gray"
             style="?android:attr/borderlessButtonStyle" />
 
         <Button

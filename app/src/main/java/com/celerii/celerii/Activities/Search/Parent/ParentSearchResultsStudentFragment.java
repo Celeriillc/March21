@@ -118,9 +118,9 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         existingConnections = new ArrayList<>();
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
-        loadExistingConnections();
         mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
         recyclerView.setAdapter(mAdapter);
+        loadExistingConnections();
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -152,6 +152,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 existingConnections.clear();
+                mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         existingConnections.add(postSnapshot.getKey());
@@ -175,6 +176,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 pendingIncomingRequests.clear();
+                mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         pendingIncomingRequests.add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
@@ -198,6 +200,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 pendingOutgoingRequests.clear();
+                mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
                         pendingOutgoingRequests.add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
@@ -229,6 +232,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         studentMap.clear();
         searchMap.clear();
         searchCheckerMap.clear();
+        mAdapter.notifyDataSetChanged();
 
         queryArray = query.toLowerCase().split(" ");
         queryArraySize = queryArray.length;
@@ -257,6 +261,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     searchResultsRowList.clear();
+                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         primaryLoopControl++;
                         final Student student = postSnapshot.getValue(Student.class);
@@ -416,27 +421,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         super.onStop();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     private void search(final int queryTermIndex) {

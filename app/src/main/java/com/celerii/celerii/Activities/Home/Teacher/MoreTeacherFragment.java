@@ -2,8 +2,11 @@ package com.celerii.celerii.Activities.Home.Teacher;
 
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -14,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,8 +52,10 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
+import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.LogoutProtocol;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.MoreTeacherHeaderModel;
@@ -70,6 +76,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -262,6 +269,7 @@ public class MoreTeacherFragment extends Fragment {
 
         classesCounter = 0;
         myClasses.clear();
+//        mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher Class").child(mAuth.getCurrentUser().getUid());
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -269,6 +277,7 @@ public class MoreTeacherFragment extends Fragment {
                 if (dataSnapshot.exists()){
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     myClasses.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()){
                         final String classKey = postSnapShot.getKey();
 
@@ -311,6 +320,7 @@ public class MoreTeacherFragment extends Fragment {
 
         childrenCounter = 0;
         myChildren.clear();
+//        mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference("Parents Students").child(mAuth.getCurrentUser().getUid());
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -318,6 +328,7 @@ public class MoreTeacherFragment extends Fragment {
                 if (dataSnapshot.exists()){
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     myChildren.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()){
                         final String childKey = postSnapShot.getKey();
 
@@ -447,6 +458,7 @@ public class MoreTeacherFragment extends Fragment {
         childrenCounter = 0;
         myChildren.clear();
         childrenKeyHolder.clear();
+//        mAdapter.notifyDataSetChanged();
         final ArrayList<String> childrenKeyList = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference().child("Parents Students").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -455,6 +467,7 @@ public class MoreTeacherFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     myChildren.clear();
+//                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()) {
                         final String childKey = postSnapShot.getKey();
                         childrenKeyList.add(childKey);
@@ -516,6 +529,7 @@ public class MoreTeacherFragment extends Fragment {
         classesCounter = 0;
         myClasses.clear();
         classesKeyHolder.clear();
+        mAdapter.notifyDataSetChanged();
         final ArrayList<String> classesKeyList = new ArrayList<>();
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Class").child(mFirebaseUser.getUid());
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -524,6 +538,7 @@ public class MoreTeacherFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     final int classesCount = (int) dataSnapshot.getChildrenCount();
                     myClasses.clear();
+                    mAdapter.notifyDataSetChanged();
                     for (DataSnapshot postSnapShot: dataSnapshot.getChildren()) {
                         final String classKey = postSnapShot.getKey();
                         classesKeyList.add(classKey);
@@ -677,7 +692,7 @@ public class MoreTeacherFragment extends Fragment {
             myClasses = gson.fromJson(myClassesJSON, type);
 
             if (myClasses != null) {
-                if (myClasses.size() >= 1) {
+                if (myClasses.size() > 0) {
                     gson = new Gson();
                     activeClass = gson.toJson(myClasses.get(0));
                     sharedPreferencesManager.setActiveClass(activeClass);
@@ -693,22 +708,32 @@ public class MoreTeacherFragment extends Fragment {
             type = new TypeToken<ArrayList<Class>>() {}.getType();
             ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
 
-            for (Class classInstance: myClasses) {
-                if (activeClassModel.getID().equals(classInstance.getID())) {
-                    activeClassExist = true;
-                    activeClassModel = classInstance;
-                    activeClass = gson.toJson(activeClassModel);
-                    sharedPreferencesManager.setActiveClass(activeClass);
-                    break;
-                }
-            }
+            if (myClasses != null) {
+                if (myClasses.size() > 0)  {
+                    for (Class classInstance : myClasses) {
+                        if (activeClassModel.getID().equals(classInstance.getID())) {
+                            activeClassExist = true;
+                            activeClassModel = classInstance;
+                            activeClass = gson.toJson(activeClassModel);
+                            sharedPreferencesManager.setActiveClass(activeClass);
+                            break;
+                        }
+                    }
 
-            if (!activeClassExist) {
-                if (myClasses.size() > 0) {
-                        gson = new Gson();
-                        activeClass = gson.toJson(myClasses.get(0));
-                        sharedPreferencesManager.setActiveClass(activeClass);
+                    if (!activeClassExist) {
+                        if (myClasses.size() > 0) {
+                            gson = new Gson();
+                            activeClass = gson.toJson(myClasses.get(0));
+                            sharedPreferencesManager.setActiveClass(activeClass);
+                        }
+                    }
+                } else {
+                    activeClass = null;
+                    sharedPreferencesManager.deleteActiveClass();
                 }
+            } else {
+                activeClass = null;
+                sharedPreferencesManager.deleteActiveClass();
             }
         }
 
@@ -716,35 +741,37 @@ public class MoreTeacherFragment extends Fragment {
         Type type = new TypeToken<Class>() {}.getType();
         final Class activeClassModel = gson.fromJson(activeClass, type);
 
-        if (activeClass != null){
+        if (activeClass != null) {
             String myClassesJSON = sharedPreferencesManager.getMyClasses();
             type = new TypeToken<ArrayList<Class>>() {}.getType();
             ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
             ArrayList<String> myClassesString = new ArrayList<>();
 
             if (myClasses != null) {
-                for (Class classInstance : myClasses) {
-                    myClassesString.add(gson.toJson(classInstance));
-                }
+                if (myClasses.size() > 0) {
+                    for (Class classInstance : myClasses) {
+                        myClassesString.add(gson.toJson(classInstance));
+                    }
 
-                final int indexOfActiveClass = myClassesString.indexOf(activeClass);
-                if (indexOfActiveClass < myClassesString.size()) {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            recyclerView.smoothScrollToPosition(indexOfActiveClass);
-                        }
-                    }, 100);
+                    final int indexOfActiveClass = myClassesString.indexOf(activeClass);
+                    if (indexOfActiveClass < myClassesString.size()) {
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                recyclerView.smoothScrollToPosition(indexOfActiveClass);
+                            }
+                        }, 100);
+                    }
+
+                    String className = activeClassModel.getClassName();
+                    prf = className + "'s Profile";
+                    att = "Take " + className + "'s Attendance";
+                    atr = "View " + className + "'s Attendance Records";
+                    ecr = "Enter Results for " + className ;
+                    cpef = "View " + className + "'s Academic Records";
                 }
             }
-
-            String className = activeClassModel.getClassName();
-            prf = className + "'s Profile";
-            att = "Take " + className + "'s Attendance";
-            atr = "View " + className + "'s Attendance Records";
-            ecr = "Enter Results for " + className ;
-            cpef = "View " + className + "'s Academic Records";
         }
 
         profile.setText(prf);
@@ -763,7 +790,6 @@ public class MoreTeacherFragment extends Fragment {
         profileLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                    Intent I = new Intent(context, TeacherAttendanceActivity.class);
                 Intent I = new Intent(context, ClassProfileActivity.class);
                 Bundle bundle = new Bundle();
 
@@ -848,8 +874,6 @@ public class MoreTeacherFragment extends Fragment {
                 Intent I = new Intent(context, SwitchActivityTeacherParent.class);
                 context.startActivity(I);
                 ((Activity)context).finish();
-//                    Toast.makeText(context, "switchAccountLayout clicked", Toast.LENGTH_SHORT).show();
-//                    loginParent("Parent");
             }
         });
         logoutLayout.setOnClickListener(new View.OnClickListener() {
@@ -861,7 +885,7 @@ public class MoreTeacherFragment extends Fragment {
                     CustomToast.blueBackgroundToast(context, messageString);
                     return;
                 }
-                LogoutProtocol.logout(context, "You're being logged out");
+                logoutConfirmation();
             }
         });
 
@@ -939,27 +963,7 @@ public class MoreTeacherFragment extends Fragment {
         super.onPause();
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
-        String day = Date.getDay();
-        String month = Date.getMonth();
-        String year = Date.getYear();
-        String day_month_year = day + "_" + month + "_" + year;
-        String month_year = month + "_" + year;
-
-        HashMap<String, Object> featureUseUpdateMap = new HashMap<>();
-        String mFirebaseUserID = mFirebaseUser.getUid();
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics User/" + mFirebaseUserID + "/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        featureUseUpdateMap.put("Analytics/Feature Use Analytics/" + featureName + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Daily Use Analytics/" + featureName + "/" + day_month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Monthly Use Analytics/" + featureName + "/" + month_year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-        featureUseUpdateMap.put("Analytics/Feature Yearly Use Analytics/" + featureName + "/" + year + "/" + featureUseKey + "/sessionDurationInSeconds", sessionDurationInSeconds);
-
-        DatabaseReference featureUseUpdateRef = FirebaseDatabase.getInstance().getReference();
-        featureUseUpdateRef.updateChildren(featureUseUpdateMap);
+        Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
     @Override
@@ -967,27 +971,65 @@ public class MoreTeacherFragment extends Fragment {
         super.onHiddenChanged(hidden);
 
         Gson gson = new Gson();
-        String myClassesJSON = sharedPreferencesManager.getMyClasses();
+        String myClassesJSON;
         String activeClass = sharedPreferencesManager.getActiveClass();
-        Type type = new TypeToken<ArrayList<Class>>() {}.getType();
-        ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
-        ArrayList<String> myClassesString = new ArrayList<>();
 
-        if (myClasses != null) {
-            for (Class classInstance : myClasses) {
-                myClassesString.add(gson.toJson(classInstance));
-            }
+        if (activeClass != null) {
+            myClassesJSON = sharedPreferencesManager.getMyClasses();
+            Type type = new TypeToken<ArrayList<Class>>() {}.getType();
+            ArrayList<Class> myClasses = gson.fromJson(myClassesJSON, type);
+            ArrayList<String> myClassesString = new ArrayList<>();
 
-            final int indexOfActiveClass = myClassesString.indexOf(activeClass);
-            if (indexOfActiveClass < myClassesString.size()) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        recyclerView.smoothScrollToPosition(indexOfActiveClass);
+            if (myClasses != null) {
+                if (myClasses.size() > 0) {
+                    for (Class classInstance : myClasses) {
+                        myClassesString.add(gson.toJson(classInstance));
                     }
-                }, 100);
+
+                    final int indexOfActiveClass = myClassesString.indexOf(activeClass);
+                    if (indexOfActiveClass < myClassesString.size()) {
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                recyclerView.smoothScrollToPosition(indexOfActiveClass);
+                            }
+                        }, 100);
+                    }
+                }
             }
         }
+    }
+
+    private void logoutConfirmation() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog_with_cancel);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button delete = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+
+        message.setText("Are you sure you want to logout of Celerii?");
+
+        delete.setText("Logout");
+        cancel.setText("Cancel");
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LogoutProtocol.logout(context, "You're being logged out");
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }
