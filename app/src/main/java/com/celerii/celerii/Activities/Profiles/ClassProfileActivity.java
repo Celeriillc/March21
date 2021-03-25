@@ -22,6 +22,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
+import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.Activities.Search.Teacher.SearchActivity;
@@ -74,6 +76,7 @@ public class ClassProfileActivity extends AppCompatActivity {
     Button errorLayoutButton;
 
     Toolbar toolbar;
+    Button termButton, yearButton;
     ImageView profilePic;
     LinearLayout profilePictureClipper;
     TextView fullName, classTeacher, school, averageAttendance, averagePerformance, boys, girls, seats;
@@ -222,6 +225,9 @@ public class ClassProfileActivity extends AppCompatActivity {
         superLayout.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
 
+        termButton = (Button) findViewById(R.id.term);
+        yearButton = (Button) findViewById(R.id.year);
+
         profilePic = (ImageView) findViewById(R.id.profilepic);
         profilePictureClipper = (LinearLayout) findViewById(R.id.profilepictureclipper);
 
@@ -234,7 +240,35 @@ public class ClassProfileActivity extends AppCompatActivity {
         boys = (TextView) findViewById(R.id.totalnumberofboys);
         girls = (TextView) findViewById(R.id.totalnumberofgirls);
 
+        term = Term.getTermShort();
+        year = Date.getYear();
+
+        termButton.setText(Term.Term(term));
+        yearButton.setText(year);
+
         loadFromFirebase();
+
+        termButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EnterResultsEditTermActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Term", term);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 0);
+            }
+        });
+
+        yearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EditYearActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Year", year);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 1);
+            }
+        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -271,7 +305,7 @@ public class ClassProfileActivity extends AppCompatActivity {
 
                     Drawable textDrawable;
                     if (!classNameString.isEmpty()) {
-                        String[] nameArray = classNameString.replaceAll("\\s+", " ").split(" ");
+                        String[] nameArray = classNameString.replaceAll("\\s+", " ").trim().split(" ");
                         if (nameArray.length == 1) {
                             textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                         } else {
@@ -376,8 +410,6 @@ public class ClassProfileActivity extends AppCompatActivity {
                                                                     girls.setText(girlsString);
                                                                     seats.setText(seatsString);
 
-                                                                    year = Date.getYear();
-                                                                    term = Term.getTermShort();
                                                                     year_term = year + "_" + term;
                                                                     term_year = term + "_" + year;
                                                                     subject_term_year = "General" + "_" + term_year;
@@ -605,5 +637,30 @@ public class ClassProfileActivity extends AppCompatActivity {
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
         Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0) {
+            if(resultCode == RESULT_OK) {
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                term = data.getStringExtra("Selected Term");
+                termButton.setText(term);
+                loadFromFirebase();
+            }
+        }
+
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                year = data.getStringExtra("Selected Year");
+                yearButton.setText(year);
+                loadFromFirebase();
+            }
+        }
     }
 }

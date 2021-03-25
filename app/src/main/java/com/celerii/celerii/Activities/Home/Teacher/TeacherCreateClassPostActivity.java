@@ -244,7 +244,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
         Drawable textDrawable;
         if (!posterNameString.isEmpty()) {
-            String[] nameArray = posterNameString.replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = posterNameString.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

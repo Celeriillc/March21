@@ -453,7 +453,7 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             Drawable textDrawable;
             if (!classStory.getPosterName().isEmpty()) {
-                String[] nameArray = classStory.getPosterName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = classStory.getPosterName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -534,7 +534,7 @@ public class CommentStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             Drawable textDrawable;
             if (!comment.getPosterName().isEmpty()) {
-                String[] nameArray = comment.getPosterName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = comment.getPosterName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

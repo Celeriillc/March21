@@ -96,7 +96,7 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
 
             Drawable textDrawable;
             if (!parentSchoolConnectionRequest.getStudentName().isEmpty()) {
-                String[] nameArray = parentSchoolConnectionRequest.getStudentName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = parentSchoolConnectionRequest.getStudentName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {
@@ -122,7 +122,7 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
 
             Drawable textDrawable;
             if (!parentSchoolConnectionRequest.getRequestSenderName().isEmpty()) {
-                String[] nameArray = parentSchoolConnectionRequest.getRequestSenderName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = parentSchoolConnectionRequest.getRequestSenderName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

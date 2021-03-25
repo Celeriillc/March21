@@ -96,7 +96,7 @@ public class ReportAbuseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             Drawable textDrawable;
             if (!reportUserModel.getName().isEmpty()) {
-                String[] nameArray = reportUserModel.getName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = reportUserModel.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

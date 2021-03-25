@@ -29,6 +29,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
+import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
@@ -81,6 +83,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
     Button errorLayoutButton;
 
     Toolbar toolbar;
+    Button termButton, yearButton;
     Button connect, disconnect;
 
     LinearLayout profilePictureClipper;
@@ -188,6 +191,9 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
         superLayout.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
+
+        termButton = (Button) findViewById(R.id.term);
+        yearButton = (Button) findViewById(R.id.year);
 
         connect = (Button) findViewById(R.id.connect);
         disconnect = (Button) findViewById(R.id.disconnect);
@@ -370,10 +376,11 @@ public class SchoolProfileActivity extends AppCompatActivity {
         collegePicList.add(collegePic4);
         collegePicList.add(collegePic5);
 
-        term = "1"; //Term.getTermShort();
-        year = "2020"; //Date.getYear();
-        term_year = term + "_" + year;
-        year_term = year + "_" +  term;
+        term = Term.getTermShort();
+        year = Date.getYear();
+
+        termButton.setText(Term.Term(term));
+        yearButton.setText(year);
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             connect.setVisibility(View.GONE);
@@ -381,6 +388,28 @@ public class SchoolProfileActivity extends AppCompatActivity {
         }
 
         loadFromFirebase();
+
+        termButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EnterResultsEditTermActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Term", term);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 0);
+            }
+        });
+
+        yearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EditYearActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Year", year);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 1);
+            }
+        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -581,6 +610,9 @@ public class SchoolProfileActivity extends AppCompatActivity {
         pendingIncomingRequestKey.clear();
         pendingOutgoingRequestKey.clear();
 
+        term_year = term + "_" + year;
+        year_term = year + "_" +  term;
+
         mDatabaseReference = mFirebaseDatabase.getReference("School").child(schoolID);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -597,7 +629,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
                         Drawable textDrawable;
                         if (!schoolName.trim().isEmpty()) {
-                            String[] nameArray = schoolName.replaceAll("\\s+", " ").split(" ");
+                            String[] nameArray = schoolName.replaceAll("\\s+", " ").trim().split(" ");
                             if (nameArray.length == 1) {
                                 textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                             } else {
@@ -913,7 +945,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
                                                             Drawable textDrawable;
                                                             if (!name.isEmpty()) {
-                                                                String[] nameArray = name.replaceAll("\\s+", " ").split(" ");
+                                                                String[] nameArray = name.replaceAll("\\s+", " ").trim().split(" ");
                                                                 if (nameArray.length == 1) {
                                                                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                                                                 } else {
@@ -970,7 +1002,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                                     collegeList.get(counter).setText(college);
                                                                     Drawable textDrawable;
                                                                     if (!college.trim().isEmpty()) {
-                                                                        String[] nameArray = college.trim().replaceAll("\\s+", " ").split(" ");
+                                                                        String[] nameArray = college.trim().replaceAll("\\s+", " ").trim().split(" ");
                                                                         textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                                                                     } else {
                                                                         textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
@@ -1498,6 +1530,31 @@ public class SchoolProfileActivity extends AppCompatActivity {
             } else if (parentActivity.equals("Teacher")) {
                 Intent i = new Intent(this, TeacherMainActivityTwo.class);
                 startActivity(i);
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0) {
+            if(resultCode == RESULT_OK) {
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                term = data.getStringExtra("Selected Term");
+                termButton.setText(term);
+                loadFromFirebase();
+            }
+        }
+
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                year = data.getStringExtra("Selected Year");
+                yearButton.setText(year);
+                loadFromFirebase();
             }
         }
     }

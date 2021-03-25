@@ -162,7 +162,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         TeacherTimetableModel teacherTimetableModel = postSnapshot.getValue(TeacherTimetableModel.class);
-                        loadView(getTimeControl(getHour(teacherTimetableModel.getTimeOfTheDay())), heightOfHour, teacherTimetableModel.getDayOfTheWeek(),
+                        loadView(getTimeControl(getHour(teacherTimetableModel.getTimeOfTheDay(), teacherTimetableModel.getZone())), heightOfHour, teacherTimetableModel.getDayOfTheWeek(),
                                 getMinute(teacherTimetableModel.getTimeOfTheDay()), Integer.parseInt(teacherTimetableModel.getDuration()), teacherTimetableModel.getSubject(),
                                 teacherTimetableModel.getClassName(), teacherTimetableModel);
                         teacherTimetableModelList.add(teacherTimetableModel);
@@ -198,9 +198,15 @@ public class TeacherTimetableActivity extends AppCompatActivity {
             myChildren = gson.fromJson(myChildrenJSON, type);
 
             if (myChildren != null) {
-                gson = new Gson();
-                activeKid = gson.toJson(myChildren.get(0));
-                sharedPreferencesManager.setActiveKid(activeKid);
+                if (myChildren.size() > 0) {
+                    gson = new Gson();
+                    activeKid = gson.toJson(myChildren.get(0));
+                    sharedPreferencesManager.setActiveKid(activeKid);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    superLayout.setVisibility(View.VISIBLE);
+                    return;
+                }
             } else {
                 progressBar.setVisibility(View.GONE);
                 superLayout.setVisibility(View.VISIBLE);
@@ -228,11 +234,9 @@ public class TeacherTimetableActivity extends AppCompatActivity {
 
             if (!activeKidExist) {
                 if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeKid = gson.toJson(myChildren.get(0));
-                        sharedPreferencesManager.setActiveKid(activeKid);
-                    }
+                    gson = new Gson();
+                    activeKid = gson.toJson(myChildren.get(0));
+                    sharedPreferencesManager.setActiveKid(activeKid);
                 } else {
                     progressBar.setVisibility(View.GONE);
                     superLayout.setVisibility(View.VISIBLE);
@@ -268,21 +272,16 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                             if (dataSnapshot.exists()) {
                                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                     TeacherTimetableModel teacherTimetableModel = postSnapshot.getValue(TeacherTimetableModel.class);
-                                    loadView(getTimeControl(getHour(teacherTimetableModel.getTimeOfTheDay())), heightOfHour, teacherTimetableModel.getDayOfTheWeek(),
+                                    loadView(getTimeControl(getHour(teacherTimetableModel.getTimeOfTheDay(), teacherTimetableModel.getZone())), heightOfHour, teacherTimetableModel.getDayOfTheWeek(),
                                             getMinute(teacherTimetableModel.getTimeOfTheDay()), Integer.valueOf(teacherTimetableModel.getDuration()), teacherTimetableModel.getSubject(),
                                             teacherTimetableModel.getClassName(), teacherTimetableModel);
                                     teacherTimetableModelList.add(teacherTimetableModel);
                                 }
+                            }
 
-                                if (counter == studentsClassesModelList.size()) {
-                                    progressBar.setVisibility(View.GONE);
-                                    superLayout.setVisibility(View.VISIBLE);
-                                }
-                            } else {
-                                if (counter == studentsClassesModelList.size()) {
-                                    progressBar.setVisibility(View.GONE);
-                                    superLayout.setVisibility(View.VISIBLE);
-                                }
+                            if (counter == studentsClassesModelList.size()) {
+                                progressBar.setVisibility(View.GONE);
+                                superLayout.setVisibility(View.VISIBLE);
                             }
                         }
 
@@ -375,12 +374,14 @@ public class TeacherTimetableActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String time = "";
-                int hour = getHour(teacherTimetableModel.getTimeOfTheDay());
-                if (hour < 13) {
-                    time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "AM";
-                } else {
-                    time = String.valueOf(Date.makeTwoDigits(hour - 12)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "PM";
-                }
+                int hour = getHour(teacherTimetableModel.getTimeOfTheDay(), teacherTimetableModel.getZone());
+                String zone = teacherTimetableModel.getZone();
+//                if (hour < 13) {
+//                    time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "AM";
+//                } else {
+//                    time = String.valueOf(Date.makeTwoDigits(hour - 12)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "PM";
+//                }
+                time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + zone;
 
                 String durationString = String.valueOf(duration) + " Minutes";
 
@@ -399,12 +400,18 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         superRelativeLayout.addView(parent);
     }
 
-    int getHour (String time) {
+    int getHour (String time, String zone) {
         if (time == null) {return 0;}
         if (time.equals("")) {return 0;}
 
         String[] timeArray = time.split(":");
-        return Integer.valueOf(timeArray[0]);
+        int hour = Integer.parseInt(timeArray[0]);
+        if (zone.equals("AM")) {
+            hour = hour;
+        } else {
+            hour += 12;
+        }
+        return hour;
     }
 
     int getMinute (String time) {

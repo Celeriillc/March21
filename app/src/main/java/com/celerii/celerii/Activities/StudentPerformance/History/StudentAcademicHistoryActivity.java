@@ -27,6 +27,7 @@ import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.models.AcademicRecordStudent;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.StudentAcademicHistoryHeaderModel;
 import com.celerii.celerii.models.StudentAcademicHistoryRowModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -60,6 +61,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     private ArrayList<StudentAcademicHistoryRowModel> studentAcademicHistoryRowModelList;
+    StudentAcademicHistoryHeaderModel studentAcademicHistoryHeaderModel;
     public RecyclerView recyclerView;
     public StudentAcademicHistoryAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -193,7 +195,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         className = activeClassModel.getClassName();
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(activeClassModel.getClassName()); //TODO: Use class name, make dynamic
+        getSupportActionBar().setTitle(className); //TODO: Use class name, make dynamic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -204,8 +206,12 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         recyclerView.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
 
+        year = Date.getYear();
+        term = Term.getTermShort();
+        studentAcademicHistoryHeaderModel = new StudentAcademicHistoryHeaderModel(term, year, className);
+
         studentAcademicHistoryRowModelList = new ArrayList<>();
-        mAdapter = new StudentAcademicHistoryAdapter(studentAcademicHistoryRowModelList, this);
+        mAdapter = new StudentAcademicHistoryAdapter(studentAcademicHistoryRowModelList, studentAcademicHistoryHeaderModel, this,this);
         recyclerView.setAdapter(mAdapter);
         loadNewDetailsFromFirebase();
 
@@ -233,8 +239,6 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
             return;
         }
 
-        year = Date.getYear();
-        term = Term.getTermShort();
         year_term = year + "_" + term;
 
         Gson gson = new Gson();
@@ -348,6 +352,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                     }
                                                 }
 
+                                                studentAcademicHistoryRowModelList.add(new StudentAcademicHistoryRowModel());
                                                 mAdapter.notifyDataSetChanged();
                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                 progressLayout.setVisibility(View.GONE);
@@ -386,6 +391,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                             }
                                         }
 
+                                        studentAcademicHistoryRowModelList.add(new StudentAcademicHistoryRowModel());
                                         mAdapter.notifyDataSetChanged();
                                         mySwipeRefreshLayout.setRefreshing(false);
                                         progressLayout.setVisibility(View.GONE);
@@ -409,6 +415,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                     }
                                 }
 
+                                studentAcademicHistoryRowModelList.add(new StudentAcademicHistoryRowModel());
                                 mAdapter.notifyDataSetChanged();
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 progressLayout.setVisibility(View.GONE);
@@ -661,5 +668,32 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0) {
+            if(resultCode == RESULT_OK) {
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                term = data.getStringExtra("Selected Term");
+                studentAcademicHistoryHeaderModel.setTerm(term);
+                mAdapter.notifyDataSetChanged();
+                loadNewDetailsFromFirebase();
+            }
+        }
+
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                year = data.getStringExtra("Selected Year");
+                studentAcademicHistoryHeaderModel.setYear(year);
+                mAdapter.notifyDataSetChanged();
+                loadNewDetailsFromFirebase();
+            }
+        }
     }
 }

@@ -180,7 +180,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             Drawable textDrawable;
             if (!messageList.getName().isEmpty()) {
-                String[] nameArray = messageList.getName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = messageList.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

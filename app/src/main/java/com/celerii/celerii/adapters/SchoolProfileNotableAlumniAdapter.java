@@ -90,7 +90,7 @@ public class SchoolProfileNotableAlumniAdapter extends RecyclerView.Adapter<Recy
 
             Drawable textDrawable;
             if (!notableAlumni.getName().trim().isEmpty()) {
-                String[] nameArray = notableAlumni.getName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = notableAlumni.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

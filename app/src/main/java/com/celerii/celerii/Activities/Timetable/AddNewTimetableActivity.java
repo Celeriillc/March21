@@ -67,6 +67,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
     Class activeClassModel;
     String hourOfTheDay;
     String minute;
+    String zone;
 
     String featureUseKey = "";
     String featureName = "Add New Timetable Item";
@@ -111,15 +112,20 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
             myClasses = gson.fromJson(myClassesJSON, type);
 
             if (myClasses != null) {
-                gson = new Gson();
-                activeClass = gson.toJson(myClasses.get(0));
-                sharedPreferencesManager.setActiveClass(activeClass);
-                gson = new Gson();
-                type = new TypeToken<Class>() {}.getType();
-                activeClassModel = gson.fromJson(activeClass, type);
-                activeClassID = activeClassModel.getID();
-                activeClassName = activeClassModel.getClassName();
-                className.setText(activeClassName);
+                if (myClasses.size() > 0) {
+                    gson = new Gson();
+                    activeClass = gson.toJson(myClasses.get(0));
+                    sharedPreferencesManager.setActiveClass(activeClass);
+                    gson = new Gson();
+                    type = new TypeToken<Class>() {}.getType();
+                    activeClassModel = gson.fromJson(activeClass, type);
+                    activeClassID = activeClassModel.getID();
+                    activeClassName = activeClassModel.getClassName();
+                    className.setText(activeClassName);
+                } else {
+                    showDialogWithMessageAndDisconnect("You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.");
+                    return;
+                }
             } else {
                 showDialogWithMessageAndDisconnect("You're not connected to any classes yet. Use the search button to search for a school and request connection to their classes.");
                 return;
@@ -185,8 +191,10 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
         minute = String.valueOf(Date.makeTwoDigits(calendar.get(Calendar.MINUTE)));
         if (hour < 13) {
             time.setText((hourOfTheDay) + ":" + (minute) + " AM");
+            zone = "AM";
         } else {
             time.setText((hour - 12) + ":" + (minute) + " PM");
+            zone = "PM";
         }
 
         duration.setText("45 Minutes");
@@ -251,9 +259,18 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
                 mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Timetable").child(mFirebaseUser.getUid()).push();
                 String pushKey = mDatabaseReference.getKey();
 
+                String hour = "";
+                if (Integer.parseInt(hourOfTheDay) < 13) {
+                    hour = hourOfTheDay;
+                } else {
+                    hour = String.valueOf(Integer.parseInt(hourOfTheDay) - 12);
+                }
+                hour = Date.makeTwoDigits(hour);
+                minute = Date.makeTwoDigits(minute);
+
                 TeacherTimetableModel teacherTimetableModel = new TeacherTimetableModel(mFirebaseUser.getUid(), activeClassID, activeClassName,
-                        pushKey, subject.getText().toString(), day.getText().toString(), hourOfTheDay + ":" + minute,
-                        duration.getText().toString().replace(" Minutes", ""));
+                        pushKey, subject.getText().toString(), day.getText().toString(), hour + ":" + minute,
+                        duration.getText().toString().replace(" Minutes", ""), zone);
 
                 HashMap<String, Object> timetableMap = new HashMap<>();
                 timetableMap.put("Teacher Timetable/" + mFirebaseUser.getUid() + "/" + pushKey, teacherTimetableModel);
@@ -299,8 +316,10 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
         this.minute = String.valueOf(minute);
         if (hour < 13) {
             time.setText((hourOfTheDay) + ":" + Date.makeTwoDigits(minute) + " AM");
+            zone = "AM";
         } else {
             time.setText((hour - 12) + ":" + (minute) + " PM");
+            zone = "PM";
         }
     }
 

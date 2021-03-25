@@ -131,7 +131,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         Drawable textDrawable;
         if (!searchResultsRow.getEntityName().isEmpty()) {
-            String[] nameArray = searchResultsRow.getEntityName().replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = searchResultsRow.getEntityName().replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

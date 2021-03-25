@@ -260,7 +260,7 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             Drawable textDrawable;
             if (!enterResultRow.getName().isEmpty()) {
-                String[] nameArray = enterResultRow.getName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = enterResultRow.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

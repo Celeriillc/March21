@@ -183,7 +183,7 @@ public class ParentProfileActivity extends AppCompatActivity {
 
                         Drawable textDrawable;
                         if (!parentName.isEmpty()) {
-                            String[] nameArray = parentName.replaceAll("\\s+", " ").split(" ");
+                            String[] nameArray = parentName.replaceAll("\\s+", " ").trim().split(" ");
                             if (nameArray.length == 1) {
                                 textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                             } else {

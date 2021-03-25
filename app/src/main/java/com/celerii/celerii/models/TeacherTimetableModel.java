@@ -1,7 +1,7 @@
 package com.celerii.celerii.models;
 
 public class TeacherTimetableModel {
-    String teacherID, classID, className, pushKey, subject, dayOfTheWeek, timeOfTheDay, duration;
+    String teacherID, classID, className, pushKey, subject, dayOfTheWeek, timeOfTheDay, duration, zone;
 
     public TeacherTimetableModel() {
         this.teacherID = "";
@@ -12,9 +12,10 @@ public class TeacherTimetableModel {
         this.dayOfTheWeek = "";
         this.timeOfTheDay = "";
         this.duration = "";
+        this.zone = "";
     }
 
-    public TeacherTimetableModel(String teacherID, String classID, String className, String pushKey, String subject, String dayOfTheWeek, String timeOfTheDay, String duration) {
+    public TeacherTimetableModel(String teacherID, String classID, String className, String pushKey, String subject, String dayOfTheWeek, String timeOfTheDay, String duration, String zone) {
         this.teacherID = teacherID;
         this.classID = classID;
         this.className = className;
@@ -23,6 +24,7 @@ public class TeacherTimetableModel {
         this.dayOfTheWeek = dayOfTheWeek;
         this.timeOfTheDay = timeOfTheDay;
         this.duration = duration;
+        this.zone = zone;
     }
 
     public String getTeacherID() {
@@ -87,5 +89,13 @@ public class TeacherTimetableModel {
 
     public void setDuration(String duration) {
         this.duration = duration;
+    }
+
+    public String getZone() {
+        return zone;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 }

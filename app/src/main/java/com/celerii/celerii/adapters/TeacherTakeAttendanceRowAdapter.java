@@ -218,7 +218,7 @@ public class TeacherTakeAttendanceRowAdapter extends RecyclerView.Adapter<Recycl
 
             Drawable textDrawable;
             if (!teacherAttendanceRow.getName().isEmpty()) {
-                String[] nameArray = teacherAttendanceRow.getName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = teacherAttendanceRow.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

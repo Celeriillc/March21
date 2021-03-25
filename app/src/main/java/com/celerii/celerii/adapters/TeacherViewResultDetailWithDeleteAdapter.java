@@ -189,7 +189,7 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
 
             Drawable textDrawable;
             if (!kidScoreForTeachersModel.getKidName().isEmpty()) {
-                String[] nameArray = kidScoreForTeachersModel.getKidName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = kidScoreForTeachersModel.getKidName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

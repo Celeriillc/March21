@@ -184,7 +184,7 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
 
                         Drawable textDrawable;
                         if (!teacherName.isEmpty()) {
-                            String[] nameArray = teacherName.replaceAll("\\s+", " ").split(" ");
+                            String[] nameArray = teacherName.replaceAll("\\s+", " ").trim().split(" ");
                             if (nameArray.length == 1) {
                                 textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                             } else {

@@ -221,7 +221,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
 
             Drawable textDrawable;
             if (!myName.isEmpty()) {
-                String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 4);
                 } else {
@@ -277,7 +277,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             holder.name.setText(chatTitle);
             Drawable textDrawable;
             if (!chatTitle.isEmpty()) {
-                String[] nameArray = chatTitle.replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = chatTitle.replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 1);
                 } else {
@@ -374,7 +374,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             } else {
                 Drawable textDrawable;
                 if (!chatTitle.isEmpty()) {
-                    String[] nameArray = chatTitle.replaceAll("\\s+", " ").split(" ");
+                    String[] nameArray = chatTitle.replaceAll("\\s+", " ").trim().split(" ");
                     if (nameArray.length == 1) {
                         textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                     } else {

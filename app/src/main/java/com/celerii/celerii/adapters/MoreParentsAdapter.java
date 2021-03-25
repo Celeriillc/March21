@@ -82,12 +82,14 @@ public class MoreParentsAdapter extends RecyclerView.Adapter<MoreParentsAdapter.
         Type type = new TypeToken<Student>() {}.getType();
         activeKid = gson.fromJson(activeKidJSON, type);
 
-        if (activeKid.getStudentID().equals(moreParentsModel.getStudentID())) {
-            holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
-            holder.childName.setTextColor(ContextCompat.getColor(context, R.color.white));
-        } else {
-            holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
-            holder.childName.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+        if (activeKid != null) {
+            if (activeKid.getStudentID().equals(moreParentsModel.getStudentID())) {
+                holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
+                holder.childName.setTextColor(ContextCompat.getColor(context, R.color.white));
+            } else {
+                holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
+                holder.childName.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+            }
         }
 
         holder.childPicClipper.setClipToOutline(true);

@@ -101,7 +101,7 @@ public class DeleteAccountReasonActivity extends AppCompatActivity {
         Drawable textDrawable;
         String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
         if (!myName.trim().isEmpty()) {
-            String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

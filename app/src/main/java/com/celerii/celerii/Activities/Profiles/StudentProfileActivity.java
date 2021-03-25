@@ -30,6 +30,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.EditProfiles.EditStudentProfileActivity;
+import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
+import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
 import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
 import com.celerii.celerii.Activities.StudentAttendance.ParentAttendanceActivity;
 import com.celerii.celerii.Activities.StudentBehaviouralPerformance.BehaviouralResultActivity;
@@ -101,6 +103,7 @@ public class StudentProfileActivity extends AppCompatActivity {
     LinearLayout attendanceErrorLayout, performanceErrorLayout, behaviouralErrorLayout, bioLayout;
 
     Toolbar toolbar;
+    Button termButton, yearButton;
     Button editStudentProfile, disconnect;
 
     ImageView kidPic, behaviourPic1, behaviourPic1Background, behaviourPic2, behaviourPic2Background;
@@ -276,6 +279,9 @@ public class StudentProfileActivity extends AppCompatActivity {
         superLayout.setVisibility(View.GONE);
         progressLayout.setVisibility(View.VISIBLE);
 
+        termButton = (Button) findViewById(R.id.term);
+        yearButton = (Button) findViewById(R.id.year);
+
         editStudentProfile = (Button) findViewById(R.id.editstudentprofile);
         disconnect = (Button) findViewById(R.id.disconnect);
 
@@ -381,8 +387,9 @@ public class StudentProfileActivity extends AppCompatActivity {
 
         term = Term.getTermShort();
         year = Date.getYear();
-        term_year = term + "_" + year;
-        year_term = year + "_" +  term;
+
+        termButton.setText(Term.Term(term));
+        yearButton.setText(year);
 
         isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
         gson = new Gson();
@@ -418,6 +425,28 @@ public class StudentProfileActivity extends AppCompatActivity {
             }
         }
         isExpired = Date.compareDates(Date.getDate(), subscriptionModel.getExpiryDate());
+
+        termButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EnterResultsEditTermActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Term", term);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 0);
+            }
+        });
+
+        yearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, EditYearActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("Year", year);
+                intent.putExtras(bundle);
+                startActivityForResult(intent, 1);
+            }
+        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -503,6 +532,8 @@ public class StudentProfileActivity extends AppCompatActivity {
             return;
         }
 
+        term_year = term + "_" + year;
+        year_term = year + "_" +  term;
         totalPointsAwarded = totalPointsFined = totalPointsEarned = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference("Student").child(studentID);
@@ -537,7 +568,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
                     Drawable textDrawable;
                     if (!studentName.isEmpty()) {
-                        String[] nameArray = studentName.replaceAll("\\s+", " ").split(" ");
+                        String[] nameArray = studentName.replaceAll("\\s+", " ").trim().split(" ");
                         if (nameArray.length == 1) {
                             textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                         } else {
@@ -1378,5 +1409,30 @@ public class StudentProfileActivity extends AppCompatActivity {
         }
         UpdateDataFromFirebase.populateEssentials(this);
         super.onResume();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 0) {
+            if(resultCode == RESULT_OK) {
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                term = data.getStringExtra("Selected Term");
+                termButton.setText(term);
+                loadFromFirebase();
+            }
+        }
+
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                superLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
+                year = data.getStringExtra("Selected Year");
+                yearButton.setText(year);
+                loadFromFirebase();
+            }
+        }
     }
 }

@@ -460,7 +460,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             Drawable textDrawable;
             if (!classStory.getPosterName().isEmpty()) {
-                String[] nameArray = classStory.getPosterName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = classStory.getPosterName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
                 } else {

@@ -131,7 +131,7 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
 
             Drawable textDrawable;
             if (!manageKidsModel.getName().isEmpty()) {
-                String[] nameArray = manageKidsModel.getName().replaceAll("\\s+", " ").split(" ");
+                String[] nameArray = manageKidsModel.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
                     textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 100);
                 } else {

@@ -350,8 +350,8 @@ public class FederatedSignInActivity extends AppCompatActivity {
                 } else {
                     sharedPreferencesManager.clear();
                     Map<String, Object> updateMap = new HashMap<String, Object>();
-                    final String userName = mFirebaseUser.getDisplayName();
-                    String userEmail = mFirebaseUser.getEmail();
+                    final String userName = mFirebaseUser.getDisplayName().trim().replaceAll("\\s+", " ");
+                    String userEmail = mFirebaseUser.getEmail().trim();
                     String refactoredEmail = userEmail.replace(".", "_fullStop_");
                     Parent parent = new Parent(userName, "", userName.toLowerCase(), "", userEmail);
                     Teacher teacher = new Teacher(userName, "", userName.toLowerCase(), "", userEmail);

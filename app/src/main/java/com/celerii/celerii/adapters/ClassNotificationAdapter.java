@@ -194,7 +194,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
 
         Drawable textDrawable;
         if (!picName.isEmpty()) {
-            String[] nameArray = picName.replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = picName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

@@ -9,12 +9,17 @@ public class StudentAcademicHistoryRowModel {
     String average;
 
     public StudentAcademicHistoryRowModel() {
+        this.studentID = "";
+        this.name = "";
+        this.imageURL = "";
+        this.average = "";
     }
 
     public StudentAcademicHistoryRowModel(String studentID, String name, String imageURL) {
         this.studentID = studentID;
         this.name = name;
         this.imageURL = imageURL;
+        this.average = "";
     }
 
     public String getStudentID() {

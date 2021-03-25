@@ -264,7 +264,7 @@ public class EditStudentProfileActivity extends AppCompatActivity {
 
                     Drawable textDrawable;
                     if (!childName.isEmpty()) {
-                        String[] nameArray = childName.replaceAll("\\s+", " ").split(" ");
+                        String[] nameArray = childName.replaceAll("\\s+", " ").trim().split(" ");
                         if (nameArray.length == 1) {
                             textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
                         } else {

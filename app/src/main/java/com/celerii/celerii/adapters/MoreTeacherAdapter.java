@@ -86,6 +86,7 @@ public class MoreTeacherAdapter extends RecyclerView.Adapter<MoreTeacherAdapter.
         Type type = new TypeToken<Class>() {}.getType();
         activeClass = gson.fromJson(activeClassJSON, type);
 
+        if (activeClass != null) {
             if (activeClass.getID().equals(moreTeachersModel.getID())) {
                 holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple));
                 holder.className.setTextColor(ContextCompat.getColor(context, R.color.white));
@@ -93,6 +94,7 @@ public class MoreTeacherAdapter extends RecyclerView.Adapter<MoreTeacherAdapter.
                 holder.parentView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                 holder.className.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
             }
+        }
 
         holder.classPicClipper.setClipToOutline(true);
         holder.className.setText(moreTeachersModel.getClassName());

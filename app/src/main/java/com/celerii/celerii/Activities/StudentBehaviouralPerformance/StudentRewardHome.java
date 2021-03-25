@@ -77,7 +77,7 @@ public class StudentRewardHome extends AppCompatActivity {
 
         Drawable textDrawable;
         if (!studentName.isEmpty()) {
-            String[] nameArray = studentName.replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = studentName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
             } else {

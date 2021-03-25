@@ -101,7 +101,7 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
 
         Drawable textDrawable;
         if (!teacherSchoolConnectionRequest.getSchoolName().isEmpty()) {
-            String[] nameArray = teacherSchoolConnectionRequest.getSchoolName().replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = teacherSchoolConnectionRequest.getSchoolName().replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
             } else {

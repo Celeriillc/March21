@@ -203,12 +203,14 @@ public class ParentTeacherMessageList extends Fragment {
                                             }
 
                                             if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
-                                                Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                                    @Override
-                                                    public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                                        return o1.getName().compareTo(o2.getName());
-                                                    }
-                                                });
+                                                if (newChatRowModelList.size() > 1) {
+                                                    Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                        @Override
+                                                        public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                            return o1.getName().compareTo(o2.getName());
+                                                        }
+                                                    });
+                                                }
                                                 mAdapter.notifyDataSetChanged();
                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                 progressLayout.setVisibility(View.GONE);
@@ -237,12 +239,14 @@ public class ParentTeacherMessageList extends Fragment {
                     counterTeachers++;
                     if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
                         if (newChatRowModelList.size() > 0) {
-                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                @Override
-                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                    return o1.getName().compareTo(o2.getName());
-                                }
-                            });
+                            if (newChatRowModelList.size() > 1) {
+                                Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                    @Override
+                                    public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                        return o1.getName().compareTo(o2.getName());
+                                    }
+                                });
+                            }
                             mAdapter.notifyDataSetChanged();
                             mySwipeRefreshLayout.setRefreshing(false);
                             progressLayout.setVisibility(View.GONE);

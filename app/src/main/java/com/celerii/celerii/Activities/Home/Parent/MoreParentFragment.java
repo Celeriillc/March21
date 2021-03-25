@@ -627,7 +627,7 @@ public class MoreParentFragment extends Fragment {
         Drawable textDrawable;
         String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
         if (!myName.trim().isEmpty()) {
-            String[] nameArray = myName.replaceAll("\\s+", " ").split(" ");
+            String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
                 textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 100);
             } else {
