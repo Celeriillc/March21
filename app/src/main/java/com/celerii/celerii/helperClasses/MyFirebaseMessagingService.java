@@ -746,50 +746,52 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     }
                     return null;
                 case "Message":
-                    resultIntent = new Intent(getBaseContext(), ChatActivity.class);
-                    bundle = new Bundle();
-                    bundle.putString("ID", fromID);
-                    bundle.putString("name", from);
-                    bundle.putString("parentActivity", activeAccount);
-                    resultIntent.putExtras(bundle);
-                    stackBuilder = TaskStackBuilder.create(getBaseContext());
-                    stackBuilder.addNextIntentWithParentStack(resultIntent);
-                    resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    if (!fromID.equals(mFirebaseUser.getUid())) {
+                        resultIntent = new Intent(getBaseContext(), ChatActivity.class);
+                        bundle = new Bundle();
+                        bundle.putString("ID", fromID);
+                        bundle.putString("name", from);
+                        bundle.putString("parentActivity", activeAccount);
+                        resultIntent.putExtras(bundle);
+                        stackBuilder = TaskStackBuilder.create(getBaseContext());
+                        stackBuilder.addNextIntentWithParentStack(resultIntent);
+                        resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                    try {
-                        if (!notificationImageURL.isEmpty()) {
-                            URL myURL = new URL(notificationImageURL);
-                            bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
-                        } else {
-                            if (from != null && !from.isEmpty())
-                                bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), from));
-                            else
-                                throw new Exception();
+                        try {
+                            if (!notificationImageURL.isEmpty()) {
+                                URL myURL = new URL(notificationImageURL);
+                                bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
+                            } else {
+                                if (from != null && !from.isEmpty())
+                                    bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), from));
+                                else
+                                    throw new Exception();
+                            }
+
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setLargeIcon(bitmap)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
+                                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                    .setSubText("New Message")
+                                    .setContentTitle(from)
+                                    .setContentText(message)
+                                    .setAutoCancel(true)
+                                    .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                                    .setOnlyAlertOnce(true)
+                                    .setContentIntent(resultPendingIntent);
+                        } catch (Exception e) {
+                            System.out.println(e);
+                            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                    .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
+                                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                    .setSubText("New Message")
+                                    .setContentTitle(from)
+                                    .setContentText(message)
+                                    .setAutoCancel(true)
+                                    .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                                    .setOnlyAlertOnce(true)
+                                    .setContentIntent(resultPendingIntent);
                         }
-
-                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
-                                .setLargeIcon(bitmap)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
-                                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                                .setSubText("New Message")
-                                .setContentTitle(from)
-                                .setContentText(message)
-                                .setAutoCancel(true)
-                                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
-                                .setOnlyAlertOnce(true)
-                                .setContentIntent(resultPendingIntent);
-                    } catch(Exception e) {
-                        System.out.println(e);
-                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
-                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
-                                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                                .setSubText("New Message")
-                                .setContentTitle(from)
-                                .setContentText(message)
-                                .setAutoCancel(true)
-                                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
-                                .setOnlyAlertOnce(true)
-                                .setContentIntent(resultPendingIntent);
                     }
                     return null;
             }
