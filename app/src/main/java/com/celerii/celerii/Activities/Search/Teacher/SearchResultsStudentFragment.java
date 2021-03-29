@@ -22,6 +22,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
+import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,9 +58,6 @@ public class SearchResultsStudentFragment extends Fragment {
     ArrayList<SearchResultsRow> searchResultsRowList;
     HashMap<String, Student> studentMap;
     HashMap<String, SearchResultsRow> searchResultsRowMap;
-    ArrayList<String> existingConnections;
-    ArrayList<String> pendingIncomingRequests;
-    ArrayList<String> pendingOutgoingRequests;
     ArrayList<ClassesStudentsAndParentsModel> classesStudentsModelList;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
@@ -116,10 +114,8 @@ public class SearchResultsStudentFragment extends Fragment {
         searchResultsRowList = new ArrayList<>();
         studentMap = new HashMap<>();
         searchResultsRowMap = new HashMap<>();
-        existingConnections = new ArrayList<>();
-        pendingIncomingRequests = new ArrayList<>();
-        pendingOutgoingRequests = new ArrayList<>();
-        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
+        SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
+        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
         loadStudentDataFromFirebase();
 

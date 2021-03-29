@@ -298,7 +298,12 @@ public class ChatActivity extends AppCompatActivity {
                                     String messageID = postSnapShot.getKey();
                                     Chats chat = postSnapShot.getValue(Chats.class);
                                     chat.setMessageID(messageID);
-                                    chat.setReceiverID("Admin");
+                                    if (!chat.getReceiverID().equals(mFirebaseUser.getUid())) {
+                                        chat.setReceiverID("Admin");
+                                    }
+                                    if (!chat.getSenderID().equals(mFirebaseUser.getUid())) {
+                                        chat.setSenderID("Admin");
+                                    }
                                     chatsList.add(chat);
                                 }
 

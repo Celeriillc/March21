@@ -77,7 +77,7 @@ public class PerformanceHistoryAdapter extends RecyclerView.Adapter<PerformanceH
         }
 
         holder.subject.setText(performanceHistoryModel.getSubject());
-        String Score = String.valueOf(performanceHistoryModel.getAverageScore());
+        String Score = String.valueOf(performanceHistoryModel.getAverageScore()) + "%";
         holder.averageScore.setText(Score);
 
         String letter = String.valueOf(performanceHistoryModel.getSubject().charAt(0));

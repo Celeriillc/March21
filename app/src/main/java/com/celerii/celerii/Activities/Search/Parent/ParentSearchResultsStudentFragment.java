@@ -22,6 +22,7 @@ import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
+import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,9 +57,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
     private HashMap<String, Student> studentMap;
-    private ArrayList<String> existingConnections;
-    private ArrayList<String> pendingIncomingRequests;
-    private ArrayList<String> pendingOutgoingRequests;
+    private SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -115,10 +114,8 @@ public class ParentSearchResultsStudentFragment extends Fragment {
 
         searchResultsRowList = new ArrayList<>();
         studentMap = new HashMap<>();
-        existingConnections = new ArrayList<>();
-        pendingIncomingRequests = new ArrayList<>();
-        pendingOutgoingRequests = new ArrayList<>();
-        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
+        searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
+        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
         loadExistingConnections();
 
@@ -144,18 +141,18 @@ public class ParentSearchResultsStudentFragment extends Fragment {
             return;
         }
 
-        existingConnections = new ArrayList<>();
-        pendingIncomingRequests = new ArrayList<>();
-        pendingOutgoingRequests = new ArrayList<>();
+        searchExistingIncomingAndOutgoingConnections.getExistingConnections().clear();
+        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().clear();
+        searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().clear();
         mDatabaseReference = mFirebaseDatabase.getReference("Parents Students").child(mFirebaseUser.getUid());
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                existingConnections.clear();
+                searchExistingIncomingAndOutgoingConnections.getExistingConnections().clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-                        existingConnections.add(postSnapshot.getKey());
+                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(postSnapshot.getKey());
                     }
                 }
 
@@ -175,11 +172,11 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                pendingIncomingRequests.clear();
+                searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-                        pendingIncomingRequests.add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
+                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
                     }
                 }
 
@@ -199,11 +196,11 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         mDatabaseReference.orderByChild("requestStatus").equalTo("Pending").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                pendingOutgoingRequests.clear();
+                searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-                        pendingOutgoingRequests.add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
+                        searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().add(postSnapshot.getValue(ParentSchoolConnectionRequest.class).getStudentID());
                     }
                 }
 

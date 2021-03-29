@@ -23,6 +23,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.SchoolTeacherConnectionRequest;
+import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.TeacherSchoolConnectionRequest;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,9 +58,7 @@ public class SearchResultsSchoolFragment extends Fragment {
     private ArrayList<SearchResultsRow> searchResultsRowList;
     private HashMap<String, School> schoolMap;
     private HashMap<String, Integer> searchMap = new HashMap<>();
-    private ArrayList<String> existingConnections;
-    private ArrayList<String> pendingIncomingRequests;
-    private ArrayList<String> pendingOutgoingRequests;
+    private SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -114,10 +113,8 @@ public class SearchResultsSchoolFragment extends Fragment {
 
         searchResultsRowList = new ArrayList<>();
         schoolMap = new HashMap<>();
-        existingConnections = new ArrayList<>();
-        pendingIncomingRequests = new ArrayList<>();
-        pendingOutgoingRequests = new ArrayList<>();
-        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
+        searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
+        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
         loadExistingConnections();
 
@@ -143,18 +140,18 @@ public class SearchResultsSchoolFragment extends Fragment {
             return;
         }
 
-        existingConnections = new ArrayList<>();
-        pendingIncomingRequests = new ArrayList<>();
-        pendingOutgoingRequests = new ArrayList<>();
+        searchExistingIncomingAndOutgoingConnections.getExistingConnections().clear();
+        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().clear();
+        searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().clear();
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher School").child(mFirebaseUser.getUid());
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                existingConnections.clear();
+                searchExistingIncomingAndOutgoingConnections.getExistingConnections().clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-                        existingConnections.add(postSnapshot.getKey());
+                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(postSnapshot.getKey());
                     }
                 }
 
@@ -177,7 +174,7 @@ public class SearchResultsSchoolFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 loopControl = 0;
-                pendingIncomingRequests.clear();
+                searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
 
@@ -194,7 +191,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         SchoolTeacherConnectionRequest schoolTeacherConnectionRequest = postSnapshot.getValue(SchoolTeacherConnectionRequest.class);
                                         String schoolID = schoolTeacherConnectionRequest.getSchool();
-                                        pendingIncomingRequests.add(schoolID);
+                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().add(schoolID);
                                     }
                                 }
 
@@ -230,7 +227,7 @@ public class SearchResultsSchoolFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 loopControl = 0;
-                pendingOutgoingRequests.clear();
+                searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()){
 
@@ -247,7 +244,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         TeacherSchoolConnectionRequest teacherSchoolConnectionRequest = postSnapshot.getValue(TeacherSchoolConnectionRequest.class);
                                         String schoolID = teacherSchoolConnectionRequest.getSchool();
-                                        pendingOutgoingRequests.add(schoolID);
+                                        searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().add(schoolID);
                                     }
                                 }
 
@@ -297,7 +294,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                             searchMap.put(key, searchMap.get(key) + 1);
                         } else {
                             searchMap.put(key, 1);
-                            String location = school.getLocation() + ", " + school.getState() + ", " + school.getCountry();
+                            String location = "";
                             SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
                             if (!school.getDeleted()) {
                                 searchResultsRowList.add(searchHistoryRow);
@@ -319,7 +316,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                                     searchMap.put(key, searchMap.get(key) + 1);
                                 } else {
                                     searchMap.put(key, 1);
-                                    String location = school.getLocation() + ", " + school.getState() + ", " + school.getCountry();
+                                    String location = "";
                                     SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
                                     if (!school.getDeleted()) {
                                         searchResultsRowList.add(searchHistoryRow);

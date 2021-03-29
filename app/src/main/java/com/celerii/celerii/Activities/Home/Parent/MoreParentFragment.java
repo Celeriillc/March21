@@ -32,6 +32,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.Activities.Events.EventsRowActivity;
 import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
+import com.celerii.celerii.Activities.Payments.PaymentsHomeActivity;
 import com.celerii.celerii.Activities.Profiles.ParentProfileActivity;
 import com.celerii.celerii.Activities.Profiles.StudentProfileActivity;
 import com.celerii.celerii.Activities.Search.Parent.ParentSearchActivity;
@@ -894,13 +895,13 @@ public class MoreParentFragment extends Fragment {
                 context.startActivity(I);
             }
         });
-//        paymentLayout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent I = new Intent(context, StudentPerformanceForParentsActivity.class);
-//                context.startActivity(I);
-//            }
-//        });
+        paymentLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(context, PaymentsHomeActivity.class);
+                context.startActivity(I);
+            }
+        });
         eventsLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

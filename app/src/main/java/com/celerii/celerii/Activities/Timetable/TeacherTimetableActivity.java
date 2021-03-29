@@ -376,12 +376,12 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                 String time = "";
                 int hour = getHour(teacherTimetableModel.getTimeOfTheDay(), teacherTimetableModel.getZone());
                 String zone = teacherTimetableModel.getZone();
-//                if (hour < 13) {
-//                    time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "AM";
-//                } else {
-//                    time = String.valueOf(Date.makeTwoDigits(hour - 12)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "PM";
-//                }
-                time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + zone;
+                if (hour < 13) {
+                    time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "AM";
+                } else {
+                    time = String.valueOf(Date.makeTwoDigits(hour - 12)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + "PM";
+                }
+//                time = String.valueOf(Date.makeTwoDigits(hour)) + ":" +  String.valueOf(Date.makeTwoDigits(minute)) + " " + zone;
 
                 String durationString = String.valueOf(duration) + " Minutes";
 
@@ -406,11 +406,11 @@ public class TeacherTimetableActivity extends AppCompatActivity {
 
         String[] timeArray = time.split(":");
         int hour = Integer.parseInt(timeArray[0]);
-        if (zone.equals("AM")) {
-            hour = hour;
-        } else {
-            hour += 12;
-        }
+//        if (zone.equals("AM")) {
+//            hour = hour;
+//        } else {
+//            hour += 12;
+//        }
         return hour;
     }
 

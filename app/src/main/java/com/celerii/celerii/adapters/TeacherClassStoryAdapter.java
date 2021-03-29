@@ -596,7 +596,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
                             String sortableTime = Date.convertToSortableDate(time);
                             boolean isSeen = false;
                             NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), classStory.getPosterAccountType(),
-                                    sharedPreferencesManager.getActiveAccount(), time, sortableTime, classStory.getPostID(), "Like", "", "", isSeen);
+                                    sharedPreferencesManager.getActiveAccount(), time, sortableTime, classStory.getPostID(), "Like", "", classStory.getClassReciepient(), isSeen);
 
                             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                                 userUpdates.put("ClassStoryParentFeed/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);

@@ -269,7 +269,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
                 minute = Date.makeTwoDigits(minute);
 
                 TeacherTimetableModel teacherTimetableModel = new TeacherTimetableModel(mFirebaseUser.getUid(), activeClassID, activeClassName,
-                        pushKey, subject.getText().toString(), day.getText().toString(), hour + ":" + minute,
+                        pushKey, subject.getText().toString(), day.getText().toString(), hourOfTheDay + ":" + minute,
                         duration.getText().toString().replace(" Minutes", ""), zone);
 
                 HashMap<String, Object> timetableMap = new HashMap<>();

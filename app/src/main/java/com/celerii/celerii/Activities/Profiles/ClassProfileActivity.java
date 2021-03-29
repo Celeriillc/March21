@@ -538,7 +538,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                             totalPercentage += percentageOfTotal;
                                         }
 
-                                        Double normalizedAverage = (classAverage / totalPercentage) * 100;
+                                        Double normalizedAverage = (classAverage / maxScore) * 100;
                                         normalizedAverageList.add(normalizedAverage);
                                     }
                                     counter++;
@@ -648,7 +648,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                 superLayout.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.VISIBLE);
                 term = data.getStringExtra("Selected Term");
-                termButton.setText(term);
+                termButton.setText(Term.Term(term));
                 loadFromFirebase();
             }
         }

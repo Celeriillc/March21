@@ -33,6 +33,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.DisconnectionModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
+import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchHistoryRow;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
@@ -63,9 +64,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     SharedPreferencesManager sharedPreferencesManager;
     private List<SearchResultsRow> searchResultsRowList;
     private Context context;
-    private ArrayList<String> existingConnections;
-    private ArrayList<String> pendingIncomingRequests;
-    private ArrayList<String> pendingOutgoingRequests;
+    private SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections;
     public HashMap<String, ArrayList<String>> guardians;
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -92,14 +91,12 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         }
     }
 
-    public SearchResultsAdapter(List<SearchResultsRow> searchResultsRowList, Context context, ArrayList<String> existingConnections,
-                                ArrayList<String> pendingIncomingRequests, ArrayList<String> pendingOutgoingRequests) {
+    public SearchResultsAdapter(List<SearchResultsRow> searchResultsRowList, Context context, SearchExistingIncomingAndOutgoingConnections
+            searchExistingIncomingAndOutgoingConnections) {
         sharedPreferencesManager = new SharedPreferencesManager(context);
         this.searchResultsRowList = searchResultsRowList;
         this.context = context;
-        this.existingConnections = existingConnections;
-        this.pendingIncomingRequests = pendingIncomingRequests;
-        this.pendingOutgoingRequests = pendingOutgoingRequests;
+        this.searchExistingIncomingAndOutgoingConnections = searchExistingIncomingAndOutgoingConnections;
         guardians = new HashMap<>();
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -156,15 +153,15 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             if (searchResultsRow.getEntityType().equals("School")) {
                 holder.sendRequest.setVisibility(View.VISIBLE);
 
-                if (existingConnections.contains(entityId)) {
+                if (searchExistingIncomingAndOutgoingConnections.getExistingConnections().contains(entityId)) {
                     holder.sendRequest.setText("Disconnect");
                     holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
                     holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
-                } else if (pendingIncomingRequests.contains(entityId)) {
+                } else if (searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().contains(entityId)) {
                     holder.sendRequest.setText("Connect");
                     holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                     holder.sendRequest.setTextColor(Color.WHITE);
-                } else if (pendingOutgoingRequests.contains(entityId)) {
+                } else if (searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().contains(entityId)) {
                     holder.sendRequest.setText("Revoke");
                     holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
                     holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
@@ -182,16 +179,16 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             if (searchResultsRow.getEntityType().equals("Student")) {
                 holder.sendRequest.setVisibility(View.VISIBLE);
 
-                if (existingConnections.contains(entityId)) {
+                if (searchExistingIncomingAndOutgoingConnections.getExistingConnections().contains(entityId)) {
                     holder.sendRequest.setText("Disconnect");
                     holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
                     holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
-                } else if (pendingIncomingRequests.contains(entityId)) {
+                } else if (searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().contains(entityId)) {
 //                    holder.sendRequest.setText("Respond");
 //                    holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
 //                    holder.sendRequest.setTextColor(Color.WHITE);
                     holder.sendRequest.setVisibility(View.GONE);
-                } else if (pendingOutgoingRequests.contains(entityId)) {
+                } else if (searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().contains(entityId)) {
                     holder.sendRequest.setText("Revoke");
                     holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
                     holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
@@ -218,7 +215,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
                     if (holder.sendRequest.getText().equals("Connect")) {
 
-                        if (pendingIncomingRequests.size() == 0) {
+                        if (searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().size() == 0) {
                             customProgressDialogOne.show();
                             holder.sendRequest.setText("Revoke");
                             holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
@@ -239,7 +236,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                             newRequestMap.put("NotificationSchool/" + entityId + "/" + refKey, notificationModel);
 
                             mDatabaseReference.updateChildren(newRequestMap);
-                            pendingOutgoingRequests.add(entityId);
+                            searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().add(entityId);
                             notifyDataSetChanged();
                             customProgressDialogOne.dismiss();
                         } else {
@@ -271,8 +268,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                     newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
                                     newConnectionMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notification);
                                     newRef.updateChildren(newConnectionMap);
-                                    existingConnections.add(entityId);
-                                    pendingIncomingRequests.remove(entityId);
+                                    searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(entityId);
+                                    searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
                                     notifyDataSetChanged();
                                     customProgressDialogOne.dismiss();
                                 }
@@ -344,7 +341,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                         holder.sendRequest.setText("Connect");
                                         holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                                         holder.sendRequest.setTextColor(Color.WHITE);
-                                        pendingOutgoingRequests.remove(entityId);
+                                        searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().remove(entityId);
                                         holder.sendRequest.setEnabled(true);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
@@ -429,7 +426,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                         holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                                         holder.sendRequest.setTextColor(Color.WHITE);
                                         newDisconnectionRef.updateChildren(newDisconnectionMap);
-                                        existingConnections.remove(entityId);
+                                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().remove(entityId);
                                         holder.sendRequest.setEnabled(true);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
@@ -505,7 +502,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                         holder.sendRequest.setText("Connect");
                                         holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                                         holder.sendRequest.setTextColor(Color.WHITE);
-                                        pendingIncomingRequests.remove(entityId);
+                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
                                         holder.sendRequest.setEnabled(true);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
@@ -555,8 +552,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                         holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
                                         holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
                                         newConnectionRef.updateChildren(newConnectionMap);
-                                        existingConnections.add(entityId);
-                                        pendingIncomingRequests.remove(entityId);
+                                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(entityId);
+                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
                                         holder.sendRequest.setEnabled(true);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
@@ -640,7 +637,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
                                         mDatabaseReference = mFirebaseDatabase.getReference();
                                         mDatabaseReference.updateChildren(newRequestMap);
-                                        pendingOutgoingRequests.add(entityId);
+                                        searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().add(entityId);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
                                     }
@@ -729,7 +726,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                             holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                                             holder.sendRequest.setTextColor(Color.WHITE);
                                             newRef.updateChildren(newRequestMap);
-                                            pendingOutgoingRequests.remove(entityId);
+                                            searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().remove(entityId);
                                             holder.sendRequest.setEnabled(true);
                                             notifyDataSetChanged();
                                             customProgressDialogOne.dismiss();
@@ -853,7 +850,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                                 holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                                                 holder.sendRequest.setTextColor(Color.WHITE);
                                                 newDisconnectionRef.updateChildren(newDisconnectionMap);
-                                                existingConnections.remove(entityId);
+                                                searchExistingIncomingAndOutgoingConnections.getExistingConnections().remove(entityId);
                                                 notifyDataSetChanged();
                                                 holder.sendRequest.setEnabled(true);
                                                 customProgressDialogOne.dismiss();
@@ -887,7 +884,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
                 if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                     if (searchResultsRow.getEntityType().equals("Student")){
-                        if (!existingConnections.contains(entityId)) {
+                        if (!searchExistingIncomingAndOutgoingConnections.getExistingConnections().contains(entityId)) {
                             String messageString = "You don't have the permission to view " + "<b>" + entityName + "</b>" + "'s information. If you" +
                                     " know " + "<b>" + entityName + "</b>" + " and would like to access their information, send a connection request to their school by using" +
                                     " the " + "<b>" + "Connect" + "</b>" + " button.";

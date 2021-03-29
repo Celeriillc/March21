@@ -264,6 +264,7 @@ public class HistoryFragment extends Fragment {
                                 counter++;
                                 if (dataSnapshot.exists()) {
                                     double termAverage = 0.0;
+                                    double maxScore = 0.0;
                                     String subject = "";
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         AcademicRecordStudent academicRecordStudent = postSnapshot.getValue(AcademicRecordStudent.class);
@@ -273,9 +274,12 @@ public class HistoryFragment extends Fragment {
                                         double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
 
                                         double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                        double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
                                         termAverage += normalizedTestClassAverage;
+                                        maxScore += normalizedMaxObtainable;
                                     }
 
+                                    termAverage = (termAverage / maxScore) * 100;
                                     if (!subjectTotal.containsKey(subject)) {
                                         subjectTotal.put(subject, termAverage);
                                     } else {

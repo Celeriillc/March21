@@ -168,46 +168,50 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 return;
             }
         } else {
-            Boolean activeKidExist = false;
-            Gson gson = new Gson();
-            Type type = new TypeToken<Student>() {}.getType();
-            Student activeKidModel = gson.fromJson(activeKid, type);
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                Boolean activeKidExist = false;
+                Gson gson = new Gson();
+                Type type = new TypeToken<Student>() {
+                }.getType();
+                Student activeKidModel = gson.fromJson(activeKid, type);
 
-            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
-            type = new TypeToken<ArrayList<Student>>() {}.getType();
-            ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                type = new TypeToken<ArrayList<Student>>() {
+                }.getType();
+                ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
 
-            for (Student student: myChildren) {
-                if (activeKidModel.getStudentID().equals(student.getStudentID())) {
-                    activeKidExist = true;
-                    activeKidModel = student;
-                    activeKid = gson.toJson(activeKidModel);
-                    sharedPreferencesManager.setActiveKid(activeKid);
-                    break;
-                }
-            }
-
-            if (!activeKidExist) {
-                if (myChildren.size() > 0) {
-                    if (myChildren.size() > 1) {
-                        gson = new Gson();
-                        activeKid = gson.toJson(myChildren.get(0));
+                for (Student student : myChildren) {
+                    if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                        activeKidExist = true;
+                        activeKidModel = student;
+                        activeKid = gson.toJson(activeKidModel);
                         sharedPreferencesManager.setActiveKid(activeKid);
+                        break;
                     }
-                } else {
-                    setSupportActionBar(toolbar);
-                    getSupportActionBar().setTitle("Attendance");
-                    getSupportActionBar().setHomeButtonEnabled(true);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    recyclerView.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                    errorLayoutButton.setText("Find my child");
-                    errorLayoutButton.setVisibility(View.VISIBLE);
-                    return;
+                }
+
+                if (!activeKidExist) {
+                    if (myChildren.size() > 0) {
+                        if (myChildren.size() > 1) {
+                            gson = new Gson();
+                            activeKid = gson.toJson(myChildren.get(0));
+                            sharedPreferencesManager.setActiveKid(activeKid);
+                        }
+                    } else {
+                        setSupportActionBar(toolbar);
+                        getSupportActionBar().setTitle("Attendance");
+                        getSupportActionBar().setHomeButtonEnabled(true);
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                        return;
+                    }
                 }
             }
         }

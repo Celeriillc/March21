@@ -21,6 +21,7 @@ import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.School;
+import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,9 +56,6 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
     private ArrayList<SearchResultsRow> searchResultsRowList;
     private HashMap<String, School> schoolMap;
     private HashMap<String, Integer> searchMap = new HashMap<>();
-    private ArrayList<String> existingConnections;
-    private ArrayList<String> pendingIncomingRequests;
-    private ArrayList<String> pendingOutgoingRequests;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
@@ -112,10 +110,8 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
 
         searchResultsRowList = new ArrayList<>();
         schoolMap = new HashMap<>();
-        existingConnections = new ArrayList<>();
-        pendingIncomingRequests = new ArrayList<>();
-        pendingOutgoingRequests = new ArrayList<>();
-        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
+        SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
+        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
         loadNewSchoolDataFromFirebase();
 
@@ -153,7 +149,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
                             searchMap.put(key, searchMap.get(key) + 1);
                         } else {
                             searchMap.put(key, 1);
-                            String location = school.getLocation() + ", " + school.getState() + ", " + school.getCountry();
+                            String location = "";
                             SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
                             if (!school.getDeleted()) {
                                 searchResultsRowList.add(searchHistoryRow);
@@ -175,7 +171,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
                                     searchMap.put(key, searchMap.get(key) + 1);
                                 } else {
                                     searchMap.put(key, 1);
-                                    String location = school.getLocation() + ", " + school.getState() + ", " + school.getCountry();
+                                    String location = "";
                                     SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
                                     if (!school.getDeleted()) {
                                         searchResultsRowList.add(searchHistoryRow);

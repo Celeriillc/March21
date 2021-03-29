@@ -584,7 +584,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                             Map<String, Object> userUpdates = new HashMap<String, Object>();
                             String time = Date.getDate();
                             String sorttableTime = Date.convertToSortableDate(time);
-                            NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), "Teacher", sharedPreferencesManager.getActiveAccount(), time, sorttableTime, classStory.getPostID(), "Like", classStory.getImageURL(), "", false);
+                            NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), classStory.getPosterID(), "Teacher", sharedPreferencesManager.getActiveAccount(), time, sorttableTime, classStory.getPostID(), "Like", classStory.getImageURL(), classStory.getClassReciepient(), false);
 
                             if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
                                 userUpdates.put("ClassStoryParentFeed/" + mFirebaseUser.getUid() + "/" + classStory.getPostID(), true);

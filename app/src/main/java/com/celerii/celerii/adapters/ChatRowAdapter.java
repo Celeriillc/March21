@@ -103,25 +103,18 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         if (chatList.getReceiverID().equals(sharedPreferencesManager.getMyUserID())){ // Set isSeen = true in Firebase Database
             mDatabaseReference = mFirebaseDatabase.getReference();
 
-            String path, pathToRecents;
-            if (sharedPreferencesManager.getMyUserID().equals(chatList.getSenderID())){
-                path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getReceiverID() + "/" + chatList.getMessageID() + "/seen";
-                pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getReceiverID() + "/seen";
-                Map<String, Object> userUpdates = new HashMap<String, Object>();
-                userUpdates.put(path, true);
-                userUpdates.put(pathToRecents, true);
-                mDatabaseReference.updateChildren(userUpdates);
-            } else if (sharedPreferencesManager.getMyUserID().equals(chatList.getReceiverID())){
-                path = "Messages/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/" + chatList.getMessageID() + "/seen";
-                pathToRecents = "Messages Recent/" + sharedPreferencesManager.getMyUserID() + "/" + chatList.getSenderID() + "/seen";
-                Map<String, Object> userUpdates = new HashMap<String, Object>();
-                userUpdates.put(path, true);
-                userUpdates.put(pathToRecents, true);
-                mDatabaseReference.updateChildren(userUpdates);
-            } else {
-                path = "";
-                pathToRecents = "";
-            }
+            Map<String, Object> userUpdates = new HashMap<String, Object>();
+            userUpdates.put("Messages/" + chatList.getReceiverID() + "/" + chatList.getSenderID() + "/" + chatList.getMessageID() + "/seen", true);
+            userUpdates.put("Messages/" + chatList.getSenderID() + "/" + chatList.getReceiverID() + "/" + chatList.getMessageID() + "/seen", true);
+            userUpdates.put("Messages Recent/" + chatList.getReceiverID() + "/" + chatList.getSenderID() + "/seen", true);
+            userUpdates.put("Messages Recent/" + chatList.getSenderID() + "/" + chatList.getReceiverID() + "/seen", true);
+
+            userUpdates.put("Messages/" + chatList.getReceiverID() + "/" + chatList.getSenderID() + "/" + chatList.getMessageID() + "/received", true);
+            userUpdates.put("Messages/" + chatList.getSenderID() + "/" + chatList.getReceiverID() + "/" + chatList.getMessageID() + "/received", true);
+            userUpdates.put("Messages Recent/" + chatList.getReceiverID() + "/" + chatList.getSenderID() + "/received", true);
+            userUpdates.put("Messages Recent/" + chatList.getSenderID() + "/" + chatList.getReceiverID() + "/received", true);
+
+            mDatabaseReference.updateChildren(userUpdates);
         }
 
         if (chatList.isMine()){

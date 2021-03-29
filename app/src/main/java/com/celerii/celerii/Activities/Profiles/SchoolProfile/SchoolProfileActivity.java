@@ -120,6 +120,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
     double schoolTotalScore = 0.0;
     double schoolAverageScore = 0.0;
     int schoolCounter = 0;
+    ArrayList<String> classesWithResults = new ArrayList<>();
     int totalChildrenCount = 0;
     int counter;
     ArrayList<String> classes = new ArrayList<>();
@@ -1140,6 +1141,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
         schoolTotalScore = 0.0;
         schoolAverageScore = 0.0;
         schoolCounter = 0;
+        classesWithResults = new ArrayList<>();
         totalChildrenCount = 0;
         counter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference().child("School Class").child(schoolID);
@@ -1167,6 +1169,9 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                         String yearTermKey = subject_year_term.split("_")[1] + "_" + subject_year_term.split("_")[2];
 
                                         if (yearTermKey.equals(year_term)) {
+                                            if (!classesWithResults.contains(classID)) {
+                                                classesWithResults.add(classID);
+                                            }
                                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(classID).child(subject_year_term);
                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
@@ -1189,7 +1194,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                             totalPercentage += percentageOfTotal;
                                                         }
 
-                                                        Double normalizedAverage = (classAverage / totalPercentage) * 100;
+                                                        Double normalizedAverage = (classAverage / maxScore) * 100;
                                                         normalizedAverageList.add(normalizedAverage);
                                                     }
                                                     counter++;
@@ -1210,7 +1215,11 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                         normalizedAverageList.clear();
 
                                                         if (schoolCounter == classCount) {
-                                                            schoolAverageScore = schoolTotalScore / schoolCounter;
+                                                            if (classesWithResults.size() > 0) {
+                                                                schoolAverageScore = schoolTotalScore / classesWithResults.size();
+                                                            } else {
+                                                                schoolAverageScore = schoolTotalScore / schoolCounter;
+                                                            }
                                                             String schoolAverageScoreString = String.valueOf((int) schoolAverageScore) + "%";
                                                             averageAcademicPerformanceInInternalExams.setText(schoolAverageScoreString);
                                                             mySwipeRefreshLayout.setRefreshing(false);
@@ -1245,7 +1254,11 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                 normalizedAverageList.clear();
 
                                                 if (schoolCounter == classCount) {
-                                                    schoolAverageScore = schoolTotalScore / schoolCounter;
+                                                    if (classesWithResults.size() > 0) {
+                                                        schoolAverageScore = schoolTotalScore / classesWithResults.size();
+                                                    } else {
+                                                        schoolAverageScore = schoolTotalScore / schoolCounter;
+                                                    }
                                                     String schoolAverageScoreString = String.valueOf((int)schoolAverageScore) + "%";
                                                     averageAcademicPerformanceInInternalExams.setText(schoolAverageScoreString);
                                                     mySwipeRefreshLayout.setRefreshing(false);
@@ -1260,7 +1273,11 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                     schoolCounter++;
 
                                     if (schoolCounter == classCount) {
-                                        schoolAverageScore = schoolTotalScore / schoolCounter;
+                                        if (classesWithResults.size() > 0) {
+                                            schoolAverageScore = schoolTotalScore / classesWithResults.size();
+                                        } else {
+                                            schoolAverageScore = schoolTotalScore / schoolCounter;
+                                        }
                                         String schoolAverageScoreString = String.valueOf(schoolAverageScore) + "%";
                                         averageAcademicPerformanceInInternalExams.setText(schoolAverageScoreString);
                                         mySwipeRefreshLayout.setRefreshing(false);
@@ -1543,7 +1560,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                 superLayout.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.VISIBLE);
                 term = data.getStringExtra("Selected Term");
-                termButton.setText(term);
+                termButton.setText(Term.Term(term));
                 loadFromFirebase();
             }
         }

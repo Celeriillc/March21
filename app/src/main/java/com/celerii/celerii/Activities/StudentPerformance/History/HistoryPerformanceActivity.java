@@ -153,6 +153,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
     Double overallTotal = 0.0;
     int overallCount = 0;
     double termAverage = 0.0;
+    double maxScore = 0.0;
     AcademicRecordStudent academicRecord;
     HistoryPerformanceBody historyPerformanceBody;
 
@@ -193,6 +194,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                     counter++;
                                     if (dataSnapshot.exists()) {
                                         termAverage = 0.0;
+                                        maxScore = 0.0;
 
                                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                             academicRecord = postSnapshot.getValue(AcademicRecordStudent.class);
@@ -210,6 +212,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                         if (counter == childrenCount) {
                                             for (String classSubjectYearTerm: classSubjectYearTermList) {
                                                 termAverage = 0.0;
+                                                maxScore = 0.0;
                                                 String academicYear_Term = "";
                                                 String latestDate = "0000/00/00 00:00:00:000";
                                                 for (AcademicRecordStudent academicRecordStudent: academicRecordStudentList) {
@@ -224,13 +227,16 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                                         }
 
                                                         double normalizedTestClassAverage = (testAverage / maxObtainable) * percentageOfTotal;
+                                                        double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
                                                         termAverage += normalizedTestClassAverage;
+                                                        maxScore += normalizedMaxObtainable;
                                                         academicRecord = academicRecordStudent;
                                                     }
                                                 }
 
 //                                                xLabel.add(academicYear_Term);
 //                                                yLabel.add(termAverage);
+                                                termAverage = (termAverage / maxScore) * 100;
                                                 overallTotal += termAverage;
                                                 overallCount += 1;
                                                 historyPerformanceBody = new HistoryPerformanceBody(academicRecord.getClassID(), "", academicRecord.getTerm(), academicRecord.getAcademicYear(), String.valueOf((int)termAverage), String.valueOf((int)termAverage), latestDate, activeStudent, activeSubject, "neutral");

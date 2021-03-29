@@ -204,7 +204,7 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 public void onClick(View v) {
                     Intent I = new Intent(context, ChatActivity.class);
                     Bundle b = new Bundle();
-                    b.putString("ID", messageList.getReceiverID());
+                    b.putString("ID", messageList.getOtherParty());
                     b.putString("name", messageList.getName());
                     I.putExtras(b);
                     context.startActivity(I);

@@ -311,43 +311,46 @@ public class AcademicRecordDetailActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
-        for (int i = 0; i < academicRecordStudentList.size(); i++) {
-            AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
-            String recordKey = academicRecordStudent.getRecordKey();
-            String class_subject_year_term = academicRecordStudent.getClassID() + "_" + subject_year_term;
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
+            for (int i = 0; i < academicRecordStudentList.size(); i++) {
+                AcademicRecordStudent academicRecordStudent = academicRecordStudentList.get(i);
+                String recordKey = academicRecordStudent.getRecordKey();
+                String class_subject_year_term = academicRecordStudent.getClassID() + "_" + subject_year_term;
 
-            Gson gson = new Gson();
-            Type type = new TypeToken<Student>() {}.getType();
-            Student activeStudentModel = gson.fromJson(sharedPreferencesManager.getActiveKid(), type);
-            String activeKidID = activeStudentModel.getStudentID();
+                Gson gson = new Gson();
+                Type type = new TypeToken<Student>() {
+                }.getType();
+                Student activeStudentModel = gson.fromJson(sharedPreferencesManager.getActiveKid(), type);
+                String activeKidID = activeStudentModel.getStudentID();
 
-            if (academicRecordStudent.getRecordKey() != null && academicRecordStudent.isNew()) {
-                updateBadgesMap.put("AcademicRecordParentNotification/" + auth.getCurrentUser().getUid() + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_year_term + "/SingleRecords/" + recordKey + "/status", false);
-                DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("AcademicRecordParentNotification/" + auth.getCurrentUser().getUid() + "/" + activeKidID + "/count");
-                updateLikeRef.runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        Integer currentValue = mutableData.getValue(Integer.class);
-                        if (currentValue == null) {
-                            mutableData.setValue(1);
-                        } else {
-                            mutableData.setValue(currentValue - 1);
+                if (academicRecordStudent.getRecordKey() != null && academicRecordStudent.isNew()) {
+                    updateBadgesMap.put("AcademicRecordParentNotification/" + auth.getCurrentUser().getUid() + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_year_term + "/SingleRecords/" + recordKey + "/status", false);
+                    DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("AcademicRecordParentNotification/" + auth.getCurrentUser().getUid() + "/" + activeKidID + "/count");
+                    updateLikeRef.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Integer currentValue = mutableData.getValue(Integer.class);
+                            if (currentValue == null) {
+                                mutableData.setValue(1);
+                            } else {
+                                mutableData.setValue(currentValue - 1);
+                            }
+
+                            return Transaction.success(mutableData);
+
                         }
 
-                        return Transaction.success(mutableData);
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
 
-                    }
+                        }
+                    });
+                }
 
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-                    }
-                });
+                mDatabaseReference = mFirebaseDatabase.getReference();
+                mDatabaseReference.updateChildren(updateBadgesMap);
             }
-
-            mDatabaseReference = mFirebaseDatabase.getReference();
-            mDatabaseReference.updateChildren(updateBadgesMap);
         }
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);

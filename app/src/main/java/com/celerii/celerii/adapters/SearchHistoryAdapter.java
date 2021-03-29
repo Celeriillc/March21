@@ -122,6 +122,10 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
             ((MyViewHolder)holder).entityName.setText(searchHistoryRow.getEntityName());
             ((MyViewHolder)holder).entityAddress.setText(searchHistoryRow.getEntityAddress());
 
+            if (searchHistoryRow.getEntityAddress().isEmpty()) {
+                ((MyViewHolder)holder).entityAddress.setVisibility(View.GONE);
+            }
+
             ((MyViewHolder)holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

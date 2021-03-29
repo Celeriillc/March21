@@ -17,6 +17,7 @@ import com.celerii.celerii.adapters.SearchResultsAdapter;
 import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.School;
+import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchResultsRow;
 import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.TeacherSchoolConnectionRequest;
@@ -97,7 +98,8 @@ public class SearchResultsAllFragment extends Fragment {
         pendingIncomingRequests = new ArrayList<>();
         pendingOutgoingRequests = new ArrayList<>();
         loadExistingConnections();
-        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), existingConnections, pendingIncomingRequests, pendingOutgoingRequests);
+        SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
+        mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
 
         DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");

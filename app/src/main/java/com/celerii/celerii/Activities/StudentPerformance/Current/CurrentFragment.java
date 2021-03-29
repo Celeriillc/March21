@@ -349,7 +349,7 @@ public class CurrentFragment extends Fragment {
                                         performanceCurrentModelList.add(performanceCurrentModel);
                                         studentScoreTotal += termAverage;
                                         classScoreTotal += classAverage;
-                                        maxScoreTotal += maxScore;
+                                        maxScoreTotal += 100;
                                         subjectCounter++;
                                     }
                                     counter++;
@@ -437,6 +437,66 @@ public class CurrentFragment extends Fragment {
 
                                                     @Override
                                                     public void onCancelled(DatabaseError databaseError) {
+                                                        className = "Not Reported";
+                                                        for (final PerformanceCurrentModel performanceCurrentModel: performanceCurrentModelList) {
+                                                            String subject_year_term = performanceCurrentModel.getSubject() + "_" + year_term;
+                                                            mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(activeStudentID).child(subject_year_term).child("status");
+                                                            mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                    if (dataSnapshot.exists()) {
+                                                                        boolean isNew = dataSnapshot.getValue(boolean.class);
+                                                                        if (isNew) {
+                                                                            performanceCurrentModel.setNew(true);
+                                                                        } else {
+                                                                            performanceCurrentModel.setNew(false);
+                                                                        }
+                                                                    } else {
+                                                                        performanceCurrentModel.setNew(false);
+                                                                    }
+
+                                                                    isNewCounter++;
+
+                                                                    if (isNewCounter == performanceCurrentModelList.size()) {
+                                                                        if (performanceCurrentModelList.size() > 1) {
+                                                                            Collections.sort(performanceCurrentModelList, new Comparator<PerformanceCurrentModel>() {
+                                                                                @Override
+                                                                                public int compare(PerformanceCurrentModel o1, PerformanceCurrentModel o2) {
+                                                                                    return o1.getSubject().compareTo(o2.getSubject());
+                                                                                }
+                                                                            });
+                                                                        }
+
+                                                                        int studentScoreAverage = (int) (studentScoreTotal / subjectCounter);
+                                                                        int classScoreAverage = (int) (classScoreTotal / subjectCounter);
+                                                                        int maxScoreAverage = (int) (maxScoreTotal / subjectCounter);
+
+                                                                        performanceCurrentHeader.setTermAverage(String.valueOf(studentScoreAverage));
+                                                                        performanceCurrentHeader.setClassAverage(String.valueOf(classScoreAverage));
+                                                                        performanceCurrentHeader.setMaxPossibleAverage(String.valueOf(maxScoreAverage));
+                                                                        performanceCurrentHeader.setTerm(term);
+                                                                        performanceCurrentHeader.setYear(year);
+                                                                        performanceCurrentHeader.setClassName(className);
+                                                                        performanceCurrentHeader.setSchool(schoolName);
+                                                                        performanceCurrentHeader.setStudent(activeStudentID);
+                                                                        if (!performanceCurrentModelList.get(0).getSubject().equals("")) {
+                                                                            performanceCurrentModelList.add(0, new PerformanceCurrentModel());
+                                                                        }
+                                                                        mAdapter.notifyDataSetChanged();
+                                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                                        errorLayout.setVisibility(View.GONE);
+                                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                                        progressLayout.setVisibility(View.GONE);
+                                                                    }
+                                                                }
+
+                                                                @Override
+                                                                public void onCancelled(DatabaseError databaseError) {
+
+                                                                }
+                                                            });
+
+                                                        }
 
                                                     }
                                                 });

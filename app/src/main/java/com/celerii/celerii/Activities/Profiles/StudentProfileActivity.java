@@ -903,6 +903,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
                                         Double termAverage = 0.0;
+                                        Double maxScore = 0.0;
                                         String localStudentID = "";
 
                                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
@@ -913,9 +914,13 @@ public class StudentProfileActivity extends AppCompatActivity {
                                             double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
 
                                             double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                            double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
                                             termAverage += normalizedTestClassAverage;
+                                            maxScore += normalizedMaxObtainable;
                                             academicRecordStudentList.add(academicRecordStudent);
                                         }
+
+                                        termAverage = (termAverage / maxScore) * 100;
 
                                         if (!subjectAverages.containsKey(subject_year_term)) {
                                             subjectAverages.put(subject_year_term, termAverage);
@@ -1420,7 +1425,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                 superLayout.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.VISIBLE);
                 term = data.getStringExtra("Selected Term");
-                termButton.setText(term);
+                termButton.setText(Term.Term(term));
                 loadFromFirebase();
             }
         }

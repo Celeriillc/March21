@@ -179,6 +179,12 @@ public class InboxFragment extends Fragment {
                         } else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
                             bottomNavigation.setNotification("", 2);
                         }
+                    } else {
+                        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                            bottomNavigation.setNotification(" ", 1);
+                        } else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
+                            bottomNavigation.setNotification(" ", 2);
+                        }
                     }
                 } else {
                     if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
