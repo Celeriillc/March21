@@ -192,7 +192,7 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                             }
                             profilePic.setImageDrawable(textDrawable);
                         } else {
-                            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
                         }
 
                         if (!teacher.getProfilePicURL().isEmpty()) {

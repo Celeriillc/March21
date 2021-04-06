@@ -98,13 +98,13 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
             if (!parentSchoolConnectionRequest.getStudentName().isEmpty()) {
                 String[] nameArray = parentSchoolConnectionRequest.getStudentName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 50);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 50);
                 }
                 holder.pic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 50);
             }
 
             if (!parentSchoolConnectionRequest.getStudentProfilePictureURL().isEmpty()) {
@@ -124,13 +124,13 @@ public class ParentRequestAdapter extends RecyclerView.Adapter<ParentRequestAdap
             if (!parentSchoolConnectionRequest.getRequestSenderName().isEmpty()) {
                 String[] nameArray = parentSchoolConnectionRequest.getRequestSenderName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 50);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 50);
                 }
                 holder.pic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 50);
             }
 
             if (!parentSchoolConnectionRequest.getRequestSenderProfilePictureURL().isEmpty()) {

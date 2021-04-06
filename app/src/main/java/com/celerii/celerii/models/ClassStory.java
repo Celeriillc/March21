@@ -12,7 +12,7 @@ public class ClassStory {
     private int numberOfComments, noOfLikes;
     private String classReciepient, url;
     private boolean isLiked = false;
-    private List<String> classReciepients = new ArrayList<String>();
+    private List<String> classRecipients = new ArrayList<String>();
     private Comment comment;
 
     public ClassStory() {
@@ -31,7 +31,7 @@ public class ClassStory {
         this.url = "";
         this.isLiked = false;
         this.imageURL = "";
-        this.classReciepients = new ArrayList<String>();
+        this.classRecipients = new ArrayList<String>();
     }
 
     public ClassStory(String story, String date, String sortableDate, String posterAccountType, String posterID, String posterName, String profilePicURL, String classReciepient, String imageURL, String url) {
@@ -135,12 +135,12 @@ public class ClassStory {
         this.profilePicURL = profilePicURL;
     }
 
-    public List<String> getClassReciepients() {
-        return classReciepients;
+    public List<String> getClassRecipients() {
+        return classRecipients;
     }
 
-    public void setClassReciepients(List<String> classReciepients) {
-        this.classReciepients = classReciepients;
+    public void setClassRecipients(List<String> classRecipients) {
+        this.classRecipients = classRecipients;
     }
 
     public String getPosterName() {

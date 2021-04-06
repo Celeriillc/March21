@@ -289,13 +289,13 @@ public class CommentStoryActivity extends AppCompatActivity {
         if (!myName.trim().isEmpty()) {
             String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 35);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 35);
             }
             myProfilePic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 35);
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
@@ -344,7 +344,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                     story.setLiked(storyInstance.isLiked());
                     story.setDate(storyInstance.getDate());
                     story.setUrl(storyInstance.getUrl());
-                    story.setClassReciepients(storyInstance.getClassReciepients());
+                    story.setClassRecipients(storyInstance.getClassRecipients());
                     mAdapter.notifyDataSetChanged();
 
                     mDatabaseReference = mFirebaseDatabase.getReference("ClassStoryComment/" + storyKey);

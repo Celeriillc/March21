@@ -555,7 +555,28 @@ public class ParentHomeClassFeed extends Fragment {
 
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
+                                                counter++;
 
+                                                if (counter == childrenCount) {
+                                                    if (classStoryList.size() > 1) {
+                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
+                                                    }
+
+                                                    Collections.reverse(classStoryList);
+                                                    classStoryList.add(new ClassStory());
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                    stillLoading = false;
+                                                    mAdapter.stillLoading = false;
+                                                    mAdapter.notifyDataSetChanged();
+                                                }
                                             }
                                         });
                                     }
@@ -601,7 +622,28 @@ public class ParentHomeClassFeed extends Fragment {
 
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
+                                                counter++;
 
+                                                if (counter == childrenCount) {
+                                                    if (classStoryList.size() > 1) {
+                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
+                                                    }
+
+                                                    Collections.reverse(classStoryList);
+                                                    classStoryList.add(new ClassStory());
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                    stillLoading = false;
+                                                    mAdapter.stillLoading = false;
+                                                    mAdapter.notifyDataSetChanged();
+                                                }
                                             }
                                         });
                                     }
@@ -647,7 +689,28 @@ public class ParentHomeClassFeed extends Fragment {
 
                                             @Override
                                             public void onCancelled(@NonNull DatabaseError error) {
+                                                counter++;
 
+                                                if (counter == childrenCount) {
+                                                    if (classStoryList.size() > 1) {
+                                                        Collections.sort(classStoryList, new Comparator<ClassStory>() {
+                                                            @Override
+                                                            public int compare(ClassStory o1, ClassStory o2) {
+                                                                return o1.getSortableDate().compareTo(o2.getSortableDate());
+                                                            }
+                                                        });
+                                                    }
+
+                                                    Collections.reverse(classStoryList);
+                                                    classStoryList.add(new ClassStory());
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+//                                                        progressLayout.setVisibility(View.GONE);
+//                                                        errorLayout.setVisibility(View.GONE);
+//                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                    stillLoading = false;
+                                                    mAdapter.stillLoading = false;
+                                                    mAdapter.notifyDataSetChanged();
+                                                }
                                             }
                                         });
                                     }
@@ -773,7 +836,14 @@ public class ParentHomeClassFeed extends Fragment {
 
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
-
+                                                counter++;
+                                                if (counter == childrenCount) {
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.GONE);
+                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                    mAdapter.notifyDataSetChanged();
+                                                }
                                             }
                                         });
                                     } else if (posterAccountType.equals("Teacher") || posterAccountType.equals("Parent")) {
@@ -817,7 +887,14 @@ public class ParentHomeClassFeed extends Fragment {
 
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
-
+                                                counter++;
+                                                if (counter == childrenCount) {
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.GONE);
+                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                    mAdapter.notifyDataSetChanged();
+                                                }
                                             }
                                         });
                                     } else {
@@ -861,7 +938,14 @@ public class ParentHomeClassFeed extends Fragment {
 
                                             @Override
                                             public void onCancelled(@NonNull DatabaseError error) {
-
+                                                counter++;
+                                                if (counter == childrenCount) {
+                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                    progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.GONE);
+                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                    mAdapter.notifyDataSetChanged();
+                                                }
                                             }
                                         });
                                     }

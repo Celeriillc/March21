@@ -638,7 +638,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                             }
                             schoolPic.setImageDrawable(textDrawable);
                         } else {
-                            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
                         }
 
                         if (!schoolPicURL.isEmpty()) {
@@ -948,13 +948,13 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                             if (!name.isEmpty()) {
                                                                 String[] nameArray = name.replaceAll("\\s+", " ").trim().split(" ");
                                                                 if (nameArray.length == 1) {
-                                                                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                                                                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 45);
                                                                 } else {
-                                                                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                                                                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 45);
                                                                 }
                                                                 notableAlumniImageList.get(counter).setImageDrawable(textDrawable);
                                                             } else {
-                                                                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                                                                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 45);
                                                             }
 
                                                             if (!profilePictureURL.isEmpty()) {
@@ -1004,9 +1004,9 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                                     Drawable textDrawable;
                                                                     if (!college.trim().isEmpty()) {
                                                                         String[] nameArray = college.trim().replaceAll("\\s+", " ").trim().split(" ");
-                                                                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                                                                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 45);
                                                                     } else {
-                                                                        textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                                                                        textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 45);
                                                                     }
                                                                     collegePicList.get(counter).setImageDrawable(textDrawable);
 

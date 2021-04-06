@@ -96,7 +96,7 @@ public class PerformanceHistoryAdapter extends RecyclerView.Adapter<PerformanceH
             }
         });
 
-        Drawable textDrawable = CreateTextDrawable.createTextDrawable(context, letter);
+        Drawable textDrawable = CreateTextDrawable.createTextDrawable(context, letter, 40);
 //        TextDrawable.builder()
 //                .buildRound(letter, ContextCompat.getColor(context, R.color.colorPrimaryPurple));
         holder.imageBadge.setImageDrawable(textDrawable);

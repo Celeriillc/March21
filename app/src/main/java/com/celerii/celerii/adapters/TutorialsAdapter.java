@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Settings.BrowserActivityForInfo;
+import com.celerii.celerii.Activities.Settings.TutorialsDetailActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.models.TutorialModel;
 
@@ -71,15 +72,17 @@ public class TutorialsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (holder instanceof MyViewHolder) {
             final TutorialModel tutorialModel = tutorialModelList.get(position);
 
-            ((MyViewHolder) holder).tutorialTitle.setText(tutorialModel.getTutorialTitle());
+            ((MyViewHolder) holder).tutorialTitle.setText(tutorialModel.getTitle());
 
             ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(context, BrowserActivityForInfo.class);
+                    Intent intent = new Intent(context, TutorialsDetailActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putString("Header", tutorialModel.getTutorialTitle());
-                    bundle.putString("URL", tutorialModel.getTutorialLink());
+                    bundle.putString("title", tutorialModel.getTitle());
+                    bundle.putString("body", tutorialModel.getHtmlBody());
+                    bundle.putString("youtubeVideoID", tutorialModel.getYoutubeVideoID());
+                    bundle.putString("poster", tutorialModel.getCreatedBy());
                     intent.putExtras(bundle);
                     ((Activity)context).startActivity(intent);
                 }

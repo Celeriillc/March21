@@ -129,7 +129,6 @@ public class CreateTextDrawable {
         return textDrawable;
     }
 
-
     public static Drawable createTextDrawableTransparent(Context context, String text) {
         String letter = String.valueOf(text.charAt(0));
         Typeface font = ResourcesCompat.getFont(context, R.font.fractul_alt_regular);
@@ -189,6 +188,7 @@ public class CreateTextDrawable {
 
         return textDrawable;
     }
+
     public static Drawable createTextDrawableColor(Context context, String text, int randomNum) {
         int color;
         String letter = String.valueOf(text.charAt(0));

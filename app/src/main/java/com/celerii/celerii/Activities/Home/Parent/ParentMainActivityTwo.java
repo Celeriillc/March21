@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.IntentSender;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -48,8 +50,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
+import com.celerii.celerii.BuildConfig;
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.Home.RemoteCampaignActivity;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
@@ -214,7 +218,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         bottomNavigation.addItem(item4);
 
         bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimaryPurple));
-        bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.colorBottomNavigationIconGray));
+        bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.black));
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_HIDE);
         loadBadgesFromFirebase();
         initFCM();
@@ -222,7 +226,6 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         onBoardingSearchBalloonCheck();
         tutorialFirebaseCheck();
         remoteCampaign();
-        checkServerForApplicationUpdates();
         bottomNavigation.setCurrentItem(0);
         bottomNavigation.setUseElevation(false);
 
@@ -736,6 +739,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkServerForApplicationUpdates();
         int currentItem = bottomNavigation.getCurrentItem();
         if (currentItem == 0){
 //            getSupportFragmentManager().beginTransaction().replace(R.id.frame_fragmentholder, frag1).commit();
@@ -1083,21 +1087,26 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                     popupSnackBarForCompleteUpdate();
                 } else if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
                     if ((appUpdateInfo.availableVersionCode() % 10) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                        startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
+                        showDialogForImmediateUpdateWithMessage(appUpdateInfo);
+//                        startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
 //                        CustomToast.primaryBackgroundToast(context, "Version Code: " + appUpdateInfo.availableVersionCode() + "\n" +
 //                                "UpdatePriority: " + appUpdateInfo.updatePriority() + "\n");
                     } else if ((appUpdateInfo.availableVersionCode() % 5) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                        startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
+                        showDialogForFlexibleUpdateWithMessage(appUpdateInfo);
+//                        startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
 //                        CustomToast.primaryBackgroundToast(context, "Version Code: " + appUpdateInfo.availableVersionCode() + "\n" +
 //                                "UpdatePriority: " + appUpdateInfo.updatePriority() + "\n");
                     } else {
-//                        CustomToast.primaryBackgroundToast(context, "Do nothing");
+                        int versionCode = BuildConfig.VERSION_CODE;
+                        int currentVersionByTen = versionCode / 10;
+                        int updateByTen = appUpdateInfo.availableVersionCode() / 10;
+
+                        if (updateByTen > currentVersionByTen) {
+                            if ((appUpdateInfo.availableVersionCode() - versionCode) > 10) {
+                                showDialogForImmediateUpdateWithMessage(appUpdateInfo);
+                            }
+                        }
                     }
-//                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-//                        startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
-//                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-//                        startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
-//                    }
                 }
             }
         });
@@ -1189,6 +1198,71 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         OK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
+    void showDialogForFlexibleUpdateWithMessage (final AppUpdateInfo appUpdateInfo) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        String messageString = "";
+        message.setText(messageString);
+
+        OK.setText("Update Celerii");
+        cancel.setText("Cancel");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
+                dialog.dismiss();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
+    void showDialogForImmediateUpdateWithMessage (final AppUpdateInfo appUpdateInfo) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        String messageString = "Your version of Celerii is outdated. An important update is available. You need to update your app to the latest version to continue.";
+        message.setText(messageString);
+
+        OK.setText("Update Celerii");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
                 dialog.dismiss();
             }
         });

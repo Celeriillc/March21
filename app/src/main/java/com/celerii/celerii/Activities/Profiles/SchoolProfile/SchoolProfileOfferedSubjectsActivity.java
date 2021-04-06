@@ -140,7 +140,9 @@ public class SchoolProfileOfferedSubjectsActivity extends AppCompatActivity {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 String subject = postSnapshot.getKey();
-                                subjects.add(subject);
+                                if (!subject.equals("General")) {
+                                    subjects.add(subject);
+                                }
                             }
 
                             subjects.add(0, schoolName +  "'s Offered Subjects");

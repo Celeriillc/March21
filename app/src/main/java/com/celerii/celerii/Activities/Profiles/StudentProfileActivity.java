@@ -576,7 +576,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                         }
                         kidPic.setImageDrawable(textDrawable);
                     } else {
-                        textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
                     }
 
                     if (!studentProfilePicURL.isEmpty()) {

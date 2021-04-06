@@ -72,13 +72,13 @@ public class NewChatRowAdapter extends RecyclerView.Adapter<NewChatRowAdapter.My
         if (!newChatRowModel.getName().isEmpty()) {
             String[] nameArray = newChatRowModel.getName().replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 40);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 40);
             }
             holder.profilePic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 40);
         }
 
         if (!newChatRowModel.getProfilePicURL().isEmpty()) {

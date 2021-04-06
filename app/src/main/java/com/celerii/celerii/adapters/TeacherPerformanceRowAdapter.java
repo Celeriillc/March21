@@ -95,7 +95,8 @@ public class TeacherPerformanceRowAdapter extends RecyclerView.Adapter<RecyclerV
             return;
         }
 
-        ((MyViewHolder) holder).pastScore.setText(teacherPerformanceRow.getPreviousScore());
+        String score = teacherPerformanceRow.getPreviousScore() + "%";
+        ((MyViewHolder) holder).pastScore.setText(score);
 //        ((MyViewHolder) holder).currentScore.setText(teacherPerformanceRow.getCurrentScore());
 //        ((MyViewHolder) holder).futureScore.setText(teacherPerformanceRow.getProjectedScore());
         ((MyViewHolder) holder).subject.setText(teacherPerformanceRow.getSubject());
@@ -131,7 +132,7 @@ public class TeacherPerformanceRowAdapter extends RecyclerView.Adapter<RecyclerV
 //            ((MyViewHolder) holder).progressImg.setImageResource(R.drawable.ic_attendance_late_24dp);
 //        }
 
-        textDrawable = CreateTextDrawable.createTextDrawable(context, letter);
+        textDrawable = CreateTextDrawable.createTextDrawable(context, letter,40);
         ((MyViewHolder) holder).subjectPic.setImageDrawable(textDrawable);
 
         ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {

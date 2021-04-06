@@ -182,13 +182,13 @@ public class InboxAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             if (!messageList.getName().isEmpty()) {
                 String[] nameArray = messageList.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 50);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 50);
                 }
                 ((MyViewHolder) holder).profilePic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 50);
             }
 
             Glide.with(context)

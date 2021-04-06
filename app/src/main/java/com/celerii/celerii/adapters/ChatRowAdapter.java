@@ -216,13 +216,13 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             if (!myName.isEmpty()) {
                 String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 4);
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 40, 4);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 4);
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 40, 4);
                 }
                 holder.otherProfilePic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 40);
             }
 
             if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
@@ -272,13 +272,13 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             if (!chatTitle.isEmpty()) {
                 String[] nameArray = chatTitle.replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 1);
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 40, 1);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 1);
+                    textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 40, 1);
                 }
                 holder.otherProfilePic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 40);
             }
 
             if (!chatList.getOtherProfilePicURL().isEmpty()) {
@@ -369,13 +369,13 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
                 if (!chatTitle.isEmpty()) {
                     String[] nameArray = chatTitle.replaceAll("\\s+", " ").trim().split(" ");
                     if (nameArray.length == 1) {
-                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 40);
                     } else {
-                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                        textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 40);
                     }
                     holder.otherProfilePic.setImageDrawable(textDrawable);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 40);
                 }
 
                 if (!chatList.getOtherProfilePicURL().isEmpty()) {

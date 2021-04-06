@@ -156,6 +156,7 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
                                 if (dataSnapshot.exists()) {
                                     ArrayList<String> classCountList = new ArrayList<>();
                                     double termClassAverage = 0.0;
+                                    double maxScore = 0.0;
                                     String subject = "";
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         AcademicRecord academicRecord = postSnapshot.getValue(AcademicRecord.class);
@@ -165,12 +166,15 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
                                         double percentageOfTotal = Double.valueOf(academicRecord.getPercentageOfTotal());
 
                                         double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                        double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
                                         termClassAverage += normalizedTestClassAverage;
+                                        maxScore += normalizedMaxObtainable;
                                         if (!classCountList.contains(academicRecord.getClassID())) {
                                             classCountList.add(academicRecord.getClassID());
                                         }
                                     }
 
+                                    termClassAverage = (termClassAverage / maxScore) * 100;
                                     if (!subjectTotal.containsKey(subject)) {
                                         subjectTotal.put(subject, termClassAverage);
                                     } else {

@@ -234,7 +234,7 @@ public class EditTeacherProfileActivity extends AppCompatActivity {
             }
             profilePicture.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {

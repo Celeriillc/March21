@@ -615,7 +615,7 @@ public class MoreTeacherFragment extends Fragment {
             }
             teacherProfilePic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 100);
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {

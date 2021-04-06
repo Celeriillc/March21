@@ -310,6 +310,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             if (dataSnapshot.exists()) {
                                                 Double termAverage = 0.0;
+                                                Double maxScore = 0.0;
                                                 String localStudentID = "";
 
                                                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
@@ -320,9 +321,12 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                     double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
 
                                                     double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                    double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
                                                     termAverage += normalizedTestClassAverage;
+                                                    maxScore += normalizedMaxObtainable;
                                                 }
 
+                                                termAverage = (termAverage / maxScore) * 100;
                                                 if (!studentScore.containsKey(localStudentID)) {
                                                     studentScore.put(localStudentID, termAverage);
                                                 } else {
@@ -352,7 +356,9 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                     }
                                                 }
 
-                                                studentAcademicHistoryRowModelList.add(new StudentAcademicHistoryRowModel());
+                                                if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
+                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                }
                                                 mAdapter.notifyDataSetChanged();
                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                 progressLayout.setVisibility(View.GONE);
@@ -391,7 +397,9 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                             }
                                         }
 
-                                        studentAcademicHistoryRowModelList.add(new StudentAcademicHistoryRowModel());
+                                        if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
+                                            studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                        }
                                         mAdapter.notifyDataSetChanged();
                                         mySwipeRefreshLayout.setRefreshing(false);
                                         progressLayout.setVisibility(View.GONE);
@@ -415,7 +423,9 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                     }
                                 }
 
-                                studentAcademicHistoryRowModelList.add(new StudentAcademicHistoryRowModel());
+                                if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
+                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                }
                                 mAdapter.notifyDataSetChanged();
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 progressLayout.setVisibility(View.GONE);

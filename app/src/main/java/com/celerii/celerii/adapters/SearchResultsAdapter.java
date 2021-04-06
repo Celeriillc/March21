@@ -130,13 +130,13 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         if (!searchResultsRow.getEntityName().isEmpty()) {
             String[] nameArray = searchResultsRow.getEntityName().replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 40);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 40);
             }
             holder.entityPic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 40);
         }
 
         if (!searchResultsRow.getEntityPic().isEmpty()) {

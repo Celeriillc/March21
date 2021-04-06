@@ -1,6 +1,8 @@
 package com.celerii.celerii.Activities.Settings;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +29,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,13 +118,16 @@ public class TutorialsActivity extends AppCompatActivity {
         }
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Tutorials").child("Parent");
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Tutorials").child("Android").child("Parents");
         } else {
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Tutorials").child("Teacher");
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Tutorials").child("Android").child("Teachers");
         }
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                tutorialModelList.clear();
+                mAdapter.notifyDataSetChanged();
+
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         TutorialModel tutorialModel = postSnapshot.getValue(TutorialModel.class);
@@ -137,7 +145,7 @@ public class TutorialsActivity extends AppCompatActivity {
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText("There are no tuorials at this time");
+                    errorLayoutText.setText("There are no tutorials at this time");
                 }
             }
 

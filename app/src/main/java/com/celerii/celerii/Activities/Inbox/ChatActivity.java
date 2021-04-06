@@ -233,13 +233,13 @@ public class ChatActivity extends AppCompatActivity {
         if (!myName.trim().isEmpty()) {
             String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 4);
+                textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], 35,4);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 4);
+                textDrawable = CreateTextDrawable.createTextDrawableColor(context, nameArray[0], nameArray[1], 35, 4);
             }
             profilePicture.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 35);
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {

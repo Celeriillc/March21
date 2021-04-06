@@ -139,7 +139,7 @@ public class TeacherHomeClassAdapter extends RecyclerView.Adapter<RecyclerView.V
                 }
                 ((MyViewHolder) holder).kidPic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 100);
             }
 
             if (!manageKidsModel.getPicURL().isEmpty()) {

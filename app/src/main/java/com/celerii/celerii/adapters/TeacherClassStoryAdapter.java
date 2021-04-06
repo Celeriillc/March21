@@ -221,13 +221,13 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             if (!myName.trim().isEmpty()) {
                 String[] nameArray = myName.replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 35);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 35);
                 }
                 ((HeaderViewHolder) holder).profilePicture.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 35);
             }
 
             if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
@@ -471,13 +471,13 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
             if (!classStory.getPosterName().isEmpty()) {
                 String[] nameArray = classStory.getPosterName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 50);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 50);
                 }
                 ((MyViewHolder) holder).profilepic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 50);
             }
 
             if (!classStory.getProfilePicURL().isEmpty()) {

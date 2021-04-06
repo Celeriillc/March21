@@ -17,7 +17,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.Payments.PaymentsHomeActivity"></activity>
+        <activity android:name=".Activities.Home.AutoUpdates.NonOptionalUpdateActivity"></activity>
+        <activity android:name=".Activities.Home.AutoUpdates.OptionalUpdateActivity" />
+        <activity android:name=".Activities.Settings.TutorialsDetailActivity" />
+        <activity android:name=".Activities.Payments.PaymentsHomeActivity" />
         <activity android:name=".Activities.Newsletters.NewsletterDetailKTActivity" />
         <activity android:name=".Activities.Utility.HTMLViewerActivity" />
         <activity android:name=".Activities.Profiles.SchoolProfile.SchoolProfileMapActivity" />

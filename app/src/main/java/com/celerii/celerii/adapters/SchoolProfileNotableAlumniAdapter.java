@@ -92,13 +92,13 @@ public class SchoolProfileNotableAlumniAdapter extends RecyclerView.Adapter<Recy
             if (!notableAlumni.getName().trim().isEmpty()) {
                 String[] nameArray = notableAlumni.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 45);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 45);
                 }
                 ((MyViewHolder) holder).notableAlumniPic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 45);
             }
 
             if (!notableAlumni.getProfilePictureURL().isEmpty()) {

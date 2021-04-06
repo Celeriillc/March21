@@ -137,6 +137,7 @@ public class TeacherPerformanceActivityMain extends AppCompatActivity {
     Double overallTotal = 0.0;
     int overallCount = 0;
     double termClassAverage = 0.0;
+    double maxScore = 0.0;
     AcademicRecord academicRecord;
 
     private void loadNewDetailsFromFirebase() {
@@ -176,6 +177,7 @@ public class TeacherPerformanceActivityMain extends AppCompatActivity {
                                     counter++;
                                     if (dataSnapshot.exists()) {
                                         termClassAverage = 0.0;
+                                        maxScore = 0.0;
 //                                        String academicYear_Term = "";
 
                                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
@@ -189,6 +191,7 @@ public class TeacherPerformanceActivityMain extends AppCompatActivity {
                                         if (counter == childrenCount) {
                                             for (String classSubjectYearTerm: classSubjectYearTermList) {
                                                 termClassAverage = 0.0;
+                                                maxScore = 0.0;
                                                 String academicYear_Term = "";
                                                 for (AcademicRecord academicRecordTeacher: academicRecordTeacherList) {
                                                     if (academicRecordTeacher.getClass_subject_AcademicYear_Term().equals(classSubjectYearTerm)) {
@@ -198,13 +201,16 @@ public class TeacherPerformanceActivityMain extends AppCompatActivity {
                                                         academicYear_Term = academicRecordTeacher.getAcademicYear_Term();
 
                                                         double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                        double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
                                                         termClassAverage += normalizedTestClassAverage;
+                                                        maxScore += normalizedMaxObtainable;
                                                         academicRecord = academicRecordTeacher;
                                                     }
                                                 }
 
 //                                                xList.add(academicYear_Term);
 //                                                yList.add(termClassAverage);
+                                                termClassAverage = (termClassAverage / maxScore) * 100;
                                                 overallTotal += termClassAverage;
                                                 overallCount += 1;
                                                 teacherPerformanceRowMain = new TeacherPerformanceRowMain("", academicRecord.getClassID(), academicRecord.getTeacherID(), academicRecord.getSubject(), academicRecord.getTerm(), academicRecord.getAcademicYear(),

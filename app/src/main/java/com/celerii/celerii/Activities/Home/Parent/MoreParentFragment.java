@@ -636,7 +636,7 @@ public class MoreParentFragment extends Fragment {
             }
             parentProfilePic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 100);
         }
 
         if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {

@@ -78,7 +78,7 @@ public class ClassListAdapterHorizontal extends RecyclerView.Adapter<ClassListAd
             }
             holder.classPic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 80);
         }
 
         if (!aClass.getClassPicURL().isEmpty()) {

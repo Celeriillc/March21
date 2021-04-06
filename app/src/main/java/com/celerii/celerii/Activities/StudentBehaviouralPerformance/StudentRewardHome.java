@@ -79,13 +79,13 @@ public class StudentRewardHome extends AppCompatActivity {
         if (!studentName.isEmpty()) {
             String[] nameArray = studentName.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 50);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 50);
             }
             studentPic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 50);
         }
 
         if (!studentPicURL.isEmpty()) {

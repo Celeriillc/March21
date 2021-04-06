@@ -127,14 +127,14 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     LinearLayout recyclerViewLayout, profilePictureClipper;
 
     String story, date, sortableDate, dateDue, posterID, imageURL, url, posterNameString, posterProfilePicURL;
-    List<String> classReciepients = new ArrayList<String>();
-    List<String> parentReciepients = new ArrayList<>();
-    List<String> schoolReciepients = new ArrayList<>();
+    List<String> classRecipients = new ArrayList<String>();
+    List<String> parentRecipients = new ArrayList<>();
+    List<String> schoolRecipients = new ArrayList<>();
     int maxNumberOfCharacters = 500;
     Button post;
     HashMap<String, ArrayList<String>> classParentMap;
     HashMap<String, ArrayList<String>> classSchoolMap;
-    String classReciepientString = "", downloadURLString = "";
+    String classRecipientstring = "", downloadURLString = "";
     CustomProgressDialogOne progressDialog;
 
     boolean isClassLoaded, isParentsLoaded, isTextNotEmpty, isTeacherInfoLoaded;
@@ -246,13 +246,13 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         if (!posterNameString.isEmpty()) {
             String[] nameArray = posterNameString.replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 40);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 40);
             }
             posterPic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 40);
         }
 
         if (!posterProfilePicURL.isEmpty()) {
@@ -422,13 +422,13 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 String lastClass = "";
                 for (int i = 0; i < classList.size(); i++){
                     if (classList.get(i).isTicked()){
-                        classReciepients.add(classList.get(i).getID());
+                        classRecipients.add(classList.get(i).getID());
                         if (classParentMap.containsKey(classList.get(i).getID())) {
                             ArrayList<String> parents = classParentMap.get(classList.get(i).getID());
                             if (parents != null) {
                                 for (String parent : parents) {
-                                    if (!parentReciepients.contains(parent)) {
-                                        parentReciepients.add(parent);
+                                    if (!parentRecipients.contains(parent)) {
+                                        parentRecipients.add(parent);
                                     }
                                 }
                             }
@@ -437,8 +437,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                             ArrayList<String> schools = classSchoolMap.get(classList.get(i).getID());
                             if (schools != null) {
                                 for (String school : schools) {
-                                    if (!schoolReciepients.contains(school)) {
-                                        schoolReciepients.add(school);
+                                    if (!schoolRecipients.contains(school)) {
+                                        schoolRecipients.add(school);
                                     }
                                 }
                             }
@@ -447,15 +447,15 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                         replaceLastClass = ", " + classList.get(i).getClassName() + ",";
                         replaceLastClassSingle = classList.get(i).getClassName() + ", ";
                         lastClass = classList.get(i).getClassName();
-                        classReciepientString = classReciepientString + classList.get(i).getClassName() + ", ";
+                        classRecipientstring = classRecipientstring + classList.get(i).getClassName() + ", ";
                     }
                 }
 
-                classReciepientString = classReciepientString.replace(replaceLastClass, replaceWithLastClass);
-                classReciepientString = classReciepientString.replace(replaceLastClassSingle, lastClass);
+                classRecipientstring = classRecipientstring.replace(replaceLastClass, replaceWithLastClass);
+                classRecipientstring = classRecipientstring.replace(replaceLastClassSingle, lastClass);
                 downloadURLCounter = 0;
 
-                if (classReciepients.size() < 1) {
+                if (classRecipients.size() < 1) {
                     showDialogWithMessage("You need to select at least one class to post a story to.");
                     return;
                 }
@@ -593,11 +593,11 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
                     if (index == bitmaps.size() - 1) {
                         downloadURLString = downloadURLString.trim();
-                        classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, downloadURLString, url);
-                        classStory.setClassReciepients(classReciepients);
+                        classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, downloadURLString, url);
+                        classStory.setClassRecipients(classRecipients);
                         imageURL = downloadURLs.get(0);
-                        notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
-                        notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                        notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
+                        notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
 
                         DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
                         String pushID = newStoryR.getKey();
@@ -611,22 +611,22 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                         newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
                         newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
-                        for (int i = 0; i < classReciepients.size(); i++){
-                            String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
-                            newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
-                            newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                        for (int i = 0; i < classRecipients.size(); i++){
+                            String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
+                            newStory.put(classStoryRecipientsPush + classRecipients.get(i), true);
+                            newStory.put("ClassStoryClass/" + classRecipients.get(i) + "/" + pushID, true);
                         }
-                        for (int i = 0; i < schoolReciepients.size(); i++) {
-                            newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
-                            notificationModelSchool.setToID(schoolReciepients.get(i));
-                            newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
-                            newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                        for (int i = 0; i < schoolRecipients.size(); i++) {
+                            newStory.put("ClassStorySchoolFeed/" + schoolRecipients.get(i) + "/" + pushID, false);
+                            notificationModelSchool.setToID(schoolRecipients.get(i));
+                            newStory.put("NotificationSchool/" + schoolRecipients.get(i) + "/" + pushID, notificationModelSchool);
+                            newStory.put("Notification Badges/Schools/" + schoolRecipients.get(i) + "/ClassStory/status", true);
                         }
-                        for (int i = 0; i < parentReciepients.size(); i++){
-                            newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
-                            notificationModelParent.setToID(parentReciepients.get(i));
-                            newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
-                            newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                        for (int i = 0; i < parentRecipients.size(); i++){
+                            newStory.put("ClassStoryParentFeed/" + parentRecipients.get(i) + "/" + pushID, false);
+                            notificationModelParent.setToID(parentRecipients.get(i));
+                            newStory.put("NotificationParent/" + parentRecipients.get(i) + "/" + pushID, notificationModelParent);
+                            newStory.put("Notification Badges/Parents/" + parentRecipients.get(i) + "/ClassStory/status", true);
                         }
 
                         newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
@@ -657,11 +657,11 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 uploadImages(0);
             }
             else {
-                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, "", url);
-                classStory.setClassReciepients(classReciepients);
+                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, "", url);
+                classStory.setClassRecipients(classRecipients);
                 imageURL = "";
-                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, classReciepientString, false);
-                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, classReciepientString, false);
+                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, classRecipientstring, false);
+                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, classRecipientstring, false);
 
                 DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
                 String pushID = newStoryR.getKey();
@@ -675,22 +675,22 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
                 newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
-                for (int i = 0; i < classReciepients.size(); i++){
+                for (int i = 0; i < classRecipients.size(); i++){
                     String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
-                    newStory.put(classStoryRecipientsPush + classReciepients.get(i), false);
-                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, false);
+                    newStory.put(classStoryRecipientsPush + classRecipients.get(i), false);
+                    newStory.put("ClassStoryClass/" + classRecipients.get(i) + "/" + pushID, false);
                 }
-                for (int i = 0; i < schoolReciepients.size(); i++) {
-                    newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
-                    notificationModelSchool.setToID(schoolReciepients.get(i));
-                    newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
-                    newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                for (int i = 0; i < schoolRecipients.size(); i++) {
+                    newStory.put("ClassStorySchoolFeed/" + schoolRecipients.get(i) + "/" + pushID, false);
+                    notificationModelSchool.setToID(schoolRecipients.get(i));
+                    newStory.put("NotificationSchool/" + schoolRecipients.get(i) + "/" + pushID, notificationModelSchool);
+                    newStory.put("Notification Badges/Schools/" + schoolRecipients.get(i) + "/ClassStory/status", true);
                 }
-                for (int i = 0; i < parentReciepients.size(); i++){
-                    newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
-                    notificationModelParent.setToID(parentReciepients.get(i));
-                    newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
-                    newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                for (int i = 0; i < parentRecipients.size(); i++){
+                    newStory.put("ClassStoryParentFeed/" + parentRecipients.get(i) + "/" + pushID, false);
+                    notificationModelParent.setToID(parentRecipients.get(i));
+                    newStory.put("NotificationParent/" + parentRecipients.get(i) + "/" + pushID, notificationModelParent);
+                    newStory.put("Notification Badges/Parents/" + parentRecipients.get(i) + "/ClassStory/status", true);
                 }
 
                 newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
@@ -710,7 +710,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             progressDialog.dismiss();
-            String messageString = "An error occured while uploading your story, please try again";
+            String messageString = "An error occurred while uploading your story, please try again";
             showDialogWithMessage((messageString));
             Log.d("Upload Story", e.getMessage());
         }
@@ -748,11 +748,11 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
                             if (downloadURLCounter == bitmaps.size()) {
                                 downloadURLString = downloadURLString.trim();
-                                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, downloadURLString, url);
-                                classStory.setClassReciepients(classReciepients);
+                                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, downloadURLString, url);
+                                classStory.setClassRecipients(classRecipients);
                                 imageURL = downloadURLs.get(0);
-                                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
-                                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
+                                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
 
                                 DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
                                 String pushID = newStoryR.getKey();
@@ -766,22 +766,22 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                                 newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
                                 newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
-                                for (int i = 0; i < classReciepients.size(); i++){
-                                    String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
-                                    newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
-                                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                                for (int i = 0; i < classRecipients.size(); i++){
+                                    String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
+                                    newStory.put(classStoryRecipientsPush + classRecipients.get(i), true);
+                                    newStory.put("ClassStoryClass/" + classRecipients.get(i) + "/" + pushID, true);
                                 }
-                                for (int i = 0; i < schoolReciepients.size(); i++) {
-                                    newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
-                                    notificationModelSchool.setToID(schoolReciepients.get(i));
-                                    newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
-                                    newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                                for (int i = 0; i < schoolRecipients.size(); i++) {
+                                    newStory.put("ClassStorySchoolFeed/" + schoolRecipients.get(i) + "/" + pushID, false);
+                                    notificationModelSchool.setToID(schoolRecipients.get(i));
+                                    newStory.put("NotificationSchool/" + schoolRecipients.get(i) + "/" + pushID, notificationModelSchool);
+                                    newStory.put("Notification Badges/Schools/" + schoolRecipients.get(i) + "/ClassStory/status", true);
                                 }
-                                for (int i = 0; i < parentReciepients.size(); i++){
-                                    newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
-                                    notificationModelParent.setToID(parentReciepients.get(i));
-                                    newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
-                                    newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                                for (int i = 0; i < parentRecipients.size(); i++){
+                                    newStory.put("ClassStoryParentFeed/" + parentRecipients.get(i) + "/" + pushID, false);
+                                    notificationModelParent.setToID(parentRecipients.get(i));
+                                    newStory.put("NotificationParent/" + parentRecipients.get(i) + "/" + pushID, notificationModelParent);
+                                    newStory.put("Notification Badges/Parents/" + parentRecipients.get(i) + "/ClassStory/status", true);
                                 }
 
                                 newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
@@ -804,11 +804,11 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 }
             }
             else {
-                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classReciepientString, "", url);
-                classStory.setClassReciepients(classReciepients);
+                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, "", url);
+                classStory.setClassRecipients(classRecipients);
                 imageURL = "";
-                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
-                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classReciepientString, false);
+                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
+                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
 
                 DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
                 String pushID = newStoryR.getKey();
@@ -822,22 +822,22 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
                 newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
 
-                for (int i = 0; i < classReciepients.size(); i++){
-                    String classStoryReciepientsPush = "ClassStoryReciepients/" + pushID + "/";
-                    newStory.put(classStoryReciepientsPush + classReciepients.get(i), true);
-                    newStory.put("ClassStoryClass/" + classReciepients.get(i) + "/" + pushID, true);
+                for (int i = 0; i < classRecipients.size(); i++){
+                    String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
+                    newStory.put(classStoryRecipientsPush + classRecipients.get(i), true);
+                    newStory.put("ClassStoryClass/" + classRecipients.get(i) + "/" + pushID, true);
                 }
-                for (int i = 0; i < schoolReciepients.size(); i++) {
-                    newStory.put("ClassStorySchoolFeed/" + schoolReciepients.get(i) + "/" + pushID, false);
-                    notificationModelSchool.setToID(schoolReciepients.get(i));
-                    newStory.put("NotificationSchool/" + schoolReciepients.get(i) + "/" + pushID, notificationModelSchool);
-                    newStory.put("Notification Badges/Schools/" + schoolReciepients.get(i) + "/ClassStory/status", true);
+                for (int i = 0; i < schoolRecipients.size(); i++) {
+                    newStory.put("ClassStorySchoolFeed/" + schoolRecipients.get(i) + "/" + pushID, false);
+                    notificationModelSchool.setToID(schoolRecipients.get(i));
+                    newStory.put("NotificationSchool/" + schoolRecipients.get(i) + "/" + pushID, notificationModelSchool);
+                    newStory.put("Notification Badges/Schools/" + schoolRecipients.get(i) + "/ClassStory/status", true);
                 }
-                for (int i = 0; i < parentReciepients.size(); i++){
-                    newStory.put("ClassStoryParentFeed/" + parentReciepients.get(i) + "/" + pushID, false);
-                    notificationModelParent.setToID(parentReciepients.get(i));
-                    newStory.put("NotificationParent/" + parentReciepients.get(i) + "/" + pushID, notificationModelParent);
-                    newStory.put("Notification Badges/Parents/" + parentReciepients.get(i) + "/ClassStory/status", true);
+                for (int i = 0; i < parentRecipients.size(); i++){
+                    newStory.put("ClassStoryParentFeed/" + parentRecipients.get(i) + "/" + pushID, false);
+                    notificationModelParent.setToID(parentRecipients.get(i));
+                    newStory.put("NotificationParent/" + parentRecipients.get(i) + "/" + pushID, notificationModelParent);
+                    newStory.put("Notification Badges/Parents/" + parentRecipients.get(i) + "/ClassStory/status", true);
                 }
 
                 newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {

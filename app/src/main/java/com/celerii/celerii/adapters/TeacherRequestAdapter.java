@@ -103,13 +103,13 @@ public class TeacherRequestAdapter extends RecyclerView.Adapter<TeacherRequestAd
         if (!teacherSchoolConnectionRequest.getSchoolName().isEmpty()) {
             String[] nameArray = teacherSchoolConnectionRequest.getSchoolName().replaceAll("\\s+", " ").trim().split(" ");
             if (nameArray.length == 1) {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 50);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 50);
             }
             holder.pic.setImageDrawable(textDrawable);
         } else {
-            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 50);
         }
 
         if (!teacherSchoolConnectionRequest.getSchoolProfilePictureURL().isEmpty()) {

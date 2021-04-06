@@ -255,13 +255,13 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
             if (!teacherAttendanceRow.getName().isEmpty()) {
                 String[] nameArray = teacherAttendanceRow.getName().replaceAll("\\s+", " ").trim().split(" ");
                 if (nameArray.length == 1) {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], 45);
                 } else {
-                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1]);
+                    textDrawable = CreateTextDrawable.createTextDrawable(context, nameArray[0], nameArray[1], 45);
                 }
                 ((MyViewHolder) holder).studentPic.setImageDrawable(textDrawable);
             } else {
-                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA");
+                textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 45);
             }
 
             if (!teacherAttendanceRow.getImageURL().isEmpty()) {
