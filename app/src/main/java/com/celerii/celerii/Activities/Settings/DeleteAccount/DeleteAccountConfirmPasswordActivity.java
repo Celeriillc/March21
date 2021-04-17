@@ -76,7 +76,8 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
     EditText password;
     ImageButton togglePasswordVisisbility;
     RelativeLayout passwordLayout;
-    String reasonForDelete, email;
+//    String reasonForDelete;
+    String email;
     Boolean isPasswordVisible = false;
     Bundle bundle;
 
@@ -103,7 +104,7 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
         mFirebaseUser = auth.getCurrentUser();
 
         bundle = getIntent().getExtras();
-        reasonForDelete = bundle.getString("Reason For Delete");
+//        reasonForDelete = bundle.getString("Reason For Delete");
         email = mFirebaseUser.getEmail();
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
@@ -217,8 +218,8 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
                                         deleteAccountUpdatemap.put("DeletedAccounts/Teacher/" + mFirebaseUser.getUid() + "/" + "isDeleted", true);
                                         deleteAccountUpdatemap.put("DeletedAccounts/Parent/" + mFirebaseUser.getUid() + "/" + "date", date);
                                         deleteAccountUpdatemap.put("DeletedAccounts/Teacher/" + mFirebaseUser.getUid() + "/" + "date", date);
-                                        deleteAccountUpdatemap.put("DeletedAccounts/Parent/" + mFirebaseUser.getUid() + "/" + "reason", reasonForDelete);
-                                        deleteAccountUpdatemap.put("DeletedAccounts/Teacher/" + mFirebaseUser.getUid() + "/" + "reason", reasonForDelete);
+//                                        deleteAccountUpdatemap.put("DeletedAccounts/Parent/" + mFirebaseUser.getUid() + "/" + "reason", "");
+//                                        deleteAccountUpdatemap.put("DeletedAccounts/Teacher/" + mFirebaseUser.getUid() + "/" + "reason", "");
 
                                         deleteAccountReverseUpdatemap.put("Parent/" + mFirebaseUser.getUid() + "/" + "isDeleted", null);
                                         deleteAccountReverseUpdatemap.put("Teacher/" + mFirebaseUser.getUid() + "/" + "isDeleted", null);

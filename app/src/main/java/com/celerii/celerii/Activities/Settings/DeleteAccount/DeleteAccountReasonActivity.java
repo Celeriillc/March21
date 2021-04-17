@@ -50,12 +50,12 @@ public class DeleteAccountReasonActivity extends AppCompatActivity {
     FirebaseUser mFirebaseUser;
 
     Toolbar toolbar;
-    RadioGroup reportingGroup;
-    RadioButton loginSignUp, classFeed, assignmentFeed, notification, other;
+//    RadioGroup reportingGroup;
+//    RadioButton loginSignUp, classFeed, assignmentFeed, notification, other;
     TextView name;
     ImageView profilePicture;
     LinearLayout profilePictureClipper;
-    EditText otherEditText;
+//    EditText otherEditText;
     Button continueButton;
 
     String reasonForDelete = "";
@@ -84,16 +84,16 @@ public class DeleteAccountReasonActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        reportingGroup = (RadioGroup) findViewById(R.id.reportinggroup);
-        loginSignUp = (RadioButton) findViewById(R.id.loginsignup);
-        classFeed = (RadioButton) findViewById(R.id.classfeed);
-        assignmentFeed = (RadioButton) findViewById(R.id.assignmentfeed);
-        notification = (RadioButton) findViewById(R.id.notifications);
-        other = (RadioButton) findViewById(R.id.other);
+//        reportingGroup = (RadioGroup) findViewById(R.id.reportinggroup);
+//        loginSignUp = (RadioButton) findViewById(R.id.loginsignup);
+//        classFeed = (RadioButton) findViewById(R.id.classfeed);
+//        assignmentFeed = (RadioButton) findViewById(R.id.assignmentfeed);
+//        notification = (RadioButton) findViewById(R.id.notifications);
+//        other = (RadioButton) findViewById(R.id.other);
         name = (TextView) findViewById(R.id.name);
         profilePicture = (ImageView) findViewById(R.id.profilepicture);
         profilePictureClipper = (LinearLayout) findViewById(R.id.profilepictureclipper);
-        otherEditText = (EditText) findViewById(R.id.otheredittext);
+//        otherEditText = (EditText) findViewById(R.id.otheredittext);
         continueButton = (Button) findViewById(R.id.continuebutton);
 
         name.setText(sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName());
@@ -122,78 +122,78 @@ public class DeleteAccountReasonActivity extends AppCompatActivity {
                     .into(profilePicture);
         }
 
-        loginSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (loginSignUp.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
-                    collapse(otherEditText);
-                }
-            }
-        });
-
-        classFeed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (classFeed.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
-                    collapse(otherEditText);
-                }
-            }
-        });
-
-        assignmentFeed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (assignmentFeed.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
-                    collapse(otherEditText);
-                }
-            }
-        });
-
-        notification.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (notification.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
-                    collapse(otherEditText);
-                }
-            }
-        });
-
-        other.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (other.isChecked() && otherEditText.getVisibility() == View.GONE) {
-                    expand(otherEditText);
-                }
-            }
-        });
+//        loginSignUp.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (loginSignUp.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
+//                    collapse(otherEditText);
+//                }
+//            }
+//        });
+//
+//        classFeed.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (classFeed.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
+//                    collapse(otherEditText);
+//                }
+//            }
+//        });
+//
+//        assignmentFeed.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (assignmentFeed.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
+//                    collapse(otherEditText);
+//                }
+//            }
+//        });
+//
+//        notification.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (notification.isChecked() && otherEditText.getVisibility() == View.VISIBLE) {
+//                    collapse(otherEditText);
+//                }
+//            }
+//        });
+//
+//        other.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (other.isChecked() && otherEditText.getVisibility() == View.GONE) {
+//                    expand(otherEditText);
+//                }
+//            }
+//        });
 
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setReasonForDelete();
+//                setReasonForDelete();
 
-                if (reasonForDelete.trim().isEmpty()) {
-                    String message = "If you selected " + "<b>" + "Other" + "</b>" + ", you need to specify a reason for deleting your account in the textbox";
-                    showDialogWithMessage(Html.fromHtml(message));
-                    return;
-                }
+//                if (reasonForDelete.trim().isEmpty()) {
+//                    String message = "If you selected " + "<b>" + "Other" + "</b>" + ", you need to specify a reason for deleting your account in the textbox";
+//                    showDialogWithMessage(Html.fromHtml(message));
+//                    return;
+//                }
 
-                Bundle bundle = new Bundle();
+//                Bundle bundle = new Bundle();
                 Intent intent = new Intent(DeleteAccountReasonActivity.this, DeleteAccountConfirmPasswordActivity.class);
-                bundle.putString("Reason For Delete", reasonForDelete);
-                intent.putExtras(bundle);
+//                bundle.putString("Reason For Delete", reasonForDelete);
+//                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
     }
 
-    private void setReasonForDelete() {
-        if (loginSignUp.isChecked()){ reasonForDelete = loginSignUp.getText().toString(); }
-        else if (classFeed.isChecked()){ reasonForDelete = classFeed.getText().toString(); }
-        else if (assignmentFeed.isChecked()){ reasonForDelete =  assignmentFeed.getText().toString(); }
-        else if (notification.isChecked()){ reasonForDelete =  notification.getText().toString(); }
-        else if (other.isChecked()){ reasonForDelete =  otherEditText.getText().toString(); }
-    }
+//    private void setReasonForDelete() {
+//        if (loginSignUp.isChecked()){ reasonForDelete = loginSignUp.getText().toString(); }
+//        else if (classFeed.isChecked()){ reasonForDelete = classFeed.getText().toString(); }
+//        else if (assignmentFeed.isChecked()){ reasonForDelete =  assignmentFeed.getText().toString(); }
+//        else if (notification.isChecked()){ reasonForDelete =  notification.getText().toString(); }
+//        else if (other.isChecked()){ reasonForDelete =  otherEditText.getText().toString(); }
+//    }
 
     void showDialogWithMessage (Spanned messageString) {
         DisplayMetrics metrics = getResources().getDisplayMetrics();

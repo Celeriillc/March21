@@ -1,9 +1,13 @@
 package com.celerii.celerii.Activities.Settings;
 
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
@@ -199,25 +203,25 @@ public class SettingsActivityParent extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String url = "https://celerii.com/blogs";
-//                try {
-//                    Intent i = new Intent("android.intent.action.MAIN");
-//                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
-//                    i.addCategory("android.intent.category.LAUNCHER");
-//                    i.setData(Uri.parse(url));
-//                    startActivity(i);
-//                }
-//                catch(ActivityNotFoundException e) {
-//                    // Chrome is not installed
-//                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//                    startActivity(i);
-//                }
+                try {
+                    Intent i = new Intent("android.intent.action.MAIN");
+                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+                    i.addCategory("android.intent.category.LAUNCHER");
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+                catch(ActivityNotFoundException e) {
+                    // Chrome is not installed
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(i);
+                }
 
-                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("Header", "Blog");
-                bundle.putString("URL", url);
-                I.putExtras(bundle);
-                startActivity(I);
+//                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("Header", "Blog");
+//                bundle.putString("URL", url);
+//                I.putExtras(bundle);
+//                startActivity(I);
             }
         });
 
@@ -225,12 +229,25 @@ public class SettingsActivityParent extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String url = "https://celerii.com/tos#terms-of-service";
-                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("Header", "Terms of Service");
-                bundle.putString("URL", url);
-                I.putExtras(bundle);
-                startActivity(I);
+                try {
+                    Intent i = new Intent("android.intent.action.MAIN");
+                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+                    i.addCategory("android.intent.category.LAUNCHER");
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+                catch(ActivityNotFoundException e) {
+                    // Chrome is not installed
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(i);
+                }
+
+//                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("Header", "Terms of Service");
+//                bundle.putString("URL", url);
+//                I.putExtras(bundle);
+//                startActivity(I);
             }
         });
 
@@ -238,12 +255,25 @@ public class SettingsActivityParent extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String url = "https://celerii.com/tos#privacy-policy";
-                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("Header", "Privacy Policy");
-                bundle.putString("URL", url);
-                I.putExtras(bundle);
-                startActivity(I);
+                try {
+                    Intent i = new Intent("android.intent.action.MAIN");
+                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+                    i.addCategory("android.intent.category.LAUNCHER");
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+                catch(ActivityNotFoundException e) {
+                    // Chrome is not installed
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(i);
+                }
+
+//                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("Header", "Privacy Policy");
+//                bundle.putString("URL", url);
+//                I.putExtras(bundle);
+//                startActivity(I);
             }
         });
 
@@ -251,12 +281,25 @@ public class SettingsActivityParent extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String url = "https://celerii.com/app-info";
-                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("Header", "App Info");
-                bundle.putString("URL", url);
-                I.putExtras(bundle);
-                startActivity(I);
+                try {
+                    Intent i = new Intent("android.intent.action.MAIN");
+                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+                    i.addCategory("android.intent.category.LAUNCHER");
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+                catch(ActivityNotFoundException e) {
+                    // Chrome is not installed
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(i);
+                }
+
+//                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("Header", "App Info");
+//                bundle.putString("URL", url);
+//                I.putExtras(bundle);
+//                startActivity(I);
             }
         });
 
@@ -264,12 +307,25 @@ public class SettingsActivityParent extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String url = "https://celerii.com/about";
-                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("Header", "About Us");
-                bundle.putString("URL", url);
-                I.putExtras(bundle);
-                startActivity(I);
+                try {
+                    Intent i = new Intent("android.intent.action.MAIN");
+                    i.setComponent(ComponentName.unflattenFromString("com.android.chrome/com.android.chrome.Main"));
+                    i.addCategory("android.intent.category.LAUNCHER");
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+                catch(ActivityNotFoundException e) {
+                    // Chrome is not installed
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(i);
+                }
+
+//                Intent I = new Intent(SettingsActivityParent.this, BrowserActivityForInfo.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("Header", "About Us");
+//                bundle.putString("URL", url);
+//                I.putExtras(bundle);
+//                startActivity(I);
             }
         });
     }
