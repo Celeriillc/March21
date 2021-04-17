@@ -1,8 +1,9 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.celerii.celerii.Activities.Delete.SchoolGalleryFragment">
+    tools:context=".Activities.ELibrary.Teacher.TeacherMyTemplatesFragment">
 
     <include android:id="@+id/errorlayout"
         layout="@layout/error_layout_tab"/>
@@ -25,4 +26,15 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-</FrameLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addtemplatefab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_add_white_24dp"
+        android:backgroundTint="@color/colorAccent" />
+
+</RelativeLayout>

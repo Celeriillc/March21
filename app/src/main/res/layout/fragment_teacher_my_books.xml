@@ -1,0 +1,1004 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Activities.ELibrary.Teacher.TeacherMyBooksFragment">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
+
+        <ScrollView
+            android:id="@+id/superlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="20dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:textSize="17sp"
+                        android:textColor="@android:color/black"
+                        android:text="My Books"/>
+
+                    <ImageView
+                        android:id="@+id/viewmoremybooks"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_black_24dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/mybookserrorlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="15dp"
+                    android:padding="25dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="@color/colorBottomNavigationIconGray"
+                        android:text="You haven't uploaded any instructional materials (books, videos or audio books) yet. Click the Upload a Book button or the Floating Add button below to add a material"/>
+
+                    <Button
+                        android:id="@+id/mybookserrorlayoutbutton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:text="Upload a Book"
+                        android:background="@drawable/roundedbutton"
+                        style="?android:attr/borderlessButtonStyle"/>
+
+                </LinearLayout>
+
+                <HorizontalScrollView
+                    android:id="@+id/mybookshorizontalscrollview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:scrollbars="none"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="20dp">
+
+                    <LinearLayout
+                        android:id="@+id/mybookslayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimageone"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitleone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayouttwo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimagetwo"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitletwo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthortwo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutthree"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimagethree"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitlethree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorthree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutfour"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimagefour"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitlefour"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorfour"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutfive"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimagefive"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitlefive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorfive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutsix"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimagesix"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitlesix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorsix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutseven"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimageseven"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitleseven"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorseven"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayouteight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimageeight"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitleeight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthoreight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutnine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimagenine"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitlenine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthornine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/mybookslayoutten"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/mybooksimageten"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/mybookstitleten"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/mybooksauthorten"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="30dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:textSize="17sp"
+                        android:textColor="@android:color/black"
+                        android:text="Recommended Books"/>
+
+                    <ImageView
+                        android:id="@+id/viewmorerecommendedbooks"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_black_24dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/recommendedbookserrorlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="15dp"
+                    android:padding="25dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textColor="@color/colorBottomNavigationIconGray"
+                        android:text="The books, videos and audio books we recommend for you will appear here"/>
+
+                </LinearLayout>
+
+                <HorizontalScrollView
+                    android:id="@+id/recommendedbookshorizontalscrollview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:scrollbars="none"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="20dp">
+
+                    <LinearLayout
+                        android:id="@+id/recommendedbookslayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimageone"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitleone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayouttwo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimagetwo"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitletwo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthortwo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutthree"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimagethree"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitlethree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorthree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutfour"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimagefour"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitlefour"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorfour"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutfive"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimagefive"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitlefive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorfive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutsix"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimagesix"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitlesix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorsix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutseven"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimageseven"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitleseven"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorseven"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayouteight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimageeight"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitleeight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthoreight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutnine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimagenine"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitlenine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthornine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/recommendedbookslayoutten"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:id="@+id/recommendedbooksimageten"
+                                android:layout_width="130dp"
+                                android:layout_height="150dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/profileimageplaceholder"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbookstitleten"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="15dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/black"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                            <TextView
+                                android:id="@+id/recommendedbooksauthorten"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:maxLines="1"
+                                android:ellipsize="end"
+                                android:maxWidth="130dp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorBottomNavigationIconGray"
+                                android:text="The Adventures of Solomon Grandi"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/uploadbookfab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_add_white_24dp"
+        android:backgroundTint="@color/colorAccent" />
+
+</RelativeLayout>

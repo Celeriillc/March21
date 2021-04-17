@@ -45,8 +45,6 @@ public class StudentPerformanceForParentsActivity extends AppCompatActivity {
     DatabaseReference mDatabaseReference;
     FirebaseUser mFirebaseUser;
 
-    Button button;
-    AccountHeader headerResult;
     Toolbar toolbar;
     TabLayout tabLayout;
     String activeStudent = "";

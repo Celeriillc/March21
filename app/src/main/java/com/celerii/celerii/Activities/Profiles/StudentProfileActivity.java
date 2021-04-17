@@ -285,7 +285,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         editStudentProfile = (Button) findViewById(R.id.editstudentprofile);
         disconnect = (Button) findViewById(R.id.disconnect);
 
-        if (sharedPreferencesManager.getActiveAccount().equals("Parent")){
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             editStudentProfile.setVisibility(View.VISIBLE);
             disconnect.setVisibility(View.VISIBLE);
         } else {
