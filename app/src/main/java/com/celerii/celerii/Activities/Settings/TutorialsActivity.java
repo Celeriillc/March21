@@ -65,8 +65,8 @@ public class TutorialsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tutorials);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
         context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();

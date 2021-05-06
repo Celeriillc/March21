@@ -428,6 +428,42 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/personalperformanceLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:padding="15dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:clickable="true"
+                        android:background="?android:attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/ic_percent" />
+
+                        <TextView
+                            android:id="@+id/personalperformance"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:text="My Performance Analytics"/>
+
+                        <ImageView
+                            android:id="@+id/personalperformancemarker"
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:src="@drawable/circular_image_background_accent"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/timetableLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -464,7 +500,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/personalperformanceLayout"
+                        android:id="@+id/elibraryLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:weightSum="1"
@@ -479,19 +515,19 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_percent" />
+                            android:src="@drawable/ic_timetable" />
 
                         <TextView
-                            android:id="@+id/personalperformance"
+                            android:id="@+id/elibrary"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textColor="@android:color/black"
                             android:textSize="15sp"
-                            android:text="My Performance Analytics"/>
+                            android:text="E Library"/>
 
                         <ImageView
-                            android:id="@+id/personalperformancemarker"
+                            android:id="@+id/elibrarymarker"
                             android:layout_width="7dp"
                             android:layout_height="7dp"
                             android:src="@drawable/circular_image_background_accent"

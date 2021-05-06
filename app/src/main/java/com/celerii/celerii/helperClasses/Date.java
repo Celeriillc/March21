@@ -20,6 +20,33 @@ public class Date {
         return Month.Month(Integer.valueOf(dateArray[1]) - 1) + " " + dateArray[2] + ", " + dateArray[0];
     }
 
+    public static String DateFormatHHMM(String Date) {
+        if (Date == null) {return "";}
+        if (Date.equals("")) {return "";}
+        String[] timeArray = Date.split(" ")[1].split(":");
+        String AMPM = "";
+        if (Integer.parseInt(timeArray[0]) > 11) {
+            AMPM = "PM";
+        } else {
+            AMPM = "AM";
+        }
+        int hour = 0;
+        if (Integer.parseInt(timeArray[0]) > 12) {
+            hour = Integer.parseInt(timeArray[0]) - 12;
+        } else {
+            hour = Integer.parseInt(timeArray[0]);
+        }
+        return String.valueOf(hour) + ":" + makeTwoDigits(timeArray[1]) + " " + AMPM;
+    }
+
+    public static String DateFormatMMDDYYYYHHMM(String Date) {
+        if (Date == null) {return "";}
+        if (Date.equals("")) {return "";}
+        String[] dateArray = Date.split(" ")[0].split("/");
+        String[] timeArray = Date.split(" ")[1].split(":");
+        return Month.Month(Integer.parseInt(dateArray[1]) - 1) + "/" + dateArray[2] + "/" + dateArray[0] + " " + timeArray[0] + ":" + makeTwoDigits(timeArray[1]);
+    }
+
     public static String getMonthString(String Date) {
         if (Date == null) {return "";}
         if (Date.equals("")) {return "";}

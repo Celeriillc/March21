@@ -1,4 +1,4 @@
-package com.celerii.celerii.Activities.ELibrary.Teacher;
+package com.celerii.celerii.Activities.EClassroom;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -9,12 +9,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.MenuItem;
 
-import com.celerii.celerii.Activities.StudentPerformance.Current.CurrentFragment;
-import com.celerii.celerii.Activities.StudentPerformance.FutureFragment;
-import com.celerii.celerii.Activities.StudentPerformance.History.HistoryFragment;
-import com.celerii.celerii.Activities.StudentPerformance.StudentPerformanceForParentsActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.google.android.material.tabs.TabLayout;
@@ -22,12 +18,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.mikepenz.materialdrawer.AccountHeader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeacherELibraryHomeActivity extends AppCompatActivity {
+public class EClassroomHomeActivity extends AppCompatActivity {
 
     Context context;
     SharedPreferencesManager sharedPreferencesManager;
@@ -37,16 +32,21 @@ public class TeacherELibraryHomeActivity extends AppCompatActivity {
     DatabaseReference mDatabaseReference;
     FirebaseUser mFirebaseUser;
 
+    String studentID;
+
     Toolbar toolbar;
     TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_teacher_e_library_home);
+        setContentView(R.layout.activity_e_classroom_home);
 
         context = this;
         sharedPreferencesManager = new SharedPreferencesManager(context);
+
+        Bundle b = getIntent().getExtras();
+        studentID = b.getString("Child ID");
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -55,7 +55,7 @@ public class TeacherELibraryHomeActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.hometoolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("My Books");
+        getSupportActionBar().setTitle("My Classroom");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -63,7 +63,7 @@ public class TeacherELibraryHomeActivity extends AppCompatActivity {
         setupViewPager(viewPager);
         tabLayout = (TabLayout) findViewById(R.id.home_tabs);
         tabLayout.setupWithViewPager(viewPager);
-        viewPager.setCurrentItem(1);
+//        viewPager.setCurrentItem(1);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -71,13 +71,10 @@ public class TeacherELibraryHomeActivity extends AppCompatActivity {
                 viewPager.setCurrentItem(tab.getPosition());
                 switch (tab.getPosition()) {
                     case 0:
-                        getSupportActionBar().setTitle("My Books");
+                        getSupportActionBar().setTitle("Scheduled Classes");
                         break;
                     case 1:
-                        getSupportActionBar().setTitle("My Assignments");
-                        break;
-                    case 2:
-                        getSupportActionBar().setTitle("My Templates");
+                        getSupportActionBar().setTitle("Concluded Classes");
                         break;
                 }
             }
@@ -94,11 +91,23 @@ public class TeacherELibraryHomeActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home){
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public String getData(){
+        return studentID;
+    }
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new TeacherMyBooksFragment(), "My Books");
-        adapter.addFrag(new TeacherMyAssignmentsFragment(), "My Assignments");
-        adapter.addFrag(new TeacherMyTemplatesFragment(), "My Templates");
+        adapter.addFrag(new EClassroomScheduledClassesListFragment(), "Scheduled Classes");
+        adapter.addFrag(new EClassroomConcludedClassesListFragment(), "Concluded Classes");
         viewPager.setAdapter(adapter);
     }
 

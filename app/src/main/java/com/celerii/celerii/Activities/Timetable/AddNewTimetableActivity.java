@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
-public class AddNewTimetableActivity extends AppCompatActivity implements TimePickerDialogFragment.TimePickerDialogHandler{
+public class AddNewTimetableActivity extends AppCompatActivity implements TimePickerDialogFragment.TimePickerDialogHandler {
 
     Context context;
     SharedPreferencesManager sharedPreferencesManager;

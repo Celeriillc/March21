@@ -3,6 +3,7 @@ package com.celerii.celerii.models;
 public class ELibraryMyAssignmentModel {
     String assignmentID, teacherID, schoolID, classID, className, dateGiven, sortableDateGiven, dueDate, sortableDateDue, materialTitle, materialType,
             materialThumbnailURL, materialDescription, materialID, materialDomain, performance;
+    Boolean submitted;
 
     public ELibraryMyAssignmentModel() {
         this.assignmentID = "";
@@ -19,6 +20,28 @@ public class ELibraryMyAssignmentModel {
         this.materialDescription = "";
         this.materialID = "";
         this.materialDomain = "";
+        this.performance = "";
+        this.submitted = false;
+    }
+
+    public ELibraryMyAssignmentModel(String teacherID, String classID, String className, String dueDate, String sortableDateDue, String materialTitle, String materialType, String materialThumbnailURL, String materialDescription, String materialID) {
+        this.assignmentID = "";
+        this.teacherID = teacherID;
+        this.schoolID = "";
+        this.classID = classID;
+        this.className = className;
+        this.dateGiven = "";
+        this.sortableDateGiven = "";
+        this.dueDate = dueDate;
+        this.sortableDateDue = sortableDateDue;
+        this.materialTitle = materialTitle;
+        this.materialType = materialType;
+        this.materialThumbnailURL = materialThumbnailURL;
+        this.materialDescription = materialDescription;
+        this.materialID = materialID;
+        this.materialDomain = "";
+        this.performance = "";
+        this.submitted = false;
     }
 
     public ELibraryMyAssignmentModel(String assignmentID, String teacherID, String schoolID, String classID, String dateGiven, String sortableDateGiven, String dueDate, String sortableDateDue, String materialTitle, String materialType, String materialThumbnailURL, String materialDescription, String materialID, String materialDomain) {
@@ -36,6 +59,8 @@ public class ELibraryMyAssignmentModel {
         this.materialDescription = materialDescription;
         this.materialID = materialID;
         this.materialDomain = materialDomain;
+        this.performance = "";
+        this.submitted = false;
     }
 
     public String getAssignmentID() {
@@ -164,5 +189,13 @@ public class ELibraryMyAssignmentModel {
 
     public void setPerformance(String performance) {
         this.performance = performance;
+    }
+
+    public Boolean getSubmitted() {
+        return submitted;
+    }
+
+    public void setSubmitted(Boolean submitted) {
+        submitted = submitted;
     }
 }

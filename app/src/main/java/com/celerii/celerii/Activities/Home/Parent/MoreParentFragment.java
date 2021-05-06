@@ -10,7 +10,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,8 +27,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
-import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.Activities.ELibrary.ParentELibraryHomeActivity;
 import com.celerii.celerii.Activities.Events.EventsRowActivity;
 import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
 import com.celerii.celerii.Activities.Payments.PaymentsHomeActivity;
@@ -44,9 +43,7 @@ import com.celerii.celerii.Activities.Subscription.SubscriptionHomeActivity;
 import com.celerii.celerii.Activities.Timetable.TeacherTimetableActivity;
 import com.celerii.celerii.Activities.Utility.SwitchActivityParentTeacher;
 import com.celerii.celerii.R;
-import com.celerii.celerii.adapters.InboxAdapter;
 import com.celerii.celerii.adapters.MoreParentsAdapter;
-import com.celerii.celerii.adapters.ParentAttendanceRowAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
@@ -54,7 +51,6 @@ import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.LogoutProtocol;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
-import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.MoreParentsHeaderModel;
 import com.celerii.celerii.models.NotificationBadgeModel;
@@ -114,11 +110,11 @@ public class MoreParentFragment extends Fragment {
     Button searchButton;
     AHBottomNavigation bottomNavigation;
 
-    LinearLayout profileLayout, subscriptionLayout, attendanceLayout, timetableLayout, performanceLayout, behaviouralPerformanceLayout, paymentLayout, eventsLayout, newslettersLayout,
+    LinearLayout profileLayout, subscriptionLayout, attendanceLayout, timetableLayout, performanceLayout, behaviouralPerformanceLayout, eLibraryLayout, paymentLayout, eventsLayout, newslettersLayout,
             settingsLayout, switchAccountLayout, logoutLayout;
-    TextView profile, subscription, attendance, timetable, performance, behaviouralPerformance, payment, events, newsletters, settings, switchAccount, logout;
-    TextView profileBadge, subscriptionBadge, attendanceBadge, performanceBadge, behaviouralPerformanceBadge, paymentBadge, eventsBadge, newslettersBadge;
-    TextView profileMarker, subscriptionMarker, attendanceMarker, timetableMarker, performanceMarker, behaviouralPerformanceMarker, paymentMarker, eventsMarker, newslettersMarker,
+    TextView profile, subscription, attendance, timetable, performance, behaviouralPerformance, eLibrary, payment, events, newsletters, settings, switchAccount, logout;
+    TextView profileBadge, subscriptionBadge, attendanceBadge, performanceBadge, behaviouralPerformanceBadge, eLibraryBadge, paymentBadge, eventsBadge, newslettersBadge;
+    TextView profileMarker, subscriptionMarker, attendanceMarker, timetableMarker, performanceMarker, behaviouralPerformanceMarker, eLibraryMarker, paymentMarker, eventsMarker, newslettersMarker,
             settingsMarker, switchAccountMarker, logoutMarker;
 
     CoordinatorLayout coordinatorLayout;
@@ -165,6 +161,7 @@ public class MoreParentFragment extends Fragment {
         timetableLayout = (LinearLayout) view.findViewById(R.id.timetableLayout);
         performanceLayout = (LinearLayout) view.findViewById(R.id.performanceLayout);
         behaviouralPerformanceLayout = (LinearLayout) view.findViewById(R.id.behaviouralperformanceLayout);
+        eLibraryLayout = (LinearLayout) view.findViewById(R.id.elibraryLayout);
         paymentLayout = (LinearLayout) view.findViewById(R.id.paymentsLayout);
         eventsLayout = (LinearLayout) view.findViewById(R.id.eventsLayout);
         newslettersLayout = (LinearLayout) view.findViewById(R.id.newslettersLayout);
@@ -178,6 +175,7 @@ public class MoreParentFragment extends Fragment {
         timetable = (TextView) view.findViewById(R.id.timetable);
         performance = (TextView) view.findViewById(R.id.performance);
         behaviouralPerformance = (TextView) view.findViewById(R.id.behaviouralperformance);
+        eLibrary = (TextView) view.findViewById(R.id.elibrary);
         payment = (TextView) view.findViewById(R.id.payments);
         events = (TextView) view.findViewById(R.id.events);
         newsletters = (TextView) view.findViewById(R.id.newsletters);
@@ -190,6 +188,7 @@ public class MoreParentFragment extends Fragment {
         attendanceBadge = (TextView) view.findViewById(R.id.attendancebadge);
         performanceBadge = (TextView) view.findViewById(R.id.performancebadge);
         behaviouralPerformanceBadge = (TextView) view.findViewById(R.id.behaviouralperformancebadge);
+        eLibraryBadge = (TextView) view.findViewById(R.id.elibrarybadge);
         paymentBadge = (TextView) view.findViewById(R.id.paymentsbadge);
         eventsBadge = (TextView) view.findViewById(R.id.eventsbadge);
         newslettersBadge = (TextView) view.findViewById(R.id.newsletterbadge);
@@ -200,6 +199,7 @@ public class MoreParentFragment extends Fragment {
         timetableMarker = (TextView) view.findViewById(R.id.timetablemarker);
         performanceMarker = (TextView) view.findViewById(R.id.performancemarker);
         behaviouralPerformanceMarker = (TextView) view.findViewById(R.id.behaviouralperformancemarker);
+        eLibraryMarker = (TextView) view.findViewById(R.id.elibrarymarker);
         paymentMarker = (TextView) view.findViewById(R.id.paymentsmarker);
         eventsMarker = (TextView) view.findViewById(R.id.eventsmarker);
         newslettersMarker = (TextView) view.findViewById(R.id.newslettersmarker);
@@ -693,6 +693,7 @@ public class MoreParentFragment extends Fragment {
         String ttb = "TimeTable";
         String pef = "Academic Performance";
         String bvr = "Behavioural Performance";
+        String elb = "E Library";
         String pmt = "Payments";
         String evt = "Events";
         String nws = "Newsletters";
@@ -831,6 +832,7 @@ public class MoreParentFragment extends Fragment {
         timetable.setText(ttb);
         performance.setText(pef);
         behaviouralPerformance.setText(bvr);
+        eLibrary.setText(elb);
         payment.setText(pmt);
         events.setText(evt);
         newsletters.setText(nws);
@@ -889,6 +891,16 @@ public class MoreParentFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(context, BehaviouralResultActivity.class);
+                Bundle b = new Bundle();
+                b.putString("ChildID", sharedPreferencesManager.getActiveKid());
+                I.putExtras(b);
+                context.startActivity(I);
+            }
+        });
+        eLibraryLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(context, ParentELibraryHomeActivity.class);
                 Bundle b = new Bundle();
                 b.putString("ChildID", sharedPreferencesManager.getActiveKid());
                 I.putExtras(b);

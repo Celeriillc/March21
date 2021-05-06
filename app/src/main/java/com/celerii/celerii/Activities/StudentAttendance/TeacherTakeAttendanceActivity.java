@@ -264,7 +264,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                 new IntentFilter("Date Information"));
     }
 
-    void loadHeaderFromFirebase(){
+    void loadHeaderFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
             mySwipeRefreshLayout.setRefreshing(false);
             recyclerView.setVisibility(View.GONE);

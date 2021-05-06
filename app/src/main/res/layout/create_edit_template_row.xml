@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:background="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/question"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:textColor="@color/black"
+                android:text="We provide portfolio screening to identify best
+                early development assets, Asset Inventory, Review of previous
+                interpretation/analysis,and data QC and Update"/>
+
+            <LinearLayout
+                android:id="@+id/optionabackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_background_for_options_light_purple"
+                android:gravity="top"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/optionalabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="(A)"/>
+
+                <TextView
+                    android:id="@+id/optiona"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="Data Quality Management "/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/optionbbackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:layout_marginTop="15dp"
+                android:padding="10dp"
+                android:orientation="horizontal"
+                android:gravity="top"
+                android:background="@drawable/rounded_background_for_options_light_purple">
+
+                <TextView
+                    android:id="@+id/optionblabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="(B)"/>
+
+                <TextView
+                    android:id="@+id/optionb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="Flowgrids Limited is a company registered in Nigeria. Our core services to the oil and gas Industry are Petroleum Engineering, Geo-sciences and Training consultancy services."/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/optioncbackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:layout_marginTop="15dp"
+                android:padding="10dp"
+                android:orientation="horizontal"
+                android:gravity="top"
+                android:background="@drawable/rounded_background_for_options_light_purple">
+
+                <TextView
+                    android:id="@+id/optionclabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="(C)"/>
+
+                <TextView
+                    android:id="@+id/optionc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="Flowgrids Limited" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/optiondbackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:layout_marginTop="15dp"
+                android:padding="10dp"
+                android:orientation="horizontal"
+                android:gravity="top"
+                android:background="@drawable/rounded_background_for_options_light_purple">
+
+                <TextView
+                    android:id="@+id/optiondlabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="(D)"/>
+
+                <TextView
+                    android:id="@+id/optiond"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/colorPrimaryPurple"
+                    android:text="Flowgrids Limited" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:background="@color/colorLightGray"
+            android:layout_marginTop="20dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

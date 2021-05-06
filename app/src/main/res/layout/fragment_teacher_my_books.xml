@@ -4,13 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Activities.ELibrary.Teacher.TeacherMyBooksFragment">
+    tools:context=".Activities.ELibrary.TeacherMyBooksFragment">
+
+    <include android:id="@+id/progresslayout"
+        layout="@layout/progress_layout_tab"/>
+
+    <include android:id="@+id/errorlayout"
+        layout="@layout/error_layout"/>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_height="match_parent">
 
         <ScrollView
             android:id="@+id/superlayout"
@@ -29,7 +34,7 @@
                     android:weightSum="1"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="40dp"
                     android:paddingStart="20dp"
                     android:paddingEnd="20dp">
 
@@ -106,18 +111,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimageone"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclipperone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimageone"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitleone"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -131,6 +146,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -147,18 +164,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimagetwo"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclippertwo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimagetwo"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitletwo"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -172,6 +199,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -188,18 +217,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimagethree"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclipperthree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimagethree"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitlethree"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -213,6 +252,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -229,18 +270,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimagefour"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclipperfour"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimagefour"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitlefour"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -254,6 +305,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -270,18 +323,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimagefive"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclipperfive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimagefive"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitlefive"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -295,6 +358,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -311,12 +376,20 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimagesix"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclippersix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimagesix"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitlesix"
@@ -352,12 +425,20 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimageseven"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclipperseven"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimageseven"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitleseven"
@@ -393,18 +474,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimageeight"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclippereight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimageeight"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitleeight"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -418,6 +509,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -434,18 +527,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimagenine"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclippernine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimagenine"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitlenine"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -459,6 +562,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -475,18 +580,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/mybooksimageten"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/mybooksimageclipperten"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/mybooksimageten"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/mybookstitleten"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -500,6 +615,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -578,18 +695,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimageone"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclipperone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimageone"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitleone"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -603,6 +730,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -619,18 +748,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimagetwo"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclippertwo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimagetwo"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitletwo"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -644,6 +783,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -660,18 +801,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimagethree"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclipperthree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimagethree"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitlethree"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -685,6 +836,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -701,18 +854,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimagefour"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclipperfour"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimagefour"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitlefour"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -726,6 +889,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -742,18 +907,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimagefive"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclipperfive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimagefive"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitlefive"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -767,6 +942,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -783,18 +960,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimagesix"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclippersix"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimagesix"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitlesix"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -808,6 +995,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -824,18 +1013,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimageseven"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclipperseven"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimageseven"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitleseven"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -849,6 +1048,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -865,18 +1066,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimageeight"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclippereight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimageeight"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitleeight"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -890,6 +1101,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -906,18 +1119,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimagenine"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclippernine"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimagenine"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitlenine"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -931,6 +1154,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -947,18 +1172,28 @@
                             android:layout_marginEnd="20dp"
                             android:orientation="vertical">
 
-                            <ImageView
-                                android:id="@+id/recommendedbooksimageten"
-                                android:layout_width="130dp"
-                                android:layout_height="150dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profileimageplaceholder"/>
+                            <LinearLayout
+                                android:id="@+id/recommendedbooksimageclipperten"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/rounded_background_for_options_light_accent">
+
+                                <ImageView
+                                    android:id="@+id/recommendedbooksimageten"
+                                    android:layout_width="130dp"
+                                    android:layout_height="150dp"
+                                    android:scaleType="centerCrop"
+                                    android:src="@drawable/profileimageplaceholder"/>
+
+                            </LinearLayout>
 
                             <TextView
                                 android:id="@+id/recommendedbookstitleten"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
@@ -972,6 +1207,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
+                                android:paddingStart="5dp"
+                                android:paddingEnd="5dp"
                                 android:maxLines="1"
                                 android:ellipsize="end"
                                 android:maxWidth="130dp"
