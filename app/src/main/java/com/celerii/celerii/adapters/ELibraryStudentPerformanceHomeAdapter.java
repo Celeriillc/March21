@@ -66,7 +66,7 @@ public class ELibraryStudentPerformanceHomeAdapter extends RecyclerView.Adapter<
         final ELibraryStudentPerformanceHomeModel eLibraryStudentPerformanceHomeModel = eLibraryStudentPerformanceHomeModelList.get(position);
 
         holder.studentName.setText(eLibraryStudentPerformanceHomeModel.getStudentName());
-        holder.score.setText(eLibraryStudentPerformanceHomeModel.getScore());
+        holder.score.setText(eLibraryStudentPerformanceHomeModel.getScore() + "%");
         holder.studentProfilePictureClipper.setClipToOutline(true);
 
         Drawable textDrawable;

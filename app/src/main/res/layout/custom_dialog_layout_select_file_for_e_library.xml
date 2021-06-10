@@ -57,7 +57,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_camera"/>
+                android:src="@drawable/ic_baseline_picture_as_pdf_black_24"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_gallery"/>
+                android:src="@drawable/ic_baseline_video_black_24"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -126,7 +126,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_camera"/>
+                android:src="@drawable/ic_baseline_audio_headphones_black_24"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -156,7 +156,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_gallery"/>
+                android:src="@drawable/ic_baseline_image_black_24"/>
 
             <TextView
                 android:layout_width="match_parent"

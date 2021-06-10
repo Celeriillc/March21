@@ -28,7 +28,8 @@ import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.bumptech.glide.Glide;
-import com.celerii.celerii.Activities.ELibrary.ParentELibraryHomeActivity;
+import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomHomeActivity;
+import com.celerii.celerii.Activities.ELibrary.Parent.ParentELibraryHomeActivity;
 import com.celerii.celerii.Activities.Events.EventsRowActivity;
 import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
 import com.celerii.celerii.Activities.Payments.PaymentsHomeActivity;
@@ -52,6 +53,8 @@ import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.LogoutProtocol;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Class;
+import com.celerii.celerii.models.EClassroomScheduledClassesListModel;
+import com.celerii.celerii.models.ELibraryMyAssignmentModel;
 import com.celerii.celerii.models.MoreParentsHeaderModel;
 import com.celerii.celerii.models.NotificationBadgeModel;
 import com.celerii.celerii.models.Parent;
@@ -110,11 +113,11 @@ public class MoreParentFragment extends Fragment {
     Button searchButton;
     AHBottomNavigation bottomNavigation;
 
-    LinearLayout profileLayout, subscriptionLayout, attendanceLayout, timetableLayout, performanceLayout, behaviouralPerformanceLayout, eLibraryLayout, paymentLayout, eventsLayout, newslettersLayout,
+    LinearLayout profileLayout, subscriptionLayout, attendanceLayout, timetableLayout, performanceLayout, behaviouralPerformanceLayout, eClassroomLayout, eLibraryLayout, paymentLayout, eventsLayout, newslettersLayout,
             settingsLayout, switchAccountLayout, logoutLayout;
-    TextView profile, subscription, attendance, timetable, performance, behaviouralPerformance, eLibrary, payment, events, newsletters, settings, switchAccount, logout;
-    TextView profileBadge, subscriptionBadge, attendanceBadge, performanceBadge, behaviouralPerformanceBadge, eLibraryBadge, paymentBadge, eventsBadge, newslettersBadge;
-    TextView profileMarker, subscriptionMarker, attendanceMarker, timetableMarker, performanceMarker, behaviouralPerformanceMarker, eLibraryMarker, paymentMarker, eventsMarker, newslettersMarker,
+    TextView profile, subscription, attendance, timetable, performance, behaviouralPerformance, eClassroom, eLibrary, payment, events, newsletters, settings, switchAccount, logout;
+    TextView profileBadge, subscriptionBadge, attendanceBadge, performanceBadge, behaviouralPerformanceBadge, eClassroomBadge, eLibraryBadge, paymentBadge, eventsBadge, newslettersBadge;
+    TextView profileMarker, subscriptionMarker, attendanceMarker, timetableMarker, performanceMarker, behaviouralPerformanceMarker, eClassroomMarker, eLibraryMarker, paymentMarker, eventsMarker, newslettersMarker,
             settingsMarker, switchAccountMarker, logoutMarker;
 
     CoordinatorLayout coordinatorLayout;
@@ -162,6 +165,7 @@ public class MoreParentFragment extends Fragment {
         performanceLayout = (LinearLayout) view.findViewById(R.id.performanceLayout);
         behaviouralPerformanceLayout = (LinearLayout) view.findViewById(R.id.behaviouralperformanceLayout);
         eLibraryLayout = (LinearLayout) view.findViewById(R.id.elibraryLayout);
+        eClassroomLayout = (LinearLayout) view.findViewById(R.id.eclassroomLayout);
         paymentLayout = (LinearLayout) view.findViewById(R.id.paymentsLayout);
         eventsLayout = (LinearLayout) view.findViewById(R.id.eventsLayout);
         newslettersLayout = (LinearLayout) view.findViewById(R.id.newslettersLayout);
@@ -176,6 +180,7 @@ public class MoreParentFragment extends Fragment {
         performance = (TextView) view.findViewById(R.id.performance);
         behaviouralPerformance = (TextView) view.findViewById(R.id.behaviouralperformance);
         eLibrary = (TextView) view.findViewById(R.id.elibrary);
+        eClassroom = (TextView) view.findViewById(R.id.eclassroom);
         payment = (TextView) view.findViewById(R.id.payments);
         events = (TextView) view.findViewById(R.id.events);
         newsletters = (TextView) view.findViewById(R.id.newsletters);
@@ -189,6 +194,7 @@ public class MoreParentFragment extends Fragment {
         performanceBadge = (TextView) view.findViewById(R.id.performancebadge);
         behaviouralPerformanceBadge = (TextView) view.findViewById(R.id.behaviouralperformancebadge);
         eLibraryBadge = (TextView) view.findViewById(R.id.elibrarybadge);
+        eClassroomBadge = (TextView) view.findViewById(R.id.eclassroombadge);
         paymentBadge = (TextView) view.findViewById(R.id.paymentsbadge);
         eventsBadge = (TextView) view.findViewById(R.id.eventsbadge);
         newslettersBadge = (TextView) view.findViewById(R.id.newsletterbadge);
@@ -200,6 +206,7 @@ public class MoreParentFragment extends Fragment {
         performanceMarker = (TextView) view.findViewById(R.id.performancemarker);
         behaviouralPerformanceMarker = (TextView) view.findViewById(R.id.behaviouralperformancemarker);
         eLibraryMarker = (TextView) view.findViewById(R.id.elibrarymarker);
+        eClassroomMarker = (TextView) view.findViewById(R.id.eclassroommarker);
         paymentMarker = (TextView) view.findViewById(R.id.paymentsmarker);
         eventsMarker = (TextView) view.findViewById(R.id.eventsmarker);
         newslettersMarker = (TextView) view.findViewById(R.id.newslettersmarker);
@@ -289,128 +296,6 @@ public class MoreParentFragment extends Fragment {
         mySwipeRefreshLayout.setRefreshing(false);
         loadHeader();
         loadFooter();
-    }
-
-    private void loadDataFromFirebase() {
-        mDatabaseReference = mFirebaseDatabase.getReference("Parent").child(mFirebaseUser.getUid());
-        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    Parent parent = dataSnapshot.getValue(Parent.class);
-                    sharedPreferencesManager.setMyFirstName(parent.getFirstName());
-                    sharedPreferencesManager.setMyLastName(parent.getLastName());
-                    sharedPreferencesManager.setMyPicURL(parent.getProfilePicURL());
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        childrenCounter = 0;
-        myChildren.clear();
-//        mAdapter.notifyDataSetChanged();
-        mDatabaseReference = mFirebaseDatabase.getReference("Parents Students").child(mFirebaseUser.getUid());
-        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
-                    myChildren.clear();
-//                    mAdapter.notifyDataSetChanged();
-                    for (DataSnapshot postSnapShot: dataSnapshot.getChildren()){
-                        final String childKey = postSnapShot.getKey();
-
-                        mDatabaseReference = mFirebaseDatabase.getReference("Student").child(childKey);
-                        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                childrenCounter++;
-                                if (dataSnapshot.exists()){
-                                    Student childInstance = dataSnapshot.getValue(Student.class);
-                                    childInstance.setStudentID(dataSnapshot.getKey());
-                                    myChildren.add(childInstance);
-                                }
-
-                                if (childrenCounter == childrenCount) {
-                                    sharedPreferencesManager.deleteMyChildren();
-                                    Gson gson = new Gson();
-                                    String json = gson.toJson(myChildren);
-                                    sharedPreferencesManager.setMyChildren(json);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
-                } else {
-                    sharedPreferencesManager.deleteMyChildren();
-                    sharedPreferencesManager.deleteActiveKid();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        classesCounter = 0;
-        myClasses.clear();
-//        mAdapter.notifyDataSetChanged();
-        mDatabaseReference = mFirebaseDatabase.getReference("Teacher Class").child(mFirebaseUser.getUid());
-        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    final int childrenCount = (int) dataSnapshot.getChildrenCount();
-                    myClasses.clear();
-//                    mAdapter.notifyDataSetChanged();
-                    for (DataSnapshot postSnapShot: dataSnapshot.getChildren()){
-                        final String classKey = postSnapShot.getKey();
-
-                        mDatabaseReference = mFirebaseDatabase.getReference("Class").child(classKey);
-                        mDatabaseReference.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                classesCounter++;
-                                if (dataSnapshot.exists()){
-                                    Class classInstance = dataSnapshot.getValue(Class.class);
-                                    classInstance.setID(dataSnapshot.getKey());
-                                    myClasses.add(classInstance);
-                                }
-
-                                if (childrenCounter == childrenCount) {
-                                    sharedPreferencesManager.deleteMyClasses();
-                                    Gson gson = new Gson();
-                                    String json = gson.toJson(myClasses);
-                                    sharedPreferencesManager.setMyClasses(json);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                    }
-                } else {
-                    sharedPreferencesManager.deleteMyClasses();
-                    sharedPreferencesManager.deleteActiveClass();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void loadBasicInfo() {
@@ -693,6 +578,7 @@ public class MoreParentFragment extends Fragment {
         String ttb = "TimeTable";
         String pef = "Academic Performance";
         String bvr = "Behavioural Performance";
+        String ecl = "E Classroom";
         String elb = "E Library";
         String pmt = "Payments";
         String evt = "Events";
@@ -832,6 +718,7 @@ public class MoreParentFragment extends Fragment {
         timetable.setText(ttb);
         performance.setText(pef);
         behaviouralPerformance.setText(bvr);
+        eClassroom.setText(ecl);
         eLibrary.setText(elb);
         payment.setText(pmt);
         events.setText(evt);
@@ -891,6 +778,16 @@ public class MoreParentFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(context, BehaviouralResultActivity.class);
+                Bundle b = new Bundle();
+                b.putString("ChildID", sharedPreferencesManager.getActiveKid());
+                I.putExtras(b);
+                context.startActivity(I);
+            }
+        });
+        eClassroomLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(context, ParentEClassroomHomeActivity.class);
                 Bundle b = new Bundle();
                 b.putString("ChildID", sharedPreferencesManager.getActiveKid());
                 I.putExtras(b);
@@ -1022,6 +919,112 @@ public class MoreParentFragment extends Fragment {
                             }
                         } else {
                             behaviouralPerformanceBadge.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("EClassroomParentNotification").child(mFirebaseUser.getUid()).child(activeKidID).child("status");
+                mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            boolean status = dataSnapshot.getValue(boolean.class);
+                            if (status) {
+                                eClassroomBadge.setVisibility(View.VISIBLE);
+                            } else {
+                                eClassroomBadge.setVisibility(View.GONE);
+                            }
+                        } else {
+                            eClassroomBadge.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("E Classroom Scheduled Class").child("Student").child(activeKidID);
+                mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            int count = 0;
+                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                EClassroomScheduledClassesListModel eClassroomScheduledClassesListModel = postSnapshot.getValue(EClassroomScheduledClassesListModel.class);
+
+                                if (eClassroomScheduledClassesListModel.getOpen()) {
+                                    count++;
+                                }
+
+                                if (count > 0) {
+                                    eClassroomMarker.setVisibility(View.VISIBLE);
+                                    eClassroomMarker.setText(String.valueOf(count));
+                                } else {
+                                    eClassroomMarker.setVisibility(View.GONE);
+                                }
+                            }
+                        } else {
+                            eClassroomMarker.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("ELibraryAssignmentParentNotification").child(mFirebaseUser.getUid()).child(activeKidID).child("status");
+                mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            boolean status = dataSnapshot.getValue(boolean.class);
+                            if (status) {
+                                eLibraryBadge.setVisibility(View.VISIBLE);
+                            } else {
+                                eLibraryBadge.setVisibility(View.GONE);
+                            }
+                        } else {
+                            eLibraryBadge.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment").child("Student").child(activeKidID);
+                mDatabaseReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            int count = 0;
+                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                ELibraryMyAssignmentModel eLibraryMyAssignmentModel = postSnapshot.getValue(ELibraryMyAssignmentModel.class);
+
+                                if (!eLibraryMyAssignmentModel.getSubmitted()) {
+                                    count++;
+                                }
+
+                                if (count > 0) {
+                                    eLibraryMarker.setVisibility(View.VISIBLE);
+                                    eLibraryMarker.setText(String.valueOf(count));
+                                } else {
+                                    eLibraryMarker.setVisibility(View.GONE);
+                                }
+                            }
+                        } else {
+                            eLibraryMarker.setVisibility(View.GONE);
                         }
                     }
 

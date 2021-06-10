@@ -500,6 +500,42 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/eclassroomLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:padding="15dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:clickable="true"
+                        android:background="?android:attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/ic_video" />
+
+                        <TextView
+                            android:id="@+id/eclassroom"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:text="E Classroom"/>
+
+                        <ImageView
+                            android:id="@+id/eclassroommarker"
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:src="@drawable/circular_image_background_accent"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/elibraryLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -515,7 +551,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_timetable" />
+                            android:src="@drawable/ic_baseline_book_black_24" />
 
                         <TextView
                             android:id="@+id/elibrary"

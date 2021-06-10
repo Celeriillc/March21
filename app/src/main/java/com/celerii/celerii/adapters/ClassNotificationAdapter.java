@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
+import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomHomeActivity;
+import com.celerii.celerii.Activities.ELibrary.Parent.ParentELibraryHomeActivity;
 import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Home.NotificationDetailActivity;
 import com.celerii.celerii.Activities.Home.Parent.ParentsRequestActivity;
@@ -123,6 +125,10 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             notification = "<b>" + notificationSubject + "</b>" + " created a new school event for you.";
         } else if (notificationType.equals("Newsletter")){
             notification = "<b>" + notificationSubject + "</b>" + " published a new school newsletter for you.";
+        } else if (notificationType.equals("EClassroom")) {
+            notification = "<b>" + notificationSubject + "</b>" + " has created a new e - classroom for " + "<b>" + notificationModel.getObjectName() + "</b>" + ". Click this notification to access the classroom before it expires.";
+        }  else if (notificationType.equals("ELibraryAssignment")) {
+            notification = "<b>" + notificationSubject + "</b>" + " has created a new e - library assignment for " + "<b>" + notificationModel.getObjectName() + "</b>" + ". Click this notification to study the material and take on the assignment.";
         } else if (notificationType.equals("ConnectionRequest")){ //TODO: Remove
             if (notificationModel.getToAccountType().equals("Parent")) {
                 notification = "<b>" + notificationSubject + "</b>" + " has requested to connect to " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
@@ -447,6 +453,24 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     b.putString("Event ID", notificationModel.getActivityID());
                     b.putString("Color Number", String.valueOf(0));
                     Intent I = new Intent(context, EventDetailActivity.class);
+                    I.putExtras(b);
+                    context.startActivity(I);
+                }  else if (notificationType.equals("EClassroom")){
+                    Bundle b = new Bundle();
+                    Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
+                    Gson gson = new Gson();
+                    String activeKid = gson.toJson(student);
+                    b.putString("Child ID", activeKid);
+                    Intent I = new Intent(context, ParentEClassroomHomeActivity.class);
+                    I.putExtras(b);
+                    context.startActivity(I);
+                }  else if (notificationType.equals("ELibraryAssignment")){
+                    Bundle b = new Bundle();
+                    Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
+                    Gson gson = new Gson();
+                    String activeKid = gson.toJson(student);
+                    b.putString("Child ID", activeKid);
+                    Intent I = new Intent(context, ParentELibraryHomeActivity.class);
                     I.putExtras(b);
                     context.startActivity(I);
                 } else if (notificationType.equals("ConnectionRequest")) {

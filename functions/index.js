@@ -164,6 +164,38 @@ exports.sendTeacherNotification = functions.database.ref('/NotificationTeacher/{
                         },
                     };
                     console.log("payload: ", payload)
+                } else if (notificationType === "EClassroom") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - classroom for " + objectName + ". Click this notification to access the classroom before it expires.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "ELibraryAssignment") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - library assignment for " + objectName + ". Click this notification to study the material and take on the assignment.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
                 } else if (notificationType === "ConnectionRequest") {
                     if (toAccountType === "Parent") {
                         payload = {
@@ -455,6 +487,38 @@ exports.sendTeacherNotification = functions.database.ref('/NotificationTeacher/{
                             objectName: objectName,
                             notificationImageURL: notificationImageURL,
                             message: fromName + " published a new school newsletter for you",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "EClassroom") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - classroom for " + objectName + ". Click this notification to access the classroom before it expires.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "ELibraryAssignment") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - library assignment for " + objectName + ". Click this notification to study the material and take on the assignment.",
                             activityID: activityID,
                         },
                     };
@@ -814,6 +878,38 @@ exports.sendParentNotification = functions.database.ref('/NotificationParent/{us
                         },
                     };
                     console.log("payload: ", payload)
+                } else if (notificationType === "EClassroom") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - classroom for " + objectName + ". Click this notification to access the classroom before it expires.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "ELibraryAssignment") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - library assignment for " + objectName + ". Click this notification to study the material and take on the assignment.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
                 } else if (notificationType === "ConnectionRequest") {
                     if (toAccountType === "Parent") {
                         payload = {
@@ -1105,6 +1201,38 @@ exports.sendParentNotification = functions.database.ref('/NotificationParent/{us
                             objectName: objectName,
                             notificationImageURL: notificationImageURL,
                             message: fromName + " published a new school newsletter for you",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "EClassroom") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - classroom for " + objectName + ". Click this notification to access the classroom before it expires.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "ELibraryAssignment") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has created a new e - library assignment for " + objectName + ". Click this notification to study the material and take on the assignment.",
                             activityID: activityID,
                         },
                     };

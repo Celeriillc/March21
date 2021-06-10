@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.celerii.celerii.Activities.ELibrary.CreateEditTemplateActivity;
+import com.celerii.celerii.Activities.ELibrary.Teacher.CreateEditTemplateActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;

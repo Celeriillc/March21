@@ -318,9 +318,10 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="7145b6" />
-                            <entry key="outputName" value="ic_baseline_picture_as_pdf_purple_24" />
-                            <entry key="sourceFile" value="C:\Users\DELL LATITUDE E6540\Downloads\NewGraphic 3\SVG\Icon_NoFrame.svg" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="color" value="d83a92" />
+                            <entry key="outputName" value="ic_video" />
+                            <entry key="sourceFile" value="C:\Users\DELL LATITUDE E6540\Downloads\feather-icons-svgs\video.svg" />
                           </map>
                         </option>
                       </PersistentState>

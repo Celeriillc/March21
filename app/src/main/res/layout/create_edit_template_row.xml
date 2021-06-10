@@ -19,15 +19,34 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/question"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:textColor="@color/black"
-                android:text="We provide portfolio screening to identify best
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:id="@+id/question"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:text="We provide portfolio screening to identify best
                 early development assets, Asset Inventory, Review of previous
                 interpretation/analysis,and data QC and Update"/>
+
+                <ImageView
+                    android:id="@+id/deletequestion"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_baseline_cancel_24"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/optionabackground"
@@ -43,6 +62,7 @@
                     android:id="@+id/optionalabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="(A)"/>
 
@@ -51,6 +71,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="Data Quality Management "/>
 
@@ -61,7 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:weightSum="1"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="5dp"
                 android:padding="10dp"
                 android:orientation="horizontal"
                 android:gravity="top"
@@ -71,6 +92,7 @@
                     android:id="@+id/optionblabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="(B)"/>
 
@@ -79,6 +101,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="Flowgrids Limited is a company registered in Nigeria. Our core services to the oil and gas Industry are Petroleum Engineering, Geo-sciences and Training consultancy services."/>
 
@@ -89,7 +112,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:weightSum="1"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="5dp"
                 android:padding="10dp"
                 android:orientation="horizontal"
                 android:gravity="top"
@@ -99,6 +122,7 @@
                     android:id="@+id/optionclabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="(C)"/>
 
@@ -107,6 +131,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="Flowgrids Limited" />
             </LinearLayout>
@@ -116,7 +141,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:weightSum="1"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="5dp"
                 android:padding="10dp"
                 android:orientation="horizontal"
                 android:gravity="top"
@@ -126,6 +151,7 @@
                     android:id="@+id/optiondlabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="(D)"/>
 
@@ -134,6 +160,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
+                    android:textStyle="bold"
                     android:textColor="@color/colorPrimaryPurple"
                     android:text="Flowgrids Limited" />
             </LinearLayout>

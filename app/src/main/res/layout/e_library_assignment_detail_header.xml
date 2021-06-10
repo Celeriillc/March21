@@ -105,14 +105,26 @@
                 android:text=""/>
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.2dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/colorLightGray" />
+
         <Button
             android:id="@+id/viewperformance"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
+            android:layout_gravity="center"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="@android:color/white"
@@ -123,10 +135,10 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0.2dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
             android:background="@color/colorLightGray" />
 
         <TextView

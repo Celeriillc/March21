@@ -148,29 +148,35 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             case "Newsletter":
                 notificationId = 5;
                 break;
-            case "ConnectionRequest":
+            case "EClassroom":
                 notificationId = 6;
                 break;
-            case "ConnectionRequestDeclined":
+            case "ELibraryAssignment":
                 notificationId = 7;
                 break;
-            case "Disconnection":
+            case "ConnectionRequest":
                 notificationId = 8;
                 break;
-            case "Connection":
+            case "ConnectionRequestDeclined":
                 notificationId = 9;
                 break;
-            case "NewResultPost":
+            case "Disconnection":
                 notificationId = 10;
                 break;
-            case "NewBehaviouralPost":
+            case "Connection":
                 notificationId = 11;
                 break;
-            case "NewAttendancePost":
+            case "NewResultPost":
                 notificationId = 12;
                 break;
-            case "Message":
+            case "NewBehaviouralPost":
                 notificationId = 13;
+                break;
+            case "NewAttendancePost":
+                notificationId = 14;
+                break;
+            case "Message":
+                notificationId = 15;
                 break;
             default:
                 notificationId = 0;
@@ -296,6 +302,112 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                             .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                             .setOnlyAlertOnce(true)
                             .setContentIntent(resultPendingIntent);
+                    return null;
+                case "EClassroom":
+//                    notificationId += DumbNumericals.generateIntIDFromStringID(objectID);
+                    resultIntent = new Intent(getBaseContext(), BehaviouralResultActivity.class);
+
+                    Student student = new Student(object, objectID);
+                    Gson gson = new Gson();
+                    String studentJSON = gson.toJson(student);
+
+                    bundle = new Bundle();
+                    bundle.putString("Child ID", studentJSON);
+                    bundle.putString("parentActivity", accountType);
+                    resultIntent.putExtras(bundle);
+
+                    stackBuilder = TaskStackBuilder.create(getBaseContext());
+                    stackBuilder.addNextIntentWithParentStack(resultIntent);
+                    resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    try {
+                        if (!notificationImageURL.isEmpty()) {
+                            URL myURL = new URL(notificationImageURL);
+                            bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
+                        } else {
+                            if (from != null && !from.isEmpty())
+                                bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), object));
+                            else
+                                throw new Exception();
+                        }
+
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setLargeIcon(bitmap)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
+                                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                .setSubText("New E Classroom")
+                                .setContentTitle(object)
+                                .setContentText(message)
+                                .setAutoCancel(true)
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                                .setOnlyAlertOnce(true)
+                                .setContentIntent(resultPendingIntent);
+                    } catch(Exception e) {
+                        System.out.println(e);
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
+                                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                .setSubText("New E Classroom")
+                                .setContentTitle(object)
+                                .setContentText(message)
+                                .setAutoCancel(true)
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                                .setOnlyAlertOnce(true)
+                                .setContentIntent(resultPendingIntent);
+                    }
+                    return null;
+                case "ELibraryAssignment":
+//                    notificationId += DumbNumericals.generateIntIDFromStringID(objectID);
+                    resultIntent = new Intent(getBaseContext(), BehaviouralResultActivity.class);
+
+                    student = new Student(object, objectID);
+                    gson = new Gson();
+                    studentJSON = gson.toJson(student);
+
+                    bundle = new Bundle();
+                    bundle.putString("Child ID", studentJSON);
+                    bundle.putString("parentActivity", accountType);
+                    resultIntent.putExtras(bundle);
+
+                    stackBuilder = TaskStackBuilder.create(getBaseContext());
+                    stackBuilder.addNextIntentWithParentStack(resultIntent);
+                    resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    try {
+                        if (!notificationImageURL.isEmpty()) {
+                            URL myURL = new URL(notificationImageURL);
+                            bitmap = getCircleBitmap(BitmapFactory.decodeStream(myURL.openConnection().getInputStream()));
+                        } else {
+                            if (from != null && !from.isEmpty())
+                                bitmap = drawableToBitmap(CreateTextDrawable.createTextDrawable(getBaseContext(), object));
+                            else
+                                throw new Exception();
+                        }
+
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setLargeIcon(bitmap)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
+                                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                .setSubText("New E Library Assignment")
+                                .setContentTitle(object)
+                                .setContentText(message)
+                                .setAutoCancel(true)
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                                .setOnlyAlertOnce(true)
+                                .setContentIntent(resultPendingIntent);
+                    } catch(Exception e) {
+                        System.out.println(e);
+                        builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+                                .setColor(ContextCompat.getColor(getBaseContext(), R.color.colorPrimaryPurpleNotification))
+                                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                .setSubText("New E Library Assignment")
+                                .setContentTitle(object)
+                                .setContentText(message)
+                                .setAutoCancel(true)
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                                .setOnlyAlertOnce(true)
+                                .setContentIntent(resultPendingIntent);
+                    }
                     return null;
                 case "ConnectionRequest":
                     if (accountType.equals("Parent")) {
@@ -590,9 +702,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                    notificationId += DumbNumericals.generateIntIDFromStringID(objectID);
                     resultIntent = new Intent(getBaseContext(), StudentPerformanceForParentsActivity.class);
 
-                    Student student = new Student(object, objectID);
-                    Gson gson = new Gson();
-                    String studentJSON = gson.toJson(student);
+                    student = new Student(object, objectID);
+                    gson = new Gson();
+                    studentJSON = gson.toJson(student);
 
                     bundle = new Bundle();
                     bundle.putString("Child ID", studentJSON);

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Celerii.iml" filepath="$PROJECT_DIR$/Celerii.iml" group="Celerii" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Celerii/app" />
+      <module fileurl="file://$PROJECT_DIR$/Celerii.iml" filepath="$PROJECT_DIR$/Celerii.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Celerii.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Celerii.app.iml" />
     </modules>
   </component>
 </project>

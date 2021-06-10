@@ -68,6 +68,7 @@ public class StudentPerformanceForParentsActivity extends AppCompatActivity {
         Bundle b = getIntent().getExtras();
         activeStudent = b.getString("Child ID");
         parentActivity = b.getString("parentActivity");
+
         if (parentActivity != null) {
             if (!parentActivity.isEmpty()) {
                 sharedPreferencesManager.setActiveAccount(parentActivity);

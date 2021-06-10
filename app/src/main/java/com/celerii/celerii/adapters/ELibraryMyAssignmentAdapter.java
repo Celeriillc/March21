@@ -9,11 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.Activities.ELibrary.ELibraryStudentPerformanceDetailActivity;
-import com.celerii.celerii.Activities.ELibrary.ELibraryParentAssignmentActivity;
+import com.celerii.celerii.Activities.ELibrary.Parent.ELibraryParentAssignmentActivity;
 import com.celerii.celerii.Activities.ELibrary.ELibraryAssignmentDetailActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
@@ -35,12 +36,13 @@ public class ELibraryMyAssignmentAdapter extends RecyclerView.Adapter<ELibraryMy
     private Context context;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public ImageView image;
+        public ImageView image, icon;
         public TextView title, className, dueDate, averagePerformance;
         public View clickableView;
 
         public MyViewHolder(final View view) {
             super(view);
+            icon = (ImageView) view.findViewById(R.id.icon);
             image = (ImageView) view.findViewById(R.id.image);
             title = (TextView) view.findViewById(R.id.title);
             className = (TextView) view.findViewById(R.id.classname);
@@ -98,11 +100,13 @@ public class ELibraryMyAssignmentAdapter extends RecyclerView.Adapter<ELibraryMy
         holder.dueDate.setText(dueDate);
         holder.averagePerformance.setText(averagePerformance);
 
-        Glide.with(context)
-                .load(eLibraryMyAssignmentModel.getMaterialThumbnailURL())
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
-                .into(holder.image);
+        if (position % 2 == 0) {
+            holder.image.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_background_for_options_light_purple));
+            holder.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_baseline_book_purple_24));
+        } else {
+            holder.image.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_background_for_options_light_accent));
+            holder.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_baseline_book_accent_24));
+        }
 
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override

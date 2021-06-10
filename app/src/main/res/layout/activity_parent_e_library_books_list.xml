@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".Activities.ELibrary.ParentELibraryBooksListActivity">
+    tools:context=".Activities.ELibrary.Parent.ParentELibraryBooksListActivity">
 
     <include android:id="@+id/hometoolbar"
         layout="@layout/home_toolbar" />

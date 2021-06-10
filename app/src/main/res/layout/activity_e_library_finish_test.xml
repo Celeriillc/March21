@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white"
-    tools:context=".Activities.ELibrary.ELibraryFinishTestActivity">
+    tools:context=".Activities.ELibrary.Parent.ELibraryFinishTestActivity">
 
     <include layout="@layout/home_toolbar"
         android:id="@+id/toolbar"/>
@@ -18,12 +18,20 @@
         android:weightSum="1"
         android:layout_margin="20dp">
 
+<!--        <ImageView-->
+<!--            android:layout_width="80dp"-->
+<!--            android:layout_height="80dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:layout_marginTop="30dp"-->
+<!--            android:src="@drawable/ic_done_all_black_24dp"/>-->
+
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:src="@drawable/ic_done_all_black_24dp"/>
+            android:src="@drawable/ic_check_circle"/>
 
         <TextView
             android:id="@+id/congratulations"
@@ -34,20 +42,34 @@
             android:gravity="center"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:textSize="17sp"
+            android:textSize="20sp"
             android:text="Congratulations! You have finished The Adventures of Solomon Grandi"/>
 
-        <TextView
-            android:id="@+id/score"
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginBottom="20dp"
-            android:gravity="center"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:textSize="80sp"
-            android:text="40/50"/>
+            android:layout_gravity="center">
+
+            <ProgressBar
+                android:id="@+id/progressbar"
+                style="@style/CircularDeterminateProgressBar"
+                android:layout_width="400dp"
+                android:layout_height="400dp"
+                android:layout_centerInParent="true"
+                android:progress="50"/>
+
+            <TextView
+                android:id="@+id/score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textColor="@color/colorBottomNavigationIconGray"
+                android:textStyle="bold"
+                android:textSize="60sp"
+                android:text="100%"/>
+
+        </RelativeLayout>
 
         <Button
             android:id="@+id/finish"

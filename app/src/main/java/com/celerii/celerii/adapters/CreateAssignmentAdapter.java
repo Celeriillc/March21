@@ -1,13 +1,19 @@
 package com.celerii.celerii.adapters;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,9 +21,9 @@ import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.celerii.celerii.Activities.ELibrary.CreateAssignmentActivity;
-import com.celerii.celerii.Activities.ELibrary.CreateQuestionActivity;
-import com.celerii.celerii.Activities.ELibrary.ELibraryLoadTemplateActivity;
+import com.celerii.celerii.Activities.ELibrary.Teacher.CreateAssignmentActivity;
+import com.celerii.celerii.Activities.ELibrary.Teacher.CreateQuestionActivity;
+import com.celerii.celerii.Activities.ELibrary.Teacher.ELibraryLoadTemplateActivity;
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EditClassActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
@@ -44,11 +50,15 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
+        public ImageView deleteQuestion;
         public LinearLayout optionABackground, optionBBackground, optionCBackground, optionDBackground;
         public TextView question, optionA, optionB, optionC, optionD, optionALabel, optionBLabel, optionCLabel, optionDLabel;
 
         public MyViewHolder(final View view) {
             super(view);
+
+            deleteQuestion = (ImageView) view.findViewById(R.id.deletequestion);
+
             optionABackground = (LinearLayout) view.findViewById(R.id.optionabackground);
             optionBBackground = (LinearLayout) view.findViewById(R.id.optionbbackground);
             optionCBackground = (LinearLayout) view.findViewById(R.id.optioncbackground);
@@ -209,6 +219,8 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
         } else if (holder instanceof MyViewHolder) {
             QuestionModel questionModel = questionModelList.get(position);
 
+            ((MyViewHolder) holder).deleteQuestion.setVisibility(View.VISIBLE);
+
             ((MyViewHolder) holder).question.setText(questionModel.getQuestion());
             ((MyViewHolder) holder).optionABackground.setBackgroundResource(0);
             ((MyViewHolder) holder).optionBBackground.setBackgroundResource(0);
@@ -255,6 +267,13 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
                 ((MyViewHolder) holder).optionD.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
                 ((MyViewHolder) holder).optionDLabel.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
             }
+
+            ((MyViewHolder) holder).deleteQuestion.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    deleteQuestion(position);
+                }
+            });
         }
     }
 
@@ -280,5 +299,39 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private boolean isPositionFooter (int position) {
         return position == questionModelList.size () - 1;
+    }
+
+    private void deleteQuestion(int position) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog_with_cancel);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button endTest = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+
+        message.setText(Html.fromHtml("Do you wish to delete this question? This process can not be undone."));
+
+        endTest.setText("Delete");
+        cancel.setText("Cancel");
+
+        endTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                questionModelList.remove(position);
+                notifyDataSetChanged();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

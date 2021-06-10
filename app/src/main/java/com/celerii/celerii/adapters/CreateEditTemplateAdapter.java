@@ -1,24 +1,30 @@
 package com.celerii.celerii.adapters;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.celerii.celerii.Activities.ELibrary.CreateEditTemplateActivity;
-import com.celerii.celerii.Activities.ELibrary.CreateQuestionActivity;
+import com.celerii.celerii.Activities.ELibrary.Teacher.CreateEditTemplateActivity;
+import com.celerii.celerii.Activities.ELibrary.Teacher.CreateQuestionActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.CreateEditTemplateHeaderModel;
@@ -29,6 +35,7 @@ import java.util.List;
 public class CreateEditTemplateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private SharedPreferencesManager sharedPreferencesManager;
     private List<QuestionModel> questionModelList;
+    private List<String> deletedQuestionKeys;
     private CreateEditTemplateHeaderModel createEditTemplateHeaderModel;
     private Context context;
     private Activity activity;
@@ -37,11 +44,15 @@ public class CreateEditTemplateAdapter extends RecyclerView.Adapter<RecyclerView
     public static final int Footer = 3;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
+        public ImageView deleteQuestion;
         public LinearLayout optionABackground, optionBBackground, optionCBackground, optionDBackground;
         public TextView question, optionA, optionB, optionC, optionD, optionALabel, optionBLabel, optionCLabel, optionDLabel;
 
         public MyViewHolder(final View view) {
             super(view);
+
+            deleteQuestion = (ImageView) view.findViewById(R.id.deletequestion);
+
             optionABackground = (LinearLayout) view.findViewById(R.id.optionabackground);
             optionBBackground = (LinearLayout) view.findViewById(R.id.optionbbackground);
             optionCBackground = (LinearLayout) view.findViewById(R.id.optioncbackground);
@@ -82,9 +93,10 @@ public class CreateEditTemplateAdapter extends RecyclerView.Adapter<RecyclerView
         }
     }
 
-    public CreateEditTemplateAdapter(List<QuestionModel> questionModelList, CreateEditTemplateHeaderModel createEditTemplateHeaderModel, Activity activity, Context context) {
+    public CreateEditTemplateAdapter(List<QuestionModel> questionModelList, List<String> deletedQuestionKeys, CreateEditTemplateHeaderModel createEditTemplateHeaderModel, Activity activity, Context context) {
         sharedPreferencesManager = new SharedPreferencesManager(context);
         this.questionModelList = questionModelList;
+        this.deletedQuestionKeys = deletedQuestionKeys;
         this.createEditTemplateHeaderModel = createEditTemplateHeaderModel;
         this.activity = activity;
         this.context = context;
@@ -155,6 +167,8 @@ public class CreateEditTemplateAdapter extends RecyclerView.Adapter<RecyclerView
         } else if (holder instanceof MyViewHolder) {
             QuestionModel questionModel = questionModelList.get(position);
 
+            ((MyViewHolder) holder).deleteQuestion.setVisibility(View.VISIBLE);
+
             ((MyViewHolder) holder).question.setText(questionModel.getQuestion());
             ((MyViewHolder) holder).optionABackground.setBackgroundResource(0);
             ((MyViewHolder) holder).optionBBackground.setBackgroundResource(0);
@@ -201,6 +215,13 @@ public class CreateEditTemplateAdapter extends RecyclerView.Adapter<RecyclerView
                 ((MyViewHolder) holder).optionD.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
                 ((MyViewHolder) holder).optionDLabel.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
             }
+
+            ((MyViewHolder) holder).deleteQuestion.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    deleteQuestion(position);
+                }
+            });
         }
     }
 
@@ -226,5 +247,40 @@ public class CreateEditTemplateAdapter extends RecyclerView.Adapter<RecyclerView
 
     private boolean isPositionFooter (int position) {
         return position == questionModelList.size () - 1;
+    }
+
+    private void deleteQuestion(int position) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog_with_cancel);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button endTest = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+
+        message.setText(Html.fromHtml("Do you wish to delete this question? This process can not be undone."));
+
+        endTest.setText("Delete");
+        cancel.setText("Cancel");
+
+        endTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                deletedQuestionKeys.add(questionModelList.get(position).getQuestionID());
+                questionModelList.remove(position);
+                notifyDataSetChanged();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

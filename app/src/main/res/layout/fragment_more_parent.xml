@@ -517,6 +517,61 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/eclassroomLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:padding="15dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:clickable="true"
+                        android:background="?android:attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/ic_video" />
+
+                        <TextView
+                            android:id="@+id/eclassroom"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:text="E Classroom"/>
+
+                        <TextView
+                            android:id="@+id/eclassroombadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:paddingStart="7dp"
+                            android:paddingEnd="7dp"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:background="@drawable/custom_badge_new_item"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:visibility="gone"
+                            android:text="New"/>
+
+                        <TextView
+                            android:id="@+id/eclassroommarker"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp"
+                            android:text=""/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/elibraryLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -532,7 +587,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_behavioural" />
+                            android:src="@drawable/ic_baseline_book_black_24" />
 
                         <TextView
                             android:id="@+id/elibrary"

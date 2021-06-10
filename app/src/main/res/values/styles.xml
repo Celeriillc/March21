@@ -86,4 +86,9 @@
         <item name="bpButtonsBackgroundColor">@color/white</item>
         <item name="bpButtonsTextColor">@color/colorPrimaryPurpleOpaque</item>
     </style>
+
+    <style name="CircularDeterminateProgressBar">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@drawable/progress_bar_circular_determinate</item>
+    </style>
 </resources>

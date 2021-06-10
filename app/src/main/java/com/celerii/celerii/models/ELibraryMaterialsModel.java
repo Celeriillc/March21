@@ -5,12 +5,13 @@ import com.celerii.celerii.helperClasses.Date;
 import java.util.ArrayList;
 
 public class ELibraryMaterialsModel {
-    String materialID, title, description, author, ageGrade, materialURL, materialThumbnailURL, type, numberOfReads, approximateDuration;
+    String materialID, uploader, title, description, author, ageGrade, materialURL, materialThumbnailURL, type, numberOfReads, approximateDuration;
     String date, sortableDate, tags;
-    ArrayList<String> tagList;
+    ArrayList<String> tagList, teacherList, schoolList;
 
     public ELibraryMaterialsModel() {
         this.materialID = "";
+        this.uploader = "";
         this.title = "";
         this.description = "";
         this.author = "";
@@ -24,10 +25,13 @@ public class ELibraryMaterialsModel {
         this.sortableDate = "0000/00/00 00:00:00:000";
         this.tags = "";
         this.tagList = new ArrayList<>();
+        this.teacherList = new ArrayList<>();
+        this.schoolList = new ArrayList<>();
     }
 
-    public ELibraryMaterialsModel(String materialID, String title, String description, String author, String ageGrade, String materialURL, String materialThumbnailURL, String type, String numberOfReads, String approximateDuration, String date, String tags, ArrayList<String> tagList) {
+    public ELibraryMaterialsModel(String materialID, String uploader, String title, String description, String author, String ageGrade, String materialURL, String materialThumbnailURL, String type, String numberOfReads, String approximateDuration, String date, String tags, ArrayList<String> tagList, ArrayList<String> teacherList, ArrayList<String> schoolList) {
         this.materialID = materialID;
+        this.uploader = uploader;
         this.title = title;
         this.description = description;
         this.author = author;
@@ -41,6 +45,8 @@ public class ELibraryMaterialsModel {
         this.sortableDate = Date.convertToSortableDate(date);
         this.tags = tags;
         this.tagList = tagList;
+        this.teacherList = teacherList;
+        this.schoolList = schoolList;
     }
 
     public String getMaterialID() {
@@ -49,6 +55,14 @@ public class ELibraryMaterialsModel {
 
     public void setMaterialID(String materialID) {
         this.materialID = materialID;
+    }
+
+    public String getUploader() {
+        return uploader;
+    }
+
+    public void setUploader(String uploader) {
+        this.uploader = uploader;
     }
 
     public String getTitle() {
@@ -153,5 +167,21 @@ public class ELibraryMaterialsModel {
 
     public void setTagList(ArrayList<String> tagList) {
         this.tagList = tagList;
+    }
+
+    public ArrayList<String> getTeacherList() {
+        return teacherList;
+    }
+
+    public void setTeacherList(ArrayList<String> teacherList) {
+        this.teacherList = teacherList;
+    }
+
+    public ArrayList<String> getSchoolList() {
+        return schoolList;
+    }
+
+    public void setSchoolList(ArrayList<String> schoolList) {
+        this.schoolList = schoolList;
     }
 }

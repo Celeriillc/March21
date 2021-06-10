@@ -1,9 +1,11 @@
 package com.celerii.celerii.models;
 
 public class EClassroomScheduledClassesListModel {
-    String classID, className, schoolID, teacherID, dateCreated, sortableDateCreated, dateScheduled, sortableDateScheduled, subject, classLink;
+    String scheduledClassID, classID, className, schoolID, teacherID, dateCreated, sortableDateCreated, dateScheduled, sortableDateScheduled, subject, description, classLink;
+    Boolean open;
 
     public EClassroomScheduledClassesListModel() {
+        this.scheduledClassID = "";
         this.classID = "";
         this.className = "";
         this.schoolID = "";
@@ -13,10 +15,13 @@ public class EClassroomScheduledClassesListModel {
         this.dateScheduled = "";
         this.sortableDateScheduled = "";
         this.subject = "";
+        this.description = "";
         this.classLink = "";
+        this.open = true;
     }
 
-    public EClassroomScheduledClassesListModel(String classID, String className, String schoolID, String teacherID, String dateCreated, String sortableDateCreated, String dateScheduled, String sortableDateScheduled, String subject, String classLink) {
+    public EClassroomScheduledClassesListModel(String scheduledClassID, String classID, String className, String schoolID, String teacherID, String dateCreated, String sortableDateCreated, String dateScheduled, String sortableDateScheduled, String subject, String description, String classLink) {
+        this.scheduledClassID = scheduledClassID;
         this.classID = classID;
         this.className = className;
         this.schoolID = schoolID;
@@ -26,7 +31,33 @@ public class EClassroomScheduledClassesListModel {
         this.dateScheduled = dateScheduled;
         this.sortableDateScheduled = sortableDateScheduled;
         this.subject = subject;
+        this.description = "";
         this.classLink = classLink;
+        this.open = true;
+    }
+
+    public EClassroomScheduledClassesListModel(String scheduledClassID, String classID, String className, String schoolID, String teacherID, String dateCreated, String sortableDateCreated, String dateScheduled, String sortableDateScheduled, String subject, String description, String classLink, Boolean open) {
+        this.scheduledClassID = scheduledClassID;
+        this.classID = classID;
+        this.className = className;
+        this.schoolID = schoolID;
+        this.teacherID = teacherID;
+        this.dateCreated = dateCreated;
+        this.sortableDateCreated = sortableDateCreated;
+        this.dateScheduled = dateScheduled;
+        this.sortableDateScheduled = sortableDateScheduled;
+        this.subject = subject;
+        this.description = "";
+        this.classLink = classLink;
+        this.open = open;
+    }
+
+    public String getScheduledClassID() {
+        return scheduledClassID;
+    }
+
+    public void setScheduledClassID(String scheduledClassID) {
+        this.scheduledClassID = scheduledClassID;
     }
 
     public String getClassID() {
@@ -107,5 +138,21 @@ public class EClassroomScheduledClassesListModel {
 
     public void setClassLink(String classLink) {
         this.classLink = classLink;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getOpen() {
+        return open;
+    }
+
+    public void setOpen(Boolean open) {
+        this.open = open;
     }
 }
