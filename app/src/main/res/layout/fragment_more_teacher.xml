@@ -334,7 +334,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
-                            android:layout_marginStart="5dp"
+                            android:layout_marginStart="0dp"
                             android:src="@drawable/ic_file" />
 
                         <TextView
@@ -479,7 +479,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_timetable" />
+                            android:src="@drawable/ic_clock" />
 
                         <TextView
                             android:id="@+id/timetable"

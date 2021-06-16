@@ -130,7 +130,7 @@ public class ELibraryMyAssignmentAdapter extends RecyclerView.Adapter<ELibraryMy
                     bundle = new Bundle();
                     bundle.putString("materialId", eLibraryMyAssignmentModel.getMaterialID());
                     bundle.putString("assignmentID", eLibraryMyAssignmentModel.getAssignmentID());
-                    bundle.putString("activeStudent", activeStudent);
+                    bundle.putString("Child ID", activeStudent);
                 } else { /*if (type.equals("ParentMyPerformance"))*/
                     Gson gson = new Gson();
                     Type type = new TypeToken<Student>() {}.getType();

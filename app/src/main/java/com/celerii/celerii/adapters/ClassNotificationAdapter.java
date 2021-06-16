@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -15,6 +17,8 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomHomeActivity;
+import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomMessageBoardActivity;
+import com.celerii.celerii.Activities.ELibrary.Parent.ELibraryParentAssignmentActivity;
 import com.celerii.celerii.Activities.ELibrary.Parent.ParentELibraryHomeActivity;
 import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Home.NotificationDetailActivity;
@@ -30,6 +34,9 @@ import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
+import com.celerii.celerii.models.EClassroomScheduledClassesListModel;
+import com.celerii.celerii.models.ELibraryMyAssignmentModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
@@ -45,6 +52,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +68,9 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
     private SharedPreferencesManager sharedPreferencesManager;
     private List<NotificationModel> notificationModelList;
     private Context context;
+    String scheduledClassLink = "";
+    String scheduledClassState = "";
+    String materialID = "";
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
@@ -460,19 +472,83 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
                     Gson gson = new Gson();
                     String activeKid = gson.toJson(student);
-                    b.putString("Child ID", activeKid);
-                    Intent I = new Intent(context, ParentEClassroomHomeActivity.class);
-                    I.putExtras(b);
-                    context.startActivity(I);
+
+                    CustomProgressDialogOne progressDialogOne = new CustomProgressDialogOne(context);
+                    progressDialogOne.show();
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("E Classroom Scheduled Class").child("Student").child(notificationModel.getObject()).child(notificationModel.getActivityID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                EClassroomScheduledClassesListModel eClassroomScheduledClassesListModel = dataSnapshot.getValue(EClassroomScheduledClassesListModel.class);
+                                scheduledClassLink = eClassroomScheduledClassesListModel.getClassLink();
+
+                                if (eClassroomScheduledClassesListModel.getOpen() == null) {
+                                    eClassroomScheduledClassesListModel.setOpen(true);
+                                }
+
+                                if (!eClassroomScheduledClassesListModel.getOpen()) {
+                                    scheduledClassState = "Concluded";
+                                }
+
+                                progressDialogOne.dismiss();
+                                b.putString("Child ID", activeKid);
+                                b.putString("Scheduled Class ID", notificationModel.getActivityID());
+                                b.putString("Scheduled Class Link", scheduledClassLink);
+                                b.putString("Scheduled Class State", scheduledClassState);
+                                b.putString("Scheduled Class Scheduled Date", eClassroomScheduledClassesListModel.getDateScheduled());
+                                Intent I = new Intent(context, ParentEClassroomMessageBoardActivity.class);
+                                I.putExtras(b);
+                                context.startActivity(I);
+                            } else {
+                                progressDialogOne.dismiss();
+                                String messageString = "We couldn't find this classroom";
+                                ShowDialogWithMessage.showDialogWithMessage(context, messageString);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 }  else if (notificationType.equals("ELibraryAssignment")){
                     Bundle b = new Bundle();
                     Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
                     Gson gson = new Gson();
                     String activeKid = gson.toJson(student);
-                    b.putString("Child ID", activeKid);
-                    Intent I = new Intent(context, ParentELibraryHomeActivity.class);
-                    I.putExtras(b);
-                    context.startActivity(I);
+
+                    CustomProgressDialogOne progressDialogOne = new CustomProgressDialogOne(context);
+                    progressDialogOne.show();
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment").child("Student").child(notificationModel.getObject()).child(notificationModel.getActivityID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                ELibraryMyAssignmentModel eLibraryMyAssignmentModel = dataSnapshot.getValue(ELibraryMyAssignmentModel.class);
+                                materialID = eLibraryMyAssignmentModel.getMaterialID();
+
+                                progressDialogOne.dismiss();
+                                b.putString("materialId", materialID);
+                                b.putString("assignmentID", notificationModel.getActivityID());
+                                b.putString("Child ID", activeKid);
+                                Intent I = new Intent(context, ELibraryParentAssignmentActivity.class);
+                                I.putExtras(b);
+                                context.startActivity(I);
+                            } else {
+                                progressDialogOne.dismiss();
+                                String messageString = "We couldn't find this assignment";
+                                ShowDialogWithMessage.showDialogWithMessage(context, messageString);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 } else if (notificationType.equals("ConnectionRequest")) {
                     if (notificationModel.getFromAccountType().equals("Parent")) {
                         Intent I = new Intent(context, ParentsRequestActivity.class);

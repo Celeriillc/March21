@@ -7,8 +7,8 @@ android {
         applicationId "com.celerii.celerii"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 4
-        versionName "4"
+        versionCode 6
+        versionName "6"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
@@ -24,6 +24,9 @@ android {
 //            shrinkResources true
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 //        }
+    }
+    dexOptions {
+        javaMaxHeapSize "2g"
     }
     dataBinding.enabled = true
 }

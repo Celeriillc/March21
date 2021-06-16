@@ -308,7 +308,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_marginEnd="5dp"
-                            android:src="@drawable/ic_icons_google_logo"
+                            android:src="@drawable/ic_alert_triangle"
                             android:visibility="gone"/>
 
                     </LinearLayout>
@@ -384,7 +384,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_timetable" />
+                            android:src="@drawable/ic_clock" />
 
                         <TextView
                             android:id="@+id/timetable"
@@ -477,7 +477,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_behavioural" />
+                            android:src="@drawable/ic_smile" />
 
                         <TextView
                             android:id="@+id/behaviouralperformance"

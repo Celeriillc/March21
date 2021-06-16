@@ -196,6 +196,6 @@ public class ELibraryMyAssignmentModel {
     }
 
     public void setSubmitted(Boolean submitted) {
-        submitted = submitted;
+        this.submitted = submitted;
     }
 }

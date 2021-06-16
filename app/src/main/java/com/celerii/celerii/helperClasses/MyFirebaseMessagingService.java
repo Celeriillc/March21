@@ -305,15 +305,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     return null;
                 case "EClassroom":
 //                    notificationId += DumbNumericals.generateIntIDFromStringID(objectID);
-                    resultIntent = new Intent(getBaseContext(), BehaviouralResultActivity.class);
+                    resultIntent = new Intent(getBaseContext(), ParentMainActivityTwo.class);
 
                     Student student = new Student(object, objectID);
                     Gson gson = new Gson();
                     String studentJSON = gson.toJson(student);
 
                     bundle = new Bundle();
-                    bundle.putString("Child ID", studentJSON);
-                    bundle.putString("parentActivity", accountType);
+                    bundle.putString("Fragment Int", "2");
                     resultIntent.putExtras(bundle);
 
                     stackBuilder = TaskStackBuilder.create(getBaseContext());
@@ -358,15 +357,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     return null;
                 case "ELibraryAssignment":
 //                    notificationId += DumbNumericals.generateIntIDFromStringID(objectID);
-                    resultIntent = new Intent(getBaseContext(), BehaviouralResultActivity.class);
+                    resultIntent = new Intent(getBaseContext(), ParentMainActivityTwo.class);
 
                     student = new Student(object, objectID);
                     gson = new Gson();
                     studentJSON = gson.toJson(student);
 
                     bundle = new Bundle();
-                    bundle.putString("Child ID", studentJSON);
-                    bundle.putString("parentActivity", accountType);
+                    bundle.putString("Fragment Int", "2");
                     resultIntent.putExtras(bundle);
 
                     stackBuilder = TaskStackBuilder.create(getBaseContext());

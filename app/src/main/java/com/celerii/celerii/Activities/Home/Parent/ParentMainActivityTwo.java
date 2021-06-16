@@ -225,6 +225,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         onBoardFirebaseCheck();
         onBoardingSearchBalloonCheck();
         tutorialFirebaseCheck();
+//        checkServerForApplicationUpdates();
         remoteCampaign();
         bottomNavigation.setCurrentItem(0);
         bottomNavigation.setUseElevation(false);
@@ -1086,25 +1087,30 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                     // If the update is downloaded but not installed, notify the user to complete the update.
                     popupSnackBarForCompleteUpdate();
                 } else if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                    if ((appUpdateInfo.availableVersionCode() % 10) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                    if ((appUpdateInfo.availableVersionCode() % 1000) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                         showDialogForImmediateUpdateWithMessage(appUpdateInfo);
 //                        startUpdate(appUpdateInfo, AppUpdateType.IMMEDIATE);
 //                        CustomToast.primaryBackgroundToast(context, "Version Code: " + appUpdateInfo.availableVersionCode() + "\n" +
 //                                "UpdatePriority: " + appUpdateInfo.updatePriority() + "\n");
-                    } else if ((appUpdateInfo.availableVersionCode() % 5) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                    } else if ((appUpdateInfo.availableVersionCode() % 50) == 0 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
                         showDialogForFlexibleUpdateWithMessage(appUpdateInfo);
 //                        startUpdate(appUpdateInfo, AppUpdateType.FLEXIBLE);
 //                        CustomToast.primaryBackgroundToast(context, "Version Code: " + appUpdateInfo.availableVersionCode() + "\n" +
 //                                "UpdatePriority: " + appUpdateInfo.updatePriority() + "\n");
                     } else {
                         int versionCode = BuildConfig.VERSION_CODE;
-                        int currentVersionByTen = versionCode / 10;
-                        int updateByTen = appUpdateInfo.availableVersionCode() / 10;
+                        int currentVersionByTen = versionCode / 1000;
+                        int updateByTen = appUpdateInfo.availableVersionCode() / 1000;
+
+//                        String info = "VersionCode: " + String.valueOf(versionCode) + " CurrentVersionByTen: " + String.valueOf(currentVersionByTen) + " UpdateByTen: " + String.valueOf(updateByTen);
+//                        CustomToast.primaryBackgroundToast(context, info);
 
                         if (updateByTen > currentVersionByTen) {
-                            if ((appUpdateInfo.availableVersionCode() - versionCode) > 10) {
+//                            CustomToast.primaryBackgroundToast(context, "UpdateByTen > CurrentVersionByTen");
+//                            if ((appUpdateInfo.availableVersionCode() - versionCode) > 10) {
+//                                CustomToast.primaryBackgroundToast(context, "appUpdateInfo.availableVersionCode - versionCode");
                                 showDialogForImmediateUpdateWithMessage(appUpdateInfo);
-                            }
+//                            }
                         }
                     }
                 }
@@ -1126,6 +1132,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                         showDialogWithMessage(message);
                         break;
                     case InstallStatus.CANCELED:
+                        message = "Remote update has been cancelled";
+                        showDialogWithMessage(message);
                         Log.e("Remote Update", "Update flow cancelled! Result code: ");
                         break;
                 }
@@ -1218,7 +1226,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             return;
         }
 
-        String messageString = "";
+        String messageString = "Your version of Celerii is outdated. An update is available. " +
+                "You can continue to use Celerii while your update is being downloaded, else, dismiss this dialog.";
         message.setText(messageString);
 
         OK.setText("Update Celerii");

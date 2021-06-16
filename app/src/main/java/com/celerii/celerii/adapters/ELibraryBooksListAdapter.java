@@ -24,6 +24,7 @@ public class ELibraryBooksListAdapter extends RecyclerView.Adapter<ELibraryBooks
 
     private SharedPreferencesManager sharedPreferencesManager;
     private List<ELibraryMaterialsModel> eLibraryMaterialsModelList;
+    private String activeStudent;
     private Context context;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -44,6 +45,13 @@ public class ELibraryBooksListAdapter extends RecyclerView.Adapter<ELibraryBooks
     public ELibraryBooksListAdapter(List<ELibraryMaterialsModel> eLibraryMaterialsModelList, Context context) {
         this.sharedPreferencesManager = new SharedPreferencesManager(context);
         this.eLibraryMaterialsModelList = eLibraryMaterialsModelList;
+        this.context = context;
+    }
+
+    public ELibraryBooksListAdapter(List<ELibraryMaterialsModel> eLibraryMaterialsModelList, String activeStudent, Context context) {
+        this.sharedPreferencesManager = new SharedPreferencesManager(context);
+        this.eLibraryMaterialsModelList = eLibraryMaterialsModelList;
+        this.activeStudent = activeStudent;
         this.context = context;
     }
 
@@ -125,6 +133,7 @@ public class ELibraryBooksListAdapter extends RecyclerView.Adapter<ELibraryBooks
                 bundle.putString("thumbnailURL", eLibraryMaterialsModel.getMaterialThumbnailURL());
                 bundle.putString("materialURL", eLibraryMaterialsModel.getMaterialURL());
                 bundle.putString("materialUploader", eLibraryMaterialsModel.getUploader());
+                bundle.putString("activeStudent", activeStudent);
                 intent.putExtras(bundle);
                 context.startActivity(intent);
             }

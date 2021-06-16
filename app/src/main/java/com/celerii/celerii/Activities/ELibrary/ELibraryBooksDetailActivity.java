@@ -14,6 +14,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,11 +30,14 @@ import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.ELibraryMaterialsModel;
+import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.SubscriptionModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -47,7 +51,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -71,7 +78,11 @@ public class ELibraryBooksDetailActivity extends AppCompatActivity {
 
     Bundle bundle;
     String id, titleString, authorString, typeString, descriptionString, thumbnailURL, materialURL, materialUploader;
-    String assignmentID, studentID, accountType;
+    String assignmentID, accountType;
+
+    String activeStudent = "";
+    String activeStudentID = "";
+    String activeStudentName;
 
     String featureUseKey = "";
     String featureName = "E Library Books Detail";
@@ -106,6 +117,77 @@ public class ELibraryBooksDetailActivity extends AppCompatActivity {
         thumbnailURL = bundle.getString("thumbnailURL");
         materialURL = bundle.getString("materialURL");
         materialUploader = bundle.getString("materialUploader");
+
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            activeStudent = bundle.getString("activeStudent");
+
+            if (activeStudent == null) {
+                Gson gson = new Gson();
+                ArrayList<Student> myChildren = new ArrayList<>();
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                Type type = new TypeToken<ArrayList<Student>>() {}.getType();
+                myChildren = gson.fromJson(myChildrenJSON, type);
+
+                if (myChildren != null) {
+                    if (myChildren.size() > 0) {
+                        gson = new Gson();
+                        activeStudent = gson.toJson(myChildren.get(0));
+                        sharedPreferencesManager.setActiveKid(activeStudent);
+                    } else {
+                        String messageString = "You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started.";
+                        showDialogWithMessageAndClose(Html.fromHtml(messageString));
+                        return;
+                    }
+                } else {
+                    String messageString = "You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started.";
+                    showDialogWithMessageAndClose(Html.fromHtml(messageString));
+                    return;
+                }
+            } else {
+                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                    Boolean activeKidExist = false;
+                    Gson gson = new Gson();
+                    Type type = new TypeToken<Student>() {}.getType();
+                    Student activeKidModel = gson.fromJson(activeStudent, type);
+
+                    String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                    type = new TypeToken<ArrayList<Student>>() {}.getType();
+                    ArrayList<Student> myChildren = gson.fromJson(myChildrenJSON, type);
+
+                    for (Student student: myChildren) {
+                        if (activeKidModel.getStudentID().equals(student.getStudentID())) {
+                            activeKidExist = true;
+                            activeKidModel = student;
+                            activeStudent = gson.toJson(activeKidModel);
+                            sharedPreferencesManager.setActiveKid(activeStudent);
+                            break;
+                        }
+                    }
+
+                    if (!activeKidExist) {
+                        if (myChildren.size() > 0) {
+                            if (myChildren.size() > 1) {
+                                gson = new Gson();
+                                activeStudent = gson.toJson(myChildren.get(0));
+                                sharedPreferencesManager.setActiveKid(activeStudent);
+                            }
+                        } else {
+                            String messageString = "You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started.";
+                            showDialogWithMessageAndClose(Html.fromHtml(messageString));
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Gson gson = new Gson();
+            Type type = new TypeToken<Student>() {}.getType();
+            Student activeStudentModel = gson.fromJson(activeStudent, type);
+
+            activeStudentID = activeStudentModel.getStudentID();
+            activeStudentName = activeStudentModel.getFirstName() + " " + activeStudentModel.getLastName();
+        }
 
         imageClipper = (LinearLayout) findViewById(R.id.imageclipper);
         title = (TextView) findViewById(R.id.title);
@@ -151,6 +233,46 @@ public class ELibraryBooksDetailActivity extends AppCompatActivity {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(Html.fromHtml(messageString));
+                    return;
+                }
+
+                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                    if (materialUploader.equals("Celerii")) {
+                        Gson gson = new Gson();
+                        Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
+                        String subscriptionModelJSON = sharedPreferencesManager.getSubscriptionInformationParents();
+                        Type type = new TypeToken<HashMap<String, ArrayList<SubscriptionModel>>>() {}.getType();
+                        HashMap<String, ArrayList<SubscriptionModel>> subscriptionModelMap = gson.fromJson(subscriptionModelJSON, type);
+                        SubscriptionModel subscriptionModel = new SubscriptionModel();
+                        if (subscriptionModelMap != null) {
+                            ArrayList<SubscriptionModel> subscriptionModelList = subscriptionModelMap.get(activeStudentID);
+                            String latestSubscriptionDate = "0000/00/00 00:00:00:000";
+                            if (subscriptionModelList != null) {
+                                for (SubscriptionModel subscriptionModel1 : subscriptionModelList) {
+                                    if (Date.compareDates(subscriptionModel1.getExpiryDate(), latestSubscriptionDate)) {
+                                        subscriptionModel = subscriptionModel1;
+                                        latestSubscriptionDate = subscriptionModel1.getExpiryDate();
+                                    }
+                                }
+                            } else {
+                                latestSubscriptionDate = "0000/00/00 00:00:00:000";
+                            }
+                        }
+                        Boolean isExpired = Date.compareDates(Date.getDate(), subscriptionModel.getExpiryDate());
+
+                        if (!isOpenToAll) {
+                            if (isExpired) {
+                                String messageString = "This material and its assignment questions are not currently available because you do not have an active subscription, please subscribe " + "<b>" + activeStudentName + "</b>" + " to a Celerii plan to get access to this material and its assignment questions";
+                                showDialogWithMessage(Html.fromHtml(messageString));
+                                return;
+                            }
+                        }
+                    }
+                }
+
                 if (typeString.equals("pdf")) {
                     Intent intent = new Intent(ELibraryBooksDetailActivity.this, ELibraryReadPDFActivity.class);
                     Bundle bundle = new Bundle();
@@ -398,6 +520,61 @@ public class ELibraryBooksDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+            }
+        });
+    }
+
+    void showDialogWithMessage (Spanned messageString) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
+    void showDialogWithMessageAndClose (Spanned messageString) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                finish();
             }
         });
     }
