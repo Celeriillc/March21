@@ -36,44 +36,44 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:weightSum="2"
                     android:layout_marginTop="15dp"
                     android:layout_marginBottom="15dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <Button
                         android:id="@+id/term"
+                        style="?android:attr/borderlessButtonStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:padding="10dp"
                         android:layout_marginStart="20dp"
                         android:layout_marginEnd="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/rounded_button_primary_purple_profile_icon"
                         android:gravity="center"
-                        android:textSize="15sp"
-                        android:textColor="@color/colorPrimaryPurple"
-                        android:textStyle="bold"
+                        android:padding="10dp"
                         android:text="2nd Term"
                         android:textAllCaps="false"
-                        android:background="@drawable/rounded_button_primary_purple_profile_icon"
-                        style="?android:attr/borderlessButtonStyle" />
+                        android:textColor="@color/colorPrimaryPurple"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
                     <Button
                         android:id="@+id/year"
+                        style="?android:attr/borderlessButtonStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:padding="10dp"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="20dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/rounded_button_primary_purple_profile_icon"
                         android:gravity="center"
-                        android:textSize="15sp"
-                        android:textColor="@color/colorPrimaryPurple"
-                        android:textStyle="bold"
+                        android:padding="10dp"
                         android:text="2022"
                         android:textAllCaps="false"
-                        android:background="@drawable/rounded_button_primary_purple_profile_icon"
-                        style="?android:attr/borderlessButtonStyle" />
+                        android:textColor="@color/colorPrimaryPurple"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
@@ -87,7 +87,7 @@
                         android:id="@+id/imagebackgroundone"
                         android:layout_width="148dp"
                         android:layout_height="148dp"
-                        android:src="@drawable/circular_image_background_white"/>
+                        android:src="@drawable/circular_image_background_white" />
 
                     <ImageView
                         android:id="@+id/imagebackgroundtwo"
@@ -107,7 +107,7 @@
                             android:id="@+id/schoolpic"
                             android:layout_width="142dp"
                             android:layout_height="142dp"
-                            android:background="@drawable/roundedbutton"/>
+                            android:background="@drawable/roundedbutton" />
 
                     </LinearLayout>
 
@@ -117,45 +117,46 @@
                     android:id="@+id/schoolname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
                     android:layout_gravity="center"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:text="Full Name"
                     android:textColor="@android:color/black"
-                    android:text="Full Name" />
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
                     android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="20dp"
                     android:text="School" />
 
                 <Button
                     android:id="@+id/connect"
+                    style="?android:attr/borderlessButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_gravity="center"
                     android:layout_marginTop="20dp"
+                    android:background="@drawable/roundedbutton"
                     android:paddingStart="30dp"
                     android:paddingEnd="30dp"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/white"
                     android:text="Connect"
-                    android:background="@drawable/roundedbutton"
-                    style="?android:attr/borderlessButtonStyle" />
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
 
                 <LinearLayout
+                    android:id="@+id/generallayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:layout_marginTop="20dp"
-                    android:paddingBottom="10dp">
+                    android:orientation="vertical"
+                    android:paddingBottom="0dp">
 
                     <LinearLayout
                         android:id="@+id/schooltypelayout"
@@ -166,49 +167,50 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_school"/>
+                                android:background="@drawable/ic_school" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/schooltype"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="Private, Secondary"
                                 android:textColor="@color/black"
-                                android:text="Private, Secondary"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="School Type"/>
+                                android:text="School Type"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/curriculumlayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -216,49 +218,50 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_accent_profile_icon"/>
+                                android:background="@drawable/rounded_button_accent_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_file_text"/>
+                                android:background="@drawable/ic_file_text" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/curriculum"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="British, Nigerian"
                                 android:textColor="@color/black"
-                                android:text="British, Nigerian"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="Curriculum"/>
+                                android:text="Curriculum"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/totalnumberofseatslayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -266,49 +269,50 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_chair"/>
+                                android:background="@drawable/ic_chair" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/totalnumberofseats"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="0"
                                 android:textColor="@color/black"
-                                android:text="0"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="Total Number of Seats"/>
+                                android:text="Total Number of Seats"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/averagenumberofseatsperclasslayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -316,49 +320,50 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_accent_profile_icon"/>
+                                android:background="@drawable/rounded_button_accent_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_chair"/>
+                                android:background="@drawable/ic_chair" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/averagenumberofseatsperclass"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="0"
                                 android:textColor="@color/black"
-                                android:text="0"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="Average Seats per Class"/>
+                                android:text="Average Seats per Class"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/termaverageattendancelayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -366,49 +371,50 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_attendance"/>
+                                android:background="@drawable/ic_attendance" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/averageattendance"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="0%"
                                 android:textColor="@color/black"
-                                android:text="0%"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="Term Average Attendance"/>
+                                android:text="Term Average Attendance"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/termaveragepunctualitylayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -416,49 +422,50 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_accent_profile_icon"/>
+                                android:background="@drawable/rounded_button_accent_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_punctuality"/>
+                                android:background="@drawable/ic_punctuality" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/averagepunctuality"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="0%"
                                 android:textColor="@color/black"
-                                android:text="0%"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="Term Average Punctuality"/>
+                                android:text="Term Average Punctuality"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/termaverageperformanceininternalexamslayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
@@ -466,118 +473,120 @@
                         <RelativeLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
                             android:layout_marginTop="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginStart="20dp">
+                            android:layout_marginBottom="10dp">
 
                             <ImageView
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:background="@drawable/rounded_button_primary_purple_profile_icon"/>
+                                android:background="@drawable/rounded_button_primary_purple_profile_icon" />
 
                             <ImageView
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_percent"/>
+                                android:background="@drawable/ic_percent" />
 
                         </RelativeLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/averageacademicperformanceininternalexams"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textStyle="bold"
+                                android:text="0%"
                                 android:textColor="@color/black"
-                                android:text="0%"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textColor="@color/colorBottomNavigationIconGray"
-                                android:text="Term Average Performance in Internal Exams"/>
+                                android:text="Term Average Performance in Internal Exams"
+                                android:textColor="@color/colorBottomNavigationIconGray" />
                         </LinearLayout>
 
                     </LinearLayout>
 
+                    <View
+                        android:id="@+id/basicinfoseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
+
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/contactinfolayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="20dp"
-                    android:paddingBottom="10dp">
+                    android:layout_marginBottom="0dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="0dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="17sp"
+                        android:text="Location/Address"
                         android:textColor="@android:color/black"
-                        android:text="Location/Address"/>
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:textSize="15sp"
+                        android:text="No. 9 Awolowo Road, off Adeola Ajose St., V/I, Lagos \nNo. 9 Ajose Adeola St., off Adeogun Crescent, V/I, Lagos"
                         android:textColor="@android:color/black"
-                        android:text="No. 9 Awolowo Road, off Adeola Ajose St., V/I, Lagos \nNo. 9 Ajose Adeola St., off Adeogun Crescent, V/I, Lagos"/>
+                        android:textSize="15sp" />
 
                     <TextView
                         android:id="@+id/viewmap"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
+                        android:text="View Map"
+                        android:textColor="@color/colorPrimaryPurple"
                         android:textSize="15sp"
                         android:textStyle="bold"
-                        android:textColor="@color/colorPrimaryPurple"
-                        android:text="View Map"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
-
+                    <View
+                        android:id="@+id/contactinfoseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/missionvisionhistorylayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="20dp"
-                    android:paddingBottom="10dp">
+                    android:layout_marginBottom="0dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -590,55 +599,55 @@
                             android:layout_height="9dp"
                             android:layout_gravity="center"
                             android:scaleType="fitCenter"
-                            android:src="@drawable/circular_image_background_primary_purple"/>
+                            android:src="@drawable/circular_image_background_primary_purple" />
 
                         <TextView
                             android:id="@+id/missiontab"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:textSize="17sp"
-                            android:textStyle="bold"
+                            android:text="Mission"
                             android:textColor="@color/colorPrimaryPurple"
-                            android:text="Mission"/>
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
 
                         <ImageView
                             android:id="@+id/visionmarker"
                             android:layout_width="9dp"
                             android:layout_height="9dp"
-                            android:layout_marginStart="20dp"
                             android:layout_gravity="center"
+                            android:layout_marginStart="20dp"
                             android:scaleType="fitCenter"
                             android:src="@drawable/circular_image_background_primary_purple"
-                            android:visibility="invisible"/>
+                            android:visibility="invisible" />
 
                         <TextView
                             android:id="@+id/visiontab"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:textSize="17sp"
+                            android:text="Vision"
                             android:textColor="@color/black"
-                            android:text="Vision"/>
+                            android:textSize="17sp" />
 
                         <ImageView
                             android:id="@+id/historymarker"
                             android:layout_width="9dp"
                             android:layout_height="9dp"
-                            android:layout_marginStart="20dp"
                             android:layout_gravity="center"
+                            android:layout_marginStart="20dp"
                             android:scaleType="fitCenter"
                             android:src="@drawable/circular_image_background_primary_purple"
-                            android:visibility="invisible"/>
+                            android:visibility="invisible" />
 
                         <TextView
                             android:id="@+id/historytab"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:textSize="17sp"
+                            android:text="History"
                             android:textColor="@color/black"
-                            android:text="History"/>
+                            android:textSize="17sp" />
 
                     </LinearLayout>
 
@@ -647,60 +656,60 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:textSize="15sp"
+                        android:text="The Google Play Console reports native crashes under Android vitals. With a few steps, you can generate and upload a native debug symbols file for your app. This file enables symbolicated native crash stack traces (that include class and function names) in Android vitals to help you debug your app in production"
                         android:textColor="@android:color/black"
-                        android:text="The Google Play Console reports native crashes under Android vitals. With a few steps, you can generate and upload a native debug symbols file for your app. This file enables symbolicated native crash stack traces (that include class and function names) in Android vitals to help you debug your app in production"/>
+                        android:textSize="15sp" />
 
-
+                    <View
+                        android:id="@+id/missionvisionhistoryseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/gallerysubjectscocurricularactivitieslayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="5dp"
                     android:layout_marginStart="0dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="0dp"
+                    android:layout_marginBottom="5dp"
+                    android:orientation="vertical"
                     android:paddingBottom="0dp">
 
                     <LinearLayout
                         android:id="@+id/gallery"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginStart="0dp"
                         android:layout_marginEnd="0dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:orientation="horizontal"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal"
-                        android:background="?android:attr/selectableItemBackground">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="30dp"
-                            android:textSize="17sp"
+                            android:layout_weight="1"
+                            android:text="Gallery"
                             android:textColor="@color/black"
-                            android:text="Gallery"/>
+                            android:textSize="17sp" />
 
                         <ImageView
                             android:id="@+id/viewmoregallery"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:layout_marginEnd="20dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                            android:layout_marginEnd="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp" />
 
                     </LinearLayout>
 
@@ -708,30 +717,30 @@
                         android:id="@+id/offeredsubjects"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginStart="0dp"
                         android:layout_marginEnd="0dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:orientation="horizontal"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal"
-                        android:background="?android:attr/selectableItemBackground">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="30dp"
-                            android:textSize="17sp"
+                            android:layout_weight="1"
+                            android:text="Offered Subjects"
                             android:textColor="@color/black"
-                            android:text="Offered Subjects"/>
+                            android:textSize="17sp" />
 
                         <ImageView
                             android:id="@+id/viewmoreofferedsubjects"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:layout_marginEnd="20dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                            android:layout_marginEnd="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp" />
 
                     </LinearLayout>
 
@@ -739,77 +748,79 @@
                         android:id="@+id/cocurricularactivities"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginStart="0dp"
                         android:layout_marginEnd="0dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:orientation="horizontal"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal"
-                        android:background="?android:attr/selectableItemBackground">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="30dp"
-                            android:textSize="17sp"
+                            android:layout_weight="1"
+                            android:text="Co-Curricular Activities"
                             android:textColor="@color/black"
-                            android:text="Co-Curricular Activities"/>
+                            android:textSize="17sp" />
 
                         <ImageView
                             android:id="@+id/viewmorecocurricularactivities"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:layout_marginEnd="20dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                            android:layout_marginEnd="20dp"
+                            android:src="@drawable/ic_chevron_right_black_24dp" />
 
                     </LinearLayout>
 
+                    <View
+                        android:id="@+id/gallerysubjectscocurricularactivitiesseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
+
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/eeaplayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="5dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="5dp"
+                    android:orientation="vertical"
                     android:paddingBottom="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
+                        android:orientation="horizontal"
                         android:paddingTop="0dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textStyle="bold"
-                            android:textSize="17sp"
+                            android:text="External Examination Average Performance"
                             android:textColor="@android:color/black"
-                            android:text="External Examination Average Performance"/>
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
 
                         <ImageView
                             android:id="@+id/viewmoreeeap"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                            android:src="@drawable/ic_chevron_right_black_24dp" />
 
                     </LinearLayout>
 
@@ -817,8 +828,8 @@
                         android:id="@+id/eeaperrorlayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_marginTop="15dp"
+                        android:orientation="vertical"
                         android:padding="20dp"
                         android:visibility="gone">
 
@@ -826,11 +837,10 @@
                             android:id="@+id/eeaperrortext"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:layout_gravity="center"
-                            android:textColor="@color/colorBottomNavigationIconGray"
+                            android:gravity="center"
                             android:text="School hasn't uploaded any external examination average performance yet"
-                            />
+                            android:textColor="@color/colorBottomNavigationIconGray" />
 
                     </LinearLayout>
 
@@ -838,17 +848,17 @@
                         android:id="@+id/eeaplayout1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:paddingTop="20dp"
-                        android:paddingBottom="15dp"
-                        android:orientation="vertical">
+                        android:paddingBottom="15dp">
 
                         <TextView
                             android:id="@+id/eeap1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="15sp"
+                            android:text="WASSCE"
                             android:textColor="@android:color/black"
-                            android:text="WASSCE"/>
+                            android:textSize="15sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -864,16 +874,16 @@
                                 android:layout_height="16dp"
                                 android:layout_weight="1"
                                 android:progress="50"
-                                android:progressDrawable="@drawable/progress_bar_primary_purple"/>
+                                android:progressDrawable="@drawable/progress_bar_primary_purple" />
 
                             <TextView
                                 android:id="@+id/eeapscore1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="15dp"
-                                android:textSize="15sp"
+                                android:text="80%"
                                 android:textColor="@android:color/black"
-                                android:text="80%"/>
+                                android:textSize="15sp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -882,17 +892,17 @@
                         android:id="@+id/eeaplayout2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:paddingTop="15dp"
-                        android:paddingBottom="15dp"
-                        android:orientation="vertical">
+                        android:paddingBottom="15dp">
 
                         <TextView
                             android:id="@+id/eeap2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="15sp"
+                            android:text="WASSCE"
                             android:textColor="@android:color/black"
-                            android:text="WASSCE"/>
+                            android:textSize="15sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -908,16 +918,16 @@
                                 android:layout_height="16dp"
                                 android:layout_weight="1"
                                 android:progress="50"
-                                android:progressDrawable="@drawable/progress_bar_kilogarm_orange"/>
+                                android:progressDrawable="@drawable/progress_bar_kilogarm_orange" />
 
                             <TextView
                                 android:id="@+id/eeapscore2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="15dp"
-                                android:textSize="15sp"
+                                android:text="80%"
                                 android:textColor="@android:color/black"
-                                android:text="80%"/>
+                                android:textSize="15sp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -926,17 +936,17 @@
                         android:id="@+id/eeaplayout3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:paddingTop="15dp"
-                        android:paddingBottom="15dp"
-                        android:orientation="vertical">
+                        android:paddingBottom="15dp">
 
                         <TextView
                             android:id="@+id/eeap3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="15sp"
+                            android:text="WASSCE"
                             android:textColor="@android:color/black"
-                            android:text="WASSCE"/>
+                            android:textSize="15sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -952,64 +962,66 @@
                                 android:layout_height="16dp"
                                 android:layout_weight="1"
                                 android:progress="50"
-                                android:progressDrawable="@drawable/progress_bar_accent"/>
+                                android:progressDrawable="@drawable/progress_bar_accent" />
 
                             <TextView
                                 android:id="@+id/eeapscore3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="15dp"
-                                android:textSize="15sp"
+                                android:text="80%"
                                 android:textColor="@android:color/black"
-                                android:text="80%"/>
+                                android:textSize="15sp" />
                         </LinearLayout>
 
                     </LinearLayout>
 
+                    <View
+                        android:id="@+id/eeapseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
+
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/awardslayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="20dp"
-                    android:paddingBottom="10dp">
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
+                        android:orientation="horizontal"
                         android:paddingTop="0dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textStyle="bold"
-                            android:textSize="17sp"
+                            android:text="Awards"
                             android:textColor="@android:color/black"
-                            android:text="Awards"/>
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
 
                         <ImageView
                             android:id="@+id/viewmoreawards"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                            android:src="@drawable/ic_chevron_right_black_24dp" />
 
                     </LinearLayout>
 
@@ -1017,8 +1029,8 @@
                         android:id="@+id/awardserrorlayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_marginTop="15dp"
+                        android:orientation="vertical"
                         android:padding="20dp"
                         android:visibility="gone">
 
@@ -1026,10 +1038,10 @@
                             android:id="@+id/awardserrortext"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:layout_gravity="center"
-                            android:textColor="@color/colorBottomNavigationIconGray"
-                            android:text="School hasn't uploaded any awards yet"/>
+                            android:gravity="center"
+                            android:text="School hasn't uploaded any awards yet"
+                            android:textColor="@color/colorBottomNavigationIconGray" />
 
                     </LinearLayout>
 
@@ -1037,34 +1049,34 @@
                         android:id="@+id/awardlayout1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <ImageView
                             android:layout_width="10dp"
                             android:layout_height="10dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/rounded_button_primary_purple"/>
+                            android:src="@drawable/rounded_button_primary_purple" />
 
                         <TextView
                             android:id="@+id/award1"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="15dp"
-                            android:textSize="15sp"
+                            android:layout_weight="1"
+                            android:text="Award 1"
                             android:textColor="@android:color/black"
-                            android:text="Award 1"/>
+                            android:textSize="15sp" />
 
                         <TextView
                             android:id="@+id/awardyear1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:textSize="15sp"
-                            android:text="2022"/>
+                            android:text="2022"
+                            android:textSize="15sp" />
 
 
                     </LinearLayout>
@@ -1073,10 +1085,10 @@
                         android:id="@+id/awardlayout2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <ImageView
                             android:layout_width="10dp"
@@ -1088,19 +1100,19 @@
                             android:id="@+id/award2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="15dp"
-                            android:textSize="15sp"
+                            android:layout_weight="1"
+                            android:text="Award 1"
                             android:textColor="@android:color/black"
-                            android:text="Award 1"/>
+                            android:textSize="15sp" />
 
                         <TextView
                             android:id="@+id/awardyear2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:textSize="15sp"
-                            android:text="2022"/>
+                            android:text="2022"
+                            android:textSize="15sp" />
 
 
                     </LinearLayout>
@@ -1109,82 +1121,84 @@
                         android:id="@+id/awardlayout3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="0dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <ImageView
                             android:layout_width="10dp"
                             android:layout_height="10dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/rounded_button_kilogarm_orange"/>
+                            android:src="@drawable/rounded_button_kilogarm_orange" />
 
                         <TextView
                             android:id="@+id/award3"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:layout_marginStart="15dp"
-                            android:textSize="15sp"
+                            android:layout_weight="1"
+                            android:text="Award 1"
                             android:textColor="@android:color/black"
-                            android:text="Award 1"/>
+                            android:textSize="15sp" />
 
                         <TextView
                             android:id="@+id/awardyear3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:textSize="15sp"
-                            android:text="2022"/>
+                            android:text="2022"
+                            android:textSize="15sp" />
 
 
                     </LinearLayout>
 
+                    <View
+                        android:id="@+id/awardsseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
+
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/notablealumnilayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="10dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="20dp"
-                    android:paddingBottom="10dp">
+                    android:layout_marginBottom="10dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
+                        android:orientation="horizontal"
                         android:paddingTop="0dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textStyle="bold"
-                            android:textSize="17sp"
+                            android:text="Notable Alumni"
                             android:textColor="@android:color/black"
-                            android:text="Notable Alumni"/>
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
 
                         <ImageView
                             android:id="@+id/viewmorenotablealumni"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_chevron_right_black_24dp"/>
+                            android:src="@drawable/ic_chevron_right_black_24dp" />
 
                     </LinearLayout>
 
@@ -1192,19 +1206,19 @@
                         android:id="@+id/notablealumnierrorlayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_marginTop="15dp"
-                        android:visibility="gone"
-                        android:padding="20dp">
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:visibility="gone">
 
                         <TextView
                             android:id="@+id/notablealumnierrortext"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:layout_gravity="center"
-                            android:textColor="@color/colorBottomNavigationIconGray"
-                            android:text="School hasn't uploaded any notable alum yet"/>
+                            android:gravity="center"
+                            android:text="School hasn't uploaded any notable alum yet"
+                            android:textColor="@color/colorBottomNavigationIconGray" />
 
                     </LinearLayout>
 
@@ -1212,10 +1226,10 @@
                         android:id="@+id/notablealumnilayout1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <LinearLayout
                             android:id="@+id/notablealumnipic1clipper"
@@ -1227,32 +1241,32 @@
                                 android:id="@+id/notablealumnipic1"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:orientation="vertical"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/notablealumni1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="15sp"
+                                android:text="Award 1"
                                 android:textColor="@android:color/black"
-                                android:text="Award 1"/>
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:id="@+id/notablealumniset1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textSize="15sp"
-                                android:text="2022"/>
+                                android:text="2022"
+                                android:textSize="15sp" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -1260,10 +1274,10 @@
                         android:id="@+id/notablealumnilayout2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <LinearLayout
                             android:id="@+id/notablealumnipic2clipper"
@@ -1275,32 +1289,32 @@
                                 android:id="@+id/notablealumnipic2"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:orientation="vertical"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/notablealumni2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="15sp"
+                                android:text="Award 1"
                                 android:textColor="@android:color/black"
-                                android:text="Award 1"/>
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:id="@+id/notablealumniset2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textSize="15sp"
-                                android:text="2022"/>
+                                android:text="2022"
+                                android:textSize="15sp" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -1308,10 +1322,10 @@
                         android:id="@+id/notablealumnilayout3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="0dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
                         <LinearLayout
                             android:id="@+id/notablealumnipic3clipper"
@@ -1323,71 +1337,73 @@
                                 android:id="@+id/notablealumnipic3"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:layout_marginStart="15dp"
-                            android:orientation="vertical"
-                            android:layout_gravity="center">
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/notablealumni3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="15sp"
+                                android:text="Award 1"
                                 android:textColor="@android:color/black"
-                                android:text="Award 1"/>
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:id="@+id/notablealumniset3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
-                                android:textSize="15sp"
-                                android:text="2022"/>
+                                android:text="2022"
+                                android:textSize="15sp" />
                         </LinearLayout>
                     </LinearLayout>
+
+                    <View
+                        android:id="@+id/notablealumniseparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="0.2dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="30dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginBottom="30dp"
+                        android:background="@color/colorDeepGray" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.2dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:background="@color/colorDeepGray"/>
-
                 <LinearLayout
+                    android:id="@+id/collegelayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="20dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:orientation="vertical"
                     android:paddingBottom="10dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
+                        android:orientation="horizontal"
                         android:paddingTop="0dp"
                         android:paddingBottom="15dp"
-                        android:orientation="horizontal">
+                        android:weightSum="1">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textStyle="bold"
-                            android:textSize="17sp"
+                            android:text="Top 5 Alumni Unversities/Colleges"
                             android:textColor="@android:color/black"
-                            android:text="Top 5 Alumni Unversities/Colleges"/>
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
 
                     </LinearLayout>
 
@@ -1395,19 +1411,19 @@
                         android:id="@+id/collegeerrorlayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_marginTop="15dp"
-                        android:visibility="gone"
-                        android:padding="20dp">
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:visibility="gone">
 
                         <TextView
                             android:id="@+id/collegeerrortext"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
                             android:layout_gravity="center"
-                            android:textColor="@color/colorBottomNavigationIconGray"
-                            android:text="School hasn't uploaded any alum college or university yet"/>
+                            android:gravity="center"
+                            android:text="School hasn't uploaded any alum college or university yet"
+                            android:textColor="@color/colorBottomNavigationIconGray" />
 
                     </LinearLayout>
 
@@ -1415,18 +1431,18 @@
                         android:id="@+id/collegelayout1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/collegesn1"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:textSize="15sp"-->
-<!--                            android:textColor="@android:color/black"-->
-<!--                            android:text="1."/>-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/collegesn1"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:textSize="15sp"-->
+                        <!--                            android:textColor="@android:color/black"-->
+                        <!--                            android:text="1."/>-->
 
                         <LinearLayout
                             android:id="@+id/collegepic1clipper"
@@ -1438,7 +1454,7 @@
                                 android:id="@+id/collegepic1"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
@@ -1446,29 +1462,29 @@
                             android:id="@+id/college1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="15dp"
                             android:layout_gravity="center"
-                            android:textSize="15sp"
+                            android:layout_marginStart="15dp"
+                            android:text="University of Lagos, Akoka"
                             android:textColor="@color/black"
-                            android:text="University of Lagos, Akoka"/>
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/collegelayout2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/collegesn2"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:textSize="15sp"-->
-<!--                            android:textColor="@android:color/black"-->
-<!--                            android:text="2."/>-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/collegesn2"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:textSize="15sp"-->
+                        <!--                            android:textColor="@android:color/black"-->
+                        <!--                            android:text="2."/>-->
 
                         <LinearLayout
                             android:id="@+id/collegepic2clipper"
@@ -1480,7 +1496,7 @@
                                 android:id="@+id/collegepic2"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
@@ -1488,29 +1504,29 @@
                             android:id="@+id/college2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="15dp"
                             android:layout_gravity="center"
-                            android:textSize="15sp"
+                            android:layout_marginStart="15dp"
+                            android:text="University of Lagos, Akoka"
                             android:textColor="@color/black"
-                            android:text="University of Lagos, Akoka"/>
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/collegelayout3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/collegesn3"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:textSize="15sp"-->
-<!--                            android:textColor="@android:color/black"-->
-<!--                            android:text="3."/>-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/collegesn3"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:textSize="15sp"-->
+                        <!--                            android:textColor="@android:color/black"-->
+                        <!--                            android:text="3."/>-->
 
                         <LinearLayout
                             android:id="@+id/collegepic3clipper"
@@ -1522,7 +1538,7 @@
                                 android:id="@+id/collegepic3"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
@@ -1530,29 +1546,29 @@
                             android:id="@+id/college3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="15dp"
                             android:layout_gravity="center"
-                            android:textSize="15sp"
+                            android:layout_marginStart="15dp"
+                            android:text="University of Lagos, Akoka"
                             android:textColor="@color/black"
-                            android:text="University of Lagos, Akoka"/>
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/collegelayout4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/collegesn4"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:textSize="15sp"-->
-<!--                            android:textColor="@android:color/black"-->
-<!--                            android:text="4."/>-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/collegesn4"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:textSize="15sp"-->
+                        <!--                            android:textColor="@android:color/black"-->
+                        <!--                            android:text="4."/>-->
 
                         <LinearLayout
                             android:id="@+id/collegepic4clipper"
@@ -1564,7 +1580,7 @@
                                 android:id="@+id/collegepic4"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
@@ -1572,29 +1588,29 @@
                             android:id="@+id/college4"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="15dp"
                             android:layout_gravity="center"
-                            android:textSize="15sp"
+                            android:layout_marginStart="15dp"
+                            android:text="University of Lagos, Akoka"
                             android:textColor="@color/black"
-                            android:text="University of Lagos, Akoka"/>
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/collegelayout5"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:weightSum="1"
                         android:layout_marginTop="15dp"
                         android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/collegesn5"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:textSize="15sp"-->
-<!--                            android:textColor="@android:color/black"-->
-<!--                            android:text="5."/>-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/collegesn5"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:textSize="15sp"-->
+                        <!--                            android:textColor="@android:color/black"-->
+                        <!--                            android:text="5."/>-->
 
                         <LinearLayout
                             android:id="@+id/collegepic5clipper"
@@ -1606,7 +1622,7 @@
                                 android:id="@+id/collegepic5"
                                 android:layout_width="45dp"
                                 android:layout_height="45dp"
-                                android:layout_gravity="center"/>
+                                android:layout_gravity="center" />
 
                         </LinearLayout>
 
@@ -1614,29 +1630,29 @@
                             android:id="@+id/college5"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="15dp"
                             android:layout_gravity="center"
-                            android:textSize="15sp"
+                            android:layout_marginStart="15dp"
+                            android:text="University of Lagos, Akoka"
                             android:textColor="@color/black"
-                            android:text="University of Lagos, Akoka"/>
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                 </LinearLayout>
 
                 <Button
                     android:id="@+id/disconnect"
+                    style="?android:attr/borderlessButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="30dp"
                     android:layout_marginStart="15dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginEnd="15dp"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
-                    android:text="Disconnect"
+                    android:layout_marginBottom="30dp"
                     android:background="@drawable/rounded_button_white_light_gray"
-                    style="?android:attr/borderlessButtonStyle" />
+                    android:text="Disconnect"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </ScrollView>

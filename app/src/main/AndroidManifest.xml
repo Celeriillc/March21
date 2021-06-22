@@ -17,6 +17,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+<!--        <receiver android:name=".Activities.Home.Parent.ParentMainActivityTwo$MyBroadcastReceiver" >-->
+<!--        </receiver>-->
+        <receiver android:name=".Activities.Utility.ApplicationLaunchActivity$MyBroadcastReceiver" >
+        </receiver>
         <activity android:name=".Activities.EClassroom.EClassroomScheduledClassParticipantsActivity"></activity>
         <activity android:name=".Activities.EClassroom.Teacher.TeacherEClassroomScheduleClassActivity" />
         <activity android:name=".Activities.EClassroom.Teacher.TeacherEClassroomMessageBoardActivity" />

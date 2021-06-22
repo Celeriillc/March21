@@ -911,6 +911,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         @Override
         protected void onPostExecute(Void void_) {
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.setChannelId("com.celerii.celerii");
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                        "com.celerii.celerii",
+                        "Celerii",
+                        NotificationManager.IMPORTANCE_DEFAULT);
+
+                if (mNotificationManager != null) {
+                    mNotificationManager.createNotificationChannel(channel);
+                }
+            }
+
             mNotificationManager.notify(notificationId, builder.build());
             super.onPostExecute(void_);
         }

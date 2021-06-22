@@ -50,6 +50,7 @@ import com.celerii.celerii.models.EEAP;
 import com.celerii.celerii.models.NotableAlumni;
 import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.School;
+import com.celerii.celerii.models.SchoolSettings;
 import com.celerii.celerii.models.SchoolTeacherConnectionRequest;
 import com.celerii.celerii.models.TeacherAttendanceHeader;
 import com.celerii.celerii.models.TeacherSchoolConnectionRequest;
@@ -86,6 +87,10 @@ public class SchoolProfileActivity extends AppCompatActivity {
     Button termButton, yearButton;
     Button connect, disconnect;
 
+    LinearLayout generalLayout, contactInfoLayout, missionVisionHistoryLayout, gallerySubjectsCoCurricularActivitiesLayout, eeapLayout, awardsLayout, notableAlumniLayout,
+            collegeLayout;
+    LinearLayout schoolTypeLayout, curriculumLayout, totalNumberOfSeatsLayout, averageNumberOfSeatsPerClassLayout, termAverageAttendanceLayout,
+            termAveragePunctualityLayout, termAveragePerformanceInInternalExamsLayout;
     LinearLayout profilePictureClipper;
     LinearLayout notableAlumniPic1Clipper, notableAlumniPic2Clipper, notableAlumniPic3Clipper;
     LinearLayout gallery, offeredSubjects, coCurricularActivities;
@@ -149,6 +154,8 @@ public class SchoolProfileActivity extends AppCompatActivity {
     ArrayList<ImageView> collegePicList = new ArrayList<>();
     ArrayList<TextView> collegeList = new ArrayList<>();
 
+    SchoolSettings schoolSettings = new SchoolSettings();
+
     String featureUseKey = "";
     String featureName = "School Profile";
     long sessionStartTime = 0;
@@ -198,6 +205,23 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
         connect = (Button) findViewById(R.id.connect);
         disconnect = (Button) findViewById(R.id.disconnect);
+
+        generalLayout = (LinearLayout) findViewById(R.id.generallayout);
+        contactInfoLayout = (LinearLayout) findViewById(R.id.contactinfolayout);
+        missionVisionHistoryLayout = (LinearLayout) findViewById(R.id.missionvisionhistorylayout);
+        gallerySubjectsCoCurricularActivitiesLayout = (LinearLayout) findViewById(R.id.gallerysubjectscocurricularactivitieslayout);
+        eeapLayout = (LinearLayout) findViewById(R.id.eeaplayout);
+        awardsLayout = (LinearLayout) findViewById(R.id.awardslayout);
+        notableAlumniLayout = (LinearLayout) findViewById(R.id.notablealumnilayout);
+        collegeLayout = (LinearLayout) findViewById(R.id.collegelayout);
+
+        schoolTypeLayout = (LinearLayout) findViewById(R.id.schooltypelayout);
+        curriculumLayout = (LinearLayout) findViewById(R.id.curriculumlayout);
+        totalNumberOfSeatsLayout = (LinearLayout) findViewById(R.id.totalnumberofseatslayout);
+        averageNumberOfSeatsPerClassLayout = (LinearLayout) findViewById(R.id.averagenumberofseatsperclasslayout);
+        termAverageAttendanceLayout = (LinearLayout) findViewById(R.id.termaverageattendancelayout);
+        termAveragePunctualityLayout = (LinearLayout) findViewById(R.id.termaveragepunctualitylayout);
+        termAveragePerformanceInInternalExamsLayout = (LinearLayout) findViewById(R.id.termaverageperformanceininternalexamslayout);
 
         profilePictureClipper = (LinearLayout) findViewById(R.id.profilepictureclipper);
         notableAlumniPic1Clipper = (LinearLayout) findViewById(R.id.notablealumnipic1clipper);
@@ -614,159 +638,249 @@ public class SchoolProfileActivity extends AppCompatActivity {
         term_year = term + "_" + year;
         year_term = year + "_" +  term;
 
-        mDatabaseReference = mFirebaseDatabase.getReference("School").child(schoolID);
+        mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    School school = dataSnapshot.getValue(School.class);
+                    schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
+                }
 
-                    boolean isDeleted = (school.getDeleted() == null) ? false : school.getDeleted();
-                    if (!isDeleted) {
-                        schoolName = school.getSchoolName();
-                        String schoolPicURL = school.getProfilePhotoUrl();
-                        schoolFullName.setText(schoolName);
-                        getSupportActionBar().setTitle(schoolName);
+                mDatabaseReference = mFirebaseDatabase.getReference("School").child(schoolID);
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            School school = dataSnapshot.getValue(School.class);
 
-                        Drawable textDrawable;
-                        if (!schoolName.trim().isEmpty()) {
-                            String[] nameArray = schoolName.replaceAll("\\s+", " ").trim().split(" ");
-                            if (nameArray.length == 1) {
-                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
-                            } else {
-                                textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 150);
-                            }
-                            schoolPic.setImageDrawable(textDrawable);
-                        } else {
-                            textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
-                        }
+                            boolean isDeleted = (school.getDeleted() == null) ? false : school.getDeleted();
+                            if (!isDeleted) {
+                                schoolName = school.getSchoolName();
+                                String schoolPicURL = school.getProfilePhotoUrl();
+                                schoolFullName.setText(schoolName);
+                                getSupportActionBar().setTitle(schoolName);
 
-                        if (!schoolPicURL.isEmpty()) {
-                            Glide.with(context)
-                                    .load(schoolPicURL)
-                                    .placeholder(textDrawable)
-                                    .error(textDrawable)
-                                    .centerCrop()
-                                    .bitmapTransform(new CropCircleTransformation(context))
-                                    .into(schoolPic);
-                        }
-
-                        String schoolTypeString = school.getSchoolType();
-                        if (!schoolTypeString.trim().isEmpty()) {
-                            schoolType.setText(schoolTypeString);
-                        } else {
-                            String message = schoolName + " hasn't set its type yet";
-                            schoolType.setText(message);
-                        }
-
-                        String curriculumString = school.getCurriculum();
-                        if (!curriculumString.trim().isEmpty()) {
-                            curriculum.setText(curriculumString);
-                        } else {
-                            String message = schoolName + " hasn't set its curriculum yet";
-                            curriculum.setText(message);
-                        }
-
-                        missionString = school.getMission();
-                        visionString = school.getVision();
-                        historyString = school.getHistory();
-
-                        if (!missionString.trim().isEmpty()) {
-                            missionVisionHistory.setText(missionString);
-                        } else {
-                            String message = schoolName + " hasn't set its mission yet";
-                            missionVisionHistory.setText(message);
-                        }
-
-                        missionMarker.setVisibility(View.VISIBLE);
-                        visionMarker.setVisibility(View.INVISIBLE);
-                        historyMarker.setVisibility(View.INVISIBLE);
-                        missionTab.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
-                        visionTab.setTextColor(ContextCompat.getColor(context, R.color.black));
-                        historyTab.setTextColor(ContextCompat.getColor(context, R.color.black));
-                        missionTab.setTypeface(null, Typeface.BOLD);
-                        visionTab.setTypeface(null, Typeface.NORMAL);
-                        historyTab.setTypeface(null, Typeface.NORMAL);
-
-                        mDatabaseReference = mFirebaseDatabase.getReference().child("School Students").child(schoolID);
-                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    numberOfStudents = (int) dataSnapshot.getChildrenCount();
-                                    totalNumberOfSeats.setText(String.valueOf(numberOfStudents));
+                                Drawable textDrawable;
+                                if (!schoolName.trim().isEmpty()) {
+                                    String[] nameArray = schoolName.replaceAll("\\s+", " ").trim().split(" ");
+                                    if (nameArray.length == 1) {
+                                        textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], 150);
+                                    } else {
+                                        textDrawable = CreateTextDrawable.createTextDrawableTransparent(context, nameArray[0], nameArray[1], 150);
+                                    }
+                                    schoolPic.setImageDrawable(textDrawable);
                                 } else {
-                                    totalNumberOfSeats.setText("0");
+                                    textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
                                 }
 
-                                mDatabaseReference = mFirebaseDatabase.getReference().child("School Class").child(schoolID);
+                                if (!schoolPicURL.isEmpty()) {
+                                    Glide.with(context)
+                                            .load(schoolPicURL)
+                                            .placeholder(textDrawable)
+                                            .error(textDrawable)
+                                            .centerCrop()
+                                            .bitmapTransform(new CropCircleTransformation(context))
+                                            .into(schoolPic);
+                                }
+
+                                String schoolTypeString = school.getSchoolType();
+                                if (schoolSettings.isShowSchoolType()) {
+                                    schoolTypeLayout.setVisibility(View.VISIBLE);
+                                    if (!schoolTypeString.trim().isEmpty()) {
+                                        schoolType.setText(schoolTypeString);
+                                    } else {
+                                        String message = schoolName + " hasn't set its type yet";
+                                        schoolType.setText(message);
+                                    }
+                                } else {
+                                    schoolTypeLayout.setVisibility(View.GONE);
+                                }
+
+                                String curriculumString = school.getCurriculum();
+                                if (schoolSettings.isShowCurriculum()) {
+                                    curriculumLayout.setVisibility(View.VISIBLE);
+                                    if (!curriculumString.trim().isEmpty()) {
+                                        curriculum.setText(curriculumString);
+                                    } else {
+                                        String message = schoolName + " hasn't set its curriculum yet";
+                                        curriculum.setText(message);
+                                    }
+                                } else {
+                                    curriculumLayout.setVisibility(View.GONE);
+                                }
+
+                                if (schoolSettings.isShowMissionVisionAndHistory()) {
+                                    missionVisionHistoryLayout.setVisibility(View.VISIBLE);
+                                    missionString = school.getMission();
+                                    visionString = school.getVision();
+                                    historyString = school.getHistory();
+
+                                    if (!missionString.trim().isEmpty()) {
+                                        missionVisionHistory.setText(missionString);
+                                    } else {
+                                        String message = schoolName + " hasn't set its mission yet";
+                                        missionVisionHistory.setText(message);
+                                    }
+
+                                    missionMarker.setVisibility(View.VISIBLE);
+                                    visionMarker.setVisibility(View.INVISIBLE);
+                                    historyMarker.setVisibility(View.INVISIBLE);
+                                    missionTab.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryPurple));
+                                    visionTab.setTextColor(ContextCompat.getColor(context, R.color.black));
+                                    historyTab.setTextColor(ContextCompat.getColor(context, R.color.black));
+                                    missionTab.setTypeface(null, Typeface.BOLD);
+                                    visionTab.setTypeface(null, Typeface.NORMAL);
+                                    historyTab.setTypeface(null, Typeface.NORMAL);
+                                } else {
+                                    missionVisionHistoryLayout.setVisibility(View.GONE);
+                                }
+
+                                mDatabaseReference = mFirebaseDatabase.getReference().child("School Students").child(schoolID);
                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                                         if (dataSnapshot.exists()) {
-                                            int numberOfClasses = (int) dataSnapshot.getChildrenCount();
-                                            int studentsPerClass = (int) (numberOfStudents / numberOfClasses);
-                                            averageNumberOfSeatsPerClass.setText(String.valueOf(studentsPerClass));
-                                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                                classes.add(postSnapshot.getKey());
-                                            }
+                                            numberOfStudents = (int) dataSnapshot.getChildrenCount();
+                                            totalNumberOfSeats.setText(String.valueOf(numberOfStudents));
                                         } else {
-                                            averageNumberOfSeatsPerClass.setText(String.valueOf(numberOfStudents));
+                                            totalNumberOfSeats.setText("0");
                                         }
 
-                                        if (classes.size() > 0) {
-                                            for (String classID : classes) {
-                                                String subject_term_year = "General_" + term_year;
-                                                mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(classID);
-                                                mDatabaseReference.orderByChild("subject_term_year").equalTo(subject_term_year).addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                        schoolAttendanceCounter++;
-                                                        int nos = (int) dataSnapshot.getChildrenCount();
-                                                        if (dataSnapshot.exists()) {
-                                                            double presentPercentageSummer = 0.0;
-                                                            double punctualPercentageSummer = 0.0;
-                                                            int attendanceCounter = 0;
-                                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                                TeacherAttendanceHeader teacherAttendanceHeader = postSnapshot.getValue(TeacherAttendanceHeader.class);
-                                                                double present = Double.parseDouble(teacherAttendanceHeader.getPresent());
-                                                                double absent = Double.parseDouble(teacherAttendanceHeader.getAbsent());
-                                                                double late = Double.parseDouble(teacherAttendanceHeader.getLate());
-                                                                double presentPercentage = ((present + late) / (present + absent + late)) * 100;
-                                                                double punctualPercentage = ((present) / (present + absent + late)) * 100;
-                                                                presentPercentageSummer += presentPercentage;
-                                                                punctualPercentageSummer += punctualPercentage;
-                                                                attendanceCounter += 1;
+                                        if (schoolSettings.isShowTotalSeats()) {
+                                            totalNumberOfSeatsLayout.setVisibility(View.VISIBLE);
+                                        } else {
+                                            totalNumberOfSeatsLayout.setVisibility(View.GONE);
+                                        }
+
+                                        mDatabaseReference = mFirebaseDatabase.getReference().child("School Class").child(schoolID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                if (dataSnapshot.exists()) {
+                                                    int numberOfClasses = (int) dataSnapshot.getChildrenCount();
+                                                    int studentsPerClass = (int) (numberOfStudents / numberOfClasses);
+                                                    averageNumberOfSeatsPerClass.setText(String.valueOf(studentsPerClass));
+                                                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                                        classes.add(postSnapshot.getKey());
+                                                    }
+                                                } else {
+                                                    averageNumberOfSeatsPerClass.setText(String.valueOf(numberOfStudents));
+                                                }
+
+                                                if (schoolSettings.isShowAverageSeatsPerClass()) {
+                                                    averageNumberOfSeatsPerClassLayout.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    averageNumberOfSeatsPerClassLayout.setVisibility(View.GONE);
+                                                }
+
+                                                if (classes.size() > 0) {
+                                                    for (String classID : classes) {
+                                                        String subject_term_year = "General_" + term_year;
+                                                        mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(classID);
+                                                        mDatabaseReference.orderByChild("subject_term_year").equalTo(subject_term_year).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                schoolAttendanceCounter++;
+                                                                int nos = (int) dataSnapshot.getChildrenCount();
+                                                                if (dataSnapshot.exists()) {
+                                                                    double presentPercentageSummer = 0.0;
+                                                                    double punctualPercentageSummer = 0.0;
+                                                                    int attendanceCounter = 0;
+                                                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                                        TeacherAttendanceHeader teacherAttendanceHeader = postSnapshot.getValue(TeacherAttendanceHeader.class);
+                                                                        double present = Double.parseDouble(teacherAttendanceHeader.getPresent());
+                                                                        double absent = Double.parseDouble(teacherAttendanceHeader.getAbsent());
+                                                                        double late = Double.parseDouble(teacherAttendanceHeader.getLate());
+                                                                        double presentPercentage = ((present + late) / (present + absent + late)) * 100;
+                                                                        double punctualPercentage = ((present) / (present + absent + late)) * 100;
+                                                                        presentPercentageSummer += presentPercentage;
+                                                                        punctualPercentageSummer += punctualPercentage;
+                                                                        attendanceCounter += 1;
+                                                                    }
+
+                                                                    double averagePresent = presentPercentageSummer / attendanceCounter;
+                                                                    double averagePunctual = punctualPercentageSummer / attendanceCounter;
+                                                                    totalAttendance += averagePresent;
+                                                                    totalPunctuality += averagePunctual;
+                                                                }
+
+                                                                if (schoolAttendanceCounter == classes.size()) {
+                                                                    int averageAttendanceInt = (int) (totalAttendance / schoolAttendanceCounter);
+                                                                    int averagePunctualityInt = (int) (totalPunctuality / schoolAttendanceCounter);
+                                                                    String messagePresent = String.valueOf(averageAttendanceInt) + "%";
+                                                                    String messagePunctual = String.valueOf(averagePunctualityInt) + "%";
+                                                                    averageAttendance.setText(messagePresent);
+                                                                    averagePunctuality.setText(messagePunctual);
+                                                                    loadTeacherRelationships();
+                                                                }
                                                             }
 
-                                                            double averagePresent = presentPercentageSummer / attendanceCounter;
-                                                            double averagePunctual = punctualPercentageSummer / attendanceCounter;
-                                                            totalAttendance += averagePresent;
-                                                            totalPunctuality += averagePunctual;
-                                                        }
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                                        if (schoolAttendanceCounter == classes.size()) {
-                                                            int averageAttendanceInt = (int) (totalAttendance / schoolAttendanceCounter);
-                                                            int averagePunctualityInt = (int) (totalPunctuality / schoolAttendanceCounter);
-                                                            String messagePresent = String.valueOf(averageAttendanceInt) + "%";
-                                                            String messagePunctual = String.valueOf(averagePunctualityInt) + "%";
-                                                            averageAttendance.setText(messagePresent);
-                                                            averagePunctuality.setText(messagePunctual);
-                                                            loadTeacherRelationships();
-                                                        }
+                                                            }
+                                                        });
                                                     }
+                                                } else {
+                                                    averageAttendance.setText("0%");
+                                                    averagePunctuality.setText("0%");
+                                                    loadTeacherRelationships();
+                                                }
 
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                if (schoolSettings.isShowAverageAttendance()) {
+                                                    termAverageAttendanceLayout.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    termAverageAttendanceLayout.setVisibility(View.GONE);
+                                                }
 
-                                                    }
-                                                });
+                                                if (schoolSettings.isShowAveragePunctuality()) {
+                                                    termAveragePunctualityLayout.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    termAveragePunctualityLayout.setVisibility(View.GONE);
+                                                }
+
+                                                if (schoolSettings.isShowGallery()) {
+                                                    gallery.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    gallery.setVisibility(View.GONE);
+                                                }
+
+                                                if (schoolSettings.isShowOfferedSubjects()) {
+                                                    offeredSubjects.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    offeredSubjects.setVisibility(View.GONE);
+                                                }
+
+                                                if (schoolSettings.isShowCoCurricularActivities()) {
+                                                    coCurricularActivities.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    coCurricularActivities.setVisibility(View.GONE);
+                                                }
+
+                                                if (!schoolSettings.isShowGallery() && !schoolSettings.isShowOfferedSubjects() && !schoolSettings.isShowCoCurricularActivities()) {
+                                                    gallerySubjectsCoCurricularActivitiesLayout.setVisibility(View.GONE);
+                                                } else {
+                                                    gallerySubjectsCoCurricularActivitiesLayout.setVisibility(View.VISIBLE);
+                                                }
+
+//                                                if (!schoolSettings.isShowSchoolType() &&
+//                                                        !schoolSettings.isShowCurriculum() &&
+//                                                        !schoolSettings.isShowTotalSeats() &&
+//                                                        !schoolSettings.isShowAverageSeatsPerClass() &&
+//                                                        !schoolSettings.isShowAverageAttendance() &&
+//                                                        !schoolSettings.isShowAveragePunctuality() &&
+//                                                        !schoolSettings.isShowAverageInternalExamsPerformance()) {
+//                                                    generalLayout.setVisibility(View.GONE);
+//                                                } else {
+//                                                    generalLayout.setVisibility(View.VISIBLE);
+//                                                }
                                             }
-                                        } else {
-                                            averageAttendance.setText("0%");
-                                            averagePunctuality.setText("0%");
-                                            loadTeacherRelationships();
-                                        }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
                                     }
 
                                     @Override
@@ -774,31 +888,31 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
                                     }
                                 });
+                            } else {
+                                mySwipeRefreshLayout.setRefreshing(false);
+                                superLayout.setVisibility(View.GONE);
+                                progressLayout.setVisibility(View.GONE);
+                                errorLayout.setVisibility(View.VISIBLE);
+                                errorLayoutText.setText("The school whose profile you've requested doesn't exist.");
                             }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-                    } else {
-                        mySwipeRefreshLayout.setRefreshing(false);
-                        superLayout.setVisibility(View.GONE);
-                        progressLayout.setVisibility(View.GONE);
-                        errorLayout.setVisibility(View.VISIBLE);
-                        errorLayoutText.setText("The school whose profile you've requested doesn't exist.");
+                        } else {
+                            mySwipeRefreshLayout.setRefreshing(false);
+                            superLayout.setVisibility(View.GONE);
+                            progressLayout.setVisibility(View.GONE);
+                            errorLayout.setVisibility(View.VISIBLE);
+                            errorLayoutText.setText("The school whose profile you've requested doesn't exist.");
+                        }
                     }
-                } else {
-                    mySwipeRefreshLayout.setRefreshing(false);
-                    superLayout.setVisibility(View.GONE);
-                    progressLayout.setVisibility(View.GONE);
-                    errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText("The school whose profile you've requested doesn't exist.");
-                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
@@ -853,6 +967,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                     address.setText(add_pho);
                                 }
 
+                                if (schoolSettings.isShowLocationAndContact()) {
+                                    contactInfoLayout.setVisibility(View.VISIBLE);
+                                } else {
+                                    contactInfoLayout.setVisibility(View.GONE);
+                                }
+
                                 mDatabaseReference = mFirebaseDatabase.getReference().child("School External Examination Average Performance").child(schoolID);
                                 mDatabaseReference.limitToLast(3).addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
@@ -890,6 +1010,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                             eEAPLinearLayoutList.get(2).setVisibility(View.GONE);
                                         }
 
+                                        if (schoolSettings.isShowExternalExaminationAveragePerformance()) {
+                                            eeapLayout.setVisibility(View.VISIBLE);
+                                        } else {
+                                            eeapLayout.setVisibility(View.GONE);
+                                        }
+
                                         mDatabaseReference = mFirebaseDatabase.getReference().child("School Awards").child(schoolID);
                                         mDatabaseReference.limitToLast(3).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
@@ -921,6 +1047,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                     awardsLinearLayoutList.get(0).setVisibility(View.GONE);
                                                     awardsLinearLayoutList.get(1).setVisibility(View.GONE);
                                                     awardsLinearLayoutList.get(2).setVisibility(View.GONE);
+                                                }
+
+                                                if (schoolSettings.isShowAwards()) {
+                                                    awardsLayout.setVisibility(View.VISIBLE);
+                                                } else {
+                                                    awardsLayout.setVisibility(View.GONE);
                                                 }
 
                                                 mDatabaseReference = mFirebaseDatabase.getReference().child("School Notable Alumni").child(schoolID);
@@ -983,6 +1115,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                             notableAlumniLinearLayoutList.get(2).setVisibility(View.GONE);
                                                         }
 
+                                                        if (schoolSettings.isShowNotableAlumni()) {
+                                                            notableAlumniLayout.setVisibility(View.VISIBLE);
+                                                        } else {
+                                                            notableAlumniLayout.setVisibility(View.GONE);
+                                                        }
+
                                                         mDatabaseReference = mFirebaseDatabase.getReference().child("School Top Five Colleges").child(schoolID);
                                                         mDatabaseReference.limitToLast(5).addListenerForSingleValueEvent(new ValueEventListener() {
                                                             @Override
@@ -1033,6 +1171,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                                     collegeLinearLayoutList.get(2).setVisibility(View.GONE);
                                                                     collegeLinearLayoutList.get(3).setVisibility(View.GONE);
                                                                     collegeLinearLayoutList.get(4).setVisibility(View.GONE);
+                                                                }
+
+                                                                if (schoolSettings.isShowTop5CollegesAndUniversities()) {
+                                                                    collegeLayout.setVisibility(View.VISIBLE);
+                                                                } else {
+                                                                    collegeLayout.setVisibility(View.GONE);
                                                                 }
 
                                                                 loadConnectionStatus();
@@ -1302,6 +1446,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                     errorLayout.setVisibility(View.GONE);
                     mySwipeRefreshLayout.setRefreshing(false);
                     superLayout.setVisibility(View.VISIBLE);
+                }
+
+                if (schoolSettings.isShowAverageInternalExamsPerformance()) {
+                    termAveragePerformanceInInternalExamsLayout.setVisibility(View.VISIBLE);
+                } else {
+                    termAveragePerformanceInInternalExamsLayout.setVisibility(View.GONE);
                 }
             }
 

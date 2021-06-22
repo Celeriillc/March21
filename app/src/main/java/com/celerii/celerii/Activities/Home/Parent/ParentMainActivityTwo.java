@@ -1,16 +1,21 @@
 package com.celerii.celerii.Activities.Home.Parent;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.core.content.ContextCompat;
@@ -28,13 +33,16 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.os.IBinder;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,6 +61,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
+import com.celerii.celerii.Activities.Utility.ApplicationLaunchActivity;
 import com.celerii.celerii.BuildConfig;
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
 import com.celerii.celerii.Activities.Home.RemoteCampaignActivity;
@@ -104,6 +113,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -401,7 +411,20 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                 }
             }
         };
+
+//        createNotification();
     }
+
+//    public void createNotification () {
+//        MyBroadcastReceiver myBroadcastReceiver = new MyBroadcastReceiver();
+//        Intent intent = new Intent(this, myBroadcastReceiver.getClass());
+//        Intent intent = new Intent(this, MyBroadcastReceiver.class);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+//                this.getApplicationContext(), 234324243, intent, 0);
+//        AlarmManager alarmManager = (AlarmManager) getSystemService( ALARM_SERVICE ) ;
+//        long currentTimeInt = System.currentTimeMillis();
+//        alarmManager.set(AlarmManager.RTC_WAKEUP , System.currentTimeMillis() + (10000), pendingIntent) ;
+//    }
 
     private void setIconDefaults() {
         item1.setDrawable(R.drawable.ic_file_text);
@@ -443,6 +466,7 @@ public class ParentMainActivityTwo extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_request) {
+//            new MyTask().execute();
             startActivity(new Intent(ParentMainActivityTwo.this, ParentsRequestActivity.class));
             return true;
         } else if (id == R.id.action_search) {
@@ -510,17 +534,17 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             stackBuilder.addNextIntentWithParentStack(resultIntent);
             PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            Intent acceptIntent = new Intent(context, NotificationReceiver.class);
-            acceptIntent.putExtra("message", "Accept");
-            acceptIntent.putExtra("notificationID", 0);
-            PendingIntent actionIntentAccept = PendingIntent.getBroadcast(context,
-                    0, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//            Intent acceptIntent = new Intent(context, NotificationReceiver.class);
+//            acceptIntent.putExtra("message", "Accept");
+//            acceptIntent.putExtra("notificationID", 0);
+//            PendingIntent actionIntentAccept = PendingIntent.getBroadcast(context,
+//                    0, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            Intent declineIntent = new Intent(context, NotificationReceiver.class);
-            declineIntent.putExtra("message", "Decline");
-            declineIntent.putExtra("notificationID", 0);
-            PendingIntent actionIntentDecline = PendingIntent.getBroadcast(context,
-                    0, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//            Intent declineIntent = new Intent(context, NotificationReceiver.class);
+//            declineIntent.putExtra("message", "Decline");
+//            declineIntent.putExtra("notificationID", 0);
+//            PendingIntent actionIntentDecline = PendingIntent.getBroadcast(context,
+//                    0, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             try {
                 URL myURL = new URL("https://businessday.ng/wp-content/uploads/2019/09/Untitled-design-2019-09-26T163510.353.png");
@@ -536,8 +560,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                         .setAutoCancel(true)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText("Esther Oriabure commented on a post you made for SS3. Esther Oriabure commented on a post you made for SS3"))
                         .setOnlyAlertOnce(true)
-                        .addAction(R.mipmap.ic_launcher, "Accept", actionIntentAccept)
-                        .addAction(R.mipmap.ic_launcher, "Decline", actionIntentDecline)
+//                        .addAction(R.mipmap.ic_launcher, "Accept", actionIntentAccept)
+//                        .addAction(R.mipmap.ic_launcher, "Decline", actionIntentDecline)
                         .setContentIntent(resultPendingIntent);
             } catch (Exception e) {
                 builder.setSmallIcon(R.drawable.ic_celerii_logo_colored)
@@ -549,8 +573,8 @@ public class ParentMainActivityTwo extends AppCompatActivity {
                         .setAutoCancel(true)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText("Esther Oriabure commented on a post you made for SS3. Esther Oriabure commented on a post you made for SS3"))
                         .setOnlyAlertOnce(true)
-                        .addAction(R.mipmap.ic_launcher, "Accept", actionIntentAccept)
-                        .addAction(R.mipmap.ic_launcher, "Decline", actionIntentDecline)
+//                        .addAction(R.mipmap.ic_launcher, "Accept", actionIntentAccept)
+//                        .addAction(R.mipmap.ic_launcher, "Decline", actionIntentDecline)
                         .setContentIntent(resultPendingIntent);
             }
             return null;
@@ -558,6 +582,22 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.setChannelId("com.celerii.celerii");
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                        "com.celerii.celerii",
+                        "Celerii",
+                        NotificationManager.IMPORTANCE_DEFAULT);
+
+                if (mNotificationManager != null) {
+                    mNotificationManager.createNotificationChannel(channel);
+                }
+            }
+
             mNotificationManager.notify(0, builder.build());
             super.onPostExecute(aVoid);
         }
@@ -1335,4 +1375,49 @@ public class ParentMainActivityTwo extends AppCompatActivity {
         return animation;
     }
     //endregion
+
+//    public static class MyBroadcastReceiver extends BroadcastReceiver {
+//
+//        public MyBroadcastReceiver() {
+//
+//        }
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+////            new MyTask().execute();
+//
+//            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "Reminder");
+//            builder.setSmallIcon(R.drawable.ic_celerii_logo_outline_bordered)
+//                    .setColor(ContextCompat.getColor(context, R.color.colorSecondaryPurple))
+//                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+//                    .setSubText("Clara Ikubese")
+//                    .setContentTitle("Esther Oriabure")
+//                    .setContentText("Esther Oriabure commented on a post you made for SS3. Esther Oriabure commented on a post you made for SS3")
+//                    .setAutoCancel(true)
+//                    .setStyle(new NotificationCompat.BigTextStyle().bigText("Esther Oriabure commented on a post you made for SS3. Esther Oriabure commented on a post you made for SS3"))
+//                    .setOnlyAlertOnce(true);
+////                        .addAction(R.mipmap.ic_launcher, "Accept", actionIntentAccept)
+////                        .addAction(R.mipmap.ic_launcher, "Decline", actionIntentDecline)
+////                    .setContentIntent(resultPendingIntent);
+//
+//            NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                builder.setChannelId("com.celerii.celerii");
+//            }
+//
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                NotificationChannel channel = new NotificationChannel(
+//                        "com.celerii.celerii",
+//                        "Celerii",
+//                        NotificationManager.IMPORTANCE_DEFAULT);
+//
+//                if (mNotificationManager != null) {
+//                    mNotificationManager.createNotificationChannel(channel);
+//                }
+//            }
+//            mNotificationManager.notify(200, builder.build());
+//
+//            Toast.makeText(context, "Alarm....", Toast.LENGTH_LONG).show();
+//        }
+//    }
 }

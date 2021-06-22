@@ -61,8 +61,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
                 .load(model)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .crossFade()
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
+                .placeholder(R.drawable.image_placeholder)
+                .error(R.drawable.image_placeholder)
                 .centerCrop()
                 .into(holder.image);
 

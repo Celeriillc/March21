@@ -52,6 +52,8 @@ public class SharedPreferencesManager {
     static final String my_referral_subject = "myReferralSubject";
     static final String my_secondary_referral_subject = "mySecondaryReferralSubject";
     static final String school_gallery = "schoolGallery";
+    static final String reminder_Ids = "reminder_ids";
+    static final String reminder_details = "reminder_details";
 
     public SharedPreferencesManager(Context context) {
         this.context = context;
@@ -702,6 +704,38 @@ public class SharedPreferencesManager {
     }
     //endregion
 
+    //region ReminderIDs
+    public String getReminderIDs() {
+        return prefs.getString(reminder_Ids, "");
+    }
+
+    public void setReminderIDs(String reminderIDs) {
+        editor.putString(reminder_Ids, reminderIDs);
+        editor.commit();
+    }
+
+    public void deleteReminderIDs() {
+        editor.remove(reminder_Ids);
+        editor.commit();
+    }
+    //endregion
+
+    //region ReminderDetails
+    public String getReminderDetails() {
+        return prefs.getString(reminder_details, "");
+    }
+
+    public void setReminderDetails(String reminderDetails) {
+        editor.putString(reminder_details, reminderDetails);
+        editor.commit();
+    }
+
+    public void deleteReminderDetails() {
+        editor.remove(reminder_details);
+        editor.commit();
+    }
+    //endregion
+
     public void clear() {
         deleteActiveAccount();
         deleteMyUserID();
@@ -739,5 +773,7 @@ public class SharedPreferencesManager {
         deleteMyReferralSubject();
         deleteMySecondaryReferralSubject();
         deleteSchoolGallery();
+        deleteReminderIDs();
+        deleteReminderDetails();
     }
 }

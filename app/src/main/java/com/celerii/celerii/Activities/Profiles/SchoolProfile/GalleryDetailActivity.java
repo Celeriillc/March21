@@ -137,11 +137,12 @@ public class GalleryDetailActivity extends AppCompatActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             ImageView imageView = new ImageView(context);
+            imageView.setColorFilter(ContextCompat.getColor(context, R.color.colorLightGray));
 
             Glide.with(context)
                     .load(imageURLs[position])
-                    .placeholder(R.drawable.profileimageplaceholder)
-                    .error(R.drawable.profileimageplaceholder)
+                    .placeholder(R.drawable.gallery_default_background)
+                    .error(R.drawable.gallery_default_background)
                     .into(imageView);
 
 //            View view = layoutInflater.inflate(layouts[position], container, false);
