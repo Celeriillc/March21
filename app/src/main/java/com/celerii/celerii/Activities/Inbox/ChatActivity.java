@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +47,13 @@ import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
+import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
+import com.celerii.celerii.models.NewChatRowModel;
+import com.celerii.celerii.models.Parent;
+import com.celerii.celerii.models.SchoolSettings;
+import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.StudentsSchoolsClassesandTeachersModel;
+import com.celerii.celerii.models.Teacher;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -63,10 +72,15 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,6 +109,7 @@ public class ChatActivity extends AppCompatActivity {
     TextView errorLayoutText;
     ImageView sendMessage, attachments, profilePicture;
     EditText editMessage;
+    Boolean schoolAllowsParentTeacherMessaging = true;
 
     File file;
     Uri uri;
@@ -253,6 +268,14 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    int schoolAllowsParentTeacherMessagingCounter;
+    ArrayList<ClassesStudentsAndParentsModel> classesStudentsAndParentsModelList;
+    ArrayList<StudentsSchoolsClassesandTeachersModel> studentsSchoolsClassesandTeachersModelList;
+    HashMap<String, String> teacherSchoolMap = new HashMap<>();
+    HashMap<String, String> parentSchoolMap = new HashMap<>();
+    HashMap<String, Boolean> schoolAllowsParentTeacherMessagingMap = new HashMap<>();
+    ArrayList<String> schoolList = new ArrayList<>();
+    ArrayList<String> teacherList = new ArrayList<>();
     private void loadMessagesFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
             recyclerView.setVisibility(View.GONE);
@@ -262,6 +285,131 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            Gson gson = new Gson();
+            String studentsSchoolsClassesandTeachersJSON = sharedPreferencesManager.getStudentsSchoolsClassesTeachers();
+            Type type = new TypeToken<ArrayList<StudentsSchoolsClassesandTeachersModel>>() {}.getType();
+            studentsSchoolsClassesandTeachersModelList = gson.fromJson(studentsSchoolsClassesandTeachersJSON, type);
+            schoolAllowsParentTeacherMessagingCounter = 0;
+
+            if (studentsSchoolsClassesandTeachersModelList == null) {
+                studentsSchoolsClassesandTeachersModelList = new ArrayList<>();
+            }
+
+            if (studentsSchoolsClassesandTeachersModelList.size() > 0) {
+                for (int i = 0; i < studentsSchoolsClassesandTeachersModelList.size(); i++) {
+                    final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel = studentsSchoolsClassesandTeachersModelList.get(i);
+                    String teacherID = studentsSchoolsClassesandTeachersModel.getTeacherID();
+                    String schoolID = studentsSchoolsClassesandTeachersModel.getSchoolID();
+
+                    if (!teacherID.equals("")) {
+                        teacherSchoolMap.put(teacherID, schoolID);
+                    }
+
+                    if (!schoolList.contains(schoolID)) {
+                        schoolList.add(schoolID);
+                    }
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            schoolAllowsParentTeacherMessagingCounter++;
+                            if (dataSnapshot.exists()) {
+                                SchoolSettings schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
+                                schoolAllowsParentTeacherMessagingMap.put(schoolID, schoolSettings.isAllowParentTeacherMessaging());
+                            } else {
+                                schoolAllowsParentTeacherMessagingMap.put(schoolID, true);
+                            }
+
+                            if (schoolAllowsParentTeacherMessagingCounter == studentsSchoolsClassesandTeachersModelList.size()) {
+                                loadMessages();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            } else {
+                loadMessages();
+            }
+        } else {
+            Gson gson = new Gson();
+            String classStudentParentJSON = sharedPreferencesManager.getClassesStudentParent();
+            Type type = new TypeToken<ArrayList<ClassesStudentsAndParentsModel>>() {}.getType();
+            classesStudentsAndParentsModelList = gson.fromJson(classStudentParentJSON, type);
+            schoolAllowsParentTeacherMessagingCounter = 0;
+
+            if (classesStudentsAndParentsModelList == null) {
+                classesStudentsAndParentsModelList = new ArrayList<>();
+            }
+
+            if (classesStudentsAndParentsModelList.size() > 0) {
+                for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
+                    final ClassesStudentsAndParentsModel classesStudentsAndParentsModel = classesStudentsAndParentsModelList.get(i);
+                    String parentID = classesStudentsAndParentsModel.getParentID();
+                    String schoolID = classesStudentsAndParentsModel.getSchoolID();
+                    if (!parentID.equals("")) {
+                        parentSchoolMap.put(parentID, schoolID);
+                    }
+
+                    if (!schoolList.contains(schoolID)) {
+                        schoolList.add(schoolID);
+                    }
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("School Teacher").child(schoolID);
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                    String teacherID = postSnapshot.getKey();
+                                    if (!teacherList.contains(teacherID)) {
+                                        teacherList.add(teacherID);
+                                    }
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            schoolAllowsParentTeacherMessagingCounter++;
+                            if (dataSnapshot.exists()) {
+                                SchoolSettings schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
+                                schoolAllowsParentTeacherMessagingMap.put(schoolID, schoolSettings.isAllowParentTeacherMessaging());
+                            } else {
+                                schoolAllowsParentTeacherMessagingMap.put(schoolID, true);
+                            }
+
+                            if (schoolAllowsParentTeacherMessagingCounter == classesStudentsAndParentsModelList.size()) {
+                                loadMessages();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            } else {
+                loadMessages();
+            }
+        }
+    }
+
+    private void loadMessages() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(mFirebaseUser.getUid()).child(IDofChatPartner);
         mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
             @Override
@@ -286,43 +434,65 @@ public class ChatActivity extends AppCompatActivity {
                         errorLayout.setVisibility(View.GONE);
                     }
                 } else {
-                    mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(mFirebaseUser.getUid()).child("Admin");
-                    mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Admin").child(IDofChatPartner);
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
-                                receiverNode = "Admin";
-                                chatsList.clear();
-                                mAdapter.notifyDataSetChanged();
-                                for (DataSnapshot postSnapShot : dataSnapshot.getChildren()){
-                                    String messageID = postSnapShot.getKey();
-                                    Chats chat = postSnapShot.getValue(Chats.class);
-                                    chat.setMessageID(messageID);
-                                    if (!chat.getReceiverID().equals(mFirebaseUser.getUid())) {
-                                        chat.setReceiverID("Admin");
+                                mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(mFirebaseUser.getUid()).child("Admin");
+                                mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
+                                            receiverNode = "Admin";
+                                            chatsList.clear();
+                                            mAdapter.notifyDataSetChanged();
+                                            for (DataSnapshot postSnapShot : dataSnapshot.getChildren()){
+                                                String messageID = postSnapShot.getKey();
+                                                Chats chat = postSnapShot.getValue(Chats.class);
+                                                chat.setMessageID(messageID);
+                                                if (!chat.getReceiverID().equals(mFirebaseUser.getUid())) {
+                                                    chat.setReceiverID("Admin");
+                                                }
+                                                if (!chat.getSenderID().equals(mFirebaseUser.getUid())) {
+                                                    chat.setSenderID("Admin");
+                                                }
+                                                chatsList.add(chat);
+                                            }
+
+                                            recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+                                            mAdapter.notifyDataSetChanged();
+                                        }
+
+                                        if (recyclerView.getVisibility() == View.GONE) {
+                                            progressLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                            errorLayout.setVisibility(View.GONE);
+                                        }
                                     }
-                                    if (!chat.getSenderID().equals(mFirebaseUser.getUid())) {
-                                        chat.setSenderID("Admin");
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
                                     }
-                                    chatsList.add(chat);
+                                });
+                            } else {
+                                if (recyclerView.getVisibility() == View.GONE) {
+                                    progressLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    errorLayout.setVisibility(View.GONE);
                                 }
-
-                                recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-                                mAdapter.notifyDataSetChanged();
-                            }
-
-                            if (recyclerView.getVisibility() == View.GONE) {
-                                progressLayout.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                                errorLayout.setVisibility(View.GONE);
                             }
                         }
 
                         @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
                         }
                     });
+
+
+
                 }
             }
 
@@ -336,7 +506,7 @@ public class ChatActivity extends AppCompatActivity {
     private void postMessageToFirebase(String fileURL) {
         if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
             String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-            showDialogWithMessage(messageString);
+            showDialogWithMessage(Html.fromHtml(messageString));
             return;
         }
 
@@ -348,9 +518,51 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             message = "Image";
         }
+
         if (!receiverNode.equals("Admin")) {
             receiverNode = IDofChatPartner;
+
+            if (!schoolList.contains(IDofChatPartner)) {
+                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                    if (!teacherSchoolMap.containsKey(IDofChatPartner)) {
+                        String messageString = "You cannot send messages to " + "<b>" + nameOfChatPartner + "</b>" + " because " +
+                                "your parent account is not connected to their account";
+                        showDialogWithMessage(Html.fromHtml(messageString));
+                        return;
+                    } else {
+                        String schoolID = teacherSchoolMap.get(IDofChatPartner);
+                        if (schoolAllowsParentTeacherMessagingMap.get(schoolID) != null) {
+                            if (!schoolAllowsParentTeacherMessagingMap.get(schoolID)) {
+                                String messageString = "You cannot send messages to " + "<b>" + nameOfChatPartner + "</b>" + " because " +
+                                        "your child(ren)'s school(s) doesn't allow parent to teacher messaging";
+                                showDialogWithMessage(Html.fromHtml(messageString));
+                                return;
+                            }
+                        }
+                    }
+                } else {
+                    if (!teacherList.contains(IDofChatPartner)) {
+                        if (!parentSchoolMap.containsKey(IDofChatPartner)) {
+                            String messageString = "You cannot send messages to " + "<b>" + nameOfChatPartner + "</b>" + " because " +
+                                    "your teacher account is not connected to their account";
+                            showDialogWithMessage(Html.fromHtml(messageString));
+                            return;
+                        } else {
+                            String schoolID = parentSchoolMap.get(IDofChatPartner);
+                            if (schoolAllowsParentTeacherMessagingMap.get(schoolID) != null) {
+                                if (!schoolAllowsParentTeacherMessagingMap.get(schoolID)) {
+                                    String messageString = "You cannot send messages to " + "<b>" + nameOfChatPartner + "</b>" + " because " +
+                                            "your school doesn't allow teacher to parent messaging";
+                                    showDialogWithMessage(Html.fromHtml(messageString));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+
         final String senderId = mFirebaseUser.getUid();
         final String receiverId = IDofChatPartner;
         boolean isSeen = false;
@@ -549,7 +761,7 @@ public class ChatActivity extends AppCompatActivity {
                 try {
                     if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
                         String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-                        showDialogWithMessage((messageString));
+                        showDialogWithMessage(Html.fromHtml(messageString));
                         return;
                     }
 
@@ -615,7 +827,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    void showDialogWithMessage (String messageString) {
+    void showDialogWithMessage (Spanned messageString) {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_unary_message_dialog);
         dialog.setCancelable(false);

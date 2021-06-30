@@ -1,12 +1,13 @@
 package com.celerii.celerii.models;
 
 public class SchoolSettings {
-    boolean showSchoolType, showCurriculum, showTotalSeats, showAverageSeatsPerClass, showAverageAttendance,
+    boolean allowParentTeacherMessaging, showSchoolType, showCurriculum, showTotalSeats, showAverageSeatsPerClass, showAverageAttendance,
             showAveragePunctuality, showAverageInternalExamsPerformance, showGallery, showLocationAndContact,
             showMissionVisionAndHistory, showOfferedSubjects, showCoCurricularActivities, showExternalExaminationAveragePerformance,
             showNotableAlumni, showAwards, showCalendar, showTop5CollegesAndUniversities;
 
     public SchoolSettings() {
+        this.allowParentTeacherMessaging = true;
         this.showSchoolType = true;
         this.showCurriculum = true;
         this.showTotalSeats = true;
@@ -24,6 +25,14 @@ public class SchoolSettings {
         this.showAwards = true;
         this.showCalendar = true;
         this.showTop5CollegesAndUniversities = true;
+    }
+
+    public boolean isAllowParentTeacherMessaging() {
+        return allowParentTeacherMessaging;
+    }
+
+    public void setAllowParentTeacherMessaging(boolean allowParentTeacherMessaging) {
+        this.allowParentTeacherMessaging = allowParentTeacherMessaging;
     }
 
     public boolean isShowSchoolType() {

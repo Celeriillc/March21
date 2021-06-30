@@ -4,6 +4,8 @@ package com.celerii.celerii.Activities.Inbox.Parent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,6 +27,7 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.NewChatRowModel;
+import com.celerii.celerii.models.SchoolSettings;
 import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.StudentsSchoolsClassesandTeachersModel;
 import com.celerii.celerii.models.Teacher;
@@ -140,6 +143,8 @@ public class ParentTeacherMessageList extends Fragment {
         return view;
     }
 
+    int schoolAllowsParentTeacherMessagingCounter;
+    boolean schoolAllowsMessaging;
     void loadFromFirebase(){
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
             mySwipeRefreshLayout.setRefreshing(false);
@@ -155,6 +160,7 @@ public class ParentTeacherMessageList extends Fragment {
         String studentsSchoolsClassesandTeachersJSON = sharedPreferencesManager.getStudentsSchoolsClassesTeachers();
         Type type = new TypeToken<ArrayList<StudentsSchoolsClassesandTeachersModel>>() {}.getType();
         studentsSchoolsClassesandTeachersModelList = gson.fromJson(studentsSchoolsClassesandTeachersJSON, type);
+        schoolAllowsParentTeacherMessagingCounter = 0;
 
         if (studentsSchoolsClassesandTeachersModelList == null) {
             studentsSchoolsClassesandTeachersModelList = new ArrayList<>();
@@ -162,245 +168,158 @@ public class ParentTeacherMessageList extends Fragment {
             recyclerView.setVisibility(View.GONE);
             progressLayout.setVisibility(View.GONE);
             mySwipeRefreshLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);errorLayoutText.setText(Html.fromHtml("You don't have any teachers to message at this time. If you're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+            errorLayout.setVisibility(View.VISIBLE);
+            errorLayoutText.setText(Html.fromHtml("You don't have any teachers to message at this time. If you're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
             errorLayoutButton.setText("Find my child");
             errorLayoutButton.setVisibility(View.VISIBLE);
         } else {
-            counterTeachers = 0;
-            newChatRowModelList.clear();
-            teachersList.clear();
-            mAdapter.notifyDataSetChanged();
+
+            HashMap<String, Boolean> schoolAllowsParentTeacherMessagingMap = new HashMap<>();
 
             for (int i = 0; i < studentsSchoolsClassesandTeachersModelList.size(); i++) {
                 final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel = studentsSchoolsClassesandTeachersModelList.get(i);
-                if (!studentsSchoolsClassesandTeachersModel.getTeacherID().isEmpty()) {
-                    mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
-                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
-                                final String teacherID = dataSnapshot.getKey();
-                                final String teacherName = teacher.getFirstName() + " " + teacher.getLastName();
-                                final String teacherProfilePictureURL = teacher.getProfilePicURL();
+                String schoolID = studentsSchoolsClassesandTeachersModel.getSchoolID();
 
-                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentsSchoolsClassesandTeachersModel.getStudentID());
-                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        counterTeachers++;
-                                        if (dataSnapshot.exists()) {
-                                            Student student = dataSnapshot.getValue(Student.class);
-                                            String studentFirstName = student.getFirstName();
-                                            String relationship = studentFirstName + "'s Teacher";
+                mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        schoolAllowsParentTeacherMessagingCounter++;
+                        if (dataSnapshot.exists()) {
+                            SchoolSettings schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
+                            schoolAllowsParentTeacherMessagingMap.put(schoolID, schoolSettings.isAllowParentTeacherMessaging());
+                        } else {
+                            schoolAllowsParentTeacherMessagingMap.put(schoolID, true);
+                        }
 
-                                            NewChatRowModel newChatRowModel = new NewChatRowModel(teacherName, relationship, teacherProfilePictureURL, teacherID);
-                                            if (!teachersList.containsKey(teacherID)) {
-                                                teachersList.put(teacherID, newChatRowModel);
-                                                if (!newChatRowModel.getIDofPartner().equals(mFirebaseUser.getUid())) {
-                                                    newChatRowModelList.add(newChatRowModel);
-                                                }
-                                            }
+                        if (schoolAllowsParentTeacherMessagingCounter == studentsSchoolsClassesandTeachersModelList.size()) {
+                            counterTeachers = 0;
+                            newChatRowModelList.clear();
+                            teachersList.clear();
+                            mAdapter.notifyDataSetChanged();
 
-                                            if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
-                                                if (newChatRowModelList.size() > 1) {
-                                                    Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                                        @Override
-                                                        public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                                            return o1.getName().compareTo(o2.getName());
+                            for (int i = 0; i < studentsSchoolsClassesandTeachersModelList.size(); i++) {
+                                final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel = studentsSchoolsClassesandTeachersModelList.get(i);
+
+                                try {
+                                    schoolAllowsMessaging = schoolAllowsParentTeacherMessagingMap.get(studentsSchoolsClassesandTeachersModel.getSchoolID());
+                                } catch (NullPointerException e) {
+                                    schoolAllowsMessaging = true;
+                                }
+
+                                if (!studentsSchoolsClassesandTeachersModel.getTeacherID().isEmpty()) {
+                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(studentsSchoolsClassesandTeachersModel.getTeacherID());
+                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            if (dataSnapshot.exists()) {
+                                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
+                                                final String teacherID = dataSnapshot.getKey();
+                                                final String teacherName = teacher.getFirstName() + " " + teacher.getLastName();
+                                                final String teacherProfilePictureURL = teacher.getProfilePicURL();
+
+                                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentsSchoolsClassesandTeachersModel.getStudentID());
+                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                                        counterTeachers++;
+                                                        if (dataSnapshot.exists()) {
+                                                            Student student = dataSnapshot.getValue(Student.class);
+                                                            String studentFirstName = student.getFirstName();
+                                                            String relationship = studentFirstName + "'s Teacher";
+
+                                                            NewChatRowModel newChatRowModel = new NewChatRowModel(teacherName, relationship, teacherProfilePictureURL, teacherID);
+                                                            if (!teachersList.containsKey(teacherID)) {
+                                                                teachersList.put(teacherID, newChatRowModel);
+                                                                if (!newChatRowModel.getIDofPartner().equals(mFirebaseUser.getUid())) {
+                                                                    if (schoolAllowsMessaging) {
+                                                                        newChatRowModelList.add(newChatRowModel);
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
+                                                                if (newChatRowModelList.size() > 0) {
+                                                                    if (newChatRowModelList.size() > 1) {
+                                                                        Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                                            @Override
+                                                                            public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                                                return o1.getName().compareTo(o2.getName());
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                    mAdapter.notifyDataSetChanged();
+                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                    progressLayout.setVisibility(View.GONE);
+                                                                    errorLayout.setVisibility(View.GONE);
+                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                } else {
+                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                    recyclerView.setVisibility(View.GONE);
+                                                                    progressLayout.setVisibility(View.GONE);
+                                                                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                                                                    errorLayout.setVisibility(View.VISIBLE);
+                                                                    errorLayoutButton.setVisibility(View.GONE);
+                                                                    errorLayoutText.setText(Html.fromHtml("Your child(ren)'s teachers should appear here, however, your child(ren)'s school(s) doesn't allow parent to teacher messaging."));
+                                                                }
+                                                            }
                                                         }
-                                                    });
-                                                }
-                                                mAdapter.notifyDataSetChanged();
-                                                mySwipeRefreshLayout.setRefreshing(false);
-                                                progressLayout.setVisibility(View.GONE);
-                                                errorLayout.setVisibility(View.GONE);
-                                                recyclerView.setVisibility(View.VISIBLE);
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(DatabaseError databaseError) {
+
+                                                    }
+                                                });
+                                            } else {
+                                                counterTeachers++;
                                             }
                                         }
-                                    }
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
 
+                                        }
+                                    });
+                                } else {
+                                    counterTeachers++;
+                                    if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
+                                        if (newChatRowModelList.size() > 0) {
+                                            if (newChatRowModelList.size() > 1) {
+                                                Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                    @Override
+                                                    public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                        return o1.getName().compareTo(o2.getName());
+                                                    }
+                                                });
+                                            }
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.GONE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            mySwipeRefreshLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);errorLayoutText.setText(Html.fromHtml("You don't have any teachers to message at this time. If you're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                                            errorLayoutButton.setText("Find my child");
+                                            errorLayoutButton.setVisibility(View.VISIBLE);
+                                        }
                                     }
-                                });
-                            } else {
-                                counterTeachers++;
+                                }
                             }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                } else {
-                    counterTeachers++;
-                    if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
-                        if (newChatRowModelList.size() > 0) {
-                            if (newChatRowModelList.size() > 1) {
-                                Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                    @Override
-                                    public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                        return o1.getName().compareTo(o2.getName());
-                                    }
-                                });
-                            }
-                            mAdapter.notifyDataSetChanged();
-                            mySwipeRefreshLayout.setRefreshing(false);
-                            progressLayout.setVisibility(View.GONE);
-                            errorLayout.setVisibility(View.GONE);
-                            recyclerView.setVisibility(View.VISIBLE);
-                        } else {
-                            mySwipeRefreshLayout.setRefreshing(false);
-                            recyclerView.setVisibility(View.GONE);
-                            progressLayout.setVisibility(View.GONE);
-                            mySwipeRefreshLayout.setVisibility(View.GONE);
-                            errorLayout.setVisibility(View.VISIBLE);errorLayoutText.setText(Html.fromHtml("You don't have any teachers to message at this time. If you're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                            errorLayoutButton.setText("Find my child");
-                            errorLayoutButton.setVisibility(View.VISIBLE);
                         }
                     }
-                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         }
-//
-//        counterStudents = 0;
-//        mDatabaseReference = mFirebaseDatabase.getReference().child("Parents Students").child(mFirebaseUser.getUid());
-//        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.exists()){
-//                    kidsList.clear();
-//                    classList.clear();
-//                    teachersList.clear();
-//                    newChatRowModelList.clear();
-//                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-//                        String kidID = postSnapshot.getKey();
-//                        kidsList.add(kidID);
-//                    }
-//
-//                    for (final String kidID : kidsList) {
-//                        mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(kidID);
-//                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(DataSnapshot dataSnapshot) {
-//                                counterStudents++;
-//                                if (dataSnapshot.exists()){
-//                                    Student student = dataSnapshot.getValue(Student.class);
-//                                    final String studentName = student.getFirstName() + "'s";
-//
-//                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Student Class").child(kidID);
-//                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                        @Override
-//                                        public void onDataChange(DataSnapshot dataSnapshot) {
-//                                            if (dataSnapshot.exists()){
-//                                                classList.clear();
-//                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-//                                                    String classID = postSnapshot.getKey();
-//                                                    classList.add(classID);
-//                                                }
-//
-//                                                counterClasses = 0;
-//                                                for (String classID : classList){
-//                                                    counterClasses++;
-//                                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Class Teacher").child(classID);
-//                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                        @Override
-//                                                        public void onDataChange(DataSnapshot dataSnapshot) {
-//                                                            if (dataSnapshot.exists()){
-//                                                                counterTeachers = 0;
-//                                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-//                                                                    final int childrenCountTeachers = (int) dataSnapshot.getChildrenCount();
-//                                                                    final String teacherID = postSnapshot.getKey();
-//
-//                                                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(teacherID);
-//                                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                                        @Override
-//                                                                        public void onDataChange(DataSnapshot dataSnapshot) {
-//                                                                            counterTeachers++;
-//                                                                            if (dataSnapshot.exists()){
-//                                                                                Teacher teacher = dataSnapshot.getValue(Teacher.class);
-//                                                                                String teacherName = teacher.getLastName() + " " + teacher.getFirstName();
-//                                                                                String relationship = studentName + " Teacher";
-//
-//                                                                                NewChatRowModel newChatRowModel = new NewChatRowModel(teacherName, relationship, teacher.getProfilePicURL(), teacherID);
-//
-//                                                                                if (!teachersList.containsKey(teacherID)){
-//                                                                                    teachersList.put(teacherID, newChatRowModel);
-//                                                                                    newChatRowModelList.add(newChatRowModel);
-//                                                                                }
-//                                                                            }
-//
-//
-//
-//                                                                            if (counterStudents == kidsList.size()) {
-//                                                                                if (counterClasses == classList.size()) {
-//                                                                                    if (counterTeachers == childrenCountTeachers) {
-//                                                                                        Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-//                                                                                            @Override
-//                                                                                            public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-//                                                                                                return o1.getName().compareTo(o2.getName());
-//                                                                                            }
-//                                                                                        });
-//                                                                                        mAdapter.notifyDataSetChanged();
-//                                                                                        mySwipeRefreshLayout.setRefreshing(false);
-//                                                                                        progressLayout.setVisibility(View.GONE);
-//                                                                                        errorLayout.setVisibility(View.GONE);
-//                                                                                        recyclerView.setVisibility(View.VISIBLE);
-//                                                                                    }
-//                                                                                }
-//                                                                            }
-//                                                                        }
-//
-//                                                                        @Override
-//                                                                        public void onCancelled(DatabaseError databaseError) {
-//
-//                                                                        }
-//                                                                    });
-//                                                                }
-//                                                            }
-//                                                        }
-//
-//                                                        @Override
-//                                                        public void onCancelled(DatabaseError databaseError) {
-//
-//                                                        }
-//                                                    });
-//                                                }
-//                                            }
-//                                        }
-//
-//                                        @Override
-//                                        public void onCancelled(DatabaseError databaseError) {
-//
-//                                        }
-//                                    });
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onCancelled(DatabaseError databaseError) {
-//
-//                            }
-//                        });
-//                    }
-//                } else {
-//                    //You have no kids
-//                    mySwipeRefreshLayout.setRefreshing(false);
-//                    recyclerView.setVisibility(View.GONE);
-//                    progressLayout.setVisibility(View.GONE);
-//                    errorLayout.setVisibility(View.VISIBLE);
-//                    errorLayoutText.setText("You don't have any Teachers to message at this time. If you're not connected to any of your children's account, use the search button to search for your children and send a request to connect to their accounts.");
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     @Override

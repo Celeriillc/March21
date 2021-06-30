@@ -138,7 +138,13 @@ public class EditClassActivity extends AppCompatActivity {
         } else {
             selectClassModelList.clear();
             mAdapter.notifyDataSetChanged();
-            selectClassModelList.addAll(moreTeachersModelListLocal);
+
+            for (Class classInstance: moreTeachersModelListLocal) {
+                if (!classInstance.isDeleted()) {
+                    selectClassModelList.add(classInstance);
+                }
+            }
+
             selectClassModelList.add(0, new Class());
             mySwipeRefreshLayout.setRefreshing(false);
             progressLayout.setVisibility(View.GONE);
@@ -146,7 +152,6 @@ public class EditClassActivity extends AppCompatActivity {
             errorLayout.setVisibility(View.GONE);
             mAdapter.notifyDataSetChanged();
         }
-
     }
 
     @Override

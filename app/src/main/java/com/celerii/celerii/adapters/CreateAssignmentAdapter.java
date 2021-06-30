@@ -87,7 +87,7 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
             date = (TextView) view.findViewById(R.id.date);
             classLayout = (LinearLayout) view.findViewById(R.id.classlayout);
             dateLayout = (LinearLayout) view.findViewById(R.id.datelayout);
-            timeLayout = (LinearLayout) view.findViewById(R.id.timelayout);
+//            timeLayout = (LinearLayout) view.findViewById(R.id.timelayout);
         }
     }
 
@@ -136,7 +136,7 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
 
             ((HeaderViewHolder)holder).className.setText(eLibraryMyAssignmentModel.getClassName());
             ((HeaderViewHolder)holder).date.setText(Date.DateFormatMMDDYYYY(eLibraryMyAssignmentModel.getDueDate()));
-            ((HeaderViewHolder)holder).time.setText(Date.DateFormatHHMM(eLibraryMyAssignmentModel.getDueDate()));
+//            ((HeaderViewHolder)holder).time.setText(Date.DateFormatHHMM(eLibraryMyAssignmentModel.getDueDate()));
 
             ((HeaderViewHolder) holder).className.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -171,23 +171,23 @@ public class CreateAssignmentAdapter extends RecyclerView.Adapter<RecyclerView.V
                 }
             });
 
-            ((HeaderViewHolder) holder).time.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    TimePickerBuilder tpb = new TimePickerBuilder().setFragmentManager(((CreateAssignmentActivity)context).getSupportFragmentManager()).setStyleResId(R.style.BetterPickersDialogFragment);
-                    tpb.show();
-
-                    tpb.addTimePickerDialogHandler(new TimePickerDialogFragment.TimePickerDialogHandler() {
-                        @Override
-                        public void onDialogTimeSet(int reference, int hourOfDay, int minute) {
-                            Intent informationIntent = new Intent("Time Information");
-                            informationIntent.putExtra("Hour", String.valueOf(hourOfDay));
-                            informationIntent.putExtra("Minute", String.valueOf(minute));
-                            LocalBroadcastManager.getInstance(context).sendBroadcast(informationIntent);
-                        }
-                    });
-                }
-            });
+//            ((HeaderViewHolder) holder).time.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    TimePickerBuilder tpb = new TimePickerBuilder().setFragmentManager(((CreateAssignmentActivity)context).getSupportFragmentManager()).setStyleResId(R.style.BetterPickersDialogFragment);
+//                    tpb.show();
+//
+//                    tpb.addTimePickerDialogHandler(new TimePickerDialogFragment.TimePickerDialogHandler() {
+//                        @Override
+//                        public void onDialogTimeSet(int reference, int hourOfDay, int minute) {
+//                            Intent informationIntent = new Intent("Time Information");
+//                            informationIntent.putExtra("Hour", String.valueOf(hourOfDay));
+//                            informationIntent.putExtra("Minute", String.valueOf(minute));
+//                            LocalBroadcastManager.getInstance(context).sendBroadcast(informationIntent);
+//                        }
+//                    });
+//                }
+//            });
 
         } else if (holder instanceof FooterViewHolder) {
 

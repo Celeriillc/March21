@@ -68,19 +68,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
                 android:ellipsize="end"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:text="Title of newsletter, that's that smoke boy"/>
+                android:text="Title of newsletter"/>
 
 
             <ImageView
                 android:id="@+id/newsletterimage"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_marginTop="20dp"
-                android:scaleType="centerCrop"/>
+                android:scaleType="center"/>
         </LinearLayout>
 
 

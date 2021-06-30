@@ -298,6 +298,16 @@ public class ClassProfileActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     Class classInstance = dataSnapshot.getValue(Class.class);
                     String classNameString = classInstance.getClassName();
+
+                    if (classInstance.isDeleted()) {
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        superLayout.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml("<b>" + classNameString + "</b>" + " has been deleted by its school."));
+                        return;
+                    }
+
                     classTeacherString = classInstance.getClassTeacher();
                     String classPicURL = classInstance.getClassPicURL();
                     fullName.setText(classNameString);

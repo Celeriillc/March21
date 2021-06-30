@@ -3,6 +3,8 @@ package com.celerii.celerii.Activities.Inbox.Teacher;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,7 +29,10 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
 import com.celerii.celerii.models.NewChatRowModel;
 import com.celerii.celerii.models.Parent;
+import com.celerii.celerii.models.SchoolSettings;
 import com.celerii.celerii.models.Student;
+import com.celerii.celerii.models.StudentsSchoolsClassesandTeachersModel;
+import com.celerii.celerii.models.Teacher;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -140,6 +145,8 @@ public class TeacherParentMessageList extends Fragment {
         return view;
     }
 
+    int schoolAllowsParentTeacherMessagingCounter;
+    boolean schoolAllowsMessaging;
     void loadFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
             mySwipeRefreshLayout.setRefreshing(false);
@@ -156,6 +163,7 @@ public class TeacherParentMessageList extends Fragment {
         String classStudentParentJSON = sharedPreferencesManager.getClassesStudentParent();
         Type type = new TypeToken<ArrayList<ClassesStudentsAndParentsModel>>() {}.getType();
         classesStudentsAndParentsModelList = gson.fromJson(classStudentParentJSON, type);
+        schoolAllowsParentTeacherMessagingCounter = 0;
 
         if (classesStudentsAndParentsModelList == null) {
             classesStudentsAndParentsModelList = new ArrayList<>();
@@ -168,101 +176,148 @@ public class TeacherParentMessageList extends Fragment {
             errorLayoutButton.setText("Find my school");
             errorLayoutButton.setVisibility(View.VISIBLE);
         } else {
+
+            HashMap<String, Boolean> schoolAllowsParentTeacherMessagingMap = new HashMap<>();
+
             for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
                 final ClassesStudentsAndParentsModel classesStudentsAndParentsModel = classesStudentsAndParentsModelList.get(i);
-                if (!classesStudentsAndParentsModel.getParentID().isEmpty()) {
-                    mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
-                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                Parent parent = dataSnapshot.getValue(Parent.class);
-                                final String parentID = dataSnapshot.getKey();
-                                final String parentName = parent.getLastName() + " " + parent.getFirstName();
-                                final String parentProfilePictureURL = parent.getProfilePicURL();
+                String schoolID = classesStudentsAndParentsModel.getSchoolID();
 
-                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(classesStudentsAndParentsModel.getStudentID());
-                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        counter++;
-                                        if (dataSnapshot.exists()) {
-                                            Student student = dataSnapshot.getValue(Student.class);
-                                            String studentFirstName = student.getFirstName();
-                                            String relationship = studentFirstName + "'s parent";
+                mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        schoolAllowsParentTeacherMessagingCounter++;
+                        if (dataSnapshot.exists()) {
+                            SchoolSettings schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
+                            schoolAllowsParentTeacherMessagingMap.put(schoolID, schoolSettings.isAllowParentTeacherMessaging());
+                        } else {
+                            schoolAllowsParentTeacherMessagingMap.put(schoolID, true);
+                        }
 
-                                            NewChatRowModel newChatRowModel = new NewChatRowModel(parentName, relationship, parentProfilePictureURL, parentID);
-                                            if (!parentList.containsKey(parentID)) {
-                                                parentList.put(parentID, newChatRowModel);
-                                                if (!newChatRowModel.getIDofPartner().equals(mFirebaseUser.getUid())) {
-                                                    newChatRowModelList.add(newChatRowModel);
-                                                }
-                                            }
+                        if (schoolAllowsParentTeacherMessagingCounter == classesStudentsAndParentsModelList.size()) {
+                            for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
+                                final ClassesStudentsAndParentsModel classesStudentsAndParentsModel = classesStudentsAndParentsModelList.get(i);
 
-                                            if (counter == classesStudentsAndParentsModelList.size()) {
-                                                if (newChatRowModelList.size() > 1) {
-                                                    Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                                        @Override
-                                                        public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                                            return o1.getName().compareTo(o2.getName());
+                                try {
+                                    schoolAllowsMessaging = schoolAllowsParentTeacherMessagingMap.get(classesStudentsAndParentsModel.getSchoolID());
+                                } catch (NullPointerException e) {
+                                    schoolAllowsMessaging = true;
+                                }
+
+                                if (!classesStudentsAndParentsModel.getParentID().isEmpty()) {
+                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(classesStudentsAndParentsModel.getParentID());
+                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            if (dataSnapshot.exists()) {
+                                                Parent parent = dataSnapshot.getValue(Parent.class);
+                                                final String parentID = dataSnapshot.getKey();
+                                                final String parentName = parent.getLastName() + " " + parent.getFirstName();
+                                                final String parentProfilePictureURL = parent.getProfilePicURL();
+
+                                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(classesStudentsAndParentsModel.getStudentID());
+                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                                        counter++;
+                                                        if (dataSnapshot.exists()) {
+                                                            Student student = dataSnapshot.getValue(Student.class);
+                                                            String studentFirstName = student.getFirstName();
+                                                            String relationship = studentFirstName + "'s parent";
+
+                                                            NewChatRowModel newChatRowModel = new NewChatRowModel(parentName, relationship, parentProfilePictureURL, parentID);
+                                                            if (!parentList.containsKey(parentID)) {
+                                                                parentList.put(parentID, newChatRowModel);
+                                                                if (!newChatRowModel.getIDofPartner().equals(mFirebaseUser.getUid())) {
+                                                                    if (schoolAllowsMessaging) {
+                                                                        newChatRowModelList.add(newChatRowModel);
+                                                                    }
+                                                                }
+                                                            }
+
+                                                            if (counter == classesStudentsAndParentsModelList.size()) {
+                                                                if (newChatRowModelList.size() > 0) {
+                                                                    if (newChatRowModelList.size() > 1) {
+                                                                        Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                                            @Override
+                                                                            public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                                                return o1.getName().compareTo(o2.getName());
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                    mAdapter.notifyDataSetChanged();
+                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                    progressLayout.setVisibility(View.GONE);
+                                                                    errorLayout.setVisibility(View.GONE);
+                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                } else {
+                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                    recyclerView.setVisibility(View.GONE);
+                                                                    progressLayout.setVisibility(View.GONE);
+                                                                    mySwipeRefreshLayout.setVisibility(View.GONE);
+                                                                    errorLayout.setVisibility(View.VISIBLE);
+                                                                    errorLayoutButton.setVisibility(View.GONE);
+                                                                    errorLayoutText.setText(Html.fromHtml("Your student(s)'s parents should appear here, however, your school(s) doesn't allow teacher to parent messaging."));
+                                                                }
+                                                            }
                                                         }
-                                                    });
-                                                }
-                                                mAdapter.notifyDataSetChanged();
-                                                mySwipeRefreshLayout.setRefreshing(false);
-                                                progressLayout.setVisibility(View.GONE);
-                                                errorLayout.setVisibility(View.GONE);
-                                                recyclerView.setVisibility(View.VISIBLE);
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(DatabaseError databaseError) {
+
+                                                    }
+                                                });
+                                            } else {
+                                                counter++;
                                             }
                                         }
-                                    }
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
 
+                                        }
+                                    });
+                                } else {
+                                    counter++;
+
+                                    if (counter == classesStudentsAndParentsModelList.size()) {
+                                        if (newChatRowModelList.size() > 0) {
+                                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                @Override
+                                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                    return o1.getName().compareTo(o2.getName());
+                                                }
+                                            });
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.GONE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            mySwipeRefreshLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.VISIBLE);
+                                            errorLayoutText.setText(Html.fromHtml("You don't have any parents to message at this time. If you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
+                                            errorLayoutButton.setText("Find my school");
+                                            errorLayoutButton.setVisibility(View.VISIBLE);
+                                        }
                                     }
-                                });
-                            } else {
-                                counter++;
+                                }
                             }
                         }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                } else {
-                    counter++;
-
-                    if (counter == classesStudentsAndParentsModelList.size()) {
-                        if (newChatRowModelList.size() > 0) {
-                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                @Override
-                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                    return o1.getName().compareTo(o2.getName());
-                                }
-                            });
-                            mAdapter.notifyDataSetChanged();
-                            mySwipeRefreshLayout.setRefreshing(false);
-                            progressLayout.setVisibility(View.GONE);
-                            errorLayout.setVisibility(View.GONE);
-                            recyclerView.setVisibility(View.VISIBLE);
-                        } else {
-                            mySwipeRefreshLayout.setRefreshing(false);
-                            recyclerView.setVisibility(View.GONE);
-                            progressLayout.setVisibility(View.GONE);
-                            mySwipeRefreshLayout.setVisibility(View.GONE);
-                            errorLayout.setVisibility(View.VISIBLE);
-                            errorLayoutText.setText(Html.fromHtml("You don't have any parents to message at this time. If you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
-                            errorLayoutButton.setText("Find my school");
-                            errorLayoutButton.setVisibility(View.VISIBLE);
-                        }
                     }
-                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         }
-
 //        mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Class").child(mFirebaseUser.getUid());
 //        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
 //            @Override

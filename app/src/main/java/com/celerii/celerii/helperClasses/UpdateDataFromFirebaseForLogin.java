@@ -292,7 +292,9 @@ public class UpdateDataFromFirebaseForLogin {
                     classInstance.setID(dataSnapshot.getKey());
                     if (!classesKeyHolder.contains(dataSnapshot.getKey())) {
                         classesKeyHolder.add(dataSnapshot.getKey());
-                        myClasses.add(classInstance);
+                        if (!classInstance.isDeleted()) {
+                            myClasses.add(classInstance);
+                        }
                     }
                 }
 

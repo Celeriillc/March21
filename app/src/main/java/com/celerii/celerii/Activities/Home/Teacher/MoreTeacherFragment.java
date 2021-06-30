@@ -381,7 +381,12 @@ public class MoreTeacherFragment extends Fragment {
         }
 
         moreTeachersModelList.clear();
-        moreTeachersModelList.addAll(moreTeachersModelListLocal);
+
+        for (Class classInstance: moreTeachersModelListLocal) {
+            if (!classInstance.isDeleted()) {
+                moreTeachersModelList.add(classInstance);
+            }
+        }
 
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
@@ -566,7 +571,9 @@ public class MoreTeacherFragment extends Fragment {
                     classInstance.setID(dataSnapshot.getKey());
                     if (!classesKeyHolder.contains(dataSnapshot.getKey())) {
                         classesKeyHolder.add(dataSnapshot.getKey());
-                        myClasses.add(classInstance);
+                        if (!classInstance.isDeleted()) {
+                            myClasses.add(classInstance);
+                        }
                     }
                 }
 

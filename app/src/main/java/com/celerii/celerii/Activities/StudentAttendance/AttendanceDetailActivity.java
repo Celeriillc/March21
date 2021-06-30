@@ -65,7 +65,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
     Bundle b;
 
     String activeKid, activeKidName, activeKidID, activeAccount;
-    String dateString, statusString, termString, subjectString, teacherString, classNameString, schoolString, remarkString, key;
+    String dateString, statusString, termString, subjectString, teacherString, classID, schoolString, remarkString, key;
     String parentActivity;
     Boolean isSubscribed;
 
@@ -169,10 +169,10 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                     statusString = parentAttendanceRow.getAttendanceStatus();
                     termString = Term.Term(parentAttendanceRow.getTerm());
                     subjectString = parentAttendanceRow.getSubject();
-                    classNameString = parentAttendanceRow.getClassID();
+                    classID = parentAttendanceRow.getClassID();
                     schoolString = parentAttendanceRow.getSchoolID();
                     teacherString = parentAttendanceRow.getTeacherID();
-                    remarkString = parentAttendanceRow.getRemark();
+                    remarkString = parentAttendanceRow.getRemark().trim();
 
                     String[] datearray = dateString.split(" ")[0].split("/");
                     Calendar c = Calendar.getInstance();
@@ -197,7 +197,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                         remark.setText(remarkString);
                     }
 
-                    mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classNameString);
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -292,7 +292,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);
     }
 
-    public void updateBadges(){
+    public void updateBadges() {
         if (parentActivity != null) {
             if (parentActivity.equals("Parent")) {
                 HashMap<String, Object> updateBadgesMap = new HashMap<String, Object>();
@@ -316,6 +316,17 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                 mDatabaseReference.updateChildren(updateBadgesMap);
             }
         }
+    }
+
+    public void updateRemarks() {
+        try {
+            String remarkString = remark.getText().toString().trim();
+            HashMap<String, Object> remarkUpdateMap = new HashMap<>();
+            remarkUpdateMap.put("AttendanceStudent/" + activeKidID + "/" + key + "/remark", remarkString);
+            remarkUpdateMap.put("AttendanceClass-Students/" + classID + "/" + key + "/Students/" + activeKidID + "/remark", remarkString);
+            mDatabaseReference = mFirebaseDatabase.getReference();
+            mDatabaseReference.updateChildren(remarkUpdateMap);
+        } catch (Exception e) {}
     }
 
     void showDialogWithMessageAndClose (String messageString) {
@@ -352,6 +363,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         if (id == android.R.id.home) {
             if (parentActivity != null) {
                 if (parentActivity.equals("Parent")) {
+                    updateRemarks();
                     Intent i = new Intent(this, ParentMainActivityTwo.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("Fragment Int", "2");
@@ -363,6 +375,10 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                     bundle.putString("Fragment Int", "3");
                     i.putExtras(bundle);
                     startActivity(i);
+                }
+            } else {
+                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                    updateRemarks();
                 }
             }
             finish();
@@ -376,6 +392,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         super.onBackPressed();
         if (parentActivity != null) {
             if (parentActivity.equals("Parent")) {
+                updateRemarks();
                 Intent i = new Intent(this, ParentMainActivityTwo.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("Fragment Int", "2");
@@ -387,6 +404,10 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                 bundle.putString("Fragment Int", "3");
                 i.putExtras(bundle);
                 startActivity(i);
+            }
+        } else {
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                updateRemarks();
             }
         }
     }

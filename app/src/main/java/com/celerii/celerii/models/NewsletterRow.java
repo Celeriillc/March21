@@ -5,7 +5,7 @@ package com.celerii.celerii.models;
  */
 
 public class NewsletterRow {
-    String newsletterKey, newsletterTitle, newsletterBody, schoolID, newsletterDate, newsletterImageURL, date, sortableDate;
+    String newsletterKey, newsletterTitle, newsletterBody, schoolID, newsletterDate, newsletterHeaderImageURL, date, sortableDate;
 
     public NewsletterRow() {
         this.newsletterKey = "";
@@ -13,7 +13,7 @@ public class NewsletterRow {
         this.newsletterBody = "";
         this.schoolID = "";
         this.newsletterDate = "";
-        this.newsletterImageURL = "";
+        this.newsletterHeaderImageURL = "";
         this.date = "0000/00/00 00:00:00:000";
         this.sortableDate = "00000000000000000";
     }
@@ -58,12 +58,12 @@ public class NewsletterRow {
         this.newsletterDate = newsletterDate;
     }
 
-    public String getNewsletterImageURL() {
-        return newsletterImageURL;
+    public String getNewsletterHeaderImageURL() {
+        return newsletterHeaderImageURL;
     }
 
-    public void setNewsletterImageURL(String newsletterImageURL) {
-        this.newsletterImageURL = newsletterImageURL;
+    public void setNewsletterHeaderImageURL(String newsletterHeaderImageURL) {
+        this.newsletterHeaderImageURL = newsletterHeaderImageURL;
     }
 
     public String getDate() {

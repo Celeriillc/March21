@@ -64,11 +64,15 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
         holder.newsletterDate.setText(Date.getRelativeTimeSpan(newsletterRow.getNewsletterDate()));
         holder.newsletterPoster.setText(newsletterRow.getSchoolID());
 
-        Glide.with(context)
-                .load(newsletterRow.getNewsletterImageURL())
-                .placeholder(R.drawable.profileimageplaceholder)
-                .error(R.drawable.profileimageplaceholder)
-                .into(holder.newsletterImage);
+        if (!newsletterRow.getNewsletterHeaderImageURL().equals("")) {
+            Glide.with(context)
+                    .load(newsletterRow.getNewsletterHeaderImageURL())
+                    .placeholder(R.drawable.profileimageplaceholder)
+                    .error(R.drawable.profileimageplaceholder)
+                    .into(holder.newsletterImage);
+        } else {
+            holder.newsletterImage.setVisibility(View.GONE);
+        }
 
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,7 +80,7 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
                 Intent intent = new Intent(context, NewsletterDetailKTActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("title", newsletterRow.getNewsletterTitle());
-                bundle.putString("imageURL", newsletterRow.getNewsletterImageURL());
+                bundle.putString("imageURL", newsletterRow.getNewsletterHeaderImageURL());
                 bundle.putString("date", newsletterRow.getNewsletterDate());
                 bundle.putString("poster", newsletterRow.getSchoolID());
                 bundle.putString("body", newsletterRow.getNewsletterBody());

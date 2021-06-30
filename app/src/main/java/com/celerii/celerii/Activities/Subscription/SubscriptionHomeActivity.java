@@ -265,7 +265,7 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
         if (subscriptionModelList == null || subscriptionModelList.size() == 0) {
             subscriptionModelList = new ArrayList<>();
             subscriptionModelList.add(new SubscriptionModel());
-            mAdapter = new SubscriptionAdapter(subscriptionModelList, new SubscriptionModel(), this);
+            mAdapter = new SubscriptionAdapter(subscriptionModelList, new SubscriptionModel(), childID, this);
             recyclerView.setAdapter(mAdapter);
             mySwipeRefreshLayout.setRefreshing(false);
             recyclerView.setVisibility(View.VISIBLE);
@@ -283,7 +283,7 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
 
             Collections.reverse(subscriptionModelList);
             subscriptionModelList.add(0, new SubscriptionModel());
-            mAdapter = new SubscriptionAdapter(subscriptionModelList, subscriptionModelList.get(1), this);
+            mAdapter = new SubscriptionAdapter(subscriptionModelList, subscriptionModelList.get(1), childID, this);
             recyclerView.setAdapter(mAdapter);
             mySwipeRefreshLayout.setRefreshing(false);
             progressLayout.setVisibility(View.GONE);

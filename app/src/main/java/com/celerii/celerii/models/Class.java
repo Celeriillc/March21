@@ -6,7 +6,7 @@ package com.celerii.celerii.models;
 
 public class Class {
     String className, classPicURL, id, classTeacher;
-    boolean isTicked;
+    boolean isTicked, isDeleted;
 
     public Class() {
         this.className = "";
@@ -14,6 +14,7 @@ public class Class {
         this.id = id;
         this.classTeacher = "";
         this.isTicked = false;
+        this.isDeleted = false;
     }
 
     public Class(String className, String id, boolean isTicked) {
@@ -22,6 +23,7 @@ public class Class {
         this.id = id;
         this.classTeacher = "";
         this.isTicked = isTicked;
+        this.isDeleted = false;
     }
 
     public Class(boolean isTicked, String className) {
@@ -30,6 +32,7 @@ public class Class {
         this.id = id;
         this.classTeacher = "";
         this.isTicked = isTicked;
+        this.isDeleted = false;
     }
 
     public Class(String className, String classPicURL, String id, boolean isTicked) {
@@ -38,6 +41,7 @@ public class Class {
         this.id = id;
         this.classTeacher = "";
         this.isTicked = isTicked;
+        this.isDeleted = false;
     }
 
     public String getClassName() {
@@ -78,5 +82,13 @@ public class Class {
 
     public void setTicked(boolean ticked) {
         isTicked = ticked;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

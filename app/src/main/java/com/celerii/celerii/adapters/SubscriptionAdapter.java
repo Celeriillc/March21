@@ -23,12 +23,18 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.SubscriptionModel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<SubscriptionModel> subscriptionModelList;
     private SubscriptionModel subscriptionModel;
+    private String childID;
     private Context context;
     public static final int Header = 1;
     public static final int Normal = 2;
@@ -70,9 +76,10 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    public SubscriptionAdapter(List<SubscriptionModel> subscriptionModelList, SubscriptionModel subscriptionModel, Context context) {
+    public SubscriptionAdapter(List<SubscriptionModel> subscriptionModelList, SubscriptionModel subscriptionModel, String childID, Context context) {
         this.subscriptionModelList = subscriptionModelList;
         this.subscriptionModel = subscriptionModel;
+        this.childID = childID;
         this.context = context;
         sharedPreferencesManager = new SharedPreferencesManager(context);
     }
@@ -109,28 +116,37 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 //                ((HeaderViewHolder) holder).status.setText("Active");
                 ((HeaderViewHolder) holder).subscribe.setText("Cancel Subscription");
                 ((HeaderViewHolder) holder).subscribe.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent));
-                ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                });
+//                ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//
+//                    }
+//                });
             } else {
 //                ((HeaderViewHolder) holder).status.setText("Inactive");
                 ((HeaderViewHolder) holder).subscribe.setText("Subscribe");
                 ((HeaderViewHolder) holder).subscribe.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedbutton));
-                ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int f = 0;
-                    }
-                });
+//                ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        int f = 0;
+//                    }
+//                });
             }
 
-//            ((HeaderViewHolder) holder).tier.setText(subscriptionModel.getSubscriptionTier());
-//            ((HeaderViewHolder) holder).date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
-//            ((HeaderViewHolder) holder).expiry.setText(Date.getFormalDocumentDate(subscriptionModel.getExpiryDate()));
-
+            ((HeaderViewHolder) holder).subscribe.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Boolean isOpenToAll = sharedPreferencesManager.getIsOpenToAll();
+                    String messageString;
+                    if (isOpenToAll) {
+                        messageString = "Celerii is currently in beta and is open to all, this functionality is unavailable.";
+                    } else {
+                        messageString = "Please update your application from the Google Play Store to subscribe or unsubscribe your child from a Celerii plan.";
+                    }
+                    showDialogWithMessage(messageString);
+                }
+            });
         } else if (holder instanceof MyViewHolder){
             final SubscriptionModel subscriptionModel = subscriptionModelList.get(position);
 
@@ -206,5 +222,31 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private boolean isPositionFooter (int position) {
         return position == subscriptionModelList.size () + 1;
+    }
+
+    void showDialogWithMessage (String messageString) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }
