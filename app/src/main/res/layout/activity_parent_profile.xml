@@ -95,7 +95,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
                     android:paddingStart="30dp"
                     android:paddingEnd="30dp"
                     android:layout_gravity="center"
@@ -104,29 +103,29 @@
                     android:textColor="@android:color/white"
                     android:text="Edit Profile"
                     android:background="@drawable/roundedbutton"
-                    android:visibility="gone"
                     style="?android:attr/borderlessButtonStyle"/>
 
-                <Button
-                    android:id="@+id/message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:paddingStart="30dp"
-                    android:paddingEnd="30dp"
-                    android:layout_gravity="center"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/white"
-                    android:text="Message"
-                    android:background="@drawable/roundedbutton"
-                    style="?android:attr/borderlessButtonStyle" />
+<!--                <Button-->
+<!--                    android:id="@+id/message"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="50dp"-->
+<!--                    android:layout_marginTop="20dp"-->
+<!--                    android:layout_marginBottom="20dp"-->
+<!--                    android:paddingStart="30dp"-->
+<!--                    android:paddingEnd="30dp"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:textAllCaps="false"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textColor="@android:color/white"-->
+<!--                    android:text="Message"-->
+<!--                    android:background="@drawable/roundedbutton"-->
+<!--                    style="?android:attr/borderlessButtonStyle" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:layout_marginTop="20dp"
                     android:paddingBottom="10dp">
 
                     <LinearLayout
@@ -151,7 +150,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_gender"/>
 
                         </RelativeLayout>
 
@@ -168,7 +167,7 @@
                                 android:layout_height="wrap_content"
                                 android:textStyle="bold"
                                 android:textColor="@color/black"
-                                android:text="Male"/>
+                                android:text="Gender not set yet"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -202,7 +201,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_engineer"/>
 
                         </RelativeLayout>
 
@@ -219,7 +218,7 @@
                                 android:layout_height="wrap_content"
                                 android:textStyle="bold"
                                 android:textColor="@color/black"
-                                android:text="Doctor"/>
+                                android:text="Occupation not set yet"/>
 
                             <TextView
                                 android:layout_width="wrap_content"

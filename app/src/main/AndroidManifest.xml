@@ -17,11 +17,12 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-<!--        <receiver android:name=".Activities.Home.Parent.ParentMainActivityTwo$MyBroadcastReceiver" >-->
-<!--        </receiver>-->
-        <receiver android:name=".Activities.Utility.ApplicationLaunchActivity$MyBroadcastReceiver" >
-        </receiver>
-        <activity android:name=".Activities.EClassroom.EClassroomScheduledClassParticipantsActivity"></activity>
+        <activity android:name=".Activities.Profiles.SchoolProfile.GalleryDetailForSingleImageActivity"></activity>
+        <!-- <receiver android:name=".Activities.Home.Parent.ParentMainActivityTwo$MyBroadcastReceiver" > -->
+        <!-- </receiver> -->
+        <receiver android:name=".Activities.Utility.ApplicationLaunchActivity$MyBroadcastReceiver"></receiver>
+
+        <activity android:name=".Activities.EClassroom.EClassroomScheduledClassParticipantsActivity" />
         <activity android:name=".Activities.EClassroom.Teacher.TeacherEClassroomScheduleClassActivity" />
         <activity android:name=".Activities.EClassroom.Teacher.TeacherEClassroomMessageBoardActivity" />
         <activity android:name=".Activities.EClassroom.Parent.ParentEClassroomMessageBoardActivity" />
@@ -131,7 +132,7 @@
         <activity
             android:name=".Activities.TeacherPerformance.TeacherPerformanceRowActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".Activities.Profiles.SchoolProfile.GalleryDetailActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.GalleryDetailForMultipleImagesActivity" />
         <activity android:name=".Activities.StudentAttendance.AttendanceDetailActivity" />
         <activity android:name=".Activities.StudentAttendance.ParentAttendanceActivity" />
         <activity android:name=".Activities.StudentPerformance.StudentPerformanceForParentsActivity" />

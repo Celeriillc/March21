@@ -1,21 +1,11 @@
 package com.celerii.celerii.adapters;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.core.app.ActivityOptionsCompat;
+
 import androidx.core.content.ContextCompat;
-import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -31,24 +21,18 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.Comment.CommentStoryActivity;
-import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
-import com.celerii.celerii.Activities.Intro.IntroSlider;
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.Profiles.TeacherProfileOneActivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
-import com.celerii.celerii.helperClasses.NotificationReceiver;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.WrapContentViewPager;
 import com.celerii.celerii.models.ClassStory;
-import com.celerii.celerii.models.LikeNotification;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.NotificationModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -60,7 +44,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -362,7 +345,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 //                    public void onClick(View v) {
 //                        Bundle b = new Bundle();
 //                        b.putString("URL", imageArray[0]);
-//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                        I.putExtras(b);
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                            ((MyViewHolder) holder).storyImageOne.setTransitionName("imageTransition");
@@ -382,7 +365,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 //                    public void onClick(View v) {
 //                        Bundle b = new Bundle();
 //                        b.putString("URL", imageArray[1]);
-//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                        I.putExtras(b);
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                            ((MyViewHolder) holder).storyImageTwo.setTransitionName("imageTransition");
@@ -402,7 +385,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 //                    public void onClick(View v) {
 //                        Bundle b = new Bundle();
 //                        b.putString("URL", imageArray[2]);
-//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                        I.putExtras(b);
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                            ((MyViewHolder) holder).storyImageThree.setTransitionName("imageTransition");

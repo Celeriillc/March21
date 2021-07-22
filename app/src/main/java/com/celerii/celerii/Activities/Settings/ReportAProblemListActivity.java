@@ -34,7 +34,7 @@ public class ReportAProblemListActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     RadioGroup reportingGroup;
-    RadioButton loginSignUp, classFeed, assignmentFeed, notification, messaging, timetable, studentPerformanceHistory,
+    RadioButton authentication, classFeed, subscription, notification, messaging, timetable, studentPerformanceHistory,
             studentPerformanceCurrent, studentPerformancePrediction, teacherPerformance, profile, attendance, event, newsletter,
             payment, other;
     Button next;
@@ -64,9 +64,9 @@ public class ReportAProblemListActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         reportingGroup = (RadioGroup) findViewById(R.id.reportinggroup);
-        loginSignUp = (RadioButton) findViewById(R.id.loginsignup);
+        authentication = (RadioButton) findViewById(R.id.authentication);
         classFeed = (RadioButton) findViewById(R.id.classfeed);
-        assignmentFeed = (RadioButton) findViewById(R.id.assignmentfeed);
+        subscription = (RadioButton) findViewById(R.id.subscription);
         notification = (RadioButton) findViewById(R.id.notifications);
         messaging = (RadioButton) findViewById(R.id.messaging);
         timetable = (RadioButton) findViewById(R.id.timetable);
@@ -87,9 +87,9 @@ public class ReportAProblemListActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
                 Intent intent = new Intent(ReportAProblemListActivity.this, ReportAProblemActivity.class);
-                if (loginSignUp.isChecked()){ bundle.putString("problemTitle", loginSignUp.getText().toString()); }
+                if (authentication.isChecked()){ bundle.putString("problemTitle", authentication.getText().toString()); }
                 else if (classFeed.isChecked()){ bundle.putString("problemTitle", classFeed.getText().toString()); }
-                else if (assignmentFeed.isChecked()){ bundle.putString("problemTitle", assignmentFeed.getText().toString()); }
+                else if (subscription.isChecked()){ bundle.putString("problemTitle", subscription.getText().toString()); }
                 else if (notification.isChecked()){ bundle.putString("problemTitle", notification.getText().toString()); }
                 else if (messaging.isChecked()){ bundle.putString("problemTitle", messaging.getText().toString()); }
                 else if (timetable.isChecked()){ bundle.putString("problemTitle", timetable.getText().toString()); }

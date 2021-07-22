@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailForMultipleImagesActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.models.GalleryModel;
 import com.bumptech.glide.Glide;
@@ -85,8 +85,8 @@ public class SchoolProfileGalleryAdapter extends RecyclerView.Adapter<SchoolProf
             @Override
             public void onClick(View v) {
                 Bundle b = new Bundle();
-                b.putString("URL", model.getURL());
-                Intent I = new Intent(context, GalleryDetailActivity.class);
+                b.putString("ImageURL", model.getURL());
+                Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
                 I.putExtras(b);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     holder.image.setTransitionName("imageTransition");

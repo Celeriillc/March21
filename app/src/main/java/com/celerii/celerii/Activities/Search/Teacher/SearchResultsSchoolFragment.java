@@ -56,7 +56,7 @@ public class SearchResultsSchoolFragment extends Fragment {
     TextView errorLayoutText;
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
-    private HashMap<String, School> schoolMap;
+    private ArrayList<String> schoolMap;
     private HashMap<String, Integer> searchMap = new HashMap<>();
     private SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections;
     public RecyclerView recyclerView;
@@ -112,7 +112,7 @@ public class SearchResultsSchoolFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
-        schoolMap = new HashMap<>();
+        schoolMap = new ArrayList<>();
         searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
         mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
@@ -277,14 +277,13 @@ public class SearchResultsSchoolFragment extends Fragment {
     void loadNewFromFirebase() {
         query = query.toLowerCase();
 
-        schoolMap.clear();
-        searchMap.clear();
-
         mDatabaseReference = mFirebaseDatabase.getReference().child("School");
         mDatabaseReference.orderByChild("searchableSchoolName").startAt(query).endAt(query + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 searchResultsRowList.clear();
+                schoolMap.clear();
+                searchMap.clear();
                 mAdapter.notifyDataSetChanged();
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
@@ -299,7 +298,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                             if (!school.getDeleted()) {
                                 searchResultsRowList.add(searchHistoryRow);
                             }
-                            schoolMap.put(key, school);
+                            schoolMap.add(key);
                         }
                     }
                 }
@@ -321,7 +320,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                                     if (!school.getDeleted()) {
                                         searchResultsRowList.add(searchHistoryRow);
                                     }
-                                    schoolMap.put(key, school);
+                                    schoolMap.add(key);
                                 }
                             }
                         }

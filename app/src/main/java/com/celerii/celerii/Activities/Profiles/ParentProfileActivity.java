@@ -59,7 +59,8 @@ public class ParentProfileActivity extends AppCompatActivity {
     LinearLayout profilePictureClipper;
     ImageView parentPic;
     TextView name, gender, occupation;
-    Button editYourProfile, message;
+    Button editYourProfile;
+//    Button message;
 
     String parentID, parentName = "", parentActivity;
 
@@ -109,7 +110,7 @@ public class ParentProfileActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         editYourProfile = (Button) findViewById(R.id.editprofile);
-        message = (Button) findViewById(R.id.message);
+//        message = (Button) findViewById(R.id.message);
         name = (TextView) findViewById(R.id.fullname);
         gender = (TextView) findViewById(R.id.gender);
         occupation = (TextView) findViewById(R.id.occupation);
@@ -119,10 +120,10 @@ public class ParentProfileActivity extends AppCompatActivity {
 
         if (parentID.equals(auth.getCurrentUser().getUid())){
             editYourProfile.setVisibility(View.VISIBLE);
-            message.setVisibility(View.GONE);
+//            message.setVisibility(View.GONE);
         } else {
             editYourProfile.setVisibility(View.GONE);
-            message.setVisibility(View.VISIBLE);
+//            message.setVisibility(View.VISIBLE);
         }
 
         editYourProfile.setOnClickListener(new View.OnClickListener() {
@@ -133,17 +134,17 @@ public class ParentProfileActivity extends AppCompatActivity {
             }
         });
 
-        message.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent I = new Intent(ParentProfileActivity.this, ChatActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("ID", parentID);
-                bundle.putString("name", parentName);
-                I.putExtras(bundle);
-                startActivity(I);
-            }
-        });
+//        message.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent I = new Intent(ParentProfileActivity.this, ChatActivity.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("ID", parentID);
+//                bundle.putString("name", parentName);
+//                I.putExtras(bundle);
+//                startActivity(I);
+//            }
+//        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {

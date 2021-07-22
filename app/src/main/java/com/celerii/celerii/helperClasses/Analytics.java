@@ -117,8 +117,8 @@ public class Analytics {
     }
 
     public static void featureAnalyticsUpdateSessionDuration(String featureName, String featureUseKey, String mFirebaseUserID, String sessionDurationInSeconds) {
-        String day = Date.getDay();
-        String month = Date.getMonth();
+        String day = Date.makeTwoDigits(Date.getDay());
+        String month = Date.makeTwoDigits(Date.getMonth());
         String year = Date.getYear();
         String year_month_day = year + "_" + month + "_" + day;
         String year_month = year + "_" + month;

@@ -1217,7 +1217,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:gravity="center"
-                            android:text="School hasn't uploaded any notable alum yet"
+                            android:text="School hasn't uploaded any notable alumn yet"
                             android:textColor="@color/colorBottomNavigationIconGray" />
 
                     </LinearLayout>

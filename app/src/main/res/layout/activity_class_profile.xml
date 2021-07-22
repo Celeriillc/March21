@@ -163,7 +163,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_user"/>
 
                         </RelativeLayout>
 
@@ -214,7 +214,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_school"/>
 
                         </RelativeLayout>
 
@@ -274,7 +274,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_attendance"/>
 
                         </RelativeLayout>
 
@@ -325,7 +325,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_percent"/>
 
                         </RelativeLayout>
 
@@ -385,7 +385,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_chair"/>
 
                         </RelativeLayout>
 
@@ -436,7 +436,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_male"/>
 
                         </RelativeLayout>
 
@@ -488,7 +488,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_search_black_24dp"/>
+                                android:background="@drawable/ic_female"/>
 
                         </RelativeLayout>
 

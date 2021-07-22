@@ -275,9 +275,9 @@ public class EditStudentProfileActivity extends AppCompatActivity {
                         textDrawable = CreateTextDrawable.createTextDrawable(context, "NA", 150);
                     }
 
-                    if (!sharedPreferencesManager.getMyPicURL().isEmpty()) {
+                    if (!student.getImageURL().equals("")) {
                         Glide.with(getBaseContext())
-                                .load(sharedPreferencesManager.getMyPicURL())
+                                .load(student.getImageURL())
                                 .placeholder(textDrawable)
                                 .error(textDrawable)
                                 .centerCrop()

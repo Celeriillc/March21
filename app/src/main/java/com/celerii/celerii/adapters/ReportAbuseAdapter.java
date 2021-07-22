@@ -83,11 +83,11 @@ public class ReportAbuseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof HeaderViewHolder){
-            if (accountType.equals("Parent")) {
-                ((HeaderViewHolder) holder).header.setText("Which Teacher are you reporting?");
-            } else {
-                ((HeaderViewHolder) holder).header.setText("Which Parent are you reporting?");
-            }
+//            if (accountType.equals("Parent")) {
+//                ((HeaderViewHolder) holder).header.setText("Which Teacher are you reporting?");
+//            } else {
+//                ((HeaderViewHolder) holder).header.setText("Which Parent are you reporting?");
+//            }
         }
         else if (holder instanceof MyViewHolder){
             final ReportUserModel reportUserModel = reportUserModelList.get(position);

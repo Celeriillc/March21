@@ -7,13 +7,12 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
+
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Html;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailForMultipleImagesActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailForSingleImageActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
@@ -31,8 +31,6 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -142,14 +140,9 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
         ((MyViewHolder) holder).imageFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Gson gson = new Gson();
-                ArrayList<String> imageList = new ArrayList<>();
-                imageList.add(chatList.getFileURL());
-                String urlJson = gson.toJson(imageList);
-                sharedPreferencesManager.setSchoolGallery(urlJson);
                 Bundle b = new Bundle();
-                b.putInt("currentImage", 0);
-                Intent I = new Intent(context, GalleryDetailActivity.class);
+                b.putString("ImageURL", chatList.getFileURL());
+                Intent I = new Intent(context, GalleryDetailForSingleImageActivity.class);
                 I.putExtras(b);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ((MyViewHolder) holder).imageFile.setTransitionName("imageTransition");
@@ -169,7 +162,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             public void onClick(View v) {
 //                Bundle b = new Bundle();
 //                b.putString("URL", chatList.getOtherProfilePicURL());
-//                Intent I = new Intent(context, GalleryDetailActivity.class);
+//                Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                I.putExtras(b);
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                    ((MyViewHolder) holder).otherProfilePic.setTransitionName("imageTransition");

@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.text.Html;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
@@ -1469,37 +1470,72 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
     private void connect() {
         if (pendingOutgoingRequestKey.size() > 0) {
-            final CustomProgressDialogOne customProgressDialogOne = new CustomProgressDialogOne(context);
-            customProgressDialogOne.show();
+            DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+            int width = metrics.widthPixels;
+            int height = metrics.heightPixels;
+            final Dialog dialog = new Dialog(context);
+            dialog.setContentView(R.layout.custom_dialog_request_connection);
+            TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+            Button cancel = (Button) dialog.findViewById(R.id.cancel);
+            Button action = (Button) dialog.findViewById(R.id.action);
+            try {
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.show();
+            } catch (Exception e) {
+                return;
+            }
+//                        dialog.getWindow().setLayout((19 * width) / 20, RecyclerView.LayoutParams.WRAP_CONTENT);
 
-            mDatabaseReference = mFirebaseDatabase.getReference("Teacher To School Request Teacher").child(mFirebaseUser.getUid()).child(schoolID);
-            mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+            String messageString = "Do you want to revoke your request to connect to " + "<b>" + schoolName + "</b>" + "?";
+            message.setText(Html.fromHtml(messageString));
+
+            action.setText("Revoke");
+
+            cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
 
-                        Map<String, Object> newRequestMap = new HashMap<String, Object>();
-                        DatabaseReference newRef = mFirebaseDatabase.getReference();
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            String pendingRequestKey = postSnapshot.getKey();
-                            newRequestMap.put("Teacher To School Request Teacher/" + mFirebaseUser.getUid() + "/" + schoolID + "/" + pendingRequestKey + "/" + "status", "Revoked");
-                            newRequestMap.put("Teacher To School Request School/" + schoolID + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Revoked");
-                            newRequestMap.put("NotificationSchool/" + schoolID + "/" + pendingRequestKey, null);
-                            pendingOutgoingRequestKey.remove(pendingRequestKey);
+            action.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final CustomProgressDialogOne customProgressDialogOne = new CustomProgressDialogOne(context);
+                    customProgressDialogOne.show();
+
+                    mDatabaseReference = mFirebaseDatabase.getReference("Teacher To School Request Teacher").child(mFirebaseUser.getUid()).child(schoolID);
+                    mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+
+                                Map<String, Object> newRequestMap = new HashMap<String, Object>();
+                                DatabaseReference newRef = mFirebaseDatabase.getReference();
+                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                    String pendingRequestKey = postSnapshot.getKey();
+                                    newRequestMap.put("Teacher To School Request Teacher/" + mFirebaseUser.getUid() + "/" + schoolID + "/" + pendingRequestKey + "/" + "status", "Revoked");
+                                    newRequestMap.put("Teacher To School Request School/" + schoolID + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Revoked");
+                                    newRequestMap.put("NotificationSchool/" + schoolID + "/" + pendingRequestKey, null);
+                                    pendingOutgoingRequestKey.remove(pendingRequestKey);
+                                }
+
+                                newRef.updateChildren(newRequestMap);
+                            }
+
+                            connect.setText("Connect");
+                            connect.setBackgroundResource(R.drawable.roundedbutton);
+                            connect.setTextColor(Color.WHITE);
+                            customProgressDialogOne.dismiss();
+                            String message = "You've successfully revoked your request to connect to " + "<b>" + schoolName + "</b>" + "'s account.";
+                            showDialogWithMessage(Html.fromHtml(message));
                         }
 
-                        newRef.updateChildren(newRequestMap);
-                    }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                    connect.setText("Connect");
-                    connect.setBackgroundResource(R.drawable.roundedbutton);
-                    connect.setTextColor(Color.WHITE);
-                    customProgressDialogOne.dismiss();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
+                        }
+                    });
                 }
             });
         } else if (pendingIncomingRequestKey.size() > 0) {
@@ -1535,6 +1571,9 @@ public class SchoolProfileActivity extends AppCompatActivity {
                     connect.setVisibility(View.GONE);
                     newConnectionRef.updateChildren(newConnectionMap);
                     customProgressDialogOne.dismiss();
+
+                    String message = "You've been successfully connected to " + "<b>" + schoolName + "</b>" + "'s account. You can now share messages with them and gain access to their classes, students and records";
+                    showDialogWithMessage(Html.fromHtml(message));
                 }
 
                 @Override
@@ -1566,9 +1605,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
             connect.setTextColor(ContextCompat.getColor(context, R.color.black));
             pendingOutgoingRequestKey.add(refKey);
             customProgressDialogOne.dismiss();
+            String message = "Your request to connect to " + "<b>" + schoolName + "</b>" + "'s account has been sent to them. We'll notify you once they respond";
+            showDialogWithMessage(Html.fromHtml(message));
         }
     }
 
+    int disconnectionCounter = 0;
     private void disconnect() {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int width = metrics.widthPixels;
@@ -1606,6 +1648,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                 customProgressDialogOne.show();
                 disconnect.setEnabled(false);
 
+                disconnectionCounter = 0;
                 String time = Date.getDate();
                 String sortableTime = Date.convertToSortableDate(time);
 
@@ -1627,17 +1670,43 @@ public class SchoolProfileActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
+                            int childrenCount = (int) dataSnapshot.getChildrenCount();
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                newDisconnectionMap.put("Teacher Class/" + mFirebaseUser.getUid() + "/" + postSnapshot.getKey(), null);
-                                newDisconnectionMap.put("Class Teacher/" + postSnapshot.getKey() + "/" + mFirebaseUser.getUid(), null);
+                                String classID = postSnapshot.getKey();
+                                newDisconnectionMap.put("Teacher Class/" + mFirebaseUser.getUid() + "/" + classID, null);
+                                newDisconnectionMap.put("Class Teacher/" + classID + "/" + mFirebaseUser.getUid(), null);
+
+                                mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        disconnectionCounter++;
+                                        if (dataSnapshot.exists()) {
+                                            Class classInstance = dataSnapshot.getValue(Class.class);
+                                            String classTeacher = classInstance.getClassTeacher();
+                                            if (mFirebaseUser.getUid().equals(classTeacher)) {
+                                                newDisconnectionMap.put("Class/" + classID + "/classTeacher", null);
+                                            }
+                                        }
+
+                                        if (disconnectionCounter == childrenCount) {
+                                            disconnect.setVisibility(View.GONE);
+                                            connect.setVisibility(View.VISIBLE);
+                                            newDisconnectionRef.updateChildren(newDisconnectionMap);
+                                            dialog.dismiss();
+                                            customProgressDialogOne.dismiss();
+                                            String message = "You've been successfully disconnected from " + "<b>" + schoolName + "</b>" + "'s account. You will no longer have access to or receive notifications from their account. To reconnect, use the search button to send a fresh connection request";
+                                            showDialogWithMessage(Html.fromHtml(message));
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
                             }
                         }
-
-                        disconnect.setVisibility(View.GONE);
-                        connect.setVisibility(View.VISIBLE);
-                        newDisconnectionRef.updateChildren(newDisconnectionMap);
-                        dialog.dismiss();
-                        customProgressDialogOne.dismiss();
                     }
 
                     @Override
@@ -1724,5 +1793,31 @@ public class SchoolProfileActivity extends AppCompatActivity {
                 loadFromFirebase();
             }
         }
+    }
+
+    void showDialogWithMessage (Spanned messageString) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

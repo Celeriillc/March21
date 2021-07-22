@@ -60,6 +60,16 @@ public class AppUpdateActivity extends AppCompatActivity {
         notify = (RadioButton) findViewById(R.id.notify);
         notAutoUpdate = (RadioButton) findViewById(R.id.notautoupdate);
         updateGroup = (RadioGroup) findViewById(R.id.updategroup);
+
+        if (sharedPreferencesManager.getApplicationUpdateState().equals("0")) {
+            autoUpdate.setChecked(true);
+        } else if (sharedPreferencesManager.getApplicationUpdateState().equals("1")) {
+            notify.setChecked(true);
+        } else if (sharedPreferencesManager.getApplicationUpdateState().equals("2")) {
+            notAutoUpdate.setChecked(true);
+        } else {
+            autoUpdate.setChecked(true);
+        }
     }
 
     @Override
@@ -77,6 +87,16 @@ public class AppUpdateActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+
+        if (autoUpdate.isChecked()) {
+            sharedPreferencesManager.setApplicationUpdateState("0");
+        } else if (notify.isChecked()) {
+            sharedPreferencesManager.setApplicationUpdateState("1");
+        } else if (notAutoUpdate.isChecked()) {
+            sharedPreferencesManager.setApplicationUpdateState("2");
+        } else {
+            sharedPreferencesManager.setApplicationUpdateState("0");
+        }
 
         sessionDurationInSeconds = String.valueOf((System.currentTimeMillis() - sessionStartTime) / 1000);
         Analytics.featureAnalyticsUpdateSessionDuration(featureName, featureUseKey, mFirebaseUser.getUid(), sessionDurationInSeconds);

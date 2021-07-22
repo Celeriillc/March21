@@ -54,6 +54,7 @@ public class SharedPreferencesManager {
     static final String school_gallery = "schoolGallery";
     static final String reminder_Ids = "reminder_ids";
     static final String reminder_details = "reminder_details";
+    static final String application_update_state = "applicationUpdateState";
 
     public SharedPreferencesManager(Context context) {
         this.context = context;
@@ -736,6 +737,22 @@ public class SharedPreferencesManager {
     }
     //endregion
 
+    //region ApplicationUpdateState
+    public String getApplicationUpdateState() {
+        return prefs.getString(application_update_state, "");
+    }
+
+    public void setApplicationUpdateState(String applicationUpdateState) {
+        editor.putString(application_update_state, applicationUpdateState);
+        editor.commit();
+    }
+
+    public void deleteApplicationUpdateState() {
+        editor.remove(application_update_state);
+        editor.commit();
+    }
+    //endregion
+
     public void clear() {
         deleteActiveAccount();
         deleteMyUserID();
@@ -775,5 +792,6 @@ public class SharedPreferencesManager {
         deleteSchoolGallery();
         deleteReminderIDs();
         deleteReminderDetails();
+        deleteApplicationUpdateState();
     }
 }

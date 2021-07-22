@@ -13,13 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailActivity;
+import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailForMultipleImagesActivity;
 import com.celerii.celerii.R;
-import com.celerii.celerii.helperClasses.SharedPreferencesManager;
-import com.celerii.celerii.models.GalleryModel;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -70,7 +67,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
         holder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent I = new Intent(context, GalleryDetailActivity.class);
+                Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
                 Bundle b = new Bundle();
                 b.putInt("currentImage", position);
                 I.putExtras(b);

@@ -110,7 +110,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
     LinearLayout performanceLayoutOne, performanceLayoutTwo, performanceLayoutThree, behaviouralLayoutOne, behaviouralLayoutTwo;
 
-    TextView headerfullname, className, school, gender, punctualityRating, averageAcademicPerformance, behaviouralPoints, temperament;
+    TextView headerfullname, className, school, gender, punctualityRating, averageAcademicPerformance, behaviouralPoints;
     TextView status, subscriptionTier, lastSubscription, expiry, bio;
     TextView present, absent, late, attendance1, attendance2, attendance3, attendance4, attendance5, attendance6, attendance7, attendance8, attendance9, attendance10;
     TextView strongest, weakest, subjectOne, scoreOne, subjectTwo, scoreTwo, subjectThree, scoreThree;
@@ -300,7 +300,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         punctualityRating = (TextView) findViewById(R.id.punctuality);
         averageAcademicPerformance = (TextView) findViewById(R.id.performance);
         behaviouralPoints = (TextView) findViewById(R.id.behaviouralpoints);
-        temperament = (TextView) findViewById(R.id.temperament);
+//        temperament = (TextView) findViewById(R.id.temperament);
 
         status = (TextView) findViewById(R.id.status);
         subscriptionTier  = (TextView) findViewById(R.id.subscriptiontier);

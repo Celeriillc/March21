@@ -344,6 +344,7 @@ public class CurrentFragment extends Fragment {
                                         examAverage = (examSum / examMax) * 100;
                                         caAverage = (caSum / caMax) * 100;
                                         termAverage = (termAverage / maxScore) * 100;
+                                        classAverage = (classAverage / maxScore) * 100;
 
                                         PerformanceCurrentModel performanceCurrentModel = new PerformanceCurrentModel(subject, latestDate, (int) caAverage, (int) examAverage, (int) termAverage);
                                         performanceCurrentModelList.add(performanceCurrentModel);

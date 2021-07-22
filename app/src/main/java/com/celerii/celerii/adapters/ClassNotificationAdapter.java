@@ -24,6 +24,7 @@ import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Home.NotificationDetailActivity;
 import com.celerii.celerii.Activities.Home.Parent.ParentsRequestActivity;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherRequestActivity;
+import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
 import com.celerii.celerii.Activities.Profiles.ParentProfileActivity;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileActivity;
 import com.celerii.celerii.Activities.StudentAttendance.ParentAttendanceActivity;
@@ -466,6 +467,10 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     b.putString("Color Number", String.valueOf(0));
                     Intent I = new Intent(context, EventDetailActivity.class);
                     I.putExtras(b);
+                    context.startActivity(I);
+                } else if (notificationType.equals("Newsletter")){
+                    Intent I = new Intent(context, NewsletterRowActivity.class);
+                    sharedPreferencesManager.setActiveAccount(notificationModel.getToAccountType());
                     context.startActivity(I);
                 }  else if (notificationType.equals("EClassroom")){
                     Bundle b = new Bundle();

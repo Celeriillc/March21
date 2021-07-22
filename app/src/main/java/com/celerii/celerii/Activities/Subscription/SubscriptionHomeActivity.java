@@ -231,7 +231,13 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
 
         subscriptionModel = new SubscriptionModel();
         subscriptionModelList = new ArrayList<>();
-        loadSubscriptionInformation();
+
+        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+            loadSubscriptionInformationForParents();
+        } else {
+            loadSubscriptionInformationForTeachers();
+        }
+
 //        mAdapter = new SubscriptionAdapter(subscriptionModelList, subscriptionModel, this);
 //        recyclerView.setAdapter(mAdapter);
         loadStudentSubscriptionInformationFromFirebase();
@@ -247,7 +253,7 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
     }
 
     static HashMap<String, ArrayList<SubscriptionModel>> subscriptionMap = new HashMap<>();
-    private void loadSubscriptionInformation() {
+    private void loadSubscriptionInformationForParents() {
         Gson gson = new Gson();
         subscriptionMap = new HashMap<>();
         String subscriptionJSON = sharedPreferencesManager.getSubscriptionInformationParents();
@@ -260,6 +266,50 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
             subscriptionModelList = new ArrayList<>();
         } else {
             subscriptionModelList = subscriptionMap.get(childID);
+        }
+
+        if (subscriptionModelList == null || subscriptionModelList.size() == 0) {
+            subscriptionModelList = new ArrayList<>();
+            subscriptionModelList.add(new SubscriptionModel());
+            mAdapter = new SubscriptionAdapter(subscriptionModelList, new SubscriptionModel(), childID, this);
+            recyclerView.setAdapter(mAdapter);
+            mySwipeRefreshLayout.setRefreshing(false);
+            recyclerView.setVisibility(View.VISIBLE);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
+        } else {
+            if (subscriptionModelList.size() > 1) {
+                Collections.sort(subscriptionModelList, new Comparator<SubscriptionModel>() {
+                    @Override
+                    public int compare(SubscriptionModel o1, SubscriptionModel o2) {
+                        return o1.getSubscriptionDate().compareTo(o2.getSubscriptionDate());
+                    }
+                });
+            }
+
+            Collections.reverse(subscriptionModelList);
+            subscriptionModelList.add(0, new SubscriptionModel());
+            mAdapter = new SubscriptionAdapter(subscriptionModelList, subscriptionModelList.get(1), childID, this);
+            recyclerView.setAdapter(mAdapter);
+            mySwipeRefreshLayout.setRefreshing(false);
+            progressLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void loadSubscriptionInformationForTeachers() {
+        Gson gson = new Gson();
+        String subscriptionJSON = sharedPreferencesManager.getSubscriptionInformationTeachers();
+        Type type = new TypeToken<HashMap<String, SubscriptionModel>>() {}.getType();
+        HashMap<String, SubscriptionModel> subscriptionModelMap = gson.fromJson(subscriptionJSON, type);
+
+        ArrayList<SubscriptionModel> subscriptionModelList = new ArrayList<>();
+
+        if (subscriptionModelMap == null) {
+            subscriptionModelList = new ArrayList<>();
+        } else {
+            subscriptionModelList.add(subscriptionModelMap.get(childID));
         }
 
         if (subscriptionModelList == null || subscriptionModelList.size() == 0) {
@@ -319,7 +369,9 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
 
                 subscriptionModelList.add(0, new SubscriptionModel());
                 mySwipeRefreshLayout.setRefreshing(false);
-                mAdapter.notifyDataSetChanged();
+//                mAdapter.notifyDataSetChanged();
+                mAdapter = new SubscriptionAdapter(subscriptionModelList, subscriptionModelList.get(1), childID, context);
+                recyclerView.setAdapter(mAdapter);
             }
 
             @Override

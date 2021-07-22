@@ -56,7 +56,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
     TextView errorLayoutText;
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
-    private HashMap<String, Student> studentMap;
+    private ArrayList<String> studentMap;
     private SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections;
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
@@ -113,7 +113,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
-        studentMap = new HashMap<>();
+        studentMap = new ArrayList<>();
         searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
         mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
@@ -561,7 +561,7 @@ public class ParentSearchResultsStudentFragment extends Fragment {
                                                     searchHistoryRow = new SearchResultsRow(studentKey, studentFirstName + " " + studentMiddleName + " " + studentLastName, "", studentPicURL, "Student");
                                                 }
                                                 searchResultsRowList.add(searchHistoryRow);
-                                                studentMap.put(studentKey, student);
+                                                studentMap.add(studentKey);
 //                                                parsedStudents.add(studentKey);
                                             }
                                         }

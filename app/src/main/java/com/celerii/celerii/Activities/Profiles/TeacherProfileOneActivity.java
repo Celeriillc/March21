@@ -63,7 +63,8 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
     ImageView profilePic;
     LinearLayout profilePictureClipper, maritalStatusLayout;
     TextView fullName, gender, maritalStatus, pointsAwarded, pointsFined, classPost, postLikes, teacherBio;
-    Button editYourProfile, message;
+    Button editYourProfile;
+//    Button message;
 
     String teacherID = "", teacherName = "";
 
@@ -104,7 +105,7 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         editYourProfile = (Button) findViewById(R.id.editprofile);
-        message = (Button) findViewById(R.id.message);
+//        message = (Button) findViewById(R.id.message);
         profilePic = (ImageView) findViewById(R.id.profilepic);
         profilePictureClipper = (LinearLayout) findViewById(R.id.profilepictureclipper);
         maritalStatusLayout = (LinearLayout) findViewById(R.id.maritalstatuslayout);
@@ -120,10 +121,10 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
 
         if (teacherID.equals(auth.getCurrentUser().getUid())){
             editYourProfile.setVisibility(View.VISIBLE);
-            message.setVisibility(View.GONE);
+//            message.setVisibility(View.GONE);
         } else {
             editYourProfile.setVisibility(View.GONE);
-            message.setVisibility(View.VISIBLE);
+//            message.setVisibility(View.VISIBLE);
         }
 
         loadFromFirebase();
@@ -136,17 +137,17 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
             }
         });
 
-        message.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent I = new Intent(TeacherProfileOneActivity.this, ChatActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("ID", teacherID);
-                bundle.putString("name", teacherName);
-                I.putExtras(bundle);
-                startActivity(I);
-            }
-        });
+//        message.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent I = new Intent(TeacherProfileOneActivity.this, ChatActivity.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("ID", teacherID);
+//                bundle.putString("name", teacherName);
+//                I.putExtras(bundle);
+//                startActivity(I);
+//            }
+//        });
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {

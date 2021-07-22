@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
@@ -30,6 +32,7 @@ import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.DisconnectionModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
@@ -71,6 +74,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     DatabaseReference mDatabaseReference;
     FirebaseUser mFirebaseUser;
     int classesToBeRemovedCounter = 0;
+    int disconnectionCounter = 0;
     CustomProgressDialogOne customProgressDialogOne;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -184,9 +188,6 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                     holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
                     holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
                 } else if (searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().contains(entityId)) {
-//                    holder.sendRequest.setText("Respond");
-//                    holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
-//                    holder.sendRequest.setTextColor(Color.WHITE);
                     holder.sendRequest.setVisibility(View.GONE);
                 } else if (searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().contains(entityId)) {
                     holder.sendRequest.setText("Revoke");
@@ -215,7 +216,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
                     if (holder.sendRequest.getText().equals("Connect")) {
 
-                        if (searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().size() == 0) {
+                        if (!searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().contains(entityId)) {
                             customProgressDialogOne.show();
                             holder.sendRequest.setText("Revoke");
                             holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
@@ -239,6 +240,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                             searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().add(entityId);
                             notifyDataSetChanged();
                             customProgressDialogOne.dismiss();
+                            String message = "Your request to connect to " + "<b>" + entityName + "</b>" + "'s account has been sent to them. We'll notify you once they respond";
+                            showDialogWithMessage(Html.fromHtml(message));
                         } else {
                             customProgressDialogOne.show();
                             holder.sendRequest.setText("Disconnect");
@@ -247,31 +250,32 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                             String time = Date.getDate();
                             String sortableTime = Date.convertToSortableDate(time);
 
-                            final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
-                            final NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sortableTime, notificationPushID, "Connection", "", "", false);
-
                             mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId);
                             mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Map<String, Object> newConnectionMap = new HashMap<String, Object>();
                                     DatabaseReference newRef = mFirebaseDatabase.getReference();
+                                    String pendingRequestKey = "";
                                     if (dataSnapshot.exists()) {
                                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                            String pendingRequestKey = postSnapshot.getKey();
+                                            pendingRequestKey = postSnapshot.getKey();
                                             newConnectionMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Accepted");
                                             newConnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Accepted");
                                             newConnectionMap.put("NotificationTeacher/" + mFirebaseUser.getUid() + "/" + pendingRequestKey, null);
                                         }
                                     }
+                                    NotificationModel notification = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sortableTime, pendingRequestKey, "Connection", "", "", false);
                                     newConnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), true);
                                     newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
-                                    newConnectionMap.put("NotificationSchool/" + entityId + "/" + notificationPushID, notification);
+                                    newConnectionMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notification);
                                     newRef.updateChildren(newConnectionMap);
                                     searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(entityId);
                                     searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
                                     notifyDataSetChanged();
                                     customProgressDialogOne.dismiss();
+                                    String message = "You've been successfully connected to " + "<b>" + entityName + "</b>" + "'s account. You can now share messages with them and gain access to their classes, students and records";
+                                    showDialogWithMessage(Html.fromHtml(message));
                                 }
 
                                 @Override
@@ -345,6 +349,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                         holder.sendRequest.setEnabled(true);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
+                                        String message = "You've successfully revoked your request to connect to " + "<b>" + entityName + "</b>" + "'s account.";
+                                        showDialogWithMessage(Html.fromHtml(message));
                                     }
 
                                     @Override
@@ -395,6 +401,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                 customProgressDialogOne.show();
                                 holder.sendRequest.setEnabled(false);
 
+                                disconnectionCounter = 0;
                                 String time = Date.getDate();
                                 String sorttableTime = Date.convertToSortableDate(time);
 
@@ -416,22 +423,48 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         if (dataSnapshot.exists()) {
+                                            int childrenCount = (int) dataSnapshot.getChildrenCount();
                                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                newDisconnectionMap.put("Teacher Class/" + mFirebaseUser.getUid() + "/" + postSnapshot.getKey(), null);
-                                                newDisconnectionMap.put("Class Teacher/" + postSnapshot.getKey() + "/" + mFirebaseUser.getUid(), null);
+                                                String classID = postSnapshot.getKey();
+                                                newDisconnectionMap.put("Teacher Class/" + mFirebaseUser.getUid() + "/" + classID, null);
+                                                newDisconnectionMap.put("Class Teacher/" + classID + "/" + mFirebaseUser.getUid(), null);
+
+                                                mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        disconnectionCounter++;
+                                                        if (dataSnapshot.exists()) {
+                                                            Class classInstance = dataSnapshot.getValue(Class.class);
+                                                            String classTeacher = classInstance.getClassTeacher();
+                                                            if (mFirebaseUser.getUid().equals(classTeacher)) {
+                                                                newDisconnectionMap.put("Class/" + classID + "/classTeacher", null);
+                                                            }
+                                                        }
+
+                                                        if (disconnectionCounter == childrenCount) {
+                                                            holder.sendRequest.setText("Connect");
+                                                            holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
+                                                            holder.sendRequest.setTextColor(Color.WHITE);
+                                                            newDisconnectionRef.updateChildren(newDisconnectionMap);
+                                                            searchExistingIncomingAndOutgoingConnections.getExistingConnections().remove(entityId);
+                                                            holder.sendRequest.setEnabled(true);
+                                                            notifyDataSetChanged();
+                                                            customProgressDialogOne.dismiss();
+                                                            String message = "You've been successfully disconnected from " + "<b>" + entityName + "</b>" + "'s account. You will no longer have access to or receive notifications from their account. To reconnect, use the search button to send a fresh connection request";
+                                                            showDialogWithMessage(Html.fromHtml(message));
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
                                             }
                                         }
 
-                                        holder.sendRequest.setText("Connect");
-                                        holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
-                                        holder.sendRequest.setTextColor(Color.WHITE);
-                                        newDisconnectionRef.updateChildren(newDisconnectionMap);
-                                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().remove(entityId);
-                                        holder.sendRequest.setEnabled(true);
-                                        notifyDataSetChanged();
-                                        customProgressDialogOne.dismiss();
-                                        String message = "You've been successfully disconnected from " + "<b>" + entityName + "</b>" + "'s account. You will no longer have access to or receive notifications from their account. To reconnect, use the search button to send a fresh connection request";
-                                        showDialogWithMessage(Html.fromHtml(message));
+
                                     }
 
                                     @Override
@@ -443,130 +476,130 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         });
 
                     }
-                    else if (holder.sendRequest.getText().equals("Respond")) {
-
-                        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-                        int width = metrics.widthPixels;
-                        int height = metrics.heightPixels;
-                        final Dialog dialog = new Dialog(context);
-                        dialog.setContentView(R.layout.custom_dialog_request_connection);
-                        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
-                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
-                        Button action = (Button) dialog.findViewById(R.id.action);
-                        try {
-                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                            dialog.show();
-                        } catch (Exception e) {
-                            return;
-                        }
-//                        dialog.getWindow().setLayout((19 * width) / 20, RecyclerView.LayoutParams.WRAP_CONTENT);
-
-                        String messageString = "<b>" + entityName + "</b>" + " sent you a connection request, accepting this request will give you access to their students, classes and data. Do you " +
-                                "wish to accept this request?";
-                        message.setText(Html.fromHtml(messageString));
-
-                        action.setText("Accept");
-                        cancel.setText("Decline");
-
-                        cancel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                                customProgressDialogOne.show();
-                                holder.sendRequest.setEnabled(false);
-
-                                String time = Date.getDate();
-                                String sorttableTime = Date.convertToSortableDate(time);
-
-                                final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
-                                final NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sorttableTime, notificationPushID, "ConnectionRequestDeclined", "", "", false);
-
-
-                                mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId);
-                                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if (dataSnapshot.exists()) {
-
-                                            Map<String, Object> newRequestMap = new HashMap<String, Object>();
-                                            DatabaseReference newRef = mFirebaseDatabase.getReference();
-                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                String pendingRequestKey = postSnapshot.getKey();
-                                                newRequestMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Declined");
-                                                newRequestMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Declined");
-                                                newRequestMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notificationModel);
-                                            }
-                                            newRef.updateChildren(newRequestMap);
-                                        }
-
-                                        holder.sendRequest.setText("Connect");
-                                        holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
-                                        holder.sendRequest.setTextColor(Color.WHITE);
-                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
-                                        holder.sendRequest.setEnabled(true);
-                                        notifyDataSetChanged();
-                                        customProgressDialogOne.dismiss();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                            }
-                        });
-
-                        action.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                dialog.dismiss();
-                                customProgressDialogOne.show();
-                                holder.sendRequest.setEnabled(false);
-
-                                String time = Date.getDate();
-                                String sorttableTime = Date.convertToSortableDate(time);
-
-                                final Map<String, Object> newConnectionMap = new HashMap<String, Object>();
-                                final DatabaseReference newConnectionRef = mFirebaseDatabase.getReference();
-                                final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
-                                final NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sorttableTime, notificationPushID, "Connection", "", "", false);
-
-                                mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId);
-                                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if (dataSnapshot.exists()) {
-
-                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                String pendingRequestKey = postSnapshot.getKey();
-                                                newConnectionMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Accepted");
-                                                newConnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Accepted");
-                                                newConnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), true);
-                                                newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
-                                                newConnectionMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notificationModel);
-                                            }
-                                        }
-
-                                        holder.sendRequest.setText("Disconnect");
-                                        holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
-                                        holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
-                                        newConnectionRef.updateChildren(newConnectionMap);
-                                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(entityId);
-                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
-                                        holder.sendRequest.setEnabled(true);
-                                        notifyDataSetChanged();
-                                        customProgressDialogOne.dismiss();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                            }
-                        });
-                    }
+//                    else if (holder.sendRequest.getText().equals("Respond")) {
+//
+//                        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+//                        int width = metrics.widthPixels;
+//                        int height = metrics.heightPixels;
+//                        final Dialog dialog = new Dialog(context);
+//                        dialog.setContentView(R.layout.custom_dialog_request_connection);
+//                        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+//                        Button cancel = (Button) dialog.findViewById(R.id.cancel);
+//                        Button action = (Button) dialog.findViewById(R.id.action);
+//                        try {
+//                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//                            dialog.show();
+//                        } catch (Exception e) {
+//                            return;
+//                        }
+////                        dialog.getWindow().setLayout((19 * width) / 20, RecyclerView.LayoutParams.WRAP_CONTENT);
+//
+//                        String messageString = "<b>" + entityName + "</b>" + " sent you a connection request, accepting this request will give you access to their students, classes and data. Do you " +
+//                                "wish to accept this request?";
+//                        message.setText(Html.fromHtml(messageString));
+//
+//                        action.setText("Accept");
+//                        cancel.setText("Decline");
+//
+//                        cancel.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//                                dialog.dismiss();
+//                                customProgressDialogOne.show();
+//                                holder.sendRequest.setEnabled(false);
+//
+//                                String time = Date.getDate();
+//                                String sorttableTime = Date.convertToSortableDate(time);
+//
+//                                final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
+//                                final NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sorttableTime, notificationPushID, "ConnectionRequestDeclined", "", "", false);
+//
+//
+//                                mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId);
+//                                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+//                                    @Override
+//                                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                                        if (dataSnapshot.exists()) {
+//
+//                                            Map<String, Object> newRequestMap = new HashMap<String, Object>();
+//                                            DatabaseReference newRef = mFirebaseDatabase.getReference();
+//                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//                                                String pendingRequestKey = postSnapshot.getKey();
+//                                                newRequestMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Declined");
+//                                                newRequestMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Declined");
+//                                                newRequestMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notificationModel);
+//                                            }
+//                                            newRef.updateChildren(newRequestMap);
+//                                        }
+//
+//                                        holder.sendRequest.setText("Connect");
+//                                        holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
+//                                        holder.sendRequest.setTextColor(Color.WHITE);
+//                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
+//                                        holder.sendRequest.setEnabled(true);
+//                                        notifyDataSetChanged();
+//                                        customProgressDialogOne.dismiss();
+//                                    }
+//
+//                                    @Override
+//                                    public void onCancelled(DatabaseError databaseError) {
+//
+//                                    }
+//                                });
+//                            }
+//                        });
+//
+//                        action.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//
+//                                dialog.dismiss();
+//                                customProgressDialogOne.show();
+//                                holder.sendRequest.setEnabled(false);
+//
+//                                String time = Date.getDate();
+//                                String sorttableTime = Date.convertToSortableDate(time);
+//
+//                                final Map<String, Object> newConnectionMap = new HashMap<String, Object>();
+//                                final DatabaseReference newConnectionRef = mFirebaseDatabase.getReference();
+//                                final String notificationPushID = mFirebaseDatabase.getReference().child("NotificationSchool").child(entityId).push().getKey();
+//                                final NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), entityId, "School", "Teacher", time, sorttableTime, notificationPushID, "Connection", "", "", false);
+//
+//                                mDatabaseReference = mFirebaseDatabase.getReference("School To Teacher Request Teacher").child(mFirebaseUser.getUid()).child(entityId);
+//                                mDatabaseReference.orderByChild("status").equalTo("Pending").addListenerForSingleValueEvent(new ValueEventListener() {
+//                                    @Override
+//                                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                                        if (dataSnapshot.exists()) {
+//
+//                                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//                                                String pendingRequestKey = postSnapshot.getKey();
+//                                                newConnectionMap.put("School To Teacher Request Teacher/" + mFirebaseUser.getUid() + "/" + entityId + "/" + pendingRequestKey + "/" + "status", "Accepted");
+//                                                newConnectionMap.put("School To Teacher Request School/" + entityId + "/" + mFirebaseUser.getUid() + "/" + pendingRequestKey + "/" + "status", "Accepted");
+//                                                newConnectionMap.put("School Teacher/" + entityId + "/" + mFirebaseUser.getUid(), true);
+//                                                newConnectionMap.put("Teacher School/" + mFirebaseUser.getUid() + "/" + entityId, true);
+//                                                newConnectionMap.put("NotificationSchool/" + entityId + "/" + pendingRequestKey, notificationModel);
+//                                            }
+//                                        }
+//
+//                                        holder.sendRequest.setText("Disconnect");
+//                                        holder.sendRequest.setBackgroundResource(R.drawable.rounded_button_white_light_gray);
+//                                        holder.sendRequest.setTextColor(ContextCompat.getColor(context, R.color.black));
+//                                        newConnectionRef.updateChildren(newConnectionMap);
+//                                        searchExistingIncomingAndOutgoingConnections.getExistingConnections().add(entityId);
+//                                        searchExistingIncomingAndOutgoingConnections.getPendingIncomingRequests().remove(entityId);
+//                                        holder.sendRequest.setEnabled(true);
+//                                        notifyDataSetChanged();
+//                                        customProgressDialogOne.dismiss();
+//                                    }
+//
+//                                    @Override
+//                                    public void onCancelled(DatabaseError databaseError) {
+//
+//                                    }
+//                                });
+//                            }
+//                        });
+//                    }
 
                 }
                 else if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
@@ -621,7 +654,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                                 String recipientAccountType = guardians.get(entityId).get(i).split(" ")[1];
 
                                                 if (!recipientID.equals(mFirebaseUser.getUid())) {
-                                                    NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, refKey, "ConnectionRequest", searchResultsRow.getEntityPic(), entityName, false);
+                                                    NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, refKey, "ConnectionRequest", searchResultsRow.getEntityPic(), entityId, entityName, false);
 
                                                     newRequestMap.put("Student Connection Request Recipients/" + recipientID + "/" + refKey, parentSchoolConnectionRequest);
                                                     if (recipientAccountType.equals("School")) {
@@ -640,6 +673,9 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                         searchExistingIncomingAndOutgoingConnections.getPendingOutgoingRequests().add(entityId);
                                         notifyDataSetChanged();
                                         customProgressDialogOne.dismiss();
+                                        String message = "Your request to connect to " + "<b>" + entityName + "</b>" + "'s account has been sent to their guardian(s). " +
+                                                "We'll notify you once they respond";
+                                        showDialogWithMessage(Html.fromHtml(message));
                                     }
 
                                     @Override
@@ -730,12 +766,16 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                             holder.sendRequest.setEnabled(true);
                                             notifyDataSetChanged();
                                             customProgressDialogOne.dismiss();
+                                            String message = "You've successfully revoked your request to connect to " + "<b>" + entityName + "</b>" + "'s account.";
+                                            showDialogWithMessage(Html.fromHtml(message));
                                         } else {
                                             holder.sendRequest.setEnabled(true);
                                             holder.sendRequest.setText("Connect");
                                             holder.sendRequest.setBackgroundResource(R.drawable.roundedbutton);
                                             holder.sendRequest.setTextColor(Color.WHITE);
                                             customProgressDialogOne.dismiss();
+                                            String message = "We could not find the request to connect to " + "<b>" + entityName + "</b>" + "'s account. Please refresh your search.";
+                                            showDialogWithMessage(Html.fromHtml(message));
                                         }
                                     }
 
@@ -831,7 +871,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                                                             String recipientAccountType = guardians.get(entityId).get(i).split(" ")[1];
 
                                                             if (!recipientID.equals(mFirebaseUser.getUid())) {
-                                                                NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, disconnectionRefKey, "Disconnection", searchResultsRow.getEntityPic(), entityId, false);
+                                                                NotificationModel notificationModel = new NotificationModel(mFirebaseUser.getUid(), recipientID, recipientAccountType, "Parent", timeSent, sorttableTimeSent, disconnectionRefKey, "Disconnection", searchResultsRow.getEntityPic(), entityId, entityName, false);
 
                                                                 if (recipientAccountType.equals("School")) {
                                                                     newDisconnectionMap.put("NotificationSchool/" + recipientID + "/" + disconnectionRefKey, notificationModel);

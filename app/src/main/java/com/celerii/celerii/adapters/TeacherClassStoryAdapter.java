@@ -372,7 +372,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
 //                    public void onClick(View v) {
 //                        Bundle b = new Bundle();
 //                        b.putString("URL", imageArray[0]);
-//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                        I.putExtras(b);
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                            ((MyViewHolder) holder).storyImageOne.setTransitionName("imageTransition");
@@ -392,7 +392,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
 //                    public void onClick(View v) {
 //                        Bundle b = new Bundle();
 //                        b.putString("URL", imageArray[1]);
-//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                        I.putExtras(b);
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                            ((MyViewHolder) holder).storyImageTwo.setTransitionName("imageTransition");
@@ -412,7 +412,7 @@ public class TeacherClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.
 //                    public void onClick(View v) {
 //                        Bundle b = new Bundle();
 //                        b.putString("URL", imageArray[2]);
-//                        Intent I = new Intent(context, GalleryDetailActivity.class);
+//                        Intent I = new Intent(context, GalleryDetailForMultipleImagesActivity.class);
 //                        I.putExtras(b);
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                            ((MyViewHolder) holder).storyImageThree.setTransitionName("imageTransition");

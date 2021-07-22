@@ -74,9 +74,9 @@ public class NewsletterRowActivity extends AppCompatActivity {
         mFirebaseUser = auth.getCurrentUser();
 
         accountType = sharedPreferencesManager.getActiveAccount();
-        if (accountType.equals("Teacher")){
+        if (accountType.equals("Teacher")) {
             newsletterAccountType = "Teacher Newsletters";
-        } else if (accountType.equals("Parent")) {
+        } else {
             newsletterAccountType = "Parent Newsletters";
         }
 

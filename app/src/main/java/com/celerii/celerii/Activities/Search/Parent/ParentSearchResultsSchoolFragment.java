@@ -54,7 +54,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
     TextView errorLayoutText;
 
     private ArrayList<SearchResultsRow> searchResultsRowList;
-    private HashMap<String, School> schoolMap;
+    private ArrayList<String> schoolMap;
     private HashMap<String, Integer> searchMap = new HashMap<>();
     public RecyclerView recyclerView;
     public SearchResultsAdapter mAdapter;
@@ -109,7 +109,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         searchResultsRowList = new ArrayList<>();
-        schoolMap = new HashMap<>();
+        schoolMap = new ArrayList<>();
         SearchExistingIncomingAndOutgoingConnections searchExistingIncomingAndOutgoingConnections = new SearchExistingIncomingAndOutgoingConnections();
         mAdapter = new SearchResultsAdapter(searchResultsRowList, getContext(), searchExistingIncomingAndOutgoingConnections);
         recyclerView.setAdapter(mAdapter);
@@ -154,7 +154,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
                             if (!school.getDeleted()) {
                                 searchResultsRowList.add(searchHistoryRow);
                             }
-                            schoolMap.put(key, school);
+                            schoolMap.add(key);
                         }
                     }
                 }
@@ -176,7 +176,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
                                     if (!school.getDeleted()) {
                                         searchResultsRowList.add(searchHistoryRow);
                                     }
-                                    schoolMap.put(key, school);
+                                    schoolMap.add(key);
                                 }
                             }
                         }

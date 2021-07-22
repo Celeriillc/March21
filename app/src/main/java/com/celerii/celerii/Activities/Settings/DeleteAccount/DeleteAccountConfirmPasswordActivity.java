@@ -34,6 +34,7 @@ import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.LogoutProtocol;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
+import com.celerii.celerii.models.Class;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -191,6 +192,26 @@ public class DeleteAccountConfirmPasswordActivity extends AppCompatActivity {
 
                                         deleteAccountReverseUpdatemap.put("Teacher Class/" + mFirebaseUser.getUid() + "/" + classID, true);
                                         deleteAccountReverseUpdatemap.put("Class Teacher/" + classID + "/" + mFirebaseUser.getUid(), true);
+
+                                        mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                if (dataSnapshot.exists()) {
+                                                    Class classInstance = dataSnapshot.getValue(Class.class);
+                                                    String classTeacher = classInstance.getClassTeacher();
+                                                    if (mFirebaseUser.getUid().equals(classTeacher)) {
+                                                        deleteAccountUpdatemap.put("Class/" + classID + "/classTeacher", null);
+                                                        deleteAccountReverseUpdatemap.put("Class/" + classID + "/classTeacher", mFirebaseUser.getUid());
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
                                     }
                                 }
 
