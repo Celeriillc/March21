@@ -99,32 +99,39 @@ public class ParentEClassroomConcludedClassesListFragment extends Fragment {
         activeStudent = activity.getData();
 
         if (activeStudent == null) {
-            Gson gson = new Gson();
-            ArrayList<Student> myChildren = new ArrayList<>();
-            String myChildrenJSON = sharedPreferencesManager.getMyChildren();
-            Type type = new TypeToken<ArrayList<Student>>() {
-            }.getType();
-            myChildren = gson.fromJson(myChildrenJSON, type);
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                Gson gson = new Gson();
+                ArrayList<Student> myChildren = new ArrayList<>();
+                String myChildrenJSON = sharedPreferencesManager.getMyChildren();
+                Type type = new TypeToken<ArrayList<Student>>() {
+                }.getType();
+                myChildren = gson.fromJson(myChildrenJSON, type);
 
-            if (myChildren != null) {
-                if (myChildren.size() > 0) {
-                    gson = new Gson();
-                    activeStudent = gson.toJson(myChildren.get(0));
-                    sharedPreferencesManager.setActiveKid(activeStudent);
+                if (myChildren != null) {
+                    if (myChildren.size() > 0) {
+                        gson = new Gson();
+                        activeStudent = gson.toJson(myChildren.get(0));
+                        sharedPreferencesManager.setActiveKid(activeStudent);
+                    } else {
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        recyclerView.setVisibility(View.GONE);
+                        progressLayout.setVisibility(View.GONE);
+                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                        errorLayout.setVisibility(View.VISIBLE);
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
+                        return view;
+                    }
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     mySwipeRefreshLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                        errorLayoutButton.setText("Find my child");
-                        errorLayoutButton.setVisibility(View.VISIBLE);
-                    } else {
-                        errorLayoutText.setText("You do not have the permission to view this student's academic record");
-                    }
-
+                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                    errorLayoutButton.setText("Find my child");
+                    errorLayoutButton.setVisibility(View.VISIBLE);
                     return view;
                 }
             } else {
@@ -133,14 +140,7 @@ public class ParentEClassroomConcludedClassesListFragment extends Fragment {
                 progressLayout.setVisibility(View.GONE);
                 mySwipeRefreshLayout.setVisibility(View.GONE);
                 errorLayout.setVisibility(View.VISIBLE);
-                if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                    errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                    errorLayoutButton.setText("Find my child");
-                    errorLayoutButton.setVisibility(View.VISIBLE);
-                } else {
-                    errorLayoutText.setText("You do not have the permission to view this student's academic record");
-                }
-
+                errorLayoutText.setText("We couldn't find this student's account");
                 return view;
             }
         } else {
@@ -179,14 +179,9 @@ public class ParentEClassroomConcludedClassesListFragment extends Fragment {
                         progressLayout.setVisibility(View.GONE);
                         mySwipeRefreshLayout.setVisibility(View.GONE);
                         errorLayout.setVisibility(View.VISIBLE);
-                        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-                            errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
-                            errorLayoutButton.setText("Find my child");
-                            errorLayoutButton.setVisibility(View.VISIBLE);
-                        } else {
-                            errorLayoutText.setText("You do not have the permission to view this student's academic record");
-                        }
-
+                        errorLayoutText.setText(Html.fromHtml("You're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                        errorLayoutButton.setText("Find my child");
+                        errorLayoutButton.setVisibility(View.VISIBLE);
                         return view;
                     }
                 }
