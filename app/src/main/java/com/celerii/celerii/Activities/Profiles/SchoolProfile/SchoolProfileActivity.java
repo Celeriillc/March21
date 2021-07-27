@@ -129,6 +129,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
     ArrayList<String> classesWithResults = new ArrayList<>();
     int totalChildrenCount = 0;
     int counter;
+    int classesWithAttendance = 0;
     ArrayList<String> classes = new ArrayList<>();
     ArrayList<Address> addresses = new ArrayList<>();
     ArrayList<EEAP> eEAPList = new ArrayList<>();
@@ -776,6 +777,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
 
                                                 if (classes.size() > 0) {
                                                     for (String classID : classes) {
+                                                        classesWithAttendance = 0;
                                                         String subject_term_year = "General_" + term_year;
                                                         mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(classID);
                                                         mDatabaseReference.orderByChild("subject_term_year").equalTo(subject_term_year).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -803,11 +805,12 @@ public class SchoolProfileActivity extends AppCompatActivity {
                                                                     double averagePunctual = punctualPercentageSummer / attendanceCounter;
                                                                     totalAttendance += averagePresent;
                                                                     totalPunctuality += averagePunctual;
+                                                                    classesWithAttendance++;
                                                                 }
 
                                                                 if (schoolAttendanceCounter == classes.size()) {
-                                                                    int averageAttendanceInt = (int) (totalAttendance / schoolAttendanceCounter);
-                                                                    int averagePunctualityInt = (int) (totalPunctuality / schoolAttendanceCounter);
+                                                                    int averageAttendanceInt = (int) (totalAttendance / classesWithAttendance);
+                                                                    int averagePunctualityInt = (int) (totalPunctuality / classesWithAttendance);
                                                                     String messagePresent = String.valueOf(averageAttendanceInt) + "%";
                                                                     String messagePunctual = String.valueOf(averagePunctualityInt) + "%";
                                                                     averageAttendance.setText(messagePresent);

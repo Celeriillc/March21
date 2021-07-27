@@ -125,6 +125,8 @@ public class StudentProfileActivity extends AppCompatActivity {
     ArrayList<AcademicRecordStudent> academicRecordStudentList = new ArrayList<>();
     ArrayList<TextView> academicSubjectTextViewList = new ArrayList<>();
     ArrayList<TextView> academicScoresTextViewList = new ArrayList<>();
+    ArrayList<BehaviouralRecordModel> behaviouralRewardRowModelList = new ArrayList<>();
+    ArrayList<BehaviouralRecordModel> behaviouralPunishmentRowModelList = new ArrayList<>();
     ArrayList<BehaviouralRecordModel> behaviouralResultRowModelList = new ArrayList<>();
     int totalPointsAwarded, totalPointsFined, totalPointsEarned;
     String dateOne = "", dateTwo, detailOne = "", detailTwo, statusOne = "", statusTwo, classNameOne = "", classNameTwo = "";
@@ -672,32 +674,37 @@ public class StudentProfileActivity extends AppCompatActivity {
                                             if (dataSnapshot.exists()) {
                                                 Double presentDouble = 0.0;
                                                 Double absentDouble = 0.0;
+                                                Double lateDouble = 0.0;
                                                 Double total = 0.0;
                                                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                                     TeacherAttendanceRow teacherAttendanceRow = postSnapshot.getValue(TeacherAttendanceRow.class);
                                                     if (teacherAttendanceRow.getAttendanceStatus().equals("Present")) {
                                                         presentDouble++;
-                                                    } else if (teacherAttendanceRow.getAttendanceStatus().equals("Absent")){
+                                                    } else if (teacherAttendanceRow.getAttendanceStatus().equals("Absent")) {
                                                         absentDouble++;
+                                                    } else if (teacherAttendanceRow.getAttendanceStatus().equals("Late")) {
+                                                        lateDouble++;
                                                     }
                                                     total++;
                                                 }
                                                 Double puncRating = (presentDouble / total) * 100;
+                                                Double presentRating = ((presentDouble + lateDouble) / total) * 100;
                                                 Double absRating = (absentDouble / total) * 100;
-                                                Double lateRating = (100 - (puncRating + absRating));
+                                                Double lateRating = (lateDouble / total) * 100;
 
-                                                String presentString = String.valueOf(puncRating.intValue()) + "%";
+                                                String puncString = String.valueOf(puncRating.intValue()) + "%";
+                                                String presentString = String.valueOf(presentRating.intValue()) + "%";
                                                 String absentString = String.valueOf(absRating.intValue()) + "%";
                                                 String lateString = String.valueOf(lateRating.intValue()) + "%";
 
                                                 if (isOpenToAll) {
-                                                    punctualityRating.setText(presentString);
+                                                    punctualityRating.setText(puncString);
                                                     present.setText("Present: " + presentString);
                                                     absent.setText("Absent: " + absentString);
                                                     late.setText("Came in Late: " + lateString);
                                                 } else {
                                                     if (!isExpired) {
-                                                        punctualityRating.setText(presentString);
+                                                        punctualityRating.setText(puncString);
                                                         present.setText("Present: " + presentString);
                                                         absent.setText("Absent: " + absentString);
                                                         late.setText("Came in Late: " + lateString);
@@ -722,41 +729,6 @@ public class StudentProfileActivity extends AppCompatActivity {
                                             errorLayout.setVisibility(View.GONE);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             superLayout.setVisibility(View.VISIBLE);
-
-//                                            mDatabaseReference = mFirebaseDatabase.getReference("StudentTemperament").child(studentID);
-//                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                @Override
-//                                                public void onDataChange(DataSnapshot dataSnapshot) {
-//                                                    if (dataSnapshot.exists()){
-//                                                        temperament.setText(dataSnapshot.getValue(String.class));
-//                                                    } else {
-//                                                        temperament.setText("Temperament not set");
-////                                                        mDatabaseReference = mFirebaseDatabase.getReference("PredictedStudentTemperament").child(studentID);
-////                                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-////                                                            @Override
-////                                                            public void onDataChange(DataSnapshot dataSnapshot) {
-////                                                                if (dataSnapshot.exists()){
-////                                                                    temperament.setText(dataSnapshot.getValue(String.class));
-////                                                                }
-////                                                                else {
-////                                                                    temperament.setText("Temperament not set");
-////                                                                }
-////                                                            }
-////
-////                                                            @Override
-////                                                            public void onCancelled(DatabaseError databaseError) {
-////
-////                                                            }
-////                                                        });
-//                                                    }
-//
-//                                                }
-//
-//                                                @Override
-//                                                public void onCancelled(DatabaseError databaseError) {
-//
-//                                                }
-//                                            });
                                         }
 
                                         @Override
@@ -837,6 +809,8 @@ public class StudentProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    attendanceHorizontalScrollView.setVisibility(View.VISIBLE);
+                    attendanceErrorLayout.setVisibility(View.GONE);
                     ArrayList<TeacherAttendanceRow> teacherAttendanceRowList = new ArrayList<>();
 
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
@@ -979,15 +953,26 @@ public class StudentProfileActivity extends AppCompatActivity {
                                             }
                                         }
 
-                                        if (academicRecordStudentList.size() == 2) {
+                                        if (academicRecordStudentList.size() > 2) {
+                                            performanceLayoutOne.setVisibility(View.VISIBLE);
+                                            performanceLayoutTwo.setVisibility(View.VISIBLE);
+                                            performanceLayoutThree.setVisibility(View.VISIBLE);
+                                            performanceErrorLayout.setVisibility(View.GONE);
+                                        } else if (academicRecordStudentList.size() == 2) {
+                                            performanceLayoutOne.setVisibility(View.VISIBLE);
+                                            performanceLayoutTwo.setVisibility(View.VISIBLE);
                                             performanceLayoutThree.setVisibility(View.GONE);
+                                            performanceErrorLayout.setVisibility(View.GONE);
                                         } else if (academicRecordStudentList.size() == 1) {
+                                            performanceLayoutOne.setVisibility(View.VISIBLE);
                                             performanceLayoutTwo.setVisibility(View.GONE);
                                             performanceLayoutThree.setVisibility(View.GONE);
-                                        } else if (academicRecordStudentList.size() == 0) {
+                                            performanceErrorLayout.setVisibility(View.GONE);
+                                        } else {
                                             performanceLayoutOne.setVisibility(View.GONE);
                                             performanceLayoutTwo.setVisibility(View.GONE);
                                             performanceLayoutThree.setVisibility(View.GONE);
+                                            performanceErrorLayout.setVisibility(View.VISIBLE);
                                         }
 
                                         if (academicRecordStudentList.size() > 1) {
@@ -1064,15 +1049,27 @@ public class StudentProfileActivity extends AppCompatActivity {
                                     }
                                 }
 
-                                if (academicRecordStudentList.size() == 2) {
+
+                                if (academicRecordStudentList.size() > 2) {
+                                    performanceLayoutOne.setVisibility(View.VISIBLE);
+                                    performanceLayoutTwo.setVisibility(View.VISIBLE);
+                                    performanceLayoutThree.setVisibility(View.VISIBLE);
+                                    performanceErrorLayout.setVisibility(View.GONE);
+                                } else if (academicRecordStudentList.size() == 2) {
+                                    performanceLayoutOne.setVisibility(View.VISIBLE);
+                                    performanceLayoutTwo.setVisibility(View.VISIBLE);
                                     performanceLayoutThree.setVisibility(View.GONE);
+                                    performanceErrorLayout.setVisibility(View.GONE);
                                 } else if (academicRecordStudentList.size() == 1) {
+                                    performanceLayoutOne.setVisibility(View.VISIBLE);
                                     performanceLayoutTwo.setVisibility(View.GONE);
                                     performanceLayoutThree.setVisibility(View.GONE);
-                                } else if (academicRecordStudentList.size() == 0) {
+                                    performanceErrorLayout.setVisibility(View.GONE);
+                                } else {
                                     performanceLayoutOne.setVisibility(View.GONE);
                                     performanceLayoutTwo.setVisibility(View.GONE);
                                     performanceLayoutThree.setVisibility(View.GONE);
+                                    performanceErrorLayout.setVisibility(View.VISIBLE);
                                 }
 
                                 int counter = 0;
@@ -1115,13 +1112,13 @@ public class StudentProfileActivity extends AppCompatActivity {
         mDatabaseReference.orderByChild("term_AcademicYear").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                behaviouralResultRowModelList.clear();
+                behaviouralRewardRowModelList.clear();
                 if (dataSnapshot.exists()) {
                     totalPointsAwarded = (int) dataSnapshot.getChildrenCount();
                     awarded.setText(Integer.toString(totalPointsEarned));
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         BehaviouralRecordModel behaviouralRecordModel = postSnapshot.getValue(BehaviouralRecordModel.class);
-                        behaviouralResultRowModelList.add(behaviouralRecordModel);
+                        behaviouralRewardRowModelList.add(behaviouralRecordModel);
                     }
                 }
 
@@ -1129,12 +1126,13 @@ public class StudentProfileActivity extends AppCompatActivity {
                 mDatabaseReference.orderByChild("term_AcademicYear").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        behaviouralPunishmentRowModelList.clear();
                         if (dataSnapshot.exists()) {
                             totalPointsFined = (int) dataSnapshot.getChildrenCount();
                             fined.setText(Integer.toString(totalPointsFined));
                             for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                                 BehaviouralRecordModel behaviouralRecordModel = postSnapshot.getValue(BehaviouralRecordModel.class);
-                                behaviouralResultRowModelList.add(behaviouralRecordModel);
+                                behaviouralPunishmentRowModelList.add(behaviouralRecordModel);
                             }
                         }
 
@@ -1142,7 +1140,11 @@ public class StudentProfileActivity extends AppCompatActivity {
                         awarded.setText(Integer.toString(totalPointsAwarded));
                         fined.setText(Integer.toString(totalPointsFined));
                         earned.setText(Integer.toString(totalPointsEarned));
-                        behaviouralPoints.setText(Integer.toString(totalPointsEarned) + " Points");
+                        behaviouralPoints.setText(Integer.toString(totalPointsEarned) + " Point(s)");
+
+                        behaviouralResultRowModelList.clear();
+                        behaviouralResultRowModelList.addAll(behaviouralRewardRowModelList);
+                        behaviouralResultRowModelList.addAll(behaviouralPunishmentRowModelList);
 
                         if (behaviouralResultRowModelList.size() > 1) {
                             Collections.sort(behaviouralResultRowModelList, new Comparator<BehaviouralRecordModel>() {
@@ -1154,14 +1156,18 @@ public class StudentProfileActivity extends AppCompatActivity {
 
                             Collections.reverse(behaviouralResultRowModelList);
 
+                            behaviouralLayoutOne.setVisibility(View.VISIBLE);
+                            behaviouralLayoutTwo.setVisibility(View.VISIBLE);
+                            behaviouralErrorLayout.setVisibility(View.GONE);
+
                             BehaviouralRecordModel recordModel1 = behaviouralResultRowModelList.get(0);
                             actionOne.setText(recordModel1.getRewardDescription());
                             pointOne.setText(recordModel1.getPoint());
                             if (recordModel1.getRewardType().equals("Reward")) {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus_one));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                             } else {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus_one));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent_profile_icon));
                             }
 
@@ -1169,22 +1175,25 @@ public class StudentProfileActivity extends AppCompatActivity {
                             actionTwo.setText(recordModel2.getRewardDescription());
                             pointTwo.setText(recordModel2.getPoint());
                             if (recordModel2.getRewardType().equals("Reward")) {
-                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus_one));
+                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus));
                                 behaviourPic2Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                             } else {
-                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus_one));
+                                behaviourPic2.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus));
                                 behaviourPic2Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent_profile_icon));
                             }
                         } else if (behaviouralResultRowModelList.size() == 1) {
+                            behaviouralLayoutOne.setVisibility(View.VISIBLE);
                             behaviouralLayoutTwo.setVisibility(View.GONE);
+                            behaviouralErrorLayout.setVisibility(View.GONE);
+
                             BehaviouralRecordModel recordModel1 = behaviouralResultRowModelList.get(0);
                             actionOne.setText(recordModel1.getRewardDescription());
                             pointOne.setText(recordModel1.getPoint());
                             if (recordModel1.getRewardType().equals("Reward")) {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus_one));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_plus));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_primary_purple_profile_icon));
                             } else {
-                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus_one));
+                                behaviourPic1.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_minus));
                                 behaviourPic1Background.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.rounded_button_accent_profile_icon));
                             }
                         } else {

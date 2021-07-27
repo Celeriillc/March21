@@ -12,12 +12,27 @@
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground">
 
+<!--        <RadioButton-->
+<!--            android:id="@+id/year"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="15dp"-->
+<!--            android:layout_marginEnd="25dp"-->
+<!--            android:paddingTop="15dp"-->
+<!--            android:paddingBottom="15dp"-->
+<!--            android:checked="true"-->
+<!--            android:layoutDirection="rtl"-->
+<!--            android:textAlignment="textStart"-->
+<!--            android:layout_gravity="start"-->
+<!--            android:textStyle="bold"-->
+<!--            android:text=""/>-->
+
         <RadioButton
             android:id="@+id/year"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"
-            android:layout_marginEnd="25dp"
+            android:paddingEnd="25dp"
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
             android:checked="true"

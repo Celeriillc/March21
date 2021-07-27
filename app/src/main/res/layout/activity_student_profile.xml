@@ -329,7 +329,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_punctuality"/>
+                                android:background="@drawable/ic_clock"/>
 
                         </RelativeLayout>
 
@@ -429,7 +429,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/ic_behavioural"/>
+                                android:background="@drawable/ic_smile"/>
 
                         </RelativeLayout>
 
@@ -1382,8 +1382,7 @@
                                     android:id="@+id/behaviourpic1"
                                     android:layout_width="25dp"
                                     android:layout_height="25dp"
-                                    android:layout_centerInParent="true"
-                                    android:background="@drawable/ic_plus_one"/>
+                                    android:layout_centerInParent="true"/>
 
                             </RelativeLayout>
 
@@ -1458,8 +1457,7 @@
                                     android:id="@+id/behaviourpic2"
                                     android:layout_width="25dp"
                                     android:layout_height="25dp"
-                                    android:layout_centerInParent="true"
-                                    android:background="@drawable/ic_minus_one"/>
+                                    android:layout_centerInParent="true"/>
 
                             </RelativeLayout>
 
