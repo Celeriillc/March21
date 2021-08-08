@@ -248,7 +248,7 @@ public class EnterResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void onClick(View v) {
                     if (context instanceof EnterResultsActivity) {
-                        ((EnterResultsActivity)context).saveNewToCloud();
+                        ((EnterResultsActivity)context).confirmSaveToCloud();
                     }
                 }
             });

@@ -510,6 +510,8 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 subject = data.getStringExtra("Selected Subject");
                 subject_term_year = subject + "_" + term + "_" + year;
                 parentAttendanceHeader.setSubject(subject);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
                 loadFromFirebase();
             }
@@ -520,6 +522,8 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 term_year = term + "_" + year;
                 subject_term_year = subject + "_" + term + "_" + year;
                 parentAttendanceHeader.setTerm(term);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
                 loadFromFirebase();
             }
@@ -530,6 +534,8 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 term_year = term + "_" + year;
                 subject_term_year = subject + "_" + term + "_" + year;
                 parentAttendanceHeader.setYear(year);
+                recyclerView.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
                 loadFromFirebase();
             }

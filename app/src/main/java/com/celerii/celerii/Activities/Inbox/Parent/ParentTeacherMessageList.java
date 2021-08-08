@@ -237,31 +237,31 @@ public class ParentTeacherMessageList extends Fragment {
                                                                     }
                                                                 }
                                                             }
+                                                        }
 
-                                                            if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
-                                                                if (newChatRowModelList.size() > 0) {
-                                                                    if (newChatRowModelList.size() > 1) {
-                                                                        Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
-                                                                            @Override
-                                                                            public int compare(NewChatRowModel o1, NewChatRowModel o2) {
-                                                                                return o1.getName().compareTo(o2.getName());
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                    mAdapter.notifyDataSetChanged();
-                                                                    mySwipeRefreshLayout.setRefreshing(false);
-                                                                    progressLayout.setVisibility(View.GONE);
-                                                                    errorLayout.setVisibility(View.GONE);
-                                                                    recyclerView.setVisibility(View.VISIBLE);
-                                                                } else {
-                                                                    mySwipeRefreshLayout.setRefreshing(false);
-                                                                    recyclerView.setVisibility(View.GONE);
-                                                                    progressLayout.setVisibility(View.GONE);
-                                                                    mySwipeRefreshLayout.setVisibility(View.GONE);
-                                                                    errorLayout.setVisibility(View.VISIBLE);
-                                                                    errorLayoutButton.setVisibility(View.GONE);
-                                                                    errorLayoutText.setText(Html.fromHtml("Your child(ren)'s teachers should appear here, however, your child(ren)'s school(s) doesn't allow parent to teacher messaging."));
+                                                        if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
+                                                            if (newChatRowModelList.size() > 0) {
+                                                                if (newChatRowModelList.size() > 1) {
+                                                                    Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                                        @Override
+                                                                        public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                                            return o1.getName().compareTo(o2.getName());
+                                                                        }
+                                                                    });
                                                                 }
+                                                                mAdapter.notifyDataSetChanged();
+                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                progressLayout.setVisibility(View.GONE);
+                                                                errorLayout.setVisibility(View.GONE);
+                                                                recyclerView.setVisibility(View.VISIBLE);
+                                                            } else {
+                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                recyclerView.setVisibility(View.GONE);
+                                                                progressLayout.setVisibility(View.GONE);
+                                                                mySwipeRefreshLayout.setVisibility(View.GONE);
+                                                                errorLayout.setVisibility(View.VISIBLE);
+                                                                errorLayoutButton.setVisibility(View.GONE);
+                                                                errorLayoutText.setText(Html.fromHtml("Your child(ren)'s teachers should appear here, however, your child(ren)'s school(s) doesn't allow parent to teacher messaging."));
                                                             }
                                                         }
                                                     }
@@ -273,6 +273,32 @@ public class ParentTeacherMessageList extends Fragment {
                                                 });
                                             } else {
                                                 counterTeachers++;
+
+                                                if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
+                                                    if (newChatRowModelList.size() > 0) {
+                                                        if (newChatRowModelList.size() > 1) {
+                                                            Collections.sort(newChatRowModelList, new Comparator<NewChatRowModel>() {
+                                                                @Override
+                                                                public int compare(NewChatRowModel o1, NewChatRowModel o2) {
+                                                                    return o1.getName().compareTo(o2.getName());
+                                                                }
+                                                            });
+                                                        }
+                                                        mAdapter.notifyDataSetChanged();
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                        progressLayout.setVisibility(View.GONE);
+                                                        errorLayout.setVisibility(View.GONE);
+                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                    } else {
+                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                        recyclerView.setVisibility(View.GONE);
+                                                        progressLayout.setVisibility(View.GONE);
+                                                        mySwipeRefreshLayout.setVisibility(View.GONE);
+                                                        errorLayout.setVisibility(View.VISIBLE);
+                                                        errorLayoutButton.setVisibility(View.GONE);
+                                                        errorLayout.setVisibility(View.VISIBLE);errorLayoutText.setText(Html.fromHtml("You don't have any teachers to message at this time. If you're not connected to any of your children's account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your child to get started or get started by clicking the " + "<b>" + "Find my child" + "</b>" + " button below"));
+                                                    }
+                                                }
                                             }
                                         }
 
@@ -283,6 +309,7 @@ public class ParentTeacherMessageList extends Fragment {
                                     });
                                 } else {
                                     counterTeachers++;
+
                                     if (counterTeachers == studentsSchoolsClassesandTeachersModelList.size()) {
                                         if (newChatRowModelList.size() > 0) {
                                             if (newChatRowModelList.size() > 1) {

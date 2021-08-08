@@ -23,12 +23,7 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.SubscriptionModel;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -62,6 +57,7 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         RelativeLayout errorLayout;
         LinearLayout chiefLayout;
         public Button subscribe;
+        View headerDividerView;
 
         public HeaderViewHolder(View view) {
             super(view);
@@ -73,6 +69,7 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
             chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
             subscribe = (Button) view.findViewById(R.id.subscribe);
+            headerDividerView = view.findViewById(R.id.headerdividerview);
         }
     }
 
@@ -102,6 +99,14 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof HeaderViewHolder){
+            if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
+                ((HeaderViewHolder) holder).subscribe.setVisibility(View.VISIBLE);
+                ((HeaderViewHolder) holder).headerDividerView.setVisibility(View.VISIBLE);
+            } else {
+                ((HeaderViewHolder) holder).subscribe.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).headerDividerView.setVisibility(View.GONE);
+            }
+
             if (subscriptionModelList.size() <= 1){
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
@@ -185,7 +190,7 @@ public class SubscriptionAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     }
 
                     statusField.setText(status);
-                    tier.setText(subscriptionModel.getSubscriptionTier());
+                    tier.setText(subscriptionModel.getTier());
                     date.setText(Date.getFormalDocumentDate(subscriptionModel.getSubscriptionDate()));
                     expiry.setText(Date.getFormalDocumentDate(subscriptionModel.getExpiryDate()));
 

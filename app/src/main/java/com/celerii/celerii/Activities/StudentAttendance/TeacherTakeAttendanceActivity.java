@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -247,7 +248,6 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
         term = Term.getTermShort();
 
         loadHeaderFromFirebase();
-        loadDetailsFromFirebase();
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -255,7 +255,6 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                     @Override
                     public void onRefresh() {
                         loadHeaderFromFirebase();
-                        loadDetailsFromFirebase();
                     }
                 }
         );
@@ -287,6 +286,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
             errorLayoutText.setText(Html.fromHtml("Your classes have no students or you're not connected to any of your classes' account. Click the " + "<b>" + "Search" + "</b>" + " button to search for your school to access your classes or get started by clicking the " + "<b>" + "Find my school" + "</b>" + " button below"));
             errorLayoutButton.setText("Find my school");
             errorLayoutButton.setVisibility(View.VISIBLE);
+            return;
         } else {
             studentParentList.clear();
             mAdapter.notifyDataSetChanged();
@@ -385,11 +385,16 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                                     }
                                 });
                             }
+
+                            loadDetailsFromFirebase();
                         } else {
                             teacherAttendanceHeader.setNoOfBoys("Not Available");
                             teacherAttendanceHeader.setNoOfGirls("Not Available");
                             teacherAttendanceHeader.setNoOfStudents("Not Available");
+
+                            loadDetailsFromFirebase();
                         }
+
                     }
 
                     @Override
@@ -520,6 +525,40 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
         }
     }
 
+    public void confirmSaveToCloud() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog_with_cancel);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button save = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+
+        message.setText(Html.fromHtml("Please confirm the "  + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + ", " + "<b>" + Term.Term(teacherAttendanceHeader.getTerm()) + "</b>" + " attendance information " +
+                "you're about to save for " + "<b>" + className + "</b>" + ". Click the " + "<b>" + "Save" + "</b>" + " button " +
+                "if you have confirmed the information."));
+
+        save.setText("Save");
+        cancel.setText("Cancel");
+
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveToCloud();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
     public void saveToCloud() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
             showDialogWithMessage("Internet is down, check your connection and try again");
@@ -561,6 +600,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                 mDatabaseReference = mFirebaseDatabase.getReference();
                 teacherAttendanceHeader.setDate(date);
                 teacherAttendanceHeader.setKey(pushID);
+                teacherAttendanceHeader.setDevice("Android");
 
                 Map<String, Object> newAttendance = new HashMap<String, Object>();
                 for (int i = 0; i < teacherAttendanceRowList.size(); i++) {
@@ -589,6 +629,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                         studentAttendance.setSubject_term_year(subject_term_year);
                         studentAttendance.setYear_month_day(year_month_day);
                         studentAttendance.setKey(pushID);
+                        studentAttendance.setDevice("Android");
                         newAttendance.put("AttendanceStudent/" + teacherAttendanceRowList.get(i).getStudentID() + "/" + pushID, studentAttendance);
 
                         String studentID = teacherAttendanceRowList.get(i).getStudentID();
@@ -597,7 +638,9 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                             for (int j = 0; j < parentIDList.size(); j++) {
                                 String parentID = parentIDList.get(j);
                                 if (!parentID.isEmpty()) {
-                                    NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewAttendancePost", teacherAttendanceRowList.get(i).getImageURL(), teacherAttendanceRowList.get(i).getStudentID(), teacherAttendanceRowList.get(i).getName(), false);
+                                    String currentDate = Date.getDate();
+                                    String currentSortableDate = Date.convertToSortableDate(currentDate);
+                                    NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), currentDate, currentSortableDate, pushID, "NewAttendancePost", teacherAttendanceRowList.get(i).getImageURL(), teacherAttendanceRowList.get(i).getStudentID(), teacherAttendanceRowList.get(i).getName(), false);
                                     newAttendance.put("AttendanceParentNotification/" + parentID + "/" + studentID + "/status", true);
                                     newAttendance.put("AttendanceParentNotification/" + parentID + "/" + studentID + "/" + pushID + "/status", true);
                                     newAttendance.put("AttendanceParentRecipients/" + pushID + "/" + parentID, true);
@@ -705,7 +748,6 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
             errorLayout.setVisibility(View.GONE);
 
             loadHeaderFromFirebase();
-            loadDetailsFromFirebase();
         }
     };
 

@@ -5,7 +5,7 @@ package com.celerii.celerii.models;
  */
 
 public class AcademicRecordStudent {
-    String classID, teacherID, schoolID, studentID, recordKey;
+    String classID, teacherID, schoolID, studentID, device, recordKey;
     String className, term, academicYear, subject, date, sortableDate;
     String academicYear_Term, term_AcademicYear;
     String subject_AcademicYear_Term, subject_Term_AcademicYear, class_subject_AcademicYear_Term, class_subject_Term_AcademicYear;
@@ -20,6 +20,9 @@ public class AcademicRecordStudent {
         this.teacherID = "";
         this.schoolID = "";
         this.studentID = "";
+        this.device = "";
+        this.recordKey = "";
+        this.className = "";
         this.term = "";
         this.academicYear = "";
         this.subject = "";
@@ -40,7 +43,7 @@ public class AcademicRecordStudent {
     }
 
 
-    public AcademicRecordStudent(String classID, String teacherID, String schoolID, String studentID, String term, String academicYear, String subject,
+    public AcademicRecordStudent(String classID, String teacherID, String schoolID, String studentID, String device, String term, String academicYear, String subject,
                                  String date, String sortableDate, String academicYear_Term, String term_AcademicYear, String subject_AcademicYear_Term,
                                  String subject_Term_AcademicYear, String class_subject_AcademicYear_Term, String class_subject_Term_AcademicYear, String testType,
                                  String maxObtainable, String percentageOfTotal, String score, String classAverage) {
@@ -48,6 +51,9 @@ public class AcademicRecordStudent {
         this.teacherID = teacherID;
         this.schoolID = schoolID;
         this.studentID = studentID;
+        this.device = device;
+        this.recordKey = "";
+        this.className = "";
         this.term = term;
         this.academicYear = academicYear;
         this.subject = subject;
@@ -64,6 +70,7 @@ public class AcademicRecordStudent {
         this.percentageOfTotal = percentageOfTotal;
         this.score = score;
         this.classAverage = classAverage;
+        this.isNew = false;
     }
 
     public String getClassID() {
@@ -96,6 +103,14 @@ public class AcademicRecordStudent {
 
     public void setStudentID(String studentID) {
         this.studentID = studentID;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
     public String getRecordKey() {

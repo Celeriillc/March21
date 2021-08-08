@@ -519,6 +519,10 @@ public class ChatActivity extends AppCompatActivity {
             message = "Image";
         }
 
+        if (message.isEmpty()) {
+            return;
+        }
+
         if (!receiverNode.equals("Admin")) {
             receiverNode = IDofChatPartner;
 

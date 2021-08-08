@@ -6,7 +6,7 @@ package com.celerii.celerii.models;
 
 public class TeacherAttendanceHeader {
     String className, subject, term, date, teacher, noOfStudents, noOfBoys, noOfGirls, key;
-    String day, month, year, sortableDate, teacherID, classID, schoolID;
+    String day, month, year, sortableDate, teacherID, classID, schoolID, device;
     String month_year, term_year, subject_term_year, year_month_day;
     String present, absent, late;
 
@@ -27,6 +27,7 @@ public class TeacherAttendanceHeader {
         this.teacherID = "";
         this.classID = "";
         this.schoolID = "";
+        this.device = "";
         this.month_year = "";
         this.term_year = "";
         this.subject_term_year = "";
@@ -36,7 +37,7 @@ public class TeacherAttendanceHeader {
         this.late = "0";
     }
 
-    public TeacherAttendanceHeader(String className, String subject, String term, String date, String teacher, String noOfStudents, String noOfBoys, String noOfGirls) {
+    public TeacherAttendanceHeader(String className, String subject, String term, String date, String teacher, String noOfStudents, String noOfBoys, String noOfGirls, String device) {
         this.className = className;
         this.subject = subject;
         this.term = term;
@@ -45,19 +46,49 @@ public class TeacherAttendanceHeader {
         this.noOfStudents = noOfStudents;
         this.noOfBoys = noOfBoys;
         this.noOfGirls = noOfGirls;
+        this.key = "";
+        this.day = "";
+        this.month = "";
+        this.year = "";
+        this.sortableDate = "";
+        this.teacherID = "";
+        this.classID = "";
+        this.schoolID = "";
+        this.device = device;
+        this.month_year = "";
+        this.term_year = "";
+        this.subject_term_year = "";
+        this.year_month_day = "";
+        this.present = "0";
+        this.absent = "0";
+        this.late = "0";
     }
 
-    public TeacherAttendanceHeader(String className, String subject, String term, String teacher, String noOfStudents, String noOfBoys, String noOfGirls, String day, String month, String year) {
+    public TeacherAttendanceHeader(String className, String subject, String term, String teacher, String noOfStudents, String noOfBoys, String noOfGirls, String day, String month, String year, String device) {
         this.className = className;
         this.subject = subject;
         this.term = term;
+        this.date = "";
         this.teacher = teacher;
         this.noOfStudents = noOfStudents;
         this.noOfBoys = noOfBoys;
         this.noOfGirls = noOfGirls;
+        this.key = "";
         this.day = day;
         this.month = month;
         this.year = year;
+        this.sortableDate = "";
+        this.teacherID = "";
+        this.classID = "";
+        this.schoolID = "";
+        this.device = device;
+        this.month_year = "";
+        this.term_year = "";
+        this.subject_term_year = "";
+        this.year_month_day = "";
+        this.present = "0";
+        this.absent = "0";
+        this.late = "0";
     }
 
     public String getClassName() {
@@ -186,6 +217,14 @@ public class TeacherAttendanceHeader {
 
     public void setSchoolID(String schoolID) {
         this.schoolID = schoolID;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
     public String getMonth_year() {

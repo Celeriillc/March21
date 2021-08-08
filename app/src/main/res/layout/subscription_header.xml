@@ -140,12 +140,14 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/headerdividerview"
         android:layout_width="match_parent"
         android:layout_height="0.2dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="0dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
+        android:visibility="gone"
         android:background="@color/colorLightGray" />
 
     <TextView

@@ -5,19 +5,39 @@ package com.celerii.celerii.models;
  */
 
 public class AcademicRecord {
-    String classID, teacherID, schoolID;
+    String classID, teacherID, schoolID, device;
     String term, academicYear, subject, date, sortableDate;
     String academicYear_Term, term_AcademicYear;
     String subject_AcademicYear_Term, subject_Term_AcademicYear, class_subject_AcademicYear_Term, class_subject_Term_AcademicYear;
     String testType, maxObtainable, percentageOfTotal, classAverage;
 
     public AcademicRecord() {
+        this.classID = "";
+        this.teacherID = "";
+        this.schoolID = "";
+        this.device = "";
+        this.term = "";
+        this.academicYear = "";
+        this.subject = "";
+        this.date = "";
+        this.sortableDate = "";
+        this.academicYear_Term = "";
+        this.term_AcademicYear = "";
+        this.subject_AcademicYear_Term = "";
+        this.subject_Term_AcademicYear = "";
+        this.class_subject_AcademicYear_Term = "";
+        this.class_subject_Term_AcademicYear = "";
+        this.testType = "";
+        this.maxObtainable = "";
+        this.percentageOfTotal = "";
+        this.classAverage = "";
     }
 
-    public AcademicRecord(String classID, String teacherID, String schoolID, String term, String academicYear, String subject, String date, String sortableDate, String academicYear_Term, String term_AcademicYear, String subject_AcademicYear_Term, String subject_Term_AcademicYear, String class_subject_AcademicYear_Term, String class_subject_Term_AcademicYear, String testType, String maxObtainable, String percentageOfTotal) {
+    public AcademicRecord(String classID, String teacherID, String schoolID, String device, String term, String academicYear, String subject, String date, String sortableDate, String academicYear_Term, String term_AcademicYear, String subject_AcademicYear_Term, String subject_Term_AcademicYear, String class_subject_AcademicYear_Term, String class_subject_Term_AcademicYear, String testType, String maxObtainable, String percentageOfTotal) {
         this.classID = classID;
         this.teacherID = teacherID;
         this.schoolID = schoolID;
+        this.device = device;
         this.term = term;
         this.academicYear = academicYear;
         this.subject = subject;
@@ -32,6 +52,7 @@ public class AcademicRecord {
         this.testType = testType;
         this.maxObtainable = maxObtainable;
         this.percentageOfTotal = percentageOfTotal;
+        this.classAverage = "";
     }
 
     public String getClassID() {
@@ -56,6 +77,14 @@ public class AcademicRecord {
 
     public void setSchoolID(String schoolID) {
         this.schoolID = schoolID;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
     public String getTerm() {

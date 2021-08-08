@@ -6,7 +6,7 @@ package com.celerii.celerii.models;
 
 public class TeacherAttendanceRow {
     String name, attendanceStatus, imageURL, date, sortableDate, term, day, month, year, remark, month_year, term_year, key;
-    String studentID, schoolID, classID, subject, teacherID, subject_term_year, year_month_day;
+    String studentID, schoolID, classID, subject, teacherID, device, subject_term_year, year_month_day;
 
     public TeacherAttendanceRow() {
         this.name = "";
@@ -27,6 +27,7 @@ public class TeacherAttendanceRow {
         this.classID = "";
         this.subject = "";
         this.teacherID = "";
+        this.device = "";
         this.subject_term_year = "";
         this.year_month_day = "";
     }
@@ -50,6 +51,7 @@ public class TeacherAttendanceRow {
         this.classID = "";
         this.subject = "";
         this.teacherID = "";
+        this.device = "";
         this.subject_term_year = "";
         this.year_month_day = "";
     }
@@ -73,6 +75,7 @@ public class TeacherAttendanceRow {
         this.classID = "";
         this.subject = "";
         this.teacherID = "";
+        this.device = "";
         this.subject_term_year = "";
         this.year_month_day = "";
     }
@@ -175,6 +178,14 @@ public class TeacherAttendanceRow {
 
     public String getSchoolID() {
         return schoolID;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
     public void setSchoolID(String schoolID) {

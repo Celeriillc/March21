@@ -260,11 +260,11 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
         teacherAttendanceHeader.setSubject(subject);
         teacherAttendanceHeader.setClassID(activeClass);
         teacherAttendanceHeader.setClassName(className);
-        teacherAttendanceHeader.setTeacher("");
-        teacherAttendanceHeader.setTerm("");
-        teacherAttendanceHeader.setNoOfStudents("");
-        teacherAttendanceHeader.setNoOfBoys("");
-        teacherAttendanceHeader.setNoOfGirls("");
+        teacherAttendanceHeader.setTeacher("Teacher");
+        teacherAttendanceHeader.setTerm("Term");
+        teacherAttendanceHeader.setPresent("Present");
+        teacherAttendanceHeader.setAbsent("Absent");
+        teacherAttendanceHeader.setLate("Late");
         teacherAttendanceRowList.clear();
 
         headerDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(activeClass);
@@ -282,9 +282,9 @@ public class TeacherAttendanceActivity extends AppCompatActivity  {
                             teacherAttendanceHeader.setTeacher(header.getTeacher());
                             teacherAttendanceHeader.setTeacherID(header.getTeacherID());
                             teacherAttendanceHeader.setTerm(header.getTerm());
-                            teacherAttendanceHeader.setNoOfStudents(header.getNoOfStudents());
-                            teacherAttendanceHeader.setNoOfBoys(header.getNoOfBoys());
-                            teacherAttendanceHeader.setNoOfGirls(header.getNoOfGirls());
+                            teacherAttendanceHeader.setPresent(header.getPresent());
+                            teacherAttendanceHeader.setAbsent(header.getAbsent());
+                            teacherAttendanceHeader.setLate(header.getLate());
                             mAdapter.notifyDataSetChanged();
                             break;
                         } else {

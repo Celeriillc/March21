@@ -206,27 +206,6 @@ public class SubscriptionHomeActivity extends AppCompatActivity {
             }
         }
 
-//        if (activeKid == null) {
-//            Set<String> childrenSet = sharedPreferencesManager.getMyChildren();
-//            ArrayList<String> children = new ArrayList<>();
-//            if (childrenSet != null) {
-//                children = new ArrayList<>(childrenSet);
-//                activeKid = children.get(0);
-//                sharedPreferencesManager.setActiveKid(activeKid);
-//            } else {
-//                setSupportActionBar(toolbar);
-//                getSupportActionBar().setTitle("Subscription Status");
-//                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//                getSupportActionBar().setHomeButtonEnabled(true);
-//                mySwipeRefreshLayout.setRefreshing(false);
-//                recyclerView.setVisibility(View.GONE);
-//                progressLayout.setVisibility(View.GONE);
-//                errorLayout.setVisibility(View.VISIBLE);
-//                errorLayoutText.setText(Html.fromHtml("You're not connected to any child account yet. Use the " + "<b>" + "Search" + "</b>" + " button to search for your child and request connection from their school."));
-//                return;
-//            }
-//        }
-
         Gson gson = new Gson();
         Type type = new TypeToken<Student>() {}.getType();
         Student activeKidModel = gson.fromJson(activeKid, type);

@@ -88,7 +88,7 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
     }
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
-        TextView className, subject, term, date, teacher, noOfstudents, noOfBoys, noOfGirls;
+        TextView className, subject, term, date, teacher, noOfPresent, noOfAbsent, noOfLate;
         LinearLayout classLayout, subjectLayout, dayLayout, dateLayout, teacherLayout, noOfStudentsLayout, noOfBoysLayout, noOfGirlsLayout, chiefLayout, deleteRecordLayout;
         RelativeLayout errorLayout;
         Button deleteRecord;
@@ -101,9 +101,9 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
             term = (TextView) view.findViewById(R.id.term);
             date = (TextView) view.findViewById(R.id.date);
             teacher = (TextView) view.findViewById(R.id.teacher);
-            noOfstudents = (TextView) view.findViewById(R.id.noofstudents);
-            noOfBoys = (TextView) view.findViewById(R.id.noofboys);
-            noOfGirls = (TextView) view.findViewById(R.id.noofgirls);
+            noOfPresent = (TextView) view.findViewById(R.id.noofpresent);
+            noOfAbsent = (TextView) view.findViewById(R.id.noofabsent);
+            noOfLate = (TextView) view.findViewById(R.id.nooflate);
 
             classLayout = (LinearLayout) view.findViewById(R.id.classlayout);
             subjectLayout = (LinearLayout) view.findViewById(R.id.subjectlayout);
@@ -154,7 +154,7 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
                 ((HeaderViewHolder) holder).deleteRecordLayout.setVisibility(View.GONE);
                 ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-                String errorMessage = "There is no " + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + " attendance information recorded for " + "<b>" + teacherAttendanceHeader.getClassName() + "</b>" + " on the " + "<b>" + Date.getFormalDocumentDate(teacherAttendanceHeader.getDate()) + "</b>" + ".";
+                String errorMessage = "There is no " + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + " attendance recorded for " + "<b>" + teacherAttendanceHeader.getClassName() + "</b>" + " on the " + "<b>" + Date.getFormalDocumentDate(teacherAttendanceHeader.getDate()) + "</b>" + ".";
                 ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
             } else {
                 String myID = sharedPreferencesManager.getMyUserID();
@@ -176,9 +176,9 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
             }
             ((HeaderViewHolder)holder).date.setText(Date.DateFormatMMDDYYYY(teacherAttendanceHeader.getDate()));
             ((HeaderViewHolder)holder).teacher.setText(teacherAttendanceHeader.getTeacher());
-            ((HeaderViewHolder)holder).noOfstudents.setText(teacherAttendanceHeader.getNoOfStudents());
-            ((HeaderViewHolder)holder).noOfBoys.setText(teacherAttendanceHeader.getNoOfBoys());
-            ((HeaderViewHolder)holder).noOfGirls.setText(teacherAttendanceHeader.getNoOfGirls());
+            ((HeaderViewHolder)holder).noOfPresent.setText(teacherAttendanceHeader.getPresent());
+            ((HeaderViewHolder)holder).noOfAbsent.setText(teacherAttendanceHeader.getAbsent());
+            ((HeaderViewHolder)holder).noOfLate.setText(teacherAttendanceHeader.getLate());
 
             ((HeaderViewHolder) holder).subjectLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

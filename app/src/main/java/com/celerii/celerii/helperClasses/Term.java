@@ -67,7 +67,7 @@ public class Term {
             term = "1";
         } else if (intMonth >= 1 && intMonth <= 4){
             term = "2";
-        } else if (intMonth > 4 && intMonth <= 7){
+        } else if (intMonth > 4 && intMonth <= 8){
             term = "3";
         }
 

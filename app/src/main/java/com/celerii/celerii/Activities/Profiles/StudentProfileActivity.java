@@ -8,7 +8,6 @@ import android.graphics.Color;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -40,7 +39,6 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.StudentPerformance.StudentPerformanceForParentsActivity;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
-import com.celerii.celerii.helperClasses.CreateDrawable;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
@@ -49,18 +47,13 @@ import com.celerii.celerii.helperClasses.Term;
 import com.celerii.celerii.helperClasses.UpdateDataFromFirebase;
 import com.celerii.celerii.models.AcademicRecordStudent;
 import com.celerii.celerii.models.BehaviouralRecordModel;
-import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.DisconnectionModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.Class;
-import com.celerii.celerii.models.StudentAcademicHistoryRowModel;
-import com.celerii.celerii.models.StudentReview;
 import com.celerii.celerii.models.SubscriptionModel;
-import com.celerii.celerii.models.Teacher;
 import com.celerii.celerii.models.TeacherAttendanceRow;
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -74,14 +67,12 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 public class StudentProfileActivity extends AppCompatActivity {
@@ -782,7 +773,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                 subscriptionTier.setText("None");
                             } else {
                                 status.setText("Subscribed");
-                                subscriptionTier.setText(subscriptionModel.getSubscriptionTier());
+                                subscriptionTier.setText(subscriptionModel.getTier());
                             }
                             lastSubscription.setText(Date.DateFormatMMDDYYYY(subscriptionModel.getSubscriptionDate()));
                             expiry.setText(Date.DateFormatMMDDYYYY(subscriptionModel.getExpiryDate()));

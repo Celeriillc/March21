@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +32,7 @@ import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
+import com.celerii.celerii.helperClasses.LogoutProtocol;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.helperClasses.TeacherEnterResultsSharedPreferences;
@@ -787,6 +789,40 @@ public class EnterResultsActivity extends AppCompatActivity {
         });
     }
 
+    public void confirmSaveToCloud() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_binary_selection_dialog_with_cancel);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button save = (Button) dialog.findViewById(R.id.optionone);
+        Button cancel = (Button) dialog.findViewById(R.id.optiontwo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+
+        message.setText(Html.fromHtml("Please confirm the "  + "<b>" + enterResultHeader.getSubject() + "</b>" + ", " + "<b>" + Term.Term(enterResultHeader.getTerm()) + "</b>" + " academic information " +
+                "you're about to save for " + "<b>" + className + "</b>" + ". Click the " + "<b>" + "Save" + "</b>" + " button " +
+                "if you have confirmed the information."));
+
+        save.setText("Save");
+        cancel.setText("Cancel");
+
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               saveNewToCloud();
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+    }
+
     public void saveNewToCloud() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
             showDialogWithMessage("Internet is down, check your connection and try again", false);
@@ -806,14 +842,16 @@ public class EnterResultsActivity extends AppCompatActivity {
 //            }
 //        }
 
-        date = Date.getDate();
-        sortableDate = Date.convertToSortableDate(date);
+//        date = Date.getDate();
+//        sortableDate = Date.convertToSortableDate(date);
         academicYear_Term = year + "_" + term;
         term_AcademicYear = term + "_" + year;
         subject_AcademicYear_Term = subject + "_" + year + "_" + term;
         subject_Term_AcademicYear = subject + "_" + term + "_" + year;
         class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
         class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
+
+        String device = "Android";
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subject_AcademicYear_Term).push();
         pushID = mDatabaseReference.getKey();
@@ -845,7 +883,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         }
         recordClassAve = recordTotalScore / (recordCounter - 2);
 
-        final AcademicRecord academicRecord = new AcademicRecord(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, term, year, subject,
+        final AcademicRecord academicRecord = new AcademicRecord(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, device, term, year, subject,
                 date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
                 class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore, percentageOfTotal);
         academicRecord.setClassAverage(String.valueOf(recordClassAve));
@@ -860,7 +898,7 @@ public class EnterResultsActivity extends AppCompatActivity {
                 newResultEntry.put("AcademicRecordClass-Student/" + activeClass + "/" + subject_AcademicYear_Term + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
                 newResultEntry.put("AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + subject_AcademicYear_Term + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
 
-                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), term, year, subject,
+                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), device, term, year, subject,
                         date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
                         class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType,
                         maximumScore, percentageOfTotal, enterResultRowList.get(i).getScore(), String.valueOf(recordClassAve));
@@ -874,7 +912,9 @@ public class EnterResultsActivity extends AppCompatActivity {
                         String parentID = parentIDList.get(j);
 
                         if (!parentID.isEmpty()) {
-                            NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), date, sortableDate, pushID, "NewResultPost", enterResultRowList.get(i).getImageURL(), enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getName(), false);
+                            String currentDate = Date.getDate();
+                            String currentSortableDate = Date.convertToSortableDate(currentDate);
+                            NotificationModel notificationModel = new NotificationModel(auth.getCurrentUser().getUid(), parentID, "Parent", sharedPreferencesManager.getActiveAccount(), currentDate, currentSortableDate, pushID, "NewResultPost", enterResultRowList.get(i).getImageURL(), enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getName(), false);
                             newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
                             newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/status", true);
                             newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/" + subject_AcademicYear_Term + "/" + pushID + "/status", true);
@@ -904,296 +944,298 @@ public class EnterResultsActivity extends AppCompatActivity {
         });
     }
 
-    public void saveToCloud() {
-        if (CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(EnterResultsActivity.this);
-            progressDialog.show();
-
-            academicYear_Term = year + "_" + term;
-            term_AcademicYear = term + "_" + year;
-            subject_AcademicYear_Term = subject + "_" + year + "_" + term;
-            subject_Term_AcademicYear = subject + "_" + term + "_" + year;
-            class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
-            class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
-
-            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecord").child("AcademicRecord").push();
-            uniquePushID = mDatabaseReference.getKey();
-
-            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTotal").child("AcademicRecordClass").child(activeClass).child(class_subject_AcademicYear_Term);
-            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    pushID = class_subject_AcademicYear_Term;
-                    mDatabaseReference = mFirebaseDatabase.getReference();
-                    newResultEntry = new HashMap<String, Object>();
-
-                    if ((previousPercentageOfTotal + Double.valueOf(percentageOfTotal)) > 100.0) {
-                        CustomToast.whiteBackgroundBottomToast(EnterResultsActivity.this, "The percentage of total is more than 100");
-                        return;
-                    }
-
-                    if ((previousPercentageOfTotal) >= 100.0) {
-                        CustomToast.whiteBackgroundBottomToast(EnterResultsActivity.this, "The percentage of total is more than 100");
-                        return;
-                    }
-
-                    final AcademicRecord academicRecord = new AcademicRecord(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, term, year, subject,
-                            date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
-                            class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore, percentageOfTotal);
-
-                    if (dataSnapshot.exists()) {
-                        existingStudentScores = new Hashtable<String, String>();
-                        DatabaseReference childDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTotal").child("AcademicRecordClass-Student").child(activeClass).child(pushID).child("Students");
-                        childDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                    String key = postSnapshot.getKey();
-                                    String score = postSnapshot.getValue(String.class);
-                                    existingStudentScores.put(key, score);
-                                }
-
-                                double classAverageNonTotal = 0;
-                                double TotalNonTotal = 0;
-                                int counterNonTotal = 0;
-                                for (int i = 0; i < enterResultRowList.size(); i++) {
-                                    if (enterResultRowList.get(i).getStudentID() != null) {
-                                        TotalNonTotal += Double.valueOf(enterResultRowList.get(i).getScore());
-                                        counterNonTotal++;
-                                    }
-                                }
-                                classAverageNonTotal = TotalNonTotal / counterNonTotal;
-
-                                double recordClassAve = 0.0;
-                                int counter = 0;
-                                for (int i = 0; i < enterResultRowList.size(); i++) {
-                                    if (enterResultRowList.get(i).getStudentID() != null) {
-                                        recordClassAve += Double.valueOf(enterResultRowList.get(i).getScore());
-                                        newScore = (Double.valueOf(enterResultRowList.get(i).getScore()) / Double.valueOf(maximumScore)) * Double.valueOf(percentageOfTotal);
-                                        final String studentID = enterResultRowList.get(i).getStudentID();
-                                        if (existingStudentScores.containsKey(studentID)) {
-                                            String oldScore = existingStudentScores.get(studentID);
-                                            Double oldScoreDouble = Double.valueOf(oldScore);
-                                            score = (oldScoreDouble + newScore);
-                                        } else {
-                                            score = newScore;
-                                        }
-                                        classAverage = classAverage + Double.valueOf(score);
-                                        counter++;
-
-                                        newResultEntry.put("AcademicRecordTotal/AcademicRecord-Student/" + activeSchoolID + "/" + pushID + "/Students/" + studentID, String.valueOf(score));
-                                        newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + pushID + "/Students/" + studentID, String.valueOf(score));
-                                        newResultEntry.put("AcademicRecordTotal/AcademicRecordClass-Student/" + activeClass + "/" + pushID + "/Students/" + studentID, String.valueOf(score));
-                                        AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, studentID, term, year, subject,
-                                                date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
-                                                class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore,
-                                                String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)), String.valueOf(score), String.valueOf(classAverage));
-
-                                        newResultEntry.put("AcademicRecordTotal/AcademicRecordStudent/" + studentID + "/" + pushID, academicRecordStudent);
-
-                                        newResultEntry.put("AcademicRecord/AcademicRecord-Student/" + activeSchoolID + "/" + uniquePushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
-                                        newResultEntry.put("AcademicRecord/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + uniquePushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
-                                        newResultEntry.put("AcademicRecord/AcademicRecordClass-Student/" + activeClass + "/" + uniquePushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
-                                        academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), term, year, subject,
-                                                date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
-                                                class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore, percentageOfTotal, enterResultRowList.get(i).getScore(), String.valueOf(classAverageNonTotal));
-
-                                        newResultEntry.put("AcademicRecord/AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + uniquePushID, academicRecordStudent);
-
-                                        ArrayList<String> parentIDList = studentParentList.get(studentID);
-                                        if (parentIDList != null) {
-                                            for (int j = 0; j < parentIDList.size(); j++) {
-                                                String parentID = parentIDList.get(j);
-                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
-                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/status", true);
-                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/status", true);
-                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/SingleRecords/" + pushID + "/status", true);
-                                                DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/count");
-                                                updateLikeRef.runTransaction(new Transaction.Handler() {
-                                                    @Override
-                                                    public Transaction.Result doTransaction(MutableData mutableData) {
-                                                        Integer currentValue = mutableData.getValue(Integer.class);
-                                                        if (currentValue == null) {
-                                                            mutableData.setValue(1);
-                                                        } else {
-                                                            mutableData.setValue(currentValue + 1);
-                                                        }
-
-                                                        return Transaction.success(mutableData);
-
-                                                    }
-
-                                                    @Override
-                                                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-
-                                recordClassAve = recordClassAve / counter;
-                                academicRecord.setClassAverage(String.valueOf(recordClassAve));
-                                newResultEntry.put("AcademicRecord/AcademicRecord/" + activeSchoolID + "/" + uniquePushID, academicRecord);
-                                newResultEntry.put("AcademicRecord/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + uniquePushID, academicRecord);
-                                newResultEntry.put("AcademicRecord/AcademicRecordClass/" + activeClass + "/" + uniquePushID, academicRecord);
-
-                                classAverage = classAverage / counter;
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID + "/classAverage", String.valueOf(classAverage));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID + "/maxObtainable", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID + "/percentageOfTotal", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID + "/classAverage", String.valueOf(classAverage));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID + "/maxObtainable", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID + "/percentageOfTotal", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID + "/classAverage", String.valueOf(classAverage));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID + "/maxObtainable", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID + "/percentageOfTotal", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
-
-                                for (int i = 0; i < parentList.size(); i++){
-
-                                }
-
-                                mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        progressDialog.dismiss();
-                                        showDialogWithMessage("Results have been posted", true);
-                                    }
-
-
-                                });
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
-                    } else {
-
-                        pushID = uniquePushID;
-                        double recordClassAve = 0.0;
-                        double recordTotalScore = 0.0;
-                        int recordCounter = 0;
-                        academicRecord.setMaxObtainable(maximumScore);
-
-                        //Get Class Average
-                        for (int i = 0; i < enterResultRowList.size(); i++) {
-                            if (enterResultRowList.get(i).getStudentID() != null) {
-                                recordTotalScore += Double.valueOf(enterResultRowList.get(i).getScore());
-                                recordCounter++;
-                            }
-                        }
-                        recordClassAve = recordTotalScore / recordCounter;
-
-                        for (int i = 0; i < enterResultRowList.size(); i++) {
-                            if (enterResultRowList.get(i).getStudentID() != null) {
-                                newResultEntry.put("AcademicRecord/AcademicRecord-Student/" + activeSchoolID + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
-                                newResultEntry.put("AcademicRecord/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
-                                newResultEntry.put("AcademicRecord/AcademicRecordClass-Student/" + activeClass + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
-                                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), term, year, subject,
-                                        date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
-                                        class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType,
-                                        maximumScore, percentageOfTotal, enterResultRowList.get(i).getScore(), String.valueOf(recordClassAve));
-
-                                newResultEntry.put("AcademicRecord/AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + pushID, academicRecordStudent);
-
-                                String studentID = enterResultRowList.get(i).getStudentID();
-                                ArrayList<String> parentIDList = studentParentList.get(studentID);
-                                if (parentIDList != null) {
-                                    for (int j = 0; j < parentIDList.size(); j++) {
-                                        String parentID = parentIDList.get(j);
-                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
-                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/status", true);
-                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/status", true);
-                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/SingleRecords/" + pushID + "/status", true);
-                                        DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/count");
-                                        updateLikeRef.runTransaction(new Transaction.Handler() {
-                                            @Override
-                                            public Transaction.Result doTransaction(MutableData mutableData) {
-                                                Integer currentValue = mutableData.getValue(Integer.class);
-                                                if (currentValue == null) {
-                                                    mutableData.setValue(1);
-                                                } else {
-                                                    mutableData.setValue(currentValue + 1);
-                                                }
-
-                                                return Transaction.success(mutableData);
-
-                                            }
-
-                                            @Override
-                                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-                        }
-//                            recordClassAve = recordTotalScore / recordCounter;
-                        academicRecord.setClassAverage(String.valueOf(recordClassAve));
-                        newResultEntry.put("AcademicRecord/AcademicRecord/" + activeSchoolID + "/" + pushID, academicRecord);
-                        newResultEntry.put("AcademicRecord/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID, academicRecord);
-                        newResultEntry.put("AcademicRecord/AcademicRecordClass/" + activeClass + "/" + pushID, academicRecord);
-
-                        pushID = class_subject_AcademicYear_Term;
-                        int counter = 0;
-
-                        String totalScore = "0.0";
-                        for (int i = 0; i < enterResultRowList.size(); i++) {
-                            if (enterResultRowList.get(i).getStudentID() != null) {
-                                totalScore = String.valueOf((Double.valueOf(enterResultRowList.get(i).getScore()) / Double.valueOf(maximumScore)) * Double.valueOf(percentageOfTotal));
-                                classAverage = classAverage + Double.valueOf(totalScore);
-                                counter++;
-                            }
-                        }
-                        classAverage = classAverage / counter;
-
-                        for (int i = 0; i < enterResultRowList.size(); i++) {
-                            if (enterResultRowList.get(i).getStudentID() != null) {
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecord-Student/" + activeSchoolID + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), totalScore);
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), totalScore);
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass-Student/" + activeClass + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), totalScore);
-
-                                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), term, year, subject,
-                                        date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
-                                        class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType,
-                                        percentageOfTotal, percentageOfTotal, totalScore, String.valueOf(classAverage));
-
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + pushID, academicRecordStudent);
-                                newResultEntry.put("AcademicRecordTotal/AcademicRecordStudent-Subject/" + enterResultRowList.get(i).getStudentID() + "/" + subject, true);
-                                //Todo: Confirm that AcademicRecordStudent-Subject writes
-                            }
-                        }
-                        academicRecord.setClassAverage(String.valueOf(classAverage)); //TODO: Change to academicRecordTotal
-                        academicRecord.setMaxObtainable(percentageOfTotal);
-                        newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID, academicRecord);
-                        newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID, academicRecord);
-                        newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID, academicRecord);
-                        newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher-Subject/" + auth.getCurrentUser().getUid() + "/" + subject, true);
-
-                        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                progressDialog.dismiss();
-                                showDialogWithMessage("Results have been posted", true);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        } else {
-            showDialogWithMessage("Internet is down, check your connection and try again", false);
-        }
-    }
+//    public void saveToCloud() {
+//        if (CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(EnterResultsActivity.this);
+//            progressDialog.show();
+//
+//            academicYear_Term = year + "_" + term;
+//            term_AcademicYear = term + "_" + year;
+//            subject_AcademicYear_Term = subject + "_" + year + "_" + term;
+//            subject_Term_AcademicYear = subject + "_" + term + "_" + year;
+//            class_subject_AcademicYear_Term = activeClass + "_" + subject + "_" + year + "_" + term;
+//            class_subject_Term_AcademicYear = activeClass + "_" + subject + "_" + term + "_" + year;
+//
+//            String device = "Android";
+//
+//            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecord").child("AcademicRecord").push();
+//            uniquePushID = mDatabaseReference.getKey();
+//
+//            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTotal").child("AcademicRecordClass").child(activeClass).child(class_subject_AcademicYear_Term);
+//            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    pushID = class_subject_AcademicYear_Term;
+//                    mDatabaseReference = mFirebaseDatabase.getReference();
+//                    newResultEntry = new HashMap<String, Object>();
+//
+//                    if ((previousPercentageOfTotal + Double.valueOf(percentageOfTotal)) > 100.0) {
+//                        CustomToast.whiteBackgroundBottomToast(EnterResultsActivity.this, "The percentage of total is more than 100");
+//                        return;
+//                    }
+//
+//                    if ((previousPercentageOfTotal) >= 100.0) {
+//                        CustomToast.whiteBackgroundBottomToast(EnterResultsActivity.this, "The percentage of total is more than 100");
+//                        return;
+//                    }
+//
+//                    final AcademicRecord academicRecord = new AcademicRecord(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, device, term, year, subject,
+//                            date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+//                            class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore, percentageOfTotal);
+//
+//                    if (dataSnapshot.exists()) {
+//                        existingStudentScores = new Hashtable<String, String>();
+//                        DatabaseReference childDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTotal").child("AcademicRecordClass-Student").child(activeClass).child(pushID).child("Students");
+//                        childDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(DataSnapshot dataSnapshot) {
+//                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//                                    String key = postSnapshot.getKey();
+//                                    String score = postSnapshot.getValue(String.class);
+//                                    existingStudentScores.put(key, score);
+//                                }
+//
+//                                double classAverageNonTotal = 0;
+//                                double TotalNonTotal = 0;
+//                                int counterNonTotal = 0;
+//                                for (int i = 0; i < enterResultRowList.size(); i++) {
+//                                    if (enterResultRowList.get(i).getStudentID() != null) {
+//                                        TotalNonTotal += Double.valueOf(enterResultRowList.get(i).getScore());
+//                                        counterNonTotal++;
+//                                    }
+//                                }
+//                                classAverageNonTotal = TotalNonTotal / counterNonTotal;
+//
+//                                double recordClassAve = 0.0;
+//                                int counter = 0;
+//                                for (int i = 0; i < enterResultRowList.size(); i++) {
+//                                    if (enterResultRowList.get(i).getStudentID() != null) {
+//                                        recordClassAve += Double.valueOf(enterResultRowList.get(i).getScore());
+//                                        newScore = (Double.valueOf(enterResultRowList.get(i).getScore()) / Double.valueOf(maximumScore)) * Double.valueOf(percentageOfTotal);
+//                                        final String studentID = enterResultRowList.get(i).getStudentID();
+//                                        if (existingStudentScores.containsKey(studentID)) {
+//                                            String oldScore = existingStudentScores.get(studentID);
+//                                            Double oldScoreDouble = Double.valueOf(oldScore);
+//                                            score = (oldScoreDouble + newScore);
+//                                        } else {
+//                                            score = newScore;
+//                                        }
+//                                        classAverage = classAverage + Double.valueOf(score);
+//                                        counter++;
+//
+//                                        newResultEntry.put("AcademicRecordTotal/AcademicRecord-Student/" + activeSchoolID + "/" + pushID + "/Students/" + studentID, String.valueOf(score));
+//                                        newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + pushID + "/Students/" + studentID, String.valueOf(score));
+//                                        newResultEntry.put("AcademicRecordTotal/AcademicRecordClass-Student/" + activeClass + "/" + pushID + "/Students/" + studentID, String.valueOf(score));
+//                                        AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, studentID, device, term, year, subject,
+//                                                date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+//                                                class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore,
+//                                                String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)), String.valueOf(score), String.valueOf(classAverage));
+//
+//                                        newResultEntry.put("AcademicRecordTotal/AcademicRecordStudent/" + studentID + "/" + pushID, academicRecordStudent);
+//
+//                                        newResultEntry.put("AcademicRecord/AcademicRecord-Student/" + activeSchoolID + "/" + uniquePushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+//                                        newResultEntry.put("AcademicRecord/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + uniquePushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+//                                        newResultEntry.put("AcademicRecord/AcademicRecordClass-Student/" + activeClass + "/" + uniquePushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+//                                        academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), device, term, year, subject,
+//                                                date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+//                                                class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType, maximumScore, percentageOfTotal, enterResultRowList.get(i).getScore(), String.valueOf(classAverageNonTotal));
+//
+//                                        newResultEntry.put("AcademicRecord/AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + uniquePushID, academicRecordStudent);
+//
+//                                        ArrayList<String> parentIDList = studentParentList.get(studentID);
+//                                        if (parentIDList != null) {
+//                                            for (int j = 0; j < parentIDList.size(); j++) {
+//                                                String parentID = parentIDList.get(j);
+//                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
+//                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/status", true);
+//                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/status", true);
+//                                                newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/SingleRecords/" + pushID + "/status", true);
+//                                                DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/count");
+//                                                updateLikeRef.runTransaction(new Transaction.Handler() {
+//                                                    @Override
+//                                                    public Transaction.Result doTransaction(MutableData mutableData) {
+//                                                        Integer currentValue = mutableData.getValue(Integer.class);
+//                                                        if (currentValue == null) {
+//                                                            mutableData.setValue(1);
+//                                                        } else {
+//                                                            mutableData.setValue(currentValue + 1);
+//                                                        }
+//
+//                                                        return Transaction.success(mutableData);
+//
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+//
+//                                                    }
+//                                                });
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//
+//                                recordClassAve = recordClassAve / counter;
+//                                academicRecord.setClassAverage(String.valueOf(recordClassAve));
+//                                newResultEntry.put("AcademicRecord/AcademicRecord/" + activeSchoolID + "/" + uniquePushID, academicRecord);
+//                                newResultEntry.put("AcademicRecord/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + uniquePushID, academicRecord);
+//                                newResultEntry.put("AcademicRecord/AcademicRecordClass/" + activeClass + "/" + uniquePushID, academicRecord);
+//
+//                                classAverage = classAverage / counter;
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID + "/classAverage", String.valueOf(classAverage));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID + "/maxObtainable", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID + "/percentageOfTotal", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID + "/classAverage", String.valueOf(classAverage));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID + "/maxObtainable", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID + "/percentageOfTotal", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID + "/classAverage", String.valueOf(classAverage));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID + "/maxObtainable", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID + "/percentageOfTotal", String.valueOf(previousPercentageOfTotal + Double.valueOf(percentageOfTotal)));
+//
+//                                for (int i = 0; i < parentList.size(); i++){
+//
+//                                }
+//
+//                                mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
+//                                    @Override
+//                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                                        progressDialog.dismiss();
+//                                        showDialogWithMessage("Results have been posted", true);
+//                                    }
+//
+//
+//                                });
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(DatabaseError databaseError) {
+//
+//                            }
+//                        });
+//
+//                    } else {
+//
+//                        pushID = uniquePushID;
+//                        double recordClassAve = 0.0;
+//                        double recordTotalScore = 0.0;
+//                        int recordCounter = 0;
+//                        academicRecord.setMaxObtainable(maximumScore);
+//
+//                        //Get Class Average
+//                        for (int i = 0; i < enterResultRowList.size(); i++) {
+//                            if (enterResultRowList.get(i).getStudentID() != null) {
+//                                recordTotalScore += Double.valueOf(enterResultRowList.get(i).getScore());
+//                                recordCounter++;
+//                            }
+//                        }
+//                        recordClassAve = recordTotalScore / recordCounter;
+//
+//                        for (int i = 0; i < enterResultRowList.size(); i++) {
+//                            if (enterResultRowList.get(i).getStudentID() != null) {
+//                                newResultEntry.put("AcademicRecord/AcademicRecord-Student/" + activeSchoolID + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+//                                newResultEntry.put("AcademicRecord/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+//                                newResultEntry.put("AcademicRecord/AcademicRecordClass-Student/" + activeClass + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), enterResultRowList.get(i).getScore());
+//                                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), device, term, year, subject,
+//                                        date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+//                                        class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType,
+//                                        maximumScore, percentageOfTotal, enterResultRowList.get(i).getScore(), String.valueOf(recordClassAve));
+//
+//                                newResultEntry.put("AcademicRecord/AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + pushID, academicRecordStudent);
+//
+//                                String studentID = enterResultRowList.get(i).getStudentID();
+//                                ArrayList<String> parentIDList = studentParentList.get(studentID);
+//                                if (parentIDList != null) {
+//                                    for (int j = 0; j < parentIDList.size(); j++) {
+//                                        String parentID = parentIDList.get(j);
+//                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/status", true);
+//                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/status", true);
+//                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/status", true);
+//                                        newResultEntry.put("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/subjects/" + subject + "/Class_Subject_AcademicYear_Term/" + class_subject_AcademicYear_Term + "/SingleRecords/" + pushID + "/status", true);
+//                                        DatabaseReference updateLikeRef = mFirebaseDatabase.getReference("AcademicRecordParentNotification/" + parentID + "/" + studentID + "/count");
+//                                        updateLikeRef.runTransaction(new Transaction.Handler() {
+//                                            @Override
+//                                            public Transaction.Result doTransaction(MutableData mutableData) {
+//                                                Integer currentValue = mutableData.getValue(Integer.class);
+//                                                if (currentValue == null) {
+//                                                    mutableData.setValue(1);
+//                                                } else {
+//                                                    mutableData.setValue(currentValue + 1);
+//                                                }
+//
+//                                                return Transaction.success(mutableData);
+//
+//                                            }
+//
+//                                            @Override
+//                                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+//
+//                                            }
+//                                        });
+//                                    }
+//                                }
+//                            }
+//                        }
+////                            recordClassAve = recordTotalScore / recordCounter;
+//                        academicRecord.setClassAverage(String.valueOf(recordClassAve));
+//                        newResultEntry.put("AcademicRecord/AcademicRecord/" + activeSchoolID + "/" + pushID, academicRecord);
+//                        newResultEntry.put("AcademicRecord/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID, academicRecord);
+//                        newResultEntry.put("AcademicRecord/AcademicRecordClass/" + activeClass + "/" + pushID, academicRecord);
+//
+//                        pushID = class_subject_AcademicYear_Term;
+//                        int counter = 0;
+//
+//                        String totalScore = "0.0";
+//                        for (int i = 0; i < enterResultRowList.size(); i++) {
+//                            if (enterResultRowList.get(i).getStudentID() != null) {
+//                                totalScore = String.valueOf((Double.valueOf(enterResultRowList.get(i).getScore()) / Double.valueOf(maximumScore)) * Double.valueOf(percentageOfTotal));
+//                                classAverage = classAverage + Double.valueOf(totalScore);
+//                                counter++;
+//                            }
+//                        }
+//                        classAverage = classAverage / counter;
+//
+//                        for (int i = 0; i < enterResultRowList.size(); i++) {
+//                            if (enterResultRowList.get(i).getStudentID() != null) {
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecord-Student/" + activeSchoolID + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), totalScore);
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher-Student/" + auth.getCurrentUser().getUid() + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), totalScore);
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordClass-Student/" + activeClass + "/" + pushID + "/Students/" + enterResultRowList.get(i).getStudentID(), totalScore);
+//
+//                                AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent(activeClass, auth.getCurrentUser().getUid(), activeSchoolID, enterResultRowList.get(i).getStudentID(), device, term, year, subject,
+//                                        date, sortableDate, academicYear_Term, term_AcademicYear, subject_AcademicYear_Term, subject_Term_AcademicYear,
+//                                        class_subject_AcademicYear_Term, class_subject_Term_AcademicYear, testType,
+//                                        percentageOfTotal, percentageOfTotal, totalScore, String.valueOf(classAverage));
+//
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordStudent/" + enterResultRowList.get(i).getStudentID() + "/" + pushID, academicRecordStudent);
+//                                newResultEntry.put("AcademicRecordTotal/AcademicRecordStudent-Subject/" + enterResultRowList.get(i).getStudentID() + "/" + subject, true);
+//                                //Todo: Confirm that AcademicRecordStudent-Subject writes
+//                            }
+//                        }
+//                        academicRecord.setClassAverage(String.valueOf(classAverage)); //TODO: Change to academicRecordTotal
+//                        academicRecord.setMaxObtainable(percentageOfTotal);
+//                        newResultEntry.put("AcademicRecordTotal/AcademicRecord/" + activeSchoolID + "/" + pushID, academicRecord);
+//                        newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher/" + auth.getCurrentUser().getUid() + "/" + pushID, academicRecord);
+//                        newResultEntry.put("AcademicRecordTotal/AcademicRecordClass/" + activeClass + "/" + pushID, academicRecord);
+//                        newResultEntry.put("AcademicRecordTotal/AcademicRecordTeacher-Subject/" + auth.getCurrentUser().getUid() + "/" + subject, true);
+//
+//                        mDatabaseReference.updateChildren(newResultEntry, new DatabaseReference.CompletionListener() {
+//                            @Override
+//                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+//                                progressDialog.dismiss();
+//                                showDialogWithMessage("Results have been posted", true);
+//                            }
+//                        });
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//        } else {
+//            showDialogWithMessage("Internet is down, check your connection and try again", false);
+//        }
+//    }
 
     void showDialogWithMessage (String messageString, final boolean finish) {
         final Dialog dialog = new Dialog(this);

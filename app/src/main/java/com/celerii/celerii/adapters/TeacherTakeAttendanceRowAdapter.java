@@ -207,7 +207,7 @@ public class TeacherTakeAttendanceRowAdapter extends RecyclerView.Adapter<Recycl
                 @Override
                 public void onClick(View v) {
                     if (context instanceof TeacherTakeAttendanceActivity) {
-                        ((TeacherTakeAttendanceActivity)context).saveToCloud();
+                        ((TeacherTakeAttendanceActivity)context).confirmSaveToCloud();
                     }
                 }
             });

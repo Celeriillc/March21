@@ -6,7 +6,7 @@ package com.celerii.celerii.models;
 
 public class ParentAttendanceRow {
     String date, attendanceStatus, term, day, month, year, remark, subject, key;
-    String studentID, classID, className, schoolID, teacherID;
+    String studentID, classID, className, schoolID, teacherID, device;
     Boolean isNew;
 
     public ParentAttendanceRow() {
@@ -24,10 +24,11 @@ public class ParentAttendanceRow {
         this.className = "";
         this.schoolID = "";
         this.teacherID = "";
+        this.device = "";
         this.isNew = false;
     }
 
-    public ParentAttendanceRow(String date, String attendanceStatus, String term, String day, String month, String year, String remark, String classID, String schoolID, String teacherID) {
+    public ParentAttendanceRow(String date, String attendanceStatus, String term, String day, String month, String year, String remark, String classID, String schoolID, String teacherID, String device) {
         this.date = date;
         this.attendanceStatus = attendanceStatus;
         this.term = term;
@@ -42,6 +43,7 @@ public class ParentAttendanceRow {
         this.className = "";
         this.schoolID = schoolID;
         this.teacherID = teacherID;
+        this.device = device;
         this.isNew = false;
     }
 
@@ -139,6 +141,14 @@ public class ParentAttendanceRow {
 
     public void setTeacherID(String teacherID) {
         this.teacherID = teacherID;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
     public String getSubject() {
