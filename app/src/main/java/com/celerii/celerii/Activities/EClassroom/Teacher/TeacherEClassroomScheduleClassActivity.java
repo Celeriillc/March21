@@ -197,7 +197,7 @@ public class TeacherEClassroomScheduleClassActivity extends AppCompatActivity im
 
         if (subjectList == null) {
             subjectList = new ArrayList<>();
-            showDialogWithMessageAndDisconnect("There are no subjects to assign to create classes for. If you're not connected to a school, use the search feature to search for a school and send a request.");
+            showDialogWithMessageAndDisconnect("There are no subjects to create classes for. If you're not connected to a school, use the search feature to search for a school and send a request.");
             return;
         } else {
             subject.setText(subjectList.get(0));
@@ -300,11 +300,15 @@ public class TeacherEClassroomScheduleClassActivity extends AppCompatActivity im
                     return;
                 }
 
+                mDatabaseReference = mFirebaseDatabase.getReference().child("E Classroom Scheduled Class").child(activeClassID).push();
+                String pushKey = mDatabaseReference.getKey();
+
                 String dateCreated = Date.getDate();
                 String sortableDateCreated = Date.convertToSortableDate(dateCreated);
                 String dateScheduled = year + "/" + month + "/" + dayOfTheMonth + " " + hourOfTheDay + ":" + minute + ":00:000";
                 String sortableDateScheduled = Date.convertToSortableDate(dateScheduled);
-                String classLink = activeClassID + subject.getText().toString() + mFirebaseUser.getUid() + sortableDateCreated;
+//                String classLink = activeClassID + subject.getText().toString() + mFirebaseUser.getUid() + sortableDateCreated;
+                String classLink = pushKey;
                 String schoolID = "";
                 if (schoolList.size() > 0) {
                     schoolID = schoolList.get(0);
@@ -316,9 +320,6 @@ public class TeacherEClassroomScheduleClassActivity extends AppCompatActivity im
                 }
 
                 customProgressDialogOne.show();
-
-                mDatabaseReference = mFirebaseDatabase.getReference().child("E Classroom Scheduled Class").child(activeClassID).push();
-                String pushKey = mDatabaseReference.getKey();
 
                 EClassroomScheduledClassesListModel eClassroomScheduledClassesListModel = new EClassroomScheduledClassesListModel(pushKey, activeClassID,
                         activeClassName, schoolID, mFirebaseUser.getUid(), dateCreated, sortableDateCreated, dateScheduled, sortableDateScheduled,

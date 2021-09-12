@@ -17,10 +17,13 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.Profiles.SchoolProfile.GalleryDetailForSingleImageActivity"></activity>
-        <!-- <receiver android:name=".Activities.Home.Parent.ParentMainActivityTwo$MyBroadcastReceiver" > -->
+        <activity android:name=".Activities.EMeeting.Parent.ParentEMeetingMessageBoardActivity"></activity>
+        <activity android:name=".Activities.EMeeting.Parent.ParentEMeetingHomeActivity" />
+        <activity android:name=".Activities.EMeeting.Teacher.TeacherEMeetingMessageBoardActivity" />
+        <activity android:name=".Activities.EMeeting.Teacher.TeacherEMeetingHomeActivity" />
+        <activity android:name=".Activities.Profiles.SchoolProfile.GalleryDetailForSingleImageActivity" /> <!-- <receiver android:name=".Activities.Home.Parent.ParentMainActivityTwo$MyBroadcastReceiver" > -->
         <!-- </receiver> -->
-        <receiver android:name=".Activities.Utility.ApplicationLaunchActivity$MyBroadcastReceiver"></receiver>
+        <receiver android:name=".Activities.Utility.ApplicationLaunchActivity$MyBroadcastReceiver" />
 
         <activity android:name=".Activities.EClassroom.EClassroomScheduledClassParticipantsActivity" />
         <activity android:name=".Activities.EClassroom.Teacher.TeacherEClassroomScheduleClassActivity" />

@@ -172,14 +172,14 @@ public class TeacherEClassroomConcludedClassesListFragment extends Fragment {
                         recyclerView.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);
                         errorLayout.setVisibility(View.VISIBLE);
-                        errorLayoutText.setText(Html.fromHtml("You do not have any scheduled classes at the moment. Click the " + "<b>" + "Add Class" + "</b>" + " floating button on the bottom left to schedule a class"));
+                        errorLayoutText.setText(Html.fromHtml("You do not have any concluded classes at the moment. Click the " + "<b>" + "Add Class" + "</b>" + " floating button on the bottom left to schedule a class"));
                     }
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You do not have any scheduled classes at the moment. Click the " + "<b>" + "Add Class" + "</b>" + " floating button on the bottom left to schedule a class"));
+                    errorLayoutText.setText(Html.fromHtml("You do not have any concluded classes at the moment. Click the " + "<b>" + "Add Class" + "</b>" + " floating button on the bottom left to schedule a class"));
                 }
             }
 

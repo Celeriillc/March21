@@ -2,7 +2,9 @@ package com.celerii.celerii.models;
 
 public class ReminderModel {
     String activityID, accountType, reminderType, eventTitle, eventSender, eClassroomChildName, eClassroomChildID,
-            eClassroomChildProfilePictureURL, eClassroomLink, eClassroomState, scheduledDate, originalScheduledDate;
+            eClassroomChildProfilePictureURL, eClassroomLink, eClassroomState, scheduledDate, originalScheduledDate,
+            meetingTitle, meetingLink, meetingSchoolName, meetingSchoolID, assignmentChildID, assignmentChildName,
+            assignmentChildProfilePictureURL, assignmentTitle, assignmentID, assignmentMaterialID;
     String timeToEvent;
     long timeInMilliseconds;
 
@@ -19,6 +21,16 @@ public class ReminderModel {
         this.eClassroomState = "";
         this.scheduledDate = "";
         this.originalScheduledDate = "";
+        this.meetingTitle = "";
+        this.meetingLink = "";
+        this.meetingSchoolName = "";
+        this.meetingSchoolID = "";
+        this.assignmentChildID = "";
+        this.assignmentChildName = "";
+        this.assignmentChildProfilePictureURL = "";
+        this.assignmentTitle = "";
+        this.assignmentID = "";
+        this.assignmentMaterialID = "";
         this.timeToEvent = "";
         this.timeInMilliseconds = 0;
     }
@@ -36,6 +48,16 @@ public class ReminderModel {
         this.eClassroomState = reminderModel.eClassroomState;
         this.scheduledDate = reminderModel.scheduledDate;
         this.originalScheduledDate = reminderModel.originalScheduledDate;
+        this.meetingTitle = reminderModel.meetingTitle;
+        this.meetingLink = reminderModel.meetingLink;
+        this.meetingSchoolName = reminderModel.meetingSchoolName;
+        this.meetingSchoolID = reminderModel.meetingSchoolID;
+        this.assignmentChildID = reminderModel.assignmentChildID;
+        this.assignmentChildName = reminderModel.assignmentChildName;
+        this.assignmentChildProfilePictureURL = reminderModel.assignmentChildProfilePictureURL;
+        this.assignmentTitle = reminderModel.assignmentTitle;
+        this.assignmentID = reminderModel.assignmentID;
+        this.assignmentMaterialID = reminderModel.assignmentMaterialID;
         this.timeToEvent = reminderModel.timeToEvent;
         this.timeInMilliseconds = reminderModel.timeInMilliseconds;
     }
@@ -156,6 +178,86 @@ public class ReminderModel {
 
     public void setOriginalScheduledDate(String originalScheduledDate) {
         this.originalScheduledDate = originalScheduledDate;
+    }
+
+    public String getMeetingTitle() {
+        return meetingTitle;
+    }
+
+    public void setMeetingTitle(String meetingTitle) {
+        this.meetingTitle = meetingTitle;
+    }
+
+    public String getMeetingLink() {
+        return meetingLink;
+    }
+
+    public void setMeetingLink(String meetingLink) {
+        this.meetingLink = meetingLink;
+    }
+
+    public String getMeetingSchoolName() {
+        return meetingSchoolName;
+    }
+
+    public void setMeetingSchoolName(String meetingSchoolName) {
+        this.meetingSchoolName = meetingSchoolName;
+    }
+
+    public String getMeetingSchoolID() {
+        return meetingSchoolID;
+    }
+
+    public void setMeetingSchoolID(String meetingSchoolID) {
+        this.meetingSchoolID = meetingSchoolID;
+    }
+
+    public String getAssignmentChildID() {
+        return assignmentChildID;
+    }
+
+    public void setAssignmentChildID(String assignmentChildID) {
+        this.assignmentChildID = assignmentChildID;
+    }
+
+    public String getAssignmentChildName() {
+        return assignmentChildName;
+    }
+
+    public void setAssignmentChildName(String assignmentChildName) {
+        this.assignmentChildName = assignmentChildName;
+    }
+
+    public String getAssignmentChildProfilePictureURL() {
+        return assignmentChildProfilePictureURL;
+    }
+
+    public void setAssignmentChildProfilePictureURL(String assignmentChildProfilePictureURL) {
+        this.assignmentChildProfilePictureURL = assignmentChildProfilePictureURL;
+    }
+
+    public String getAssignmentTitle() {
+        return assignmentTitle;
+    }
+
+    public void setAssignmentTitle(String assignmentTitle) {
+        this.assignmentTitle = assignmentTitle;
+    }
+
+    public String getAssignmentID() {
+        return assignmentID;
+    }
+
+    public void setAssignmentID(String assignmentID) {
+        this.assignmentID = assignmentID;
+    }
+
+    public String getAssignmentMaterialID() {
+        return assignmentMaterialID;
+    }
+
+    public void setAssignmentMaterialID(String assignmentMaterialID) {
+        this.assignmentMaterialID = assignmentMaterialID;
     }
 
     public String getTimeToEvent() {

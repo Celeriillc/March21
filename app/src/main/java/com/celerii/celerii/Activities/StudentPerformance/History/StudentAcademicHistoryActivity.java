@@ -69,7 +69,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
     String year, term, year_term;
 
     String featureUseKey = "";
-    String featureName = "Class Academic Records";
+    String featureName = "Class Term Average";
     long sessionStartTime = 0;
     String sessionDurationInSeconds = "0";
 
@@ -195,7 +195,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         className = activeClassModel.getClassName();
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(className); //TODO: Use class name, make dynamic
+        getSupportActionBar().setTitle(className + "'s Term Average"); //TODO: Use class name, make dynamic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 

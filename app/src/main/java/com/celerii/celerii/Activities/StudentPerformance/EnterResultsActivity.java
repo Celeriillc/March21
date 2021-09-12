@@ -829,6 +829,17 @@ public class EnterResultsActivity extends AppCompatActivity {
             return;
         }
 
+        if (!enterResultHeader.getMaxScore().matches("^-?\\d+$")) {
+            showDialogWithMessage("The maximum obtainable score for this test has to be a whole number", false);
+            return;
+        }
+
+        int maxObt = Integer.parseInt(enterResultHeader.getMaxScore());
+        if (maxObt <= 0) {
+            showDialogWithMessage("The maximum obtainable score for this test has to be a whole number greater than zero (0)", false);
+            return;
+        }
+
         final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(EnterResultsActivity.this);
         progressDialog.show();
 

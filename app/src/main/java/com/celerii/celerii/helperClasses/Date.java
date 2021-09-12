@@ -36,6 +36,11 @@ public class Date {
         } else {
             hour = Integer.parseInt(timeArray[0]);
         }
+
+        if  (String.valueOf(hour).equals("0")) {
+            hour = 12;
+        }
+
         return String.valueOf(hour) + ":" + makeTwoDigits(timeArray[1]) + " " + AMPM;
     }
 

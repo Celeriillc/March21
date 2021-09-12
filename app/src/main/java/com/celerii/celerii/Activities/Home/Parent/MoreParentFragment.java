@@ -30,6 +30,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomHomeActivity;
 import com.celerii.celerii.Activities.ELibrary.Parent.ParentELibraryHomeActivity;
+import com.celerii.celerii.Activities.EMeeting.Parent.ParentEMeetingHomeActivity;
 import com.celerii.celerii.Activities.Events.EventsRowActivity;
 import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
 import com.celerii.celerii.Activities.Payments.PaymentsHomeActivity;
@@ -55,6 +56,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.EClassroomScheduledClassesListModel;
 import com.celerii.celerii.models.ELibraryMyAssignmentModel;
+import com.celerii.celerii.models.EMeetingScheduledMeetingsListModel;
 import com.celerii.celerii.models.MoreParentsHeaderModel;
 import com.celerii.celerii.models.NotificationBadgeModel;
 import com.celerii.celerii.models.Parent;
@@ -113,11 +115,11 @@ public class MoreParentFragment extends Fragment {
     Button searchButton;
     AHBottomNavigation bottomNavigation;
 
-    LinearLayout profileLayout, subscriptionLayout, attendanceLayout, timetableLayout, performanceLayout, behaviouralPerformanceLayout, eClassroomLayout, eLibraryLayout, paymentLayout, eventsLayout, newslettersLayout,
+    LinearLayout profileLayout, subscriptionLayout, attendanceLayout, timetableLayout, performanceLayout, behaviouralPerformanceLayout, eClassroomLayout, eLibraryLayout, paymentLayout, pTMeetingLayout, eventsLayout, newslettersLayout,
             settingsLayout, switchAccountLayout, logoutLayout;
-    TextView profile, subscription, attendance, timetable, performance, behaviouralPerformance, eClassroom, eLibrary, payment, events, newsletters, settings, switchAccount, logout;
-    TextView profileBadge, subscriptionBadge, attendanceBadge, performanceBadge, behaviouralPerformanceBadge, eClassroomBadge, eLibraryBadge, paymentBadge, eventsBadge, newslettersBadge;
-    TextView profileMarker, subscriptionMarker, attendanceMarker, timetableMarker, performanceMarker, behaviouralPerformanceMarker, eClassroomMarker, eLibraryMarker, paymentMarker, eventsMarker, newslettersMarker,
+    TextView profile, subscription, attendance, timetable, performance, behaviouralPerformance, eClassroom, eLibrary, payment, pTMeeting, events, newsletters, settings, switchAccount, logout;
+    TextView profileBadge, subscriptionBadge, attendanceBadge, performanceBadge, behaviouralPerformanceBadge, eClassroomBadge, eLibraryBadge, paymentBadge, pTMeetingBadge, eventsBadge, newslettersBadge;
+    TextView profileMarker, subscriptionMarker, attendanceMarker, timetableMarker, performanceMarker, behaviouralPerformanceMarker, eClassroomMarker, eLibraryMarker, paymentMarker, pTMeetingMarker, eventsMarker, newslettersMarker,
             settingsMarker, switchAccountMarker, logoutMarker;
 
     CoordinatorLayout coordinatorLayout;
@@ -167,6 +169,7 @@ public class MoreParentFragment extends Fragment {
         eLibraryLayout = (LinearLayout) view.findViewById(R.id.elibraryLayout);
         eClassroomLayout = (LinearLayout) view.findViewById(R.id.eclassroomLayout);
         paymentLayout = (LinearLayout) view.findViewById(R.id.paymentsLayout);
+        pTMeetingLayout = (LinearLayout) view.findViewById(R.id.ptmeetingLayout);
         eventsLayout = (LinearLayout) view.findViewById(R.id.eventsLayout);
         newslettersLayout = (LinearLayout) view.findViewById(R.id.newslettersLayout);
         settingsLayout = (LinearLayout) view.findViewById(R.id.settingsLayout);
@@ -182,6 +185,7 @@ public class MoreParentFragment extends Fragment {
         eLibrary = (TextView) view.findViewById(R.id.elibrary);
         eClassroom = (TextView) view.findViewById(R.id.eclassroom);
         payment = (TextView) view.findViewById(R.id.payments);
+        pTMeeting = (TextView) view.findViewById(R.id.ptmeeting);
         events = (TextView) view.findViewById(R.id.events);
         newsletters = (TextView) view.findViewById(R.id.newsletters);
         settings = (TextView) view.findViewById(R.id.settings);
@@ -196,6 +200,7 @@ public class MoreParentFragment extends Fragment {
         eLibraryBadge = (TextView) view.findViewById(R.id.elibrarybadge);
         eClassroomBadge = (TextView) view.findViewById(R.id.eclassroombadge);
         paymentBadge = (TextView) view.findViewById(R.id.paymentsbadge);
+        pTMeetingBadge = (TextView) view.findViewById(R.id.ptmeetingbadge);
         eventsBadge = (TextView) view.findViewById(R.id.eventsbadge);
         newslettersBadge = (TextView) view.findViewById(R.id.newsletterbadge);
 
@@ -208,6 +213,7 @@ public class MoreParentFragment extends Fragment {
         eLibraryMarker = (TextView) view.findViewById(R.id.elibrarymarker);
         eClassroomMarker = (TextView) view.findViewById(R.id.eclassroommarker);
         paymentMarker = (TextView) view.findViewById(R.id.paymentsmarker);
+        pTMeetingMarker = (TextView) view.findViewById(R.id.ptmeetingmarker);
         eventsMarker = (TextView) view.findViewById(R.id.eventsmarker);
         newslettersMarker = (TextView) view.findViewById(R.id.newslettersmarker);
         settingsMarker = (TextView) view.findViewById(R.id.settingsmarker);
@@ -583,6 +589,7 @@ public class MoreParentFragment extends Fragment {
         String ecl = "E Classroom";
         String elb = "E Library";
         String pmt = "Payments";
+        String ptm = "PT Meetings";
         String evt = "Events";
         String nws = "Newsletters";
         String set = "Settings";
@@ -723,6 +730,7 @@ public class MoreParentFragment extends Fragment {
         eClassroom.setText(ecl);
         eLibrary.setText(elb);
         payment.setText(pmt);
+        pTMeeting.setText(ptm);
         events.setText(evt);
         newsletters.setText(nws);
         settings.setText(set);
@@ -813,6 +821,13 @@ public class MoreParentFragment extends Fragment {
                 context.startActivity(I);
             }
         });
+        pTMeetingLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(context, ParentEMeetingHomeActivity.class);
+                context.startActivity(I);
+            }
+        });
         eventsLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -857,7 +872,7 @@ public class MoreParentFragment extends Fragment {
     }
 
     private void loadUpBadgesAndMarkers() {
-        if (sharedPreferencesManager.getActiveKid() != null){
+        if (sharedPreferencesManager.getActiveKid() != null) {
             if (!sharedPreferencesManager.getActiveKid().equals("")) {
                 Gson gson = new Gson();
                 Type type = new TypeToken<Student>() {}.getType();
@@ -1037,6 +1052,37 @@ public class MoreParentFragment extends Fragment {
                 });
             }
         }
+
+        mDatabaseReference = mFirebaseDatabase.getReference().child("E Meeting Scheduled Meeting").child("Parent").child(mFirebaseUser.getUid());
+        mDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    int count = 0;
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        EMeetingScheduledMeetingsListModel eMeetingScheduledMeetingsListModel = postSnapshot.getValue(EMeetingScheduledMeetingsListModel.class);
+
+                        if (eMeetingScheduledMeetingsListModel.getOpen()) {
+                            count++;
+                        }
+
+                        if (count > 0) {
+                            pTMeetingMarker.setVisibility(View.VISIBLE);
+                            pTMeetingMarker.setText(String.valueOf(count));
+                        } else {
+                            pTMeetingMarker.setVisibility(View.GONE);
+                        }
+                    }
+                } else {
+                    pTMeetingMarker.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Notification Badges").child("Parents").child(mFirebaseUser.getUid()).child("Events").child("status");
         mDatabaseReference.addValueEventListener(new ValueEventListener() {

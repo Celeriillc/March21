@@ -196,6 +196,22 @@ exports.sendTeacherNotification = functions.database.ref('/NotificationTeacher/{
                         },
                     };
                     console.log("payload: ", payload)
+                } else if (notificationType === "EMeeting") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has invited you to join a scheduled e - meeting. Click this notification to go to the message board of this meeting.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
                 } else if (notificationType === "ConnectionRequest") {
                     if (toAccountType === "Parent") {
                         payload = {
@@ -519,6 +535,22 @@ exports.sendTeacherNotification = functions.database.ref('/NotificationTeacher/{
                             objectName: objectName,
                             notificationImageURL: notificationImageURL,
                             message: fromName + " has created a new e - library assignment for " + objectName + ". Click this notification to study the material and take on the assignment.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "EMeeting") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has invited you to join a scheduled e - meeting. Click this notification to go to the message board of this meeting.",
                             activityID: activityID,
                         },
                     };
@@ -910,6 +942,22 @@ exports.sendParentNotification = functions.database.ref('/NotificationParent/{us
                         },
                     };
                     console.log("payload: ", payload)
+                } else if (notificationType === "EMeeting") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has invited you to join a scheduled e - meeting. Click this notification to go to the message board of this meeting.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
                 } else if (notificationType === "ConnectionRequest") {
                     if (toAccountType === "Parent") {
                         payload = {
@@ -1233,6 +1281,22 @@ exports.sendParentNotification = functions.database.ref('/NotificationParent/{us
                             objectName: objectName,
                             notificationImageURL: notificationImageURL,
                             message: fromName + " has created a new e - library assignment for " + objectName + ". Click this notification to study the material and take on the assignment.",
+                            activityID: activityID,
+                        },
+                    };
+                    console.log("payload: ", payload)
+                } else if (notificationType === "EMeeting") {
+                    payload = {
+                        data: {
+                            data_type: notificationType,
+                            account_type: toAccountType,
+                            fromAccountType: fromAccountType,
+                            fromID: fromID,
+                            fromName: fromName,
+                            object: object,
+                            objectName: objectName,
+                            notificationImageURL: notificationImageURL,
+                            message: fromName + " has invited you to join a scheduled e - meeting. Click this notification to go to the message board of this meeting.",
                             activityID: activityID,
                         },
                     };

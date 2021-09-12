@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context="com.celerii.celerii.Activities.EMeeting.Parent.ParentEMeetingMessageBoardActivity">
+
+    <RelativeLayout
+        android:id="@+id/activity_chat_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--        <include android:id="@+id/hometoolbar"-->
+        <!--            layout="@layout/home_toolbar"/>-->
+
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/hometoolbar"
+            android:minHeight="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            android:background="?attr/colorPrimary"
+            app:elevation="0dp"
+
+            android:theme="@style/AppTheme"
+            app:popupTheme="@style/AppTheme"
+            app:titleTextAppearance="@style/Toolbar.TitleText"
+            app:contentInsetStartWithNavigation="0dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/joinmeeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:text="Join Meeting"
+                    android:background="@drawable/roundedbutton"
+                    style="?android:attr/borderlessButtonStyle" />
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <include android:id="@+id/errorlayout"
+            layout="@layout/error_layout"/>
+
+        <include android:id="@+id/progresslayout"
+            layout="@layout/progress_layout"/>
+
+        <View
+            android:id="@+id/base"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="#eeeeee"
+            android:layout_alignParentBottom="true"/>
+
+        <LinearLayout
+            android:id="@+id/form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorMessagesGray"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:weightSum="10"
+            android:layout_above="@+id/base"
+            android:layout_alignParentStart="true">
+
+            <LinearLayout
+                android:id="@+id/profilepictureclipper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="15dp"
+                android:layout_gravity="center"
+                android:background="@drawable/circular_image_background_white">
+
+                <ImageView
+                    android:id="@+id/myprofilepic"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"/>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10"
+                android:layout_marginEnd="15dp">
+
+                <EditText
+                    android:id="@+id/messageEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="100dp"
+                    android:paddingBottom="15dp"
+                    android:hint="Type a message"
+                    android:textColorHint="#CCCCCC"
+                    android:inputType="textMultiLine"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/custom_edit_text_for_messages"
+                    android:maxHeight="160dp"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/attachments"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="@drawable/ic_camera_chat"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/sendlayout"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"/>
+
+                <RelativeLayout
+                    android:id="@+id/sendlayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true">
+
+                    <LinearLayout
+                        android:id="@+id/clipper"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="5dp"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/sendMessageButton"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/ic_send"/>
+
+
+                    </LinearLayout>
+                </RelativeLayout>
+
+
+            </RelativeLayout>
+
+            <!--            <EditText-->
+            <!--                android:id="@+id/messageEditText"-->
+            <!--                android:layout_width="0dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_weight="10"-->
+            <!--                android:paddingTop="10dp"-->
+            <!--                android:paddingStart="15dp"-->
+            <!--                android:paddingEnd="15dp"-->
+            <!--                android:paddingBottom="10dp"-->
+            <!--                android:hint="Send a message"-->
+            <!--                android:textColorHint="#CCCCCC"-->
+            <!--                android:layout_gravity="center_vertical"-->
+            <!--                android:background="@drawable/custom_edit_text_for_chat"-->
+            <!--                android:maxHeight="160dp"-->
+            <!--                android:textColor="#777777"-->
+            <!--                android:textSize="15dp" />-->
+
+            <!--            <ImageView-->
+            <!--                android:id="@+id/sendMessageButton"-->
+            <!--                android:layout_width="35dp"-->
+            <!--                android:layout_height="35dp"-->
+            <!--                android:background="@drawable/ic_play_circle_filled_black_24dp"-->
+            <!--                android:layout_gravity="center_vertical"-->
+            <!--                android:layout_marginStart="5dp"-->
+            <!--                android:layout_marginEnd="5dp"/>-->
+        </LinearLayout>
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:background="#ffffff"
+            android:layout_above="@id/form"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:clipToPadding="false"
+            android:layout_alignBottom="@id/separator"
+            android:layout_marginTop="?actionBarSize"
+            />
+
+        <!--        <LinearLayout-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:gravity="end"-->
+        <!--            android:background="@color/white"-->
+        <!--            android:layout_marginTop="?actionBarSize">-->
+
+        <!--            <Button-->
+        <!--                android:id="@+id/joinclassd"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="40dp"-->
+        <!--                android:layout_marginTop="0dp"-->
+        <!--                android:layout_marginBottom="5dp"-->
+        <!--                android:layout_marginStart="20dp"-->
+        <!--                android:layout_marginEnd="20dp"-->
+        <!--                android:paddingStart="40dp"-->
+        <!--                android:paddingEnd="40dp"-->
+        <!--                android:textAllCaps="false"-->
+        <!--                android:textStyle="bold"-->
+        <!--                android:textColor="@android:color/white"-->
+        <!--                android:text="Join Class"-->
+        <!--                android:background="@drawable/roundedbutton"-->
+        <!--                style="?android:attr/borderlessButtonStyle" />-->
+
+        <!--        </LinearLayout>-->
+    </RelativeLayout>
+</LinearLayout>

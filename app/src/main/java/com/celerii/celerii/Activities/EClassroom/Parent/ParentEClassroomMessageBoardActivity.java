@@ -389,7 +389,7 @@ public class ParentEClassroomMessageBoardActivity extends AppCompatActivity {
                 }
 
                 if (scheduledClassState.equals("Concluded")) {
-                    String messageString = "This class has been closed by its creator. You can still post on its message board but audio and video access has been restricted.";
+                    String messageString = "This class has been closed by its creator. You can still post on its message board but audio and video access have been restricted.";
                     ShowDialogWithMessage.showDialogWithMessage(context, Html.fromHtml(messageString));
                     return;
                 }

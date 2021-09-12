@@ -141,7 +141,7 @@ public class StudentAcademicHistoryAdapter extends RecyclerView.Adapter<Recycler
             final StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = studentAcademicHistoryRowModelList.get(position);
 
             ((MyViewHolder) holder).kidName.setText(studentAcademicHistoryRowModel.getName());
-            String average = "0%";
+            String average = "NA";
             if (studentAcademicHistoryRowModel.getAverage() != null) {
                 if (!studentAcademicHistoryRowModel.getAverage().equals("")) {
                     average = studentAcademicHistoryRowModel.getAverage() + "%";

@@ -22,6 +22,9 @@ import android.text.Html;
 import android.text.Spanned;
 
 import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomMessageBoardActivity;
+import com.celerii.celerii.Activities.ELibrary.Parent.ELibraryParentAssignmentActivity;
+import com.celerii.celerii.Activities.EMeeting.Parent.ParentEMeetingMessageBoardActivity;
+import com.celerii.celerii.Activities.EMeeting.Teacher.TeacherEMeetingMessageBoardActivity;
 import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Intro.IntroSlider;
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
@@ -35,6 +38,8 @@ import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.Month;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.EClassroomScheduledClassesListModel;
+import com.celerii.celerii.models.ELibraryMyAssignmentModel;
+import com.celerii.celerii.models.EMeetingScheduledMeetingsListModel;
 import com.celerii.celerii.models.EventsRow;
 import com.celerii.celerii.models.ReminderModel;
 import com.celerii.celerii.models.Student;
@@ -295,7 +300,7 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
                                 }
 
                                 if (parentEventCounter == parentEventChildrenCount) {
-                                    prepareStudentEClassroomReminders();
+                                    prepareTeacherEMeetingReminders();
                                 }
                             }
 
@@ -306,7 +311,7 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
                         });
                     }
                 } else {
-                    prepareStudentEClassroomReminders();
+                    prepareTeacherEMeetingReminders();
                 }
             }
 
@@ -317,7 +322,215 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
         });
     }
 
+    private void prepareTeacherEMeetingReminders() {
+        mDatabaseReference = mFirebaseDatabase.getReference().child("E Meeting Scheduled Meeting").child("Teacher").child(mFirebaseUser.getUid());
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        EMeetingScheduledMeetingsListModel eMeetingScheduledMeetingsListModel = postSnapshot.getValue(EMeetingScheduledMeetingsListModel.class);
+
+                        if (eMeetingScheduledMeetingsListModel.getOpen() == null) {
+                            eMeetingScheduledMeetingsListModel.setOpen(true);
+                        }
+
+                        String todaysDate = (Date.getDate());
+                        if (Date.compareDates(eMeetingScheduledMeetingsListModel.getDateScheduled(), todaysDate)) {
+                            if (eMeetingScheduledMeetingsListModel.getOpen()) {
+                                ReminderModel reminderModel = new ReminderModel();
+                                reminderModel.setActivityID(postSnapshot.getKey());
+                                reminderModel.setAccountType("Teacher");
+                                reminderModel.setReminderType("TeacherEMeeting");
+                                reminderModel.setMeetingTitle(eMeetingScheduledMeetingsListModel.getScheduledMeetingTitle());
+                                reminderModel.setMeetingSchoolID(eMeetingScheduledMeetingsListModel.getSchoolID());
+                                reminderModel.setMeetingSchoolName(eMeetingScheduledMeetingsListModel.getSchoolName());
+                                reminderModel.setMeetingLink(eMeetingScheduledMeetingsListModel.getMeetingLink());
+                                reminderModel.seteClassroomState("Scheduled");
+                                reminderModel.setOriginalScheduledDate(eMeetingScheduledMeetingsListModel.getDateScheduled());
+
+                                ReminderModel zeroMinutes = getTimeInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, zeroMinutes.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, zeroMinutes);
+                                idCounter++;
+
+                                ReminderModel tenMinutes = getMinusTenMinutesInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, tenMinutes.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, tenMinutes);
+                                idCounter++;
+
+                                ReminderModel oneHour = getMinusOneHourInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, oneHour.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, oneHour);
+                                idCounter++;
+
+                                ReminderModel oneDay = getMinusOneDayInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, oneDay.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, oneDay);
+                                idCounter++;
+                            }
+                        }
+                    }
+                }
+
+                prepareParentEMeetingReminders();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void prepareParentEMeetingReminders() {
+        mDatabaseReference = mFirebaseDatabase.getReference().child("E Meeting Scheduled Meeting").child("Parent").child(mFirebaseUser.getUid());
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        EMeetingScheduledMeetingsListModel eMeetingScheduledMeetingsListModel = postSnapshot.getValue(EMeetingScheduledMeetingsListModel.class);
+
+                        if (eMeetingScheduledMeetingsListModel.getOpen() == null) {
+                            eMeetingScheduledMeetingsListModel.setOpen(true);
+                        }
+
+                        String todaysDate = (Date.getDate());
+                        if (Date.compareDates(eMeetingScheduledMeetingsListModel.getDateScheduled(), todaysDate)) {
+                            if (eMeetingScheduledMeetingsListModel.getOpen()) {
+                                ReminderModel reminderModel = new ReminderModel();
+                                reminderModel.setActivityID(postSnapshot.getKey());
+                                reminderModel.setAccountType("Parent");
+                                reminderModel.setReminderType("ParentEMeeting");
+                                reminderModel.setMeetingTitle(eMeetingScheduledMeetingsListModel.getScheduledMeetingTitle());
+                                reminderModel.setMeetingSchoolID(eMeetingScheduledMeetingsListModel.getSchoolID());
+                                reminderModel.setMeetingSchoolName(eMeetingScheduledMeetingsListModel.getSchoolName());
+                                reminderModel.setMeetingLink(eMeetingScheduledMeetingsListModel.getMeetingLink());
+                                reminderModel.seteClassroomState("Scheduled");
+                                reminderModel.setOriginalScheduledDate(eMeetingScheduledMeetingsListModel.getDateScheduled());
+
+                                ReminderModel zeroMinutes = getTimeInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, zeroMinutes.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, zeroMinutes);
+                                idCounter++;
+
+                                ReminderModel tenMinutes = getMinusTenMinutesInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, tenMinutes.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, tenMinutes);
+                                idCounter++;
+
+                                ReminderModel oneHour = getMinusOneHourInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, oneHour.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, oneHour);
+                                idCounter++;
+
+                                ReminderModel oneDay = getMinusOneDayInMilliSeconds(reminderModel);
+                                createAlarm(idCounter, oneDay.getTimeInMilliseconds());
+                                reminderIDs.add(idCounter);
+                                reminderModels.put(idCounter, oneDay);
+                                idCounter++;
+                            }
+                        }
+                    }
+                }
+
+                prepareStudentELibraryAssignmentReminders();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void prepareStudentELibraryAssignmentReminders() {
+        studentCounter = 0;
+        if (children != null) {
+            if (children.size() > 0) {
+                for (Student child : children) {
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment").child("Student").child(child.getStudentID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            studentCounter++;
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                    ELibraryMyAssignmentModel eLibraryMyAssignmentModel = postSnapshot.getValue(ELibraryMyAssignmentModel.class);
+
+                                    String todaysDate = (Date.getDate());
+                                    if (Date.compareDates(eLibraryMyAssignmentModel.getDueDate(), todaysDate)) {
+                                        if (!eLibraryMyAssignmentModel.getSubmitted()) {
+                                            ReminderModel reminderModel = new ReminderModel();
+                                            reminderModel.setActivityID(postSnapshot.getKey());
+                                            reminderModel.setAccountType("Parent");
+                                            reminderModel.setReminderType("ELibraryAssignment");
+                                            reminderModel.setAssignmentChildName(child.getFirstName() + " " + child.getLastName());
+                                            reminderModel.setAssignmentChildID(child.getStudentID());
+                                            reminderModel.setAssignmentChildProfilePictureURL(child.getImageURL());
+                                            reminderModel.setAssignmentID(eLibraryMyAssignmentModel.getAssignmentID());
+                                            reminderModel.setAssignmentTitle(eLibraryMyAssignmentModel.getMaterialTitle());
+                                            reminderModel.setAssignmentMaterialID(eLibraryMyAssignmentModel.getMaterialID());
+
+                                            ReminderModel zeroMinutes = getTimeInMilliSeconds(reminderModel);
+                                            createAlarm(idCounter, zeroMinutes.getTimeInMilliseconds());
+                                            reminderIDs.add(idCounter);
+                                            reminderModels.put(idCounter, zeroMinutes);
+                                            idCounter++;
+
+                                            ReminderModel tenMinutes = getMinusTenMinutesInMilliSeconds(reminderModel);
+                                            createAlarm(idCounter, tenMinutes.getTimeInMilliseconds());
+                                            reminderIDs.add(idCounter);
+                                            reminderModels.put(idCounter, tenMinutes);
+                                            idCounter++;
+
+                                            ReminderModel oneHour = getMinusOneHourInMilliSeconds(reminderModel);
+                                            createAlarm(idCounter, oneHour.getTimeInMilliseconds());
+                                            reminderIDs.add(idCounter);
+                                            reminderModels.put(idCounter, oneHour);
+                                            idCounter++;
+
+                                            ReminderModel oneDay = getMinusOneDayInMilliSeconds(reminderModel);
+                                            createAlarm(idCounter, oneDay.getTimeInMilliseconds());
+                                            reminderIDs.add(idCounter);
+                                            reminderModels.put(idCounter, oneDay);
+                                            idCounter++;
+                                        }
+                                    }
+                                }
+
+                                if (studentCounter == children.size()) {
+                                    prepareStudentEClassroomReminders();
+                                }
+                            } else {
+                                prepareStudentEClassroomReminders();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            } else {
+                prepareStudentEClassroomReminders();
+            }
+        } else {
+            prepareStudentEClassroomReminders();
+        }
+    }
+
     private void prepareStudentEClassroomReminders() {
+        studentCounter = 0;
         if (children != null) {
             if (children.size() > 0) {
                 for (Student child : children) {
@@ -577,6 +790,64 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
                         subText = "Event Reminder";
                         contentTitle = "You have an upcoming event";
                         notificationID = 100;
+                    } else if (reminderModel.getReminderType().equals("TeacherEMeeting")) {
+                        resultIntent = new Intent(context, TeacherEMeetingMessageBoardActivity.class);
+                        bundle.putString("Scheduled Meeting ID", reminderModel.getActivityID());
+                        bundle.putString("Scheduled Meeting Link", reminderModel.getMeetingLink());
+                        bundle.putString("Scheduled Meeting State", reminderModel.geteClassroomState());
+                        bundle.putString("Scheduled Meeting Scheduled Date", reminderModel.getOriginalScheduledDate());
+                        bundle.putString("parentActivity", reminderModel.getAccountType());
+                        resultIntent.putExtras(bundle);
+                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                        stackBuilder.addNextIntentWithParentStack(resultIntent);
+                        resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        message = Html.fromHtml(String.format(Locale.getDefault(), "Your meeting <strong>%s</strong> with <strong>%s</strong> is scheduled " +
+                                        "to hold in <strong>%s</strong>. Tap this notification to view.", reminderModel.getMeetingTitle(), reminderModel.getMeetingSchoolName(),
+                                reminderModel.getTimeToEvent()));
+                        subText = "Meeting Reminder";
+                        contentTitle = "You have an upcoming meeting";
+                        notificationID = 101;
+                    } else if (reminderModel.getReminderType().equals("ParentEMeeting")) {
+                        resultIntent = new Intent(context, ParentEMeetingMessageBoardActivity.class);
+                        bundle.putString("Scheduled Meeting ID", reminderModel.getActivityID());
+                        bundle.putString("Scheduled Meeting Link", reminderModel.getMeetingLink());
+                        bundle.putString("Scheduled Meeting State", reminderModel.geteClassroomState());
+                        bundle.putString("Scheduled Meeting Scheduled Date", reminderModel.getOriginalScheduledDate());
+                        bundle.putString("parentActivity", reminderModel.getAccountType());
+                        resultIntent.putExtras(bundle);
+                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                        stackBuilder.addNextIntentWithParentStack(resultIntent);
+                        resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        message = Html.fromHtml(String.format(Locale.getDefault(), "Your meeting <strong>%s</strong> with <strong>%s</strong> is scheduled " +
+                                        "to hold in <strong>%s</strong>. Tap this notification to view.", reminderModel.getMeetingTitle(), reminderModel.getMeetingSchoolName(),
+                                reminderModel.getTimeToEvent()));
+                        subText = "Meeting Reminder";
+                        contentTitle = "You have an upcoming meeting";
+                        notificationID = 102;
+                    } else if (reminderModel.getReminderType().equals("ELibraryAssignment")) {
+                        Student student = new Student(reminderModel.geteClassroomChildName(), reminderModel.geteClassroomChildID(),
+                                reminderModel.geteClassroomChildProfilePictureURL());
+                        gson = new Gson();
+                        String activeKid = gson.toJson(student);
+
+                        resultIntent = new Intent(context, ELibraryParentAssignmentActivity.class);
+                        bundle.putString("materialId", reminderModel.getAssignmentMaterialID());
+                        bundle.putString("assignmentID", reminderModel.getAssignmentID());
+                        bundle.putString("Child ID", activeKid);
+                        bundle.putString("parentActivity", reminderModel.getAccountType());
+                        resultIntent.putExtras(bundle);
+                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                        stackBuilder.addNextIntentWithParentStack(resultIntent);
+                        resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        message = Html.fromHtml(String.format(Locale.getDefault(), "<strong>%s</strong>'s eLibrary assignment on <strong>%s</strong> is due " +
+                                        "in <strong>%s</strong>. Tap this notification to view.", reminderModel.geteClassroomChildName(), reminderModel.getAssignmentTitle(),
+                                reminderModel.getTimeToEvent()));
+                        subText = "E-Library Assignment Reminder";
+                        contentTitle = reminderModel.geteClassroomChildName() + "'s eLibrary assignment is due soon";
+                        notificationID = 103;
                     } else {
                         Student student = new Student(reminderModel.geteClassroomChildName(), reminderModel.geteClassroomChildID(),
                                 reminderModel.geteClassroomChildProfilePictureURL());
@@ -600,7 +871,7 @@ public class ApplicationLaunchActivity extends AppCompatActivity {
                                 reminderModel.getTimeToEvent()));
                         subText = "Scheduled E-Classroom Reminder";
                         contentTitle = reminderModel.geteClassroomChildName() + " has a remote class coming up soon";
-                        notificationID = 101;
+                        notificationID = 104;
                     }
 
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "Reminder");

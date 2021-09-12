@@ -29,6 +29,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.Activities.EClassroom.Teacher.TeacherEClassroomHomeActivity;
 import com.celerii.celerii.Activities.ELibrary.Teacher.TeacherELibraryHomeActivity;
+import com.celerii.celerii.Activities.EMeeting.Teacher.TeacherEMeetingHomeActivity;
 import com.celerii.celerii.Activities.Events.EventsRowActivity;
 import com.celerii.celerii.Activities.Newsletters.NewsletterRowActivity;
 import com.celerii.celerii.Activities.Profiles.ClassProfileActivity;
@@ -98,11 +99,11 @@ public class MoreTeacherFragment extends Fragment {
     Button searchButton;
     AHBottomNavigation bottomNavigation;
 
-    LinearLayout profileLayout, attendanceRecordsLayout, attendanceLayout, timetableLayout, eClassroomLayout, eLibraryLayout, enterClassResultLayout, personalPerformanceLayout, studentPerformanceLayout, eventsLayout, newslettersLayout,
+    LinearLayout profileLayout, attendanceRecordsLayout, attendanceLayout, timetableLayout, eClassroomLayout, eLibraryLayout, pTMeetingLayout, enterClassResultLayout, personalPerformanceLayout, studentPerformanceLayout, eventsLayout, newslettersLayout,
             settingsLayout, switchAccountLayout, logoutLayout;
-    TextView profile, attendanceRecords, attendance, timetable, eClassroom, eLibrary, enterClassResult, personalPerformance, studentPerformance, events, newsletters, settings, switchAccount, logout;
-    TextView eventsBadge, newslettersBadge;
-    ImageView profileMarker, attendanceRecordsMarker, attendanceMarker, timetableMarker, eClassroomMarker, eLibraryMarker, enterClassResultMarker, personalPerformanceMarker, studentPerformanceMarker, eventsMarker, newslettersMarker,
+    TextView profile, attendanceRecords, attendance, timetable, eClassroom, eLibrary, pTMeeting, enterClassResult, personalPerformance, studentPerformance, events, newsletters, settings, switchAccount, logout;
+    TextView eventsBadge, newslettersBadge, pTMeetingBadge;
+    ImageView profileMarker, attendanceRecordsMarker, attendanceMarker, timetableMarker, eClassroomMarker, eLibraryMarker, pTMeetingMarker, enterClassResultMarker, personalPerformanceMarker, studentPerformanceMarker, eventsMarker, newslettersMarker,
             settingsMarker, switchAccountMarker, logoutMarker;
 
     ArrayList<String> classesFirebase = new ArrayList<>();
@@ -153,6 +154,7 @@ public class MoreTeacherFragment extends Fragment {
         timetableLayout = (LinearLayout) view.findViewById(R.id.timetableLayout);
         eClassroomLayout = (LinearLayout) view.findViewById(R.id.eclassroomLayout);
         eLibraryLayout = (LinearLayout) view.findViewById(R.id.elibraryLayout);
+        pTMeetingLayout = (LinearLayout) view.findViewById(R.id.ptmeetingLayout);
         enterClassResultLayout = (LinearLayout) view.findViewById(R.id.enterclassresultLayout);
         personalPerformanceLayout = (LinearLayout) view.findViewById(R.id.personalperformanceLayout);
         studentPerformanceLayout = (LinearLayout) view.findViewById(R.id.studentperformanceLayout);
@@ -167,6 +169,7 @@ public class MoreTeacherFragment extends Fragment {
         attendanceRecords = (TextView) view.findViewById(R.id.attendancerecords);
         timetable = (TextView) view.findViewById(R.id.timetable);
         eLibrary = (TextView) view.findViewById(R.id.elibrary);
+        pTMeeting = (TextView) view.findViewById(R.id.ptmeeting);
         eClassroom = (TextView) view.findViewById(R.id.eclassroom);
         enterClassResult = (TextView) view.findViewById(R.id.enterclassresult);
         personalPerformance = (TextView) view.findViewById(R.id.personalperformance);
@@ -177,6 +180,7 @@ public class MoreTeacherFragment extends Fragment {
         switchAccount = (TextView) view.findViewById(R.id.switchaccount);
         logout = (TextView) view.findViewById(R.id.logout);
 
+        pTMeetingBadge = (TextView) view.findViewById(R.id.ptmeetingbadge);
         eventsBadge = (TextView) view.findViewById(R.id.eventsbadge);
         newslettersBadge = (TextView) view.findViewById(R.id.newslettersbadge);
 
@@ -185,6 +189,7 @@ public class MoreTeacherFragment extends Fragment {
         attendanceRecordsMarker = (ImageView) view.findViewById(R.id.attendancerecordsmarker);
         timetableMarker = (ImageView) view.findViewById(R.id.timetablemarker);
         eLibraryMarker = (ImageView) view.findViewById(R.id.elibrarymarker);
+        pTMeetingMarker = (ImageView) view.findViewById(R.id.ptmeetingmarker);
         eClassroomMarker = (ImageView) view.findViewById(R.id.eclassroommarker);
         enterClassResultMarker = (ImageView) view.findViewById(R.id.enterclassresultmarker);
         personalPerformanceMarker = (ImageView) view.findViewById(R.id.personalperformancemarker);
@@ -679,6 +684,7 @@ public class MoreTeacherFragment extends Fragment {
         String ttb = "My TimeTable";
         String ecl = "E Classroom";
         String elb = "E Library";
+        String ptm = "PT Meeting";
         String mpef = "My Performance Analytics";
         String cpef = "Class Academic Records";
         String evt = "Events";
@@ -786,6 +792,7 @@ public class MoreTeacherFragment extends Fragment {
         timetable.setText(ttb);
         eClassroom.setText(ecl);
         eLibrary.setText(elb);
+        pTMeeting.setText(ptm);
         enterClassResult.setText(ecr);
         personalPerformance.setText(mpef);
         studentPerformance.setText(cpef);
@@ -845,6 +852,13 @@ public class MoreTeacherFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent I = new Intent(context, TeacherELibraryHomeActivity.class);
+                context.startActivity(I);
+            }
+        });
+        pTMeetingLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent I = new Intent(context, TeacherEMeetingHomeActivity.class);
                 context.startActivity(I);
             }
         });

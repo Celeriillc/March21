@@ -272,6 +272,7 @@ public class ELibraryTakeTestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (questionIndex > 0) {
+                    next.setText("Next");
                     questionIndex--;
                     String headerString = "Question " + String.valueOf(questionIndex + 1) + " of " + String.valueOf(questionModelList.size());
                     header.setText(headerString);

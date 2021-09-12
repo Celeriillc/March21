@@ -299,7 +299,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_take_attendance" />
+                            android:src="@drawable/ic_edit_3" />
 
                         <TextView
                             android:id="@+id/attendance"
@@ -335,7 +335,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="0dp"
-                            android:src="@drawable/ic_file" />
+                            android:src="@drawable/ic_clipboard" />
 
                         <TextView
                             android:id="@+id/attendancerecords"
@@ -371,7 +371,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_enter_results" />
+                            android:src="@drawable/ic_edit" />
 
                         <TextView
                             android:id="@+id/enterclassresult"
@@ -407,7 +407,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_class_performance" />
+                            android:src="@drawable/ic_percent" />
 
                         <TextView
                             android:id="@+id/studentperformance"
@@ -443,7 +443,7 @@
                             android:layout_height="25dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginStart="5dp"
-                            android:src="@drawable/ic_percent" />
+                            android:src="@drawable/ic_activity" />
 
                         <TextView
                             android:id="@+id/personalperformance"
@@ -564,6 +564,59 @@
 
                         <ImageView
                             android:id="@+id/elibrarymarker"
+                            android:layout_width="7dp"
+                            android:layout_height="7dp"
+                            android:src="@drawable/circular_image_background_accent"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ptmeetingLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:weightSum="1"
+                        android:padding="15dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:clickable="true"
+                        android:background="?android:attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/ic_video" />
+
+                        <TextView
+                            android:id="@+id/ptmeeting"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@android:color/black"
+                            android:textSize="15sp"
+                            android:text="PT Meeting"/>
+
+                        <TextView
+                            android:id="@+id/ptmeetingbadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:paddingStart="7dp"
+                            android:paddingEnd="7dp"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:background="@drawable/custom_badge_new_item"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:visibility="gone"
+                            android:text="New"/>
+
+                        <ImageView
+                            android:id="@+id/ptmeetingmarker"
                             android:layout_width="7dp"
                             android:layout_height="7dp"
                             android:src="@drawable/circular_image_background_accent"

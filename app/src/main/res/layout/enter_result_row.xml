@@ -51,7 +51,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
                 android:maxLines="1"
-                android:maxLength="3"
                 android:textSize="13sp"
                 android:inputType="number"
                 android:gravity="end"

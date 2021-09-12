@@ -48,6 +48,7 @@ import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
+import com.celerii.celerii.models.MessageList;
 import com.celerii.celerii.models.NewChatRowModel;
 import com.celerii.celerii.models.Parent;
 import com.celerii.celerii.models.SchoolSettings;
@@ -276,6 +277,7 @@ public class ChatActivity extends AppCompatActivity {
     HashMap<String, Boolean> schoolAllowsParentTeacherMessagingMap = new HashMap<>();
     ArrayList<String> schoolList = new ArrayList<>();
     ArrayList<String> teacherList = new ArrayList<>();
+    Boolean isDeleted = false;
     private void loadMessagesFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
             recyclerView.setVisibility(View.GONE);

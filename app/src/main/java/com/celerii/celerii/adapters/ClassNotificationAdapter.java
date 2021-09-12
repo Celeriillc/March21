@@ -20,6 +20,8 @@ import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomHomeActi
 import com.celerii.celerii.Activities.EClassroom.Parent.ParentEClassroomMessageBoardActivity;
 import com.celerii.celerii.Activities.ELibrary.Parent.ELibraryParentAssignmentActivity;
 import com.celerii.celerii.Activities.ELibrary.Parent.ParentELibraryHomeActivity;
+import com.celerii.celerii.Activities.EMeeting.Parent.ParentEMeetingMessageBoardActivity;
+import com.celerii.celerii.Activities.EMeeting.Teacher.TeacherEMeetingMessageBoardActivity;
 import com.celerii.celerii.Activities.Events.EventDetailActivity;
 import com.celerii.celerii.Activities.Home.NotificationDetailActivity;
 import com.celerii.celerii.Activities.Home.Parent.ParentsRequestActivity;
@@ -38,6 +40,7 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.EClassroomScheduledClassesListModel;
 import com.celerii.celerii.models.ELibraryMyAssignmentModel;
+import com.celerii.celerii.models.EMeetingScheduledMeetingsListModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.bumptech.glide.Glide;
 import com.celerii.celerii.models.ParentSchoolConnectionRequest;
@@ -71,6 +74,8 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
     private Context context;
     String scheduledClassLink = "";
     String scheduledClassState = "";
+    String scheduledMeetingLink = "";
+    String scheduledMeetingState = "";
     String materialID = "";
     FirebaseAuth auth;
     FirebaseDatabase mFirebaseDatabase;
@@ -140,8 +145,10 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
             notification = "<b>" + notificationSubject + "</b>" + " published a new school newsletter for you.";
         } else if (notificationType.equals("EClassroom")) {
             notification = "<b>" + notificationSubject + "</b>" + " has created a new e - classroom for " + "<b>" + notificationModel.getObjectName() + "</b>" + ". Click this notification to access the classroom before it expires.";
-        }  else if (notificationType.equals("ELibraryAssignment")) {
+        } else if (notificationType.equals("ELibraryAssignment")) {
             notification = "<b>" + notificationSubject + "</b>" + " has created a new e - library assignment for " + "<b>" + notificationModel.getObjectName() + "</b>" + ". Click this notification to study the material and take on the assignment.";
+        } else if (notificationType.equals("EMeeting")) {
+            notification = "<b>" + notificationSubject + "</b>" + " has invited you to join a scheduled e - meeting. Click this notification to go to the message board of this meeting.";
         } else if (notificationType.equals("ConnectionRequest")){ //TODO: Remove
             if (notificationModel.getToAccountType().equals("Parent")) {
                 notification = "<b>" + notificationSubject + "</b>" + " has requested to connect to " + "<b>" + notificationModel.getObjectName() + "</b>" + "'s account";
@@ -518,7 +525,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
 
                         }
                     });
-                }  else if (notificationType.equals("ELibraryAssignment")){
+                } else if (notificationType.equals("ELibraryAssignment")){
                     Bundle b = new Bundle();
                     Student student = new Student(notificationModel.getObjectName(), notificationModel.getObject());
                     Gson gson = new Gson();
@@ -554,14 +561,60 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
 
                         }
                     });
+                } else if (notificationType.equals("EMeeting")) {
+                    CustomProgressDialogOne progressDialogOne = new CustomProgressDialogOne(context);
+                    progressDialogOne.show();
+
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("E Meeting Scheduled Meeting").child(notificationModel.getToAccountType()).child(notificationModel.getToID()).child(notificationModel.getActivityID());
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                EMeetingScheduledMeetingsListModel eMeetingScheduledMeetingsListModel = dataSnapshot.getValue(EMeetingScheduledMeetingsListModel.class);
+
+                                if (eMeetingScheduledMeetingsListModel.getOpen() == null) {
+                                    eMeetingScheduledMeetingsListModel.setOpen(true);
+                                }
+
+                                if (!eMeetingScheduledMeetingsListModel.getOpen()) {
+                                    scheduledMeetingState = "Concluded";
+                                }
+
+                                progressDialogOne.dismiss();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("Scheduled Meeting ID", notificationModel.getActivityID());
+                                bundle.putString("Scheduled Meeting Link", eMeetingScheduledMeetingsListModel.getMeetingLink());
+                                bundle.putString("Scheduled Meeting State", scheduledClassState);
+                                bundle.putString("Scheduled Meeting Scheduled Date", eMeetingScheduledMeetingsListModel.getDateScheduled());
+                                Intent intent;
+                                if (notificationModel.getToAccountType().equals("Parent")) {
+                                    intent = new Intent(context, ParentEMeetingMessageBoardActivity.class);
+                                } else {
+                                    intent = new Intent(context, TeacherEMeetingMessageBoardActivity.class);
+                                }
+
+                                intent.putExtras(bundle);
+                                context.startActivity(intent);
+                            } else {
+                                progressDialogOne.dismiss();
+                                String messageString = "We couldn't find this meeting";
+                                ShowDialogWithMessage.showDialogWithMessage(context, messageString);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 } else if (notificationType.equals("ConnectionRequest")) {
+                    Intent intent;
                     if (notificationModel.getFromAccountType().equals("Parent")) {
-                        Intent I = new Intent(context, ParentsRequestActivity.class);
-                        context.startActivity(I);
+                        intent = new Intent(context, ParentsRequestActivity.class);
                     } else {
-                        Intent I = new Intent(context, TeacherRequestActivity.class);
-                        context.startActivity(I);
+                        intent = new Intent(context, TeacherRequestActivity.class);
                     }
+                    context.startActivity(intent);
                 } else if (notificationType.equals("Connection")) {
                     if (notificationModel.getFromAccountType().equals("Parent")) {
                         Intent intent;
