@@ -797,6 +797,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         public Object instantiateItem(ViewGroup container, int position) {
 //            layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             ImageView imageView = new ImageView(context);
+            imageView.setAdjustViewBounds(true);
 
             Glide.with(context)
                     .load(imageURLs[position])

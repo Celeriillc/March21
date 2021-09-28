@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermActivity;
+import com.celerii.celerii.Activities.StudentPerformance.History.StudentYearTermPerformanceActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.Activities.StudentPerformance.StudentPerformanceForParentsActivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
@@ -110,7 +111,7 @@ public class StudentAcademicHistoryAdapter extends RecyclerView.Adapter<Recycler
 
             if (studentAcademicHistoryRowModelList.size() <= 1) {
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
-                String message = studentAcademicHistoryHeaderModel.getClassName() + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area";
+                String message = studentAcademicHistoryHeaderModel.getClassName() + " doesn't contain any academic records for " + Term.Term(studentAcademicHistoryHeaderModel.getTerm()) + ", " + studentAcademicHistoryHeaderModel.getYear() + ". You can use the term and year options above to change the term and year combination to one that has records.";
                 ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(message));
             } else {
                 ((HeaderViewHolder) holder).errorLayout.setVisibility(View.GONE);
@@ -179,12 +180,10 @@ public class StudentAcademicHistoryAdapter extends RecyclerView.Adapter<Recycler
             ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Bundle bundle = new Bundle();
-                    Gson gson = new Gson();
-                    String activeStudentJSON = gson.toJson(new Student(kidName.split(" ")[0], kidName.split(" ")[1], studentAcademicHistoryRowModel.getImageURL(), kidNo));
-                    bundle.putString("Child ID", activeStudentJSON);
-                    Intent I = new Intent(context, StudentPerformanceForParentsActivity.class);
-                    I.putExtras(bundle);
+                    StudentYearTermPerformanceActivity.studentID = kidNo;
+                    StudentYearTermPerformanceActivity.studentName = kidName;
+                    StudentYearTermPerformanceActivity.subjectMap = studentAcademicHistoryHeaderModel.getStudentRecords().get(kidNo);
+                    Intent I = new Intent(context, StudentYearTermPerformanceActivity.class);
                     context.startActivity(I);
                 }
             });

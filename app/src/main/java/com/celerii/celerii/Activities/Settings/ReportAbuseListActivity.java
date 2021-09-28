@@ -203,7 +203,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                                 Parent parent = dataSnapshot.getValue(Parent.class);
                                 String parentID = dataSnapshot.getKey();
                                 ReportUserModel reportUser = new ReportUserModel(parent.getFirstName() + " " + parent.getLastName(), parent.getProfilePicURL(), parentID);
-                                if (!parent.getDeleted()) {
+                                if (!parent.getIsDeleted()) {
                                     if (!reportUserModelMap.containsKey(parentID)) {
                                         reportUserModelList.add(reportUser);
                                         reportUserModelMap.put(parentID, reportUser);
@@ -276,7 +276,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                             School school = dataSnapshot.getValue(School.class);
                             String schoolID = dataSnapshot.getKey();
                             ReportUserModel reportUser = new ReportUserModel(school.getSchoolName(), school.getProfilePhotoUrl(), schoolID);
-                            if (!school.getDeleted()) {
+                            if (!school.getIsDeleted()) {
                                 if (!reportUserModelMap.containsKey(schoolID)) {
                                     reportUserModelList.add(reportUser);
                                     reportUserModelMap.put(schoolID, reportUser);
@@ -357,7 +357,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                                 Teacher teacher = dataSnapshot.getValue(Teacher.class);
                                 String teacherID = dataSnapshot.getKey();
                                 ReportUserModel reportUser = new ReportUserModel(teacher.getFirstName() + " " + teacher.getLastName(), teacher.getProfilePicURL(), teacherID);
-                                if (!teacher.getDeleted()) {
+                                if (!teacher.getIsDeleted()) {
                                     if (!reportUserModelMap.containsKey(teacherID)) {
                                         reportUserModelList.add(reportUser);
                                         reportUserModelMap.put(teacherID, reportUser);
@@ -430,7 +430,7 @@ public class ReportAbuseListActivity extends AppCompatActivity {
                                 School school = dataSnapshot.getValue(School.class);
                                 String schoolID = dataSnapshot.getKey();
                                 ReportUserModel reportUser = new ReportUserModel(school.getSchoolName(), school.getProfilePhotoUrl(), schoolID);
-                                if (!school.getDeleted()) {
+                                if (!school.getIsDeleted()) {
                                     if (!reportUserModelMap.containsKey(schoolID)) {
                                         reportUserModelList.add(reportUser);
                                         reportUserModelMap.put(schoolID, reportUser);

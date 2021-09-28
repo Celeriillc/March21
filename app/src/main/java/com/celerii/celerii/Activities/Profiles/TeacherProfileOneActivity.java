@@ -1,6 +1,5 @@
 package com.celerii.celerii.Activities.Profiles;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import androidx.core.widget.NestedScrollView;
@@ -19,17 +18,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.EditProfiles.EditTeacherProfileActivity;
-import com.celerii.celerii.Activities.Inbox.ChatActivity;
 import com.celerii.celerii.R;
-import com.celerii.celerii.adapters.InboxAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
-import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Teacher;
-import com.celerii.celerii.models.TeacherActivityStatistics;
-import com.celerii.celerii.models.TeacherPrivacyModel;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,8 +32,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.HashMap;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -176,12 +168,22 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()){
                     final Teacher teacher = dataSnapshot.getValue(Teacher.class);
 
-                    if (!teacher.getDeleted()) {
+                    if (!teacher.getIsDeleted()) {
                         teacherName = teacher.getFirstName() + " " + teacher.getLastName();
                         fullName.setText(teacherName);
                         getSupportActionBar().setTitle(teacherName);
-                        gender.setText(teacher.getGender());
-                        maritalStatus.setText(teacher.getMaritalStatus());
+
+                        if (!teacher.getGender().equals("")) {
+                            gender.setText(teacher.getGender());
+                        } else {
+                            gender.setText("Gender not set");
+                        }
+
+                        if (!teacher.getMaritalStatus().equals("")) {
+                            maritalStatus.setText(teacher.getMaritalStatus());
+                        } else {
+                            maritalStatus.setText("Relationship status not set");
+                        }
 
                         Drawable textDrawable;
                         if (!teacherName.isEmpty()) {

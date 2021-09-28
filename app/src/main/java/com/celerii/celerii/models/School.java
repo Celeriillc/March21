@@ -212,7 +212,7 @@ public class School {
         this.searchableLocation = searchableLocation;
     }
 
-    public Boolean getDeleted() {
+    public Boolean getIsDeleted() {
         return isDeleted;
     }
 

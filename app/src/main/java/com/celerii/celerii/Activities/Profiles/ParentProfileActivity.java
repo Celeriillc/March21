@@ -165,7 +165,7 @@ public class ParentProfileActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
                     Parent parent = dataSnapshot.getValue(Parent.class);
-                    if (!parent.getDeleted()) {
+                    if (!parent.getIsDeleted()) {
                         parentName = parent.getFirstName() + " " + parent.getLastName();
                         getSupportActionBar().setTitle(parentName);
                         name.setText(parentName);

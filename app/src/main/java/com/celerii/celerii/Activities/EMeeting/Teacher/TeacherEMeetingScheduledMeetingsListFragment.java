@@ -157,14 +157,14 @@ public class TeacherEMeetingScheduledMeetingsListFragment extends Fragment {
                         recyclerView.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);
                         errorLayout.setVisibility(View.VISIBLE);
-                        errorLayoutText.setText(Html.fromHtml("You do not have any scheduled meetings at the moment. Scheduled Meetings from your school will appear here."));
+                        errorLayoutText.setText(Html.fromHtml("You do not have any scheduled meetings at the moment. Scheduled meetings from your school(s) will appear here."));
                     }
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You do not have any scheduled meetings at the moment. Scheduled Meetings from your school will appear here."));
+                    errorLayoutText.setText(Html.fromHtml("You do not have any scheduled meetings at the moment. Scheduled meetings from your school(s) will appear here."));
                 }
             }
 

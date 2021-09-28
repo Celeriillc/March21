@@ -72,12 +72,12 @@ public class SharedPreferencesManager {
 
     public void setActiveAccount(String activeAccount) {
         editor.putString(active_Account, activeAccount);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteActiveAccount() {
         editor.remove(active_Account);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -88,12 +88,12 @@ public class SharedPreferencesManager {
 
     public void setMyUserID(String myUserID) {
         editor.putString(my_User_ID, myUserID);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyUserID() {
         editor.remove(my_User_ID);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -104,12 +104,12 @@ public class SharedPreferencesManager {
 
     public void setMyFirstName(String myFirstName) {
         editor.putString(my_First_Name, myFirstName);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyFirstName() {
         editor.remove(my_First_Name);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -120,12 +120,12 @@ public class SharedPreferencesManager {
 
     public void setMyMiddleName(String myMiddleName) {
         editor.putString(my_middle_name, myMiddleName);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyMiddleName() {
         editor.remove(my_middle_name);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -136,12 +136,12 @@ public class SharedPreferencesManager {
 
     public void setMyLastName(String myLastName) {
         editor.putString(my_Last_Name, myLastName);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyLastName() {
         editor.remove(my_Last_Name);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -152,12 +152,12 @@ public class SharedPreferencesManager {
 
     public void setMyPicURL(String myPicURL) {
         editor.putString(my_pic_URL, myPicURL);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyPicURL() {
         editor.remove(my_pic_URL);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -168,12 +168,12 @@ public class SharedPreferencesManager {
 
     public void setMyPhoneNumber(String myPhoneNumber) {
         editor.putString(my_phone_number, myPhoneNumber);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyPhoneNumber() {
         editor.remove(my_phone_number);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -184,12 +184,12 @@ public class SharedPreferencesManager {
 
     public void setMyGender(String myGender) {
         editor.putString(my_gender, myGender);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyGender() {
         editor.remove(my_gender);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -200,12 +200,12 @@ public class SharedPreferencesManager {
 
     public void setMyRelationshipStatus(String myRelationshipStatus) {
         editor.putString(my_relationship_status, myRelationshipStatus);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyRelationshipStatus() {
         editor.remove(my_relationship_status);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -216,12 +216,12 @@ public class SharedPreferencesManager {
 
     public void setMyBio(String myBio) {
         editor.putString(my_bio, myBio);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyBio() {
         editor.remove(my_bio);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -232,12 +232,12 @@ public class SharedPreferencesManager {
 
     public void setMyOccupation(String myOccupation) {
         editor.putString(my_occupation, myOccupation);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyOccupation() {
         editor.remove(my_occupation);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -248,12 +248,12 @@ public class SharedPreferencesManager {
 
     public void setActiveClass(String activeClass) {
         editor.putString(active_Class, activeClass);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteActiveClass() {
         editor.remove(active_Class);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -264,12 +264,12 @@ public class SharedPreferencesManager {
 
     public void setActiveKid(String activeKid) {
         editor.putString(active_Kid, activeKid);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteActiveKid() {
         editor.remove(active_Kid);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -280,12 +280,12 @@ public class SharedPreferencesManager {
 //
 //    public void setMyClasses(Set<String> myClasses) {
 //        editor.putStringSet(my_Classes, myClasses);
-//        editor.commit();
+//        editor.apply();
 //    }
 //
 //    public void deleteMyClasses() {
 //        editor.remove(my_Classes);
-//        editor.commit();
+//        editor.apply();
 //    }
 //    //endregion
 //
@@ -296,12 +296,12 @@ public class SharedPreferencesManager {
 //
 //    public void setMyChildren(Set<String> myChildren) {
 //        editor.putStringSet(my_Children, myChildren);
-//        editor.commit();
+//        editor.apply();
 //    }
 //
 //    public void deleteMyChildren() {
 //        editor.remove(my_Children);
-//        editor.commit();
+//        editor.apply();
 //    }
     //endregion
 
@@ -312,12 +312,12 @@ public class SharedPreferencesManager {
 
     public void setMyClasses(String myClasses) {
         editor.putString(my_Classes, myClasses);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyClasses() {
         editor.remove(my_Classes);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -328,12 +328,12 @@ public class SharedPreferencesManager {
 
     public void setMyChildren(String myChildren) {
         editor.putString(my_Children, myChildren);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyChildren() {
         editor.remove(my_Children);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -344,12 +344,12 @@ public class SharedPreferencesManager {
 
     public void setClassesStudentParent(String myClassesStudentParent) {
         editor.putString(classes_students_parents, myClassesStudentParent);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteClassesStudentParent() {
         editor.remove(classes_students_parents);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -360,12 +360,12 @@ public class SharedPreferencesManager {
 
     public void setClassesStudent(String myClassesStudent) {
         editor.putString(classes_students, myClassesStudent);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteClassesStudent() {
         editor.remove(classes_students);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -376,12 +376,12 @@ public class SharedPreferencesManager {
 
     public void setStudentsSchoolsClassesTeachers(String myStudentsSchoolsClassesTeachers) {
         editor.putString(students_schools_classes_teachers, myStudentsSchoolsClassesTeachers);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteStudentsSchoolsClassesTeachers() {
         editor.remove(students_schools_classes_teachers);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -392,12 +392,12 @@ public class SharedPreferencesManager {
 
     public void setStudentsClasses(String myStudentsClasses) {
         editor.putString(students_classes, myStudentsClasses);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteStudentsClasses() {
         editor.remove(students_classes);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -408,12 +408,12 @@ public class SharedPreferencesManager {
 
     public void setSubjects(String subjects) {
         editor.putString(this.subjects, subjects);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteSubjects() {
         editor.remove(subjects);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -424,12 +424,12 @@ public class SharedPreferencesManager {
 
     public void setParentFeed(String parentFeed) {
         editor.putString(parent_feed, parentFeed);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteParentFeed() {
         editor.remove(parent_feed);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -440,12 +440,12 @@ public class SharedPreferencesManager {
 
     public void setTeacherFeed(String teacherFeed) {
         editor.putString(teacher_feed, teacherFeed);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteTeacherFeed() {
         editor.remove(teacher_feed);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -456,12 +456,12 @@ public class SharedPreferencesManager {
 
     public void setClassStudentForTeacher(String classStudentForTeacher) {
         editor.putString(class_student_for_teacher, classStudentForTeacher);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteClassStudentForTeacher() {
         editor.remove(class_student_for_teacher);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -472,12 +472,12 @@ public class SharedPreferencesManager {
 
     public void setMessages(String messagesA) {
         editor.putString(messages, messagesA);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMessages() {
         editor.remove(messages);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -488,12 +488,12 @@ public class SharedPreferencesManager {
 
     public void setParentNotification(String parentNotification) {
         editor.putString(parent_notification, parentNotification);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteParentNotification() {
         editor.remove(parent_notification);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -504,12 +504,12 @@ public class SharedPreferencesManager {
 
     public void setTeacherNotification(String teacherNotification) {
         editor.putString(teacher_notification, teacherNotification);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteTeacherNotification() {
         editor.remove(teacher_notification);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -520,12 +520,12 @@ public class SharedPreferencesManager {
 
     public void setSubscriptionInformationParents(String subscriptionInformationParents) {
         editor.putString(subscription_information_parents, subscriptionInformationParents);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteSubscriptionInformationParents() {
         editor.remove(subscription_information_parents);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -536,12 +536,12 @@ public class SharedPreferencesManager {
 
     public void setSubscriptionInformationTeachers(String subscriptionInformationTeachers) {
         editor.putString(subscription_information_teachers, subscriptionInformationTeachers);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteSubscriptionInformationTeachers() {
         editor.remove(subscription_information_teachers);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -552,12 +552,12 @@ public class SharedPreferencesManager {
 
     public void setIsOpenToAll(Boolean isOpenToAll) {
         editor.putBoolean(is_open_to_all, isOpenToAll);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteIsOpenToAll() {
         editor.remove(is_open_to_all);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -568,12 +568,12 @@ public class SharedPreferencesManager {
 
     public void setCurrentLoginSessionKey(String currentLoginSessionKey) {
         editor.putString(current_login_session_key, currentLoginSessionKey);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteCurrentLoginSessionKey() {
         editor.remove(current_login_session_key);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -584,12 +584,12 @@ public class SharedPreferencesManager {
 
     public void setCurrentLoginSessionDayMonthYear(String currentLoginSessionDayMonthYear) {
         editor.putString(current_login_session_day_month_year, currentLoginSessionDayMonthYear);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteCurrentLoginSessionDayMonthYear() {
         editor.remove(current_login_session_day_month_year);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -600,12 +600,12 @@ public class SharedPreferencesManager {
 
     public void setCurrentLoginSessionMonthYear(String currentLoginSessionMonthYear) {
         editor.putString(current_login_session_month_year, currentLoginSessionMonthYear);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteCurrentLoginSessionMonthYear() {
         editor.remove(current_login_session_month_year);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -616,12 +616,12 @@ public class SharedPreferencesManager {
 
     public void setCurrentLoginSessionYear(String currentLoginSessionYear) {
         editor.putString(current_login_session_year, currentLoginSessionYear);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteCurrentLoginSessionYear() {
         editor.remove(current_login_session_year);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -632,12 +632,12 @@ public class SharedPreferencesManager {
 
     public void setMyReferralLink(String myReferralLink) {
         editor.putString(my_referral_link, myReferralLink);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyReferralLink() {
         editor.remove(my_referral_link);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -648,12 +648,12 @@ public class SharedPreferencesManager {
 
     public void setMyReferralText(String myReferralText) {
         editor.putString(my_referral_text, myReferralText);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyReferralText() {
         editor.remove(my_referral_text);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -664,12 +664,12 @@ public class SharedPreferencesManager {
 
     public void setMyReferralSubject(String myReferralSubject) {
         editor.putString(my_referral_subject, myReferralSubject);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMyReferralSubject() {
         editor.remove(my_referral_subject);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -680,12 +680,12 @@ public class SharedPreferencesManager {
 
     public void setMySecondaryReferralSubject(String myReferralSubject) {
         editor.putString(my_secondary_referral_subject, myReferralSubject);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteMySecondaryReferralSubject() {
         editor.remove(my_secondary_referral_subject);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -696,12 +696,12 @@ public class SharedPreferencesManager {
 
     public void setSchoolGallery(String school_gallery_) {
         editor.putString(school_gallery, school_gallery_);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteSchoolGallery() {
         editor.remove(school_gallery);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -712,12 +712,12 @@ public class SharedPreferencesManager {
 
     public void setReminderIDs(String reminderIDs) {
         editor.putString(reminder_Ids, reminderIDs);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteReminderIDs() {
         editor.remove(reminder_Ids);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -728,12 +728,12 @@ public class SharedPreferencesManager {
 
     public void setReminderDetails(String reminderDetails) {
         editor.putString(reminder_details, reminderDetails);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteReminderDetails() {
         editor.remove(reminder_details);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 
@@ -744,12 +744,12 @@ public class SharedPreferencesManager {
 
     public void setApplicationUpdateState(String applicationUpdateState) {
         editor.putString(application_update_state, applicationUpdateState);
-        editor.commit();
+        editor.apply();
     }
 
     public void deleteApplicationUpdateState() {
         editor.remove(application_update_state);
-        editor.commit();
+        editor.apply();
     }
     //endregion
 

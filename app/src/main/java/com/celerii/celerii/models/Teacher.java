@@ -182,7 +182,7 @@ public class Teacher {
         this.bio = bio;
     }
 
-    public Boolean getDeleted() {
+    public Boolean getIsDeleted() {
         return isDeleted;
     }
 

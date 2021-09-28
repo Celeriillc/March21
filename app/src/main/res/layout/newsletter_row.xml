@@ -80,7 +80,7 @@
                 android:id="@+id/newsletterimage"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:scaleType="center"/>
+                android:scaleType="centerCrop"/>
         </LinearLayout>
 
 

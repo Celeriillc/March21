@@ -35,7 +35,6 @@ import com.celerii.celerii.Activities.EditTermAndYearInfo.EnterResultsEditTermAc
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.SchoolProfileCoCurricularActivity;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
@@ -52,7 +51,6 @@ import com.celerii.celerii.models.NotableAlumni;
 import com.celerii.celerii.models.NotificationModel;
 import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.SchoolSettings;
-import com.celerii.celerii.models.SchoolTeacherConnectionRequest;
 import com.celerii.celerii.models.TeacherAttendanceHeader;
 import com.celerii.celerii.models.TeacherSchoolConnectionRequest;
 import com.google.firebase.auth.FirebaseAuth;
@@ -655,7 +653,7 @@ public class SchoolProfileActivity extends AppCompatActivity {
                         if (dataSnapshot.exists()) {
                             School school = dataSnapshot.getValue(School.class);
 
-                            boolean isDeleted = (school.getDeleted() == null) ? false : school.getDeleted();
+                            boolean isDeleted = (school.getIsDeleted() == null) ? false : school.getIsDeleted();
                             if (!isDeleted) {
                                 schoolName = school.getSchoolName();
                                 String schoolPicURL = school.getProfilePhotoUrl();

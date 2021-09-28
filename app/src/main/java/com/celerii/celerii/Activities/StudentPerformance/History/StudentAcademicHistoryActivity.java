@@ -1,5 +1,6 @@
 package com.celerii.celerii.Activities.StudentPerformance.History;
 
+import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +25,8 @@ import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.helperClasses.Term;
+import com.celerii.celerii.models.AcademicRecord;
+import com.celerii.celerii.models.AcademicRecordClass;
 import com.celerii.celerii.models.AcademicRecordStudent;
 import com.celerii.celerii.models.Class;
 import com.celerii.celerii.models.Student;
@@ -39,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,8 +72,12 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
     String activeClass = "", className = "";
     String year, term, year_term;
 
+    int counter1, counter2, studentCounter;
+    HashMap<String, HashMap<String, ArrayList<AcademicRecordStudent>>> studentRecords;
+    HashMap<String, String> mapOfKeyAndSubjectYearTerm = new HashMap<>();
+
     String featureUseKey = "";
-    String featureName = "Class Term Average";
+    String featureName = "Class Term Average for Teacher";
     long sessionStartTime = 0;
     String sessionDurationInSeconds = "0";
 
@@ -207,8 +215,9 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         year = Date.getYear();
-        term = Term.getTermShort();
-        studentAcademicHistoryHeaderModel = new StudentAcademicHistoryHeaderModel(term, year, className);
+        term = "2"; //Term.getTermShort();
+        studentRecords = new HashMap<>();
+        studentAcademicHistoryHeaderModel = new StudentAcademicHistoryHeaderModel(term, year, className, studentRecords);
 
         studentAcademicHistoryRowModelList = new ArrayList<>();
         mAdapter = new StudentAcademicHistoryAdapter(studentAcademicHistoryRowModelList, studentAcademicHistoryHeaderModel, this,this);
@@ -225,9 +234,149 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         );
     }
 
-    HashMap<String, Double> studentScore = new HashMap<>();
-    HashMap<String, Integer> studentCounter = new HashMap<>();
-    int subjectCounter = 0;
+//    private void loadNewNewDetailsFromFirebase() {
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+//
+//        year_term = year + "_" + term;
+//
+//        studentRecords = new HashMap<>();
+//
+//        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass);
+//        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.exists()) {
+//                    final int childrenCount1 = (int) dataSnapshot.getChildrenCount();
+//                    counter1 = 0;
+//                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+//                        String subject_year_term = postSnapshot.getKey();
+//                        String yearTermKey = subject_year_term.split("_")[1] + "_" + subject_year_term.split("_")[2];
+//
+//                        if (yearTermKey.equals(year_term)) {
+//                            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(subject_year_term);
+//                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                @Override
+//                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                    if (dataSnapshot.exists()) {
+//                                        final int childrenCount2 = (int) dataSnapshot.getChildrenCount();
+//                                        counter2 = 0;
+//                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//                                            String key = postSnapshot.getKey();
+//
+//                                            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subject_year_term).child(key);
+//                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                                @Override
+//                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                                    if (dataSnapshot.exists()) {
+//                                                        AcademicRecord academicRecordClass = dataSnapshot.getValue(AcademicRecord.class);
+//                                                        String subject = academicRecordClass.getSubject();
+//                                                        String maxObtainable = academicRecordClass.getMaxObtainable();
+//                                                        String percentageOfTotal = academicRecordClass.getPercentageOfTotal();
+//
+//                                                        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(subject_year_term).child(key).child("Students");
+//                                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                                            @Override
+//                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                                                if (dataSnapshot.exists()) {
+//                                                                    final int childrenCount3 = (int) dataSnapshot.getChildrenCount();
+//                                                                    counter3 = 0;
+//                                                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//                                                                        AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent();
+//                                                                        academicRecordStudent.setScore(postSnapshot.getValue(String.class));
+//                                                                        academicRecordStudent.setSubject(subject);
+//                                                                        academicRecordStudent.setMaxObtainable(maxObtainable);
+//                                                                        academicRecordStudent.setPercentageOfTotal(percentageOfTotal);
+//
+//                                                                        if (!studentRecords.containsKey(postSnapshot.getKey())) {
+//                                                                            ArrayList<AcademicRecordStudent> listOfRecords = new ArrayList<>();
+//                                                                            listOfRecords.add(academicRecordStudent);
+//                                                                            studentRecords.put(postSnapshot.getKey(), listOfRecords);
+//                                                                        } else {
+//                                                                            studentRecords.get(postSnapshot.getKey()).add(academicRecordStudent);
+//                                                                        }
+//                                                                    }
+//
+//                                                                    counter2++;
+//
+//                                                                    if (counter2 == childrenCount2) {
+//                                                                        counter1++;
+//                                                                        if (counter1 == childrenCount1) {
+//                                                                            int i = 5 + 5;
+//                                                                        }
+//                                                                    }
+//                                                                } else {
+//                                                                    counter2++;
+//                                                                    if (counter2 == childrenCount2) {
+//                                                                        if (counter1 == childrenCount1) {
+//                                                                            int i = 5 + 5;
+//                                                                        }
+//                                                                    }
+//                                                                }
+//                                                            }
+//
+//                                                            @Override
+//                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                                            }
+//                                                        });
+//                                                    } else {
+//                                                        counter2++;
+//                                                        if (counter2 == childrenCount2) {
+//                                                            if (counter1 == childrenCount1) {
+//                                                                int i = 5 + 5;
+//                                                            }
+//                                                        }
+//                                                    }
+//                                                }
+//
+//                                                @Override
+//                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                                }
+//                                            });
+//                                        }
+//                                    } else {
+//                                        counter1++;
+//                                        if (counter1 == childrenCount1) {
+//                                            int i = 5 + 5;
+//                                        }
+//                                    }
+//                                }
+//
+//                                @Override
+//                                public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                }
+//                            });
+//                        } else {
+//                            counter1++;
+//                            if (counter1 == childrenCount1) {
+//                                if (studentRecords.size() == 0) {
+//                                    mySwipeRefreshLayout.setRefreshing(false);
+//                                    recyclerView.setVisibility(View.GONE);
+//                                    progressLayout.setVisibility(View.GONE);
+//                                    errorLayout.setVisibility(View.VISIBLE);
+//                                    errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any academic records for "  + "<b>" + Term.Term(term) + "</b>" + " in " + "<b>" + year + "</b>" + "."));
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
 
     private void loadNewDetailsFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
@@ -240,209 +389,1200 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         }
 
         year_term = year + "_" + term;
+        studentRecords.clear();
 
-        Gson gson = new Gson();
-        HashMap<String, HashMap<String, Student>> classStudentsForTeacherMap = new HashMap<String, HashMap<String, Student>>();
-        String classStudentsForTeacherJSON = sharedPreferencesManager.getClassStudentForTeacher();
-        Type type = new TypeToken<HashMap<String, HashMap<String, Student>>>() {}.getType();
-        classStudentsForTeacherMap = gson.fromJson(classStudentsForTeacherJSON, type);
+        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass);
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    final int childrenCount1 = (int) dataSnapshot.getChildrenCount();
+                    counter1 = 0;
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        String subject_year_term = postSnapshot.getKey();
+                        String yearTermKey = subject_year_term.split("_")[1] + "_" + subject_year_term.split("_")[2];
 
-        if (classStudentsForTeacherMap == null || classStudentsForTeacherMap.size() == 0) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
-        } else {
-            final HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClass);
+                        if (yearTermKey.equals(year_term)) {
+                            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(subject_year_term);
+                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.exists()) {
+                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                            String key = postSnapshot.getKey();
+                                            mapOfKeyAndSubjectYearTerm.put(key, subject_year_term);
+                                        }
+                                        counter1++;
 
-            if (classMap == null) {
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
-                return;
-            }
+                                        if (counter1 == childrenCount1) {
+                                            counter2 = 0;
+                                            for (Map.Entry<String, String> entry : mapOfKeyAndSubjectYearTerm.entrySet()) {
+                                                mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(entry.getValue()).child(entry.getKey());
+                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        if (dataSnapshot.exists()) {
+                                                            AcademicRecord academicRecordClass = dataSnapshot.getValue(AcademicRecord.class);
+                                                            String subject = academicRecordClass.getSubject();
+                                                            String maxObtainable = academicRecordClass.getMaxObtainable();
+                                                            String percentageOfTotal = academicRecordClass.getPercentageOfTotal();
+                                                            String date = academicRecordClass.getDate();
+                                                            String testType = academicRecordClass.getTestType();
+                                                            String classId =academicRecordClass.getClassID();
 
-            if (classMap.size() == 0) {
-                mySwipeRefreshLayout.setRefreshing(false);
-                recyclerView.setVisibility(View.GONE);
-                progressLayout.setVisibility(View.GONE);
-                errorLayout.setVisibility(View.VISIBLE);
-                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
-                return;
-            }
+                                                            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(entry.getValue()).child(entry.getKey()).child("Students");
+                                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                    if (dataSnapshot.exists()) {
+                                                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                                            AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent();
+                                                                            academicRecordStudent.setScore(postSnapshot.getValue(String.class));
+                                                                            academicRecordStudent.setSubject(subject);
+                                                                            academicRecordStudent.setMaxObtainable(maxObtainable);
+                                                                            academicRecordStudent.setPercentageOfTotal(percentageOfTotal);
+                                                                            academicRecordStudent.setDate(date);
+                                                                            academicRecordStudent.setTestType(testType);
+                                                                            academicRecordStudent.setClassID(classId);
+                                                                            academicRecordStudent.setAcademicYear(year);
+                                                                            academicRecordStudent.setTerm(term);
 
-            studentScore = new HashMap<>();
-            studentCounter = new HashMap<>();
-            studentAcademicHistoryRowModelList.clear();
-            mAdapter.notifyDataSetChanged();
+                                                                            if (!studentRecords.containsKey(postSnapshot.getKey())) {
+                                                                                HashMap<String, ArrayList<AcademicRecordStudent>> mapOfRecords = new HashMap<>();
+                                                                                ArrayList<AcademicRecordStudent> academicRecordStudentArrayList = new ArrayList<>();
+                                                                                academicRecordStudentArrayList.add(academicRecordStudent);
+                                                                                mapOfRecords.put(subject, academicRecordStudentArrayList);
+                                                                                studentRecords.put(postSnapshot.getKey(), mapOfRecords);
+                                                                            } else {
+                                                                                HashMap<String, ArrayList<AcademicRecordStudent>> mapOfRecords = studentRecords.get(postSnapshot.getKey());
+                                                                                if (mapOfRecords != null) {
+                                                                                    if (!mapOfRecords.containsKey(subject)) {
+                                                                                        ArrayList<AcademicRecordStudent> academicRecordStudentArrayList = new ArrayList<>();
+                                                                                        academicRecordStudentArrayList.add(academicRecordStudent);
+                                                                                        studentRecords.get(postSnapshot.getKey()).put(subject, academicRecordStudentArrayList);
+                                                                                    } else {
+                                                                                        studentRecords.get(postSnapshot.getKey()).get(subject).add(academicRecordStudent);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        counter2++;
 
-            for (final Map.Entry<String, Student> entry : classMap.entrySet()) {
-                final String studentID = entry.getKey();
-                Student studentModel = entry.getValue();
+                                                                        if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                            if (studentRecords.size() > 0) {
+                                                                                for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                                    String studentID = entry.getKey();
+                                                                                    HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                                    double studentScore = 0.0;
+                                                                                    double studentCumulative = 0.0;
+                                                                                    for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                                        String subject = subjectEntry.getKey();
+                                                                                        ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                                        double subjectTermAverage = 0.0;
+                                                                                        double subjectMaxScore = 0.0;
+                                                                                        for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                            double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                            double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                            double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
 
-                final StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel();
-                studentAcademicHistoryRowModel.setImageURL(studentModel.getImageURL());
-                studentAcademicHistoryRowModel.setName(studentModel.getFirstName() + " " + studentModel.getLastName());
-                studentAcademicHistoryRowModel.setStudentID(studentID);
-                studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
-//                studentScore.put(studentID, 0.0);
-//                studentCounter.put(studentID, 0);
+                                                                                            double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                            double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                            subjectTermAverage += normalizedTestClassAverage;
+                                                                                            subjectMaxScore += normalizedMaxObtainable;
+                                                                                        }
+                                                                                        subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                                        studentCumulative += subjectTermAverage;
+                                                                                    }
+                                                                                    studentScore = studentCumulative / subjectMap.size();
+                                                                                    StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf((int)studentScore));
+                                                                                    studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                                }
 
-                mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(studentID);
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            final int childrenCount = (int) dataSnapshot.getChildrenCount();
-                            subjectCounter = 0;
-                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                                                                                studentCounter = 0;
+                                                                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                        @Override
+                                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                            if (dataSnapshot.exists()) {
+                                                                                                Student student = dataSnapshot.getValue(Student.class);
+                                                                                                String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                                String studentProfilePictureURL = student.getImageURL();
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            } else {
+                                                                                                String studentName = "Deleted Student";
+                                                                                                String studentProfilePictureURL = "";
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            }
+                                                                                            studentCounter++;
 
-                                String subject_year_term = postSnapshot.getKey();
-                                String yearTermKey = subject_year_term.split("_")[1] + "_" + subject_year_term.split("_")[2];
+                                                                                            if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                                studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                                mAdapter.notifyDataSetChanged();
+                                                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                                                progressLayout.setVisibility(View.GONE);
+                                                                                                errorLayout.setVisibility(View.GONE);
+                                                                                                recyclerView.setVisibility(View.VISIBLE);
+                                                                                            }
+                                                                                        }
 
-                                if (yearTermKey.equals(year_term)) {
-                                    mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(entry.getKey()).child(subject_year_term);
-                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            if (dataSnapshot.exists()) {
-                                                Double termAverage = 0.0;
-                                                Double maxScore = 0.0;
-                                                String localStudentID = "";
+                                                                                        @Override
+                                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                    AcademicRecordStudent academicRecordStudent = postSnapshot.getValue(AcademicRecordStudent.class);
-                                                    localStudentID = academicRecordStudent.getStudentID();
-                                                    double testClassAverage = Double.valueOf(academicRecordStudent.getScore());
-                                                    double maxObtainable = Double.valueOf(academicRecordStudent.getMaxObtainable());
-                                                    double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            } else {
+                                                                                if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                                    progressLayout.setVisibility(View.GONE);
+                                                                                    errorLayout.setVisibility(View.GONE);
+                                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        counter2++;
 
-                                                    double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
-                                                    double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
-                                                    termAverage += normalizedTestClassAverage;
-                                                    maxScore += normalizedMaxObtainable;
-                                                }
+                                                                        if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                            if (studentRecords.size() > 0) {
+                                                                                for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                                    String studentID = entry.getKey();
+                                                                                    HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                                    double studentScore = 0.0;
+                                                                                    double studentCumulative = 0.0;
+                                                                                    for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                                        String subject = subjectEntry.getKey();
+                                                                                        ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                                        double subjectTermAverage = 0.0;
+                                                                                        double subjectMaxScore = 0.0;
+                                                                                        for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                            double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                            double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                            double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
 
-                                                termAverage = (termAverage / maxScore) * 100;
-                                                if (!studentScore.containsKey(localStudentID)) {
-                                                    studentScore.put(localStudentID, termAverage);
-                                                } else {
-                                                    studentScore.put(localStudentID, studentScore.get(localStudentID) + termAverage);
-                                                }
+                                                                                            double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                            double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                            subjectTermAverage += normalizedTestClassAverage;
+                                                                                            subjectMaxScore += normalizedMaxObtainable;
+                                                                                        }
+                                                                                        subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                                        studentCumulative += subjectTermAverage;
+                                                                                    }
+                                                                                    studentScore = studentCumulative / subjectMap.size();
+                                                                                    StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                                    studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                                }
 
-                                                if (!studentCounter.containsKey(localStudentID)) {
-                                                    studentCounter.put(localStudentID, 1);
-                                                } else {
-                                                    studentCounter.put(localStudentID, studentCounter.get(localStudentID) + 1);
-                                                }
+                                                                                studentCounter = 0;
+                                                                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                        @Override
+                                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                            if (dataSnapshot.exists()) {
+                                                                                                Student student = dataSnapshot.getValue(Student.class);
+                                                                                                String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                                String studentProfilePictureURL = student.getImageURL();
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            } else {
+                                                                                                String studentName = "Deleted Student";
+                                                                                                String studentProfilePictureURL = "";
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            }
+                                                                                            studentCounter++;
+
+                                                                                            if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                                studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                                mAdapter.notifyDataSetChanged();
+                                                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                                                progressLayout.setVisibility(View.GONE);
+                                                                                                errorLayout.setVisibility(View.GONE);
+                                                                                                recyclerView.setVisibility(View.VISIBLE);
+                                                                                            }
+                                                                                        }
+
+                                                                                        @Override
+                                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            } else {
+                                                                                if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                                    progressLayout.setVisibility(View.GONE);
+                                                                                    errorLayout.setVisibility(View.GONE);
+                                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                }
+                                                            });
+                                                        } else {
+                                                            counter2++;
+
+                                                            if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                if (studentRecords.size() > 0) {
+                                                                    for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                        String studentID = entry.getKey();
+                                                                        HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                        double studentScore = 0.0;
+                                                                        double studentCumulative = 0.0;
+                                                                        for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                            String subject = subjectEntry.getKey();
+                                                                            ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                            double subjectTermAverage = 0.0;
+                                                                            double subjectMaxScore = 0.0;
+                                                                            for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                                double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                subjectTermAverage += normalizedTestClassAverage;
+                                                                                subjectMaxScore += normalizedMaxObtainable;
+                                                                            }
+                                                                            subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                            studentCumulative += subjectTermAverage;
+                                                                        }
+                                                                        studentScore = studentCumulative / subjectMap.size();
+                                                                        StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                        studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                    }
+
+                                                                    studentCounter = 0;
+                                                                    for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                        mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                            @Override
+                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                if (dataSnapshot.exists()) {
+                                                                                    Student student = dataSnapshot.getValue(Student.class);
+                                                                                    String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                    String studentProfilePictureURL = student.getImageURL();
+                                                                                    studentAcademicHistoryRowModel.setName(studentName);
+                                                                                    studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                } else {
+                                                                                    String studentName = "Deleted Student";
+                                                                                    String studentProfilePictureURL = "";
+                                                                                    studentAcademicHistoryRowModel.setName(studentName);
+                                                                                    studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                }
+                                                                                studentCounter++;
+
+                                                                                if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                                    progressLayout.setVisibility(View.GONE);
+                                                                                    errorLayout.setVisibility(View.GONE);
+                                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                                }
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                } else {
+                                                                    if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                        studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                        mAdapter.notifyDataSetChanged();
+                                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                                        progressLayout.setVisibility(View.GONE);
+                                                                        errorLayout.setVisibility(View.GONE);
+                                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
                                             }
-                                            subjectCounter++;
+                                        }
+                                    } else {
+                                        counter1++;
+                                        if (counter1 == childrenCount1) {
+                                            counter2 = 0;
+                                            for (Map.Entry<String, String> entry : mapOfKeyAndSubjectYearTerm.entrySet()) {
+                                                mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(entry.getValue()).child(entry.getKey());
+                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        if (dataSnapshot.exists()) {
+                                                            AcademicRecord academicRecordClass = dataSnapshot.getValue(AcademicRecord.class);
+                                                            String subject = academicRecordClass.getSubject();
+                                                            String maxObtainable = academicRecordClass.getMaxObtainable();
+                                                            String percentageOfTotal = academicRecordClass.getPercentageOfTotal();
 
-                                            if (subjectCounter == childrenCount) {
-                                                subjectCounter = 0;
+                                                            mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(entry.getValue()).child(entry.getKey()).child("Students");
+                                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                    if (dataSnapshot.exists()) {
+                                                                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                                            AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent();
+                                                                            academicRecordStudent.setScore(postSnapshot.getValue(String.class));
+                                                                            academicRecordStudent.setSubject(subject);
+                                                                            academicRecordStudent.setMaxObtainable(maxObtainable);
+                                                                            academicRecordStudent.setPercentageOfTotal(percentageOfTotal);
+
+                                                                            if (!studentRecords.containsKey(postSnapshot.getKey())) {
+                                                                                HashMap<String, ArrayList<AcademicRecordStudent>> mapOfRecords = new HashMap<>();
+                                                                                ArrayList<AcademicRecordStudent> academicRecordStudentArrayList = new ArrayList<>();
+                                                                                academicRecordStudentArrayList.add(academicRecordStudent);
+                                                                                mapOfRecords.put(subject, academicRecordStudentArrayList);
+                                                                                studentRecords.put(postSnapshot.getKey(), mapOfRecords);
+                                                                            } else {
+                                                                                HashMap<String, ArrayList<AcademicRecordStudent>> mapOfRecords = studentRecords.get(postSnapshot.getKey());
+                                                                                if (mapOfRecords != null) {
+                                                                                    if (!mapOfRecords.containsKey(subject)) {
+                                                                                        ArrayList<AcademicRecordStudent> academicRecordStudentArrayList = new ArrayList<>();
+                                                                                        academicRecordStudentArrayList.add(academicRecordStudent);
+                                                                                        studentRecords.get(postSnapshot.getKey()).put(subject, academicRecordStudentArrayList);
+                                                                                    } else {
+                                                                                        studentRecords.get(postSnapshot.getKey()).get(subject).add(academicRecordStudent);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        counter2++;
+
+                                                                        if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                            if (studentRecords.size() > 0) {
+                                                                                for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                                    String studentID = entry.getKey();
+                                                                                    HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                                    double studentScore = 0.0;
+                                                                                    double studentCumulative = 0.0;
+                                                                                    for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                                        String subject = subjectEntry.getKey();
+                                                                                        ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                                        double subjectTermAverage = 0.0;
+                                                                                        double subjectMaxScore = 0.0;
+                                                                                        for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                            double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                            double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                            double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                                            double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                            double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                            subjectTermAverage += normalizedTestClassAverage;
+                                                                                            subjectMaxScore += normalizedMaxObtainable;
+                                                                                        }
+                                                                                        subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                                        studentCumulative += subjectTermAverage;
+                                                                                    }
+                                                                                    studentScore = studentCumulative / subjectMap.size();
+                                                                                    StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                                    studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                                }
+
+                                                                                studentCounter = 0;
+                                                                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                        @Override
+                                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                            if (dataSnapshot.exists()) {
+                                                                                                Student student = dataSnapshot.getValue(Student.class);
+                                                                                                String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                                String studentProfilePictureURL = student.getImageURL();
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            } else {
+                                                                                                String studentName = "Deleted Student";
+                                                                                                String studentProfilePictureURL = "";
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            }
+                                                                                            studentCounter++;
+
+                                                                                            if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                                studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                                mAdapter.notifyDataSetChanged();
+                                                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                                                progressLayout.setVisibility(View.GONE);
+                                                                                                errorLayout.setVisibility(View.GONE);
+                                                                                                recyclerView.setVisibility(View.VISIBLE);
+                                                                                            }
+                                                                                        }
+
+                                                                                        @Override
+                                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            } else {
+                                                                                if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                                    progressLayout.setVisibility(View.GONE);
+                                                                                    errorLayout.setVisibility(View.GONE);
+                                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        counter2++;
+
+                                                                        if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                            if (studentRecords.size() > 0) {
+                                                                                for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                                    String studentID = entry.getKey();
+                                                                                    HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                                    double studentScore = 0.0;
+                                                                                    double studentCumulative = 0.0;
+                                                                                    for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                                        String subject = subjectEntry.getKey();
+                                                                                        ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                                        double subjectTermAverage = 0.0;
+                                                                                        double subjectMaxScore = 0.0;
+                                                                                        for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                            double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                            double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                            double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                                            double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                            double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                            subjectTermAverage += normalizedTestClassAverage;
+                                                                                            subjectMaxScore += normalizedMaxObtainable;
+                                                                                        }
+                                                                                        subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                                        studentCumulative += subjectTermAverage;
+                                                                                    }
+                                                                                    studentScore = studentCumulative / subjectMap.size();
+                                                                                    StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                                    studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                                }
+
+                                                                                studentCounter = 0;
+                                                                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                                    mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                        @Override
+                                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                            if (dataSnapshot.exists()) {
+                                                                                                Student student = dataSnapshot.getValue(Student.class);
+                                                                                                String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                                String studentProfilePictureURL = student.getImageURL();
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            } else {
+                                                                                                String studentName = "Deleted Student";
+                                                                                                String studentProfilePictureURL = "";
+                                                                                                studentAcademicHistoryRowModel.setName(studentName);
+                                                                                                studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                            }
+                                                                                            studentCounter++;
+
+                                                                                            if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                                studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                                mAdapter.notifyDataSetChanged();
+                                                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                                                progressLayout.setVisibility(View.GONE);
+                                                                                                errorLayout.setVisibility(View.GONE);
+                                                                                                recyclerView.setVisibility(View.VISIBLE);
+                                                                                            }
+                                                                                        }
+
+                                                                                        @Override
+                                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            } else {
+                                                                                if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                                    progressLayout.setVisibility(View.GONE);
+                                                                                    errorLayout.setVisibility(View.GONE);
+                                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                }
+                                                            });
+                                                        } else {
+                                                            counter2++;
+
+                                                            if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                if (studentRecords.size() > 0) {
+                                                                    for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                        String studentID = entry.getKey();
+                                                                        HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                        double studentScore = 0.0;
+                                                                        double studentCumulative = 0.0;
+                                                                        for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                            String subject = subjectEntry.getKey();
+                                                                            ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                            double subjectTermAverage = 0.0;
+                                                                            double subjectMaxScore = 0.0;
+                                                                            for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                                double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                subjectTermAverage += normalizedTestClassAverage;
+                                                                                subjectMaxScore += normalizedMaxObtainable;
+                                                                            }
+                                                                            subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                            studentCumulative += subjectTermAverage;
+                                                                        }
+                                                                        studentScore = studentCumulative / subjectMap.size();
+                                                                        StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                        studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                    }
+
+                                                                    studentCounter = 0;
+                                                                    for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                        mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                            @Override
+                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                if (dataSnapshot.exists()) {
+                                                                                    Student student = dataSnapshot.getValue(Student.class);
+                                                                                    String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                    String studentProfilePictureURL = student.getImageURL();
+                                                                                    studentAcademicHistoryRowModel.setName(studentName);
+                                                                                    studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                } else {
+                                                                                    String studentName = "Deleted Student";
+                                                                                    String studentProfilePictureURL = "";
+                                                                                    studentAcademicHistoryRowModel.setName(studentName);
+                                                                                    studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                }
+                                                                                studentCounter++;
+
+                                                                                if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                    mAdapter.notifyDataSetChanged();
+                                                                                    mySwipeRefreshLayout.setRefreshing(false);
+                                                                                    progressLayout.setVisibility(View.GONE);
+                                                                                    errorLayout.setVisibility(View.GONE);
+                                                                                    recyclerView.setVisibility(View.VISIBLE);
+                                                                                }
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                } else {
+                                                                    if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                        studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                        mAdapter.notifyDataSetChanged();
+                                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                                        progressLayout.setVisibility(View.GONE);
+                                                                        errorLayout.setVisibility(View.GONE);
+                                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
                                             }
+                                        }
+                                    }
+                                }
 
-                                            if (studentCounter.size() == classMap.size()) {
-                                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel: studentAcademicHistoryRowModelList) {
-                                                    String key = studentAcademicHistoryRowModel.getStudentID();
-                                                    try {
-                                                        double score = (int) ((studentScore.get(key) / studentCounter.get(key)));
-                                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(score));
-                                                    } catch (Exception e) {
-                                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(0.0));
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        } else {
+                            counter1++;
+                            if (counter1 == childrenCount1) {
+                                counter2 = 0;
+                                if (mapOfKeyAndSubjectYearTerm.size() > 0) {
+                                    for (Map.Entry<String, String> entry : mapOfKeyAndSubjectYearTerm.entrySet()) {
+                                        mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(entry.getValue()).child(entry.getKey());
+                                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                if (dataSnapshot.exists()) {
+                                                    AcademicRecord academicRecordClass = dataSnapshot.getValue(AcademicRecord.class);
+                                                    String subject = academicRecordClass.getSubject();
+                                                    String maxObtainable = academicRecordClass.getMaxObtainable();
+                                                    String percentageOfTotal = academicRecordClass.getPercentageOfTotal();
+
+                                                    mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(entry.getValue()).child(entry.getKey()).child("Students");
+                                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            if (dataSnapshot.exists()) {
+                                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                                    AcademicRecordStudent academicRecordStudent = new AcademicRecordStudent();
+                                                                    academicRecordStudent.setScore(postSnapshot.getValue(String.class));
+                                                                    academicRecordStudent.setSubject(subject);
+                                                                    academicRecordStudent.setMaxObtainable(maxObtainable);
+                                                                    academicRecordStudent.setPercentageOfTotal(percentageOfTotal);
+
+                                                                    if (!studentRecords.containsKey(postSnapshot.getKey())) {
+                                                                        HashMap<String, ArrayList<AcademicRecordStudent>> mapOfRecords = new HashMap<>();
+                                                                        ArrayList<AcademicRecordStudent> academicRecordStudentArrayList = new ArrayList<>();
+                                                                        academicRecordStudentArrayList.add(academicRecordStudent);
+                                                                        mapOfRecords.put(subject, academicRecordStudentArrayList);
+                                                                        studentRecords.put(postSnapshot.getKey(), mapOfRecords);
+                                                                    } else {
+                                                                        HashMap<String, ArrayList<AcademicRecordStudent>> mapOfRecords = studentRecords.get(postSnapshot.getKey());
+                                                                        if (mapOfRecords != null) {
+                                                                            if (!mapOfRecords.containsKey(subject)) {
+                                                                                ArrayList<AcademicRecordStudent> academicRecordStudentArrayList = new ArrayList<>();
+                                                                                academicRecordStudentArrayList.add(academicRecordStudent);
+                                                                                studentRecords.get(postSnapshot.getKey()).put(subject, academicRecordStudentArrayList);
+                                                                            } else {
+                                                                                studentRecords.get(postSnapshot.getKey()).get(subject).add(academicRecordStudent);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                counter2++;
+
+                                                                if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                    if (studentRecords.size() > 0) {
+                                                                        for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                            String studentID = entry.getKey();
+                                                                            HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                            double studentScore = 0.0;
+                                                                            double studentCumulative = 0.0;
+                                                                            for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                                String subject = subjectEntry.getKey();
+                                                                                ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                                double subjectTermAverage = 0.0;
+                                                                                double subjectMaxScore = 0.0;
+                                                                                for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                    double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                    double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                    double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                                    double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                    double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                    subjectTermAverage += normalizedTestClassAverage;
+                                                                                    subjectMaxScore += normalizedMaxObtainable;
+                                                                                }
+                                                                                subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                                studentCumulative += subjectTermAverage;
+                                                                            }
+                                                                            studentScore = studentCumulative / subjectMap.size();
+                                                                            StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                            studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                        }
+
+                                                                        studentCounter = 0;
+                                                                        for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                            mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                @Override
+                                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                    if (dataSnapshot.exists()) {
+                                                                                        Student student = dataSnapshot.getValue(Student.class);
+                                                                                        String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                        String studentProfilePictureURL = student.getImageURL();
+                                                                                        studentAcademicHistoryRowModel.setName(studentName);
+                                                                                        studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                    } else {
+                                                                                        String studentName = "Deleted Student";
+                                                                                        String studentProfilePictureURL = "";
+                                                                                        studentAcademicHistoryRowModel.setName(studentName);
+                                                                                        studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                    }
+                                                                                    studentCounter++;
+
+                                                                                    if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                        studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                        mAdapter.notifyDataSetChanged();
+                                                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                                                        progressLayout.setVisibility(View.GONE);
+                                                                                        errorLayout.setVisibility(View.GONE);
+                                                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                                                    }
+                                                                                }
+
+                                                                                @Override
+                                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    } else {
+                                                                        if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                            studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                            mAdapter.notifyDataSetChanged();
+                                                                            mySwipeRefreshLayout.setRefreshing(false);
+                                                                            progressLayout.setVisibility(View.GONE);
+                                                                            errorLayout.setVisibility(View.GONE);
+                                                                            recyclerView.setVisibility(View.VISIBLE);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                counter2++;
+
+                                                                if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                                    if (studentRecords.size() > 0) {
+                                                                        for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                            String studentID = entry.getKey();
+                                                                            HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                            double studentScore = 0.0;
+                                                                            double studentCumulative = 0.0;
+                                                                            for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                                String subject = subjectEntry.getKey();
+                                                                                ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                                double subjectTermAverage = 0.0;
+                                                                                double subjectMaxScore = 0.0;
+                                                                                for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                                    double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                                    double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                                    double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                                    double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                                    double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                                    subjectTermAverage += normalizedTestClassAverage;
+                                                                                    subjectMaxScore += normalizedMaxObtainable;
+                                                                                }
+                                                                                subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                                studentCumulative += subjectTermAverage;
+                                                                            }
+                                                                            studentScore = studentCumulative / subjectMap.size();
+                                                                            StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                            studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                                        }
+
+                                                                        studentCounter = 0;
+                                                                        for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                            mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                            mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                @Override
+                                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                    if (dataSnapshot.exists()) {
+                                                                                        Student student = dataSnapshot.getValue(Student.class);
+                                                                                        String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                                        String studentProfilePictureURL = student.getImageURL();
+                                                                                        studentAcademicHistoryRowModel.setName(studentName);
+                                                                                        studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                    } else {
+                                                                                        String studentName = "Deleted Student";
+                                                                                        String studentProfilePictureURL = "";
+                                                                                        studentAcademicHistoryRowModel.setName(studentName);
+                                                                                        studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                                    }
+                                                                                    studentCounter++;
+
+                                                                                    if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                                        studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                                        mAdapter.notifyDataSetChanged();
+                                                                                        mySwipeRefreshLayout.setRefreshing(false);
+                                                                                        progressLayout.setVisibility(View.GONE);
+                                                                                        errorLayout.setVisibility(View.GONE);
+                                                                                        recyclerView.setVisibility(View.VISIBLE);
+                                                                                    }
+                                                                                }
+
+                                                                                @Override
+                                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    } else {
+                                                                        if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                            studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                            mAdapter.notifyDataSetChanged();
+                                                                            mySwipeRefreshLayout.setRefreshing(false);
+                                                                            progressLayout.setVisibility(View.GONE);
+                                                                            errorLayout.setVisibility(View.GONE);
+                                                                            recyclerView.setVisibility(View.VISIBLE);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                                } else {
+                                                    counter2++;
+
+                                                    if (counter2 == mapOfKeyAndSubjectYearTerm.size()) {
+                                                        if (studentRecords.size() > 0) {
+                                                            for (Map.Entry<String, HashMap<String, ArrayList<AcademicRecordStudent>>> entry : studentRecords.entrySet()) {
+                                                                String studentID = entry.getKey();
+                                                                HashMap<String, ArrayList<AcademicRecordStudent>> subjectMap = entry.getValue();
+                                                                double studentScore = 0.0;
+                                                                double studentCumulative = 0.0;
+                                                                for (Map.Entry<String, ArrayList<AcademicRecordStudent>> subjectEntry : subjectMap.entrySet()) {
+                                                                    String subject = subjectEntry.getKey();
+                                                                    ArrayList<AcademicRecordStudent> academicRecords = subjectEntry.getValue();
+                                                                    double subjectTermAverage = 0.0;
+                                                                    double subjectMaxScore = 0.0;
+                                                                    for (AcademicRecordStudent academicRecordStudent : academicRecords) {
+                                                                        double testClassAverage = Double.parseDouble(academicRecordStudent.getScore());
+                                                                        double maxObtainable = Double.parseDouble(academicRecordStudent.getMaxObtainable());
+                                                                        double percentageOfTotal = Double.parseDouble(academicRecordStudent.getPercentageOfTotal());
+
+                                                                        double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+                                                                        double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+                                                                        subjectTermAverage += normalizedTestClassAverage;
+                                                                        subjectMaxScore += normalizedMaxObtainable;
+                                                                    }
+                                                                    subjectTermAverage = (subjectTermAverage / subjectMaxScore) * 100;
+                                                                    studentCumulative += subjectTermAverage;
+                                                                }
+                                                                studentScore = studentCumulative / subjectMap.size();
+                                                                StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel(studentID, String.valueOf(studentScore));
+                                                                studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+                                                            }
+
+                                                            studentCounter = 0;
+                                                            for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
+                                                                mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                        if (dataSnapshot.exists()) {
+                                                                            Student student = dataSnapshot.getValue(Student.class);
+                                                                            String studentName = student.getFirstName() + " " + student.getLastName();
+                                                                            String studentProfilePictureURL = student.getImageURL();
+                                                                            studentAcademicHistoryRowModel.setName(studentName);
+                                                                            studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                        } else {
+                                                                            String studentName = "Deleted Student";
+                                                                            String studentProfilePictureURL = "";
+                                                                            studentAcademicHistoryRowModel.setName(studentName);
+                                                                            studentAcademicHistoryRowModel.setImageURL(studentProfilePictureURL);
+                                                                        }
+                                                                        studentCounter++;
+
+                                                                        if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                            studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                            mAdapter.notifyDataSetChanged();
+                                                                            mySwipeRefreshLayout.setRefreshing(false);
+                                                                            progressLayout.setVisibility(View.GONE);
+                                                                            errorLayout.setVisibility(View.GONE);
+                                                                            recyclerView.setVisibility(View.VISIBLE);
+                                                                        }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                    }
+                                                                });
+                                                            }
+                                                        } else {
+                                                            if (studentCounter == studentAcademicHistoryRowModelList.size()) {
+                                                                studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                                                mAdapter.notifyDataSetChanged();
+                                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                                progressLayout.setVisibility(View.GONE);
+                                                                errorLayout.setVisibility(View.GONE);
+                                                                recyclerView.setVisibility(View.VISIBLE);
+                                                            }
+                                                        }
                                                     }
                                                 }
+                                            }
 
-                                                if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
-                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
-                                                }
-                                                mAdapter.notifyDataSetChanged();
-                                                mySwipeRefreshLayout.setRefreshing(false);
-                                                progressLayout.setVisibility(View.GONE);
-                                                errorLayout.setVisibility(View.GONE);
-                                                recyclerView.setVisibility(View.VISIBLE);
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
                                             }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
+                                        });
+                                    }
                                 } else {
-                                    subjectCounter++;
-
-                                    if (subjectCounter == childrenCount) {
-                                        if (!studentScore.containsKey(studentID)) {
-                                            studentScore.put(studentID, 0.0);
-                                        }
-
-                                        if (!studentCounter.containsKey(studentID)) {
-                                            studentCounter.put(studentID, 1);
-                                        }
-                                    }
-
-                                    if (studentCounter.size() == classMap.size()) {
-                                        for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel: studentAcademicHistoryRowModelList) {
-                                            String key = studentAcademicHistoryRowModel.getStudentID();
-                                            try {
-                                                double score = (int) ((studentScore.get(key) / studentCounter.get(key)));
-                                                studentAcademicHistoryRowModel.setAverage(String.valueOf(score));
-                                            } catch (Exception e) {
-                                                studentAcademicHistoryRowModel.setAverage(String.valueOf(0.0));
-                                            }
-                                        }
-
-                                        if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
-                                            studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
-                                        }
-                                        mAdapter.notifyDataSetChanged();
-                                        mySwipeRefreshLayout.setRefreshing(false);
-                                        progressLayout.setVisibility(View.GONE);
-                                        errorLayout.setVisibility(View.GONE);
-                                        recyclerView.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                            }
-                        } else {
-                            studentScore.put(studentID, 0.0);
-                            studentCounter.put(studentID, 1);
-
-                            if (studentCounter.size() == classMap.size()) {
-                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel: studentAcademicHistoryRowModelList) {
-                                    String key = studentAcademicHistoryRowModel.getStudentID();
-                                    try {
-                                        double score = (int) ((studentScore.get(key) / studentCounter.get(key)));
-                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(score));
-                                    } catch (Exception e) {
-                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(0.0));
-                                    }
-                                }
-
-                                if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                                    mAdapter.notifyDataSetChanged();
+                                    mySwipeRefreshLayout.setRefreshing(false);
+                                    progressLayout.setVisibility(View.GONE);
+                                    errorLayout.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
                                 }
-                                mAdapter.notifyDataSetChanged();
-                                mySwipeRefreshLayout.setRefreshing(false);
-                                progressLayout.setVisibility(View.GONE);
-                                errorLayout.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
                             }
                         }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                } else {
+                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+                    mAdapter.notifyDataSetChanged();
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             }
-        }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
+
+//    HashMap<String, Double> studentScore = new HashMap<>();
+//    HashMap<String, Integer> studentCounter = new HashMap<>();
+//    int subjectCounter = 0;
+//
+//    private void loadNewDetailsFromFirebase() {
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+//
+//        year_term = year + "_" + term;
+//
+//        Gson gson = new Gson();
+//        HashMap<String, HashMap<String, Student>> classStudentsForTeacherMap = new HashMap<String, HashMap<String, Student>>();
+//        String classStudentsForTeacherJSON = sharedPreferencesManager.getClassStudentForTeacher();
+//        Type type = new TypeToken<HashMap<String, HashMap<String, Student>>>() {}.getType();
+//        classStudentsForTeacherMap = gson.fromJson(classStudentsForTeacherJSON, type);
+//
+//        if (classStudentsForTeacherMap == null || classStudentsForTeacherMap.size() == 0) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
+//        } else {
+//            final HashMap<String, Student> classMap = classStudentsForTeacherMap.get(activeClass);
+//
+//            if (classMap == null) {
+//                mySwipeRefreshLayout.setRefreshing(false);
+//                recyclerView.setVisibility(View.GONE);
+//                progressLayout.setVisibility(View.GONE);
+//                errorLayout.setVisibility(View.VISIBLE);
+//                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
+//                return;
+//            }
+//
+//            if (classMap.size() == 0) {
+//                mySwipeRefreshLayout.setRefreshing(false);
+//                recyclerView.setVisibility(View.GONE);
+//                progressLayout.setVisibility(View.GONE);
+//                errorLayout.setVisibility(View.VISIBLE);
+//                errorLayoutText.setText(Html.fromHtml(className + " doesn't contain any students. You can change the active class to another with students in the " + "<b>" + "More" + "</b>" + " area"));
+//                return;
+//            }
+//
+//            studentScore = new HashMap<>();
+//            studentCounter = new HashMap<>();
+//            studentAcademicHistoryRowModelList.clear();
+//            mAdapter.notifyDataSetChanged();
+//
+//            for (final Map.Entry<String, Student> entry : classMap.entrySet()) {
+//                final String studentID = entry.getKey();
+//                Student studentModel = entry.getValue();
+//
+//                final StudentAcademicHistoryRowModel studentAcademicHistoryRowModel = new StudentAcademicHistoryRowModel();
+//                studentAcademicHistoryRowModel.setImageURL(studentModel.getImageURL());
+//                studentAcademicHistoryRowModel.setName(studentModel.getFirstName() + " " + studentModel.getLastName());
+//                studentAcademicHistoryRowModel.setStudentID(studentID);
+//                studentAcademicHistoryRowModelList.add(studentAcademicHistoryRowModel);
+////                studentScore.put(studentID, 0.0);
+////                studentCounter.put(studentID, 0);
+//
+//                mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(studentID);
+//                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(DataSnapshot dataSnapshot) {
+//                        if (dataSnapshot.exists()) {
+//                            final int childrenCount = (int) dataSnapshot.getChildrenCount();
+//                            subjectCounter = 0;
+//                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+//
+//                                String subject_year_term = postSnapshot.getKey();
+//                                String yearTermKey = subject_year_term.split("_")[1] + "_" + subject_year_term.split("_")[2];
+//
+//                                if (yearTermKey.equals(year_term)) {
+//                                    mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(entry.getKey()).child(subject_year_term);
+//                                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                        @Override
+//                                        public void onDataChange(DataSnapshot dataSnapshot) {
+//                                            if (dataSnapshot.exists()) {
+//                                                Double termAverage = 0.0;
+//                                                Double maxScore = 0.0;
+//                                                String localStudentID = "";
+//
+//                                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+//                                                    AcademicRecordStudent academicRecordStudent = postSnapshot.getValue(AcademicRecordStudent.class);
+//                                                    localStudentID = academicRecordStudent.getStudentID();
+//                                                    double testClassAverage = Double.valueOf(academicRecordStudent.getScore());
+//                                                    double maxObtainable = Double.valueOf(academicRecordStudent.getMaxObtainable());
+//                                                    double percentageOfTotal = Double.valueOf(academicRecordStudent.getPercentageOfTotal());
+//
+//                                                    double normalizedTestClassAverage = (testClassAverage / maxObtainable) * percentageOfTotal;
+//                                                    double normalizedMaxObtainable = (maxObtainable / maxObtainable) * percentageOfTotal;
+//                                                    termAverage += normalizedTestClassAverage;
+//                                                    maxScore += normalizedMaxObtainable;
+//                                                }
+//
+//                                                termAverage = (termAverage / maxScore) * 100;
+//                                                if (!studentScore.containsKey(localStudentID)) {
+//                                                    studentScore.put(localStudentID, termAverage);
+//                                                } else {
+//                                                    studentScore.put(localStudentID, studentScore.get(localStudentID) + termAverage);
+//                                                }
+//
+//                                                if (!studentCounter.containsKey(localStudentID)) {
+//                                                    studentCounter.put(localStudentID, 1);
+//                                                } else {
+//                                                    studentCounter.put(localStudentID, studentCounter.get(localStudentID) + 1);
+//                                                }
+//                                            }
+//                                            subjectCounter++;
+//
+//                                            if (subjectCounter == childrenCount) {
+//                                                subjectCounter = 0;
+//                                            }
+//
+//                                            if (studentCounter.size() == classMap.size()) {
+//                                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel: studentAcademicHistoryRowModelList) {
+//                                                    String key = studentAcademicHistoryRowModel.getStudentID();
+//                                                    try {
+//                                                        double score = (int) ((studentScore.get(key) / studentCounter.get(key)));
+//                                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(score));
+//                                                    } catch (Exception e) {
+//                                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(0.0));
+//                                                    }
+//                                                }
+//
+//                                                if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
+//                                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+//                                                }
+//                                                mAdapter.notifyDataSetChanged();
+//                                                mySwipeRefreshLayout.setRefreshing(false);
+//                                                progressLayout.setVisibility(View.GONE);
+//                                                errorLayout.setVisibility(View.GONE);
+//                                                recyclerView.setVisibility(View.VISIBLE);
+//
+//                                            }
+//                                        }
+//
+//                                        @Override
+//                                        public void onCancelled(DatabaseError databaseError) {
+//
+//                                        }
+//                                    });
+//                                } else {
+//                                    subjectCounter++;
+//
+//                                    if (subjectCounter == childrenCount) {
+//                                        if (!studentScore.containsKey(studentID)) {
+//                                            studentScore.put(studentID, 0.0);
+//                                        }
+//
+//                                        if (!studentCounter.containsKey(studentID)) {
+//                                            studentCounter.put(studentID, 1);
+//                                        }
+//                                    }
+//
+//                                    if (studentCounter.size() == classMap.size()) {
+//                                        for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel: studentAcademicHistoryRowModelList) {
+//                                            String key = studentAcademicHistoryRowModel.getStudentID();
+//                                            try {
+//                                                double score = (int) ((studentScore.get(key) / studentCounter.get(key)));
+//                                                studentAcademicHistoryRowModel.setAverage(String.valueOf(score));
+//                                            } catch (Exception e) {
+//                                                studentAcademicHistoryRowModel.setAverage(String.valueOf(0.0));
+//                                            }
+//                                        }
+//
+//                                        if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
+//                                            studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+//                                        }
+//                                        mAdapter.notifyDataSetChanged();
+//                                        mySwipeRefreshLayout.setRefreshing(false);
+//                                        progressLayout.setVisibility(View.GONE);
+//                                        errorLayout.setVisibility(View.GONE);
+//                                        recyclerView.setVisibility(View.VISIBLE);
+//                                    }
+//                                }
+//                            }
+//                        } else {
+//                            studentScore.put(studentID, 0.0);
+//                            studentCounter.put(studentID, 1);
+//
+//                            if (studentCounter.size() == classMap.size()) {
+//                                for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel: studentAcademicHistoryRowModelList) {
+//                                    String key = studentAcademicHistoryRowModel.getStudentID();
+//                                    try {
+//                                        double score = (int) ((studentScore.get(key) / studentCounter.get(key)));
+//                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(score));
+//                                    } catch (Exception e) {
+//                                        studentAcademicHistoryRowModel.setAverage(String.valueOf(0.0));
+//                                    }
+//                                }
+//
+//                                if (!studentAcademicHistoryRowModelList.get(0).getStudentID().trim().isEmpty()) {
+//                                    studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
+//                                }
+//                                mAdapter.notifyDataSetChanged();
+//                                mySwipeRefreshLayout.setRefreshing(false);
+//                                progressLayout.setVisibility(View.GONE);
+//                                errorLayout.setVisibility(View.GONE);
+//                                recyclerView.setVisibility(View.VISIBLE);
+//                            }
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(DatabaseError databaseError) {
+//
+//                    }
+//                });
+//            }
+//        }
+//    }
 
 //    int studentCounter = 0;
 //    private void loadNeDetailsFromFirebase() {

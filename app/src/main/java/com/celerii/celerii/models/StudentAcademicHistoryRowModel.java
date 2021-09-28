@@ -1,9 +1,5 @@
 package com.celerii.celerii.models;
 
-/**
- * Created by DELL on 8/21/2017.
- */
-
 public class StudentAcademicHistoryRowModel {
     String studentID, name, imageURL;
     String average;
@@ -20,6 +16,13 @@ public class StudentAcademicHistoryRowModel {
         this.name = name;
         this.imageURL = imageURL;
         this.average = "";
+    }
+
+    public StudentAcademicHistoryRowModel(String studentID, String average) {
+        this.studentID = studentID;
+        this.name = "";
+        this.imageURL = "";
+        this.average = average;
     }
 
     public String getStudentID() {

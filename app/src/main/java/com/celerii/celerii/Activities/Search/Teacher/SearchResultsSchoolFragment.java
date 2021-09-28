@@ -295,7 +295,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                             searchMap.put(key, 1);
                             String location = "";
                             SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
-                            if (!school.getDeleted()) {
+                            if (!school.getIsDeleted()) {
                                 searchResultsRowList.add(searchHistoryRow);
                             }
                             schoolMap.add(key);
@@ -317,7 +317,7 @@ public class SearchResultsSchoolFragment extends Fragment {
                                     searchMap.put(key, 1);
                                     String location = "";
                                     SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
-                                    if (!school.getDeleted()) {
+                                    if (!school.getIsDeleted()) {
                                         searchResultsRowList.add(searchHistoryRow);
                                     }
                                     schoolMap.add(key);

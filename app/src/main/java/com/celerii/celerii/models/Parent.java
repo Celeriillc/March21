@@ -185,7 +185,7 @@ public class Parent {
         this.phone = phone;
     }
 
-    public Boolean getDeleted() {
+    public Boolean getIsDeleted() {
         return isDeleted;
     }
 

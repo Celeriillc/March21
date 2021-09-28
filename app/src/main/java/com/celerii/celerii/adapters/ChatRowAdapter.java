@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.app.ActivityOptionsCompat;
@@ -22,7 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailForMultipleImagesActivity;
+import com.celerii.celerii.Activities.Utility.OpenPDFActivity;
 import com.celerii.celerii.Activities.Profiles.SchoolProfile.GalleryDetailForSingleImageActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
@@ -31,14 +30,9 @@ import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.celerii.celerii.models.Chats;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +52,9 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
     private SharedPreferencesManager sharedPreferencesManager;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name, message, time, noOfmesages;
-        public ImageView messageStatus, otherProfilePic, imageFile;
-        public LinearLayout imageClipper, profilePictureClipper, layout;
+        public TextView name, message, time, noOfmesages, fileName;
+        public ImageView messageStatus, otherProfilePic, imageFile/*, fileImage, fileIcon*/;
+        public LinearLayout imageClipper, profilePictureClipper, layout, fileImageClipper;
         public View divider;
 
         public MyViewHolder(final View view) {
@@ -68,12 +62,16 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             name = (TextView) view.findViewById(R.id.name);
             message = (TextView) view.findViewById(R.id.message_text);
             time = (TextView) view.findViewById(R.id.time);
+            fileName = (TextView) view.findViewById(R.id.filename);
             imageClipper = (LinearLayout) view.findViewById(R.id.imageClipper);
             profilePictureClipper = (LinearLayout) view.findViewById(R.id.profilepictureclipper);
             layout = (LinearLayout) view.findViewById(R.id.bubble_layout);
+            fileImageClipper = (LinearLayout) view.findViewById(R.id.fileimageclipper);
             messageStatus = (ImageView) view.findViewById(R.id.messagestatus);
             otherProfilePic = (ImageView) view.findViewById(R.id.otherprofilepic);
             imageFile = (ImageView) view.findViewById(R.id.imagefile);
+//            fileImage = (ImageView) view.findViewById(R.id.fileimage);
+//            fileIcon = (ImageView) view.findViewById(R.id.fileicon);
             divider = view.findViewById(R.id.divider);
         }
     }
@@ -115,49 +113,26 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             mDatabaseReference.updateChildren(userUpdates);
         }
 
-        if (chatList.isMine()){
-            mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(chatList.getReceiverID()).child(chatList.getSenderID()).child(chatList.getMessageID()).child("seen");
-            mDatabaseReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()){
-                        boolean isSeen = dataSnapshot.getValue(boolean.class);
-                        if (isSeen) {
-                            (holder).messageStatus.setImageResource(R.drawable.ic_read_all_black_24dp);
-                        } else {
-                            (holder).messageStatus.setImageResource(R.drawable.ic_sent_black_24dp);
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-        ((MyViewHolder) holder).imageFile.setOnClickListener(new View.OnClickListener() {
+        holder.imageFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle b = new Bundle();
-                b.putString("ImageURL", chatList.getFileURL());
-                Intent I = new Intent(context, GalleryDetailForSingleImageActivity.class);
-                I.putExtras(b);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ((MyViewHolder) holder).imageFile.setTransitionName("imageTransition");
-                    Pair<View, String> pair1 = Pair.create((View) ((MyViewHolder) holder).imageFile, ((MyViewHolder) holder).imageFile.getTransitionName());
+                if (!chatList.getFileURL().equals("")) {
+                    if (chatList.getFileType().equals("image")) {
+                        Bundle b = new Bundle();
+                        b.putString("ImageURL", chatList.getFileURL());
+                        Intent I = new Intent(context, GalleryDetailForSingleImageActivity.class);
+                        I.putExtras(b);
+                        holder.imageFile.setTransitionName("imageTransition");
+                        Pair<View, String> pair1 = Pair.create((View) holder.imageFile, holder.imageFile.getTransitionName());
 
-                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, ((MyViewHolder) holder).imageFile, ((MyViewHolder) holder).imageFile.getTransitionName());
-                    context.startActivity(I, optionsCompat.toBundle());
-                }
-                else {
-                    context.startActivity(I);
+                        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, holder.imageFile, holder.imageFile.getTransitionName());
+                        context.startActivity(I, optionsCompat.toBundle());
+                    }
                 }
             }
         });
 
-        ((MyViewHolder) holder).otherProfilePic.setOnClickListener(new View.OnClickListener() {
+        holder.otherProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                Bundle b = new Bundle();
@@ -177,28 +152,56 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
             }
         });
 
-//            !chatList.getFileURL().isEmpty() && chatList.getFileURL() != null
-        (holder).message.setText(Html.fromHtml(chatList.getMessage()));
-//        if (chatList.getMessage().equals("")) {
-//            (holder).message.setVisibility(View.GONE);
-//        }
-        Glide.with(context)
-                .load(chatList.getFileURL())
-                .fitCenter()
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .into(holder.imageFile);
-        if (chatList.getFileURL().isEmpty()) {
+        holder.fileImageClipper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!chatList.getFileURL().equals("")) {
+                    if (chatList.getFileType().equals("pdf")) {
+                        Intent intent = new Intent(context, OpenPDFActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("PDFTitle", chatList.getFileName());
+                        bundle.putString("PDFURL", chatList.getFileURL());
+                        intent.putExtras(bundle);
+                        context.startActivity(intent);
+                    }
+                }
+            }
+        });
+
+        if (!chatList.getFileURL().equals("")) {
+            holder.message.setVisibility(View.GONE);
+            if (chatList.getFileType().equals("pdf")) {
+                holder.imageClipper.setVisibility(View.GONE);
+                holder.fileImageClipper.setVisibility(View.VISIBLE);
+                holder.fileName.setVisibility(View.VISIBLE);
+
+                holder.fileName.setText(chatList.getFileName());
+            } else {
+                holder.imageClipper.setVisibility(View.VISIBLE);
+                holder.fileImageClipper.setVisibility(View.GONE);
+                holder.fileName.setVisibility(View.GONE);
+
+                Glide.with(context)
+                        .load(chatList.getFileURL())
+                        .fitCenter()
+                        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .into(holder.imageFile);
+            }
+        } else {
             holder.message.setVisibility(View.VISIBLE);
             holder.imageClipper.setVisibility(View.GONE);
-        } else {
-            holder.message.setVisibility(View.GONE);
-            holder.imageClipper.setVisibility(View.VISIBLE);
+            holder.fileImageClipper.setVisibility(View.GONE);
+            holder.fileName.setVisibility(View.GONE);
+
+            (holder).message.setText(Html.fromHtml(chatList.getMessage()));
         }
+
         if (position == chatsList.size() - 1) {
             holder.divider.setVisibility(View.GONE);
         } else {
             holder.divider.setVisibility(View.VISIBLE);
         }
+
         holder.time.setText(Date.getRelativeTimeSpan(chatList.getDatestamp()));
 
         if (chatList.isMine()) {
@@ -227,38 +230,6 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
                         .bitmapTransform(new CropCircleTransformation(context))
                         .into(holder.otherProfilePic);
             }
-
-//            try {
-//                if (chatsList.get(position + 1).isMine()) {
-//                    holder.divider.setVisibility(View.GONE);
-//                    holder.time.setVisibility(View.GONE);
-//                    if (chatList.getFileURL().equals("")) {
-//                        holder.imageClipper.setVisibility(View.GONE);
-//                    } else {
-//                        holder.message.setVisibility(View.GONE);
-//                    }
-//                }
-//            } catch (Exception e) {
-//                Log.d("Out of Range", "Out of Range");
-//            }
-//
-//            try {
-//                if (chatsList.get(position - 1).isMine()) {
-//                    holder.otherProfilePic.setVisibility(View.GONE);
-//                    holder.name.setVisibility(View.GONE);
-//                    if (chatList.getFileURL().equals("")) {
-//                        holder.imageClipper.setVisibility(View.GONE);
-//                    } else {
-//                        holder.message.setVisibility(View.GONE);
-//                    }
-//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
-//                    marginParams.setMargins(210, 0, 0, 0);
-//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
-//                    holder.layout.setLayoutParams(layoutParams);
-//                }
-//            } catch (Exception e) {
-//                Log.d("Out of Range", "Out of Range");
-//            }
         } else {
             holder.name.setText(chatTitle);
             Drawable textDrawable;
@@ -283,59 +254,7 @@ public class ChatRowAdapter extends RecyclerView.Adapter<ChatRowAdapter.MyViewHo
                         .bitmapTransform(new CropCircleTransformation(context))
                         .into(holder.otherProfilePic);
             }
-
-//            try {
-//                if (!chatsList.get(position + 1).isMine()) {
-//                    holder.divider.setVisibility(View.GONE);
-//                    holder.time.setVisibility(View.GONE);
-//                    if (chatList.getFileURL().equals("")) {
-//                        holder.imageClipper.setVisibility(View.GONE);
-//                    } else {
-//                        holder.message.setVisibility(View.GONE);
-//                    }
-//                }
-//            } catch (Exception e) {
-//                Log.d("Out of Range", "Out of Range");
-//            }
-//
-//            try {
-//                if (!chatsList.get(position - 1).isMine()) {
-//                    holder.otherProfilePic.setVisibility(View.GONE);
-//                    holder.name.setVisibility(View.GONE);
-//                    if (chatList.getFileURL().equals("")) {
-//                        holder.imageClipper.setVisibility(View.GONE);
-//                    } else {
-//                        holder.message.setVisibility(View.GONE);
-//                    }
-//                    ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(holder.layout.getLayoutParams());
-//                    marginParams.setMargins(210, 0, 0, 0);
-//                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
-//                    holder.layout.setLayoutParams(layoutParams);
-//                }
-//            } catch (Exception e) {
-//                Log.d("Out of Range", "Out of Range");
-//            }
         }
-
-//        if (!chatList.getFileURL().equals("")){
-//            ((MyViewHolder) holder).message.setVisibility(View.GONE);
-//            if (chatList.isMine()) {
-//                ((MyViewHolder) holder).layout.setGravity(Gravity.END);
-//                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
-//                ((MyViewHolder) holder).otherProfilePic.setVisibility(View.GONE);
-//                imageBackgroundForIsMine(((MyViewHolder) holder), position);
-//
-//            } else {
-//                ((MyViewHolder) holder).layout.setGravity(Gravity.START);
-//                ((MyViewHolder) holder).imageFile.setVisibility(View.VISIBLE);
-//                imageBackgroundForNotIsMine(((MyViewHolder) holder), position);
-//            }
-//        }else{
-//            ((MyViewHolder) holder).imageFile.setVisibility(View.GONE);
-//            ((MyViewHolder) holder).message.setVisibility(View.VISIBLE);
-//            ((MyViewHolder) holder).message.setText(chatList.getMessage());
-//            chatBubbleBackground(((MyViewHolder) holder), position);
-//        }
     }
 
     public int getItemCount() {

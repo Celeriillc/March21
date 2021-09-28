@@ -182,7 +182,7 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
                                 if (StringComparer.contains(query, searchSubject)) {
                                     if (!teachersList.containsKey(teacherKey)) {
                                         SearchResultsRow searchResultsRow = new SearchResultsRow(teacherKey, searchSubject, "", teacherPicURL, "Teacher");
-                                        if (!teacher.getDeleted()) {
+                                        if (!teacher.getIsDeleted()) {
                                             searchResultsRowList.add(searchResultsRow);
                                         }
                                         teacherMap.add(teacherKey);

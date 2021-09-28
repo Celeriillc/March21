@@ -158,14 +158,14 @@ public class ParentEMeetingConcludedMeetingsListFragment extends Fragment {
                         recyclerView.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);
                         errorLayout.setVisibility(View.VISIBLE);
-                        errorLayoutText.setText(Html.fromHtml("You do not have any concluded meetings at the moment. Concluded Meetings from your child(ren)'s school(s) will appear here."));
+                        errorLayoutText.setText(Html.fromHtml("You do not have any concluded meetings at the moment. Concluded meetings from your child(ren)'s school(s) will appear here."));
                     }
                 } else {
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText(Html.fromHtml("You do not have any concluded meetings at the moment. Concluded Meetings from your child(ren)'s school(s) will appear here."));
+                    errorLayoutText.setText(Html.fromHtml("You do not have any concluded meetings at the moment. Concluded meetings from your child(ren)'s school(s) will appear here."));
                 }
             }
 

@@ -5,7 +5,7 @@ package com.celerii.celerii.models;
  */
 
 public class Chats {
-    String message, messageID, senderID, receiverID, datestamp, sortableDate, fileURL, otherProfilePicURL;
+    String message, messageID, senderID, receiverID, datestamp, sortableDate, fileURL, fileType, fileName, otherProfilePicURL;
     boolean received, mine, isRow, seen;
 
     public Chats() {
@@ -16,19 +16,23 @@ public class Chats {
         this.datestamp = "";
         this.sortableDate = "";
         this.fileURL = "";
+        this.fileType = "";
+        this.fileName = "";
         this.otherProfilePicURL = "";
         this.received = false;
         this.mine = false;
         this.seen = false;
     }
 
-    public Chats(String message, String senderID, String receiverID, String datestamp, String sortableDate, boolean seen, boolean mine, String fileURL, String otherProfilePicURL, boolean isRow) {
+    public Chats(String message, String senderID, String receiverID, String datestamp, String sortableDate, boolean seen, boolean mine, String fileURL, String fileType, String fileName, String otherProfilePicURL, boolean isRow) {
         this.message = message;
         this.senderID = senderID;
         this.receiverID = receiverID;
         this.datestamp = datestamp;
         this.sortableDate = sortableDate;
         this.fileURL = fileURL;
+        this.fileType = fileType;
+        this.fileName = fileName;
         this.otherProfilePicURL = otherProfilePicURL;
         this.seen = seen;
         this.mine = mine;
@@ -81,6 +85,22 @@ public class Chats {
 
     public void setFileURL(String fileURL) {
         this.fileURL = fileURL;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getOtherProfilePicURL() {

@@ -1304,6 +1304,12 @@ public class EnterResultsActivity extends AppCompatActivity {
     };
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
     }

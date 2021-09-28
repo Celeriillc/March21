@@ -1,17 +1,24 @@
 package com.celerii.celerii.adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Html;
+import android.text.Spanned;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.celerii.celerii.Activities.Newsletters.NewsletterDetailActivity;
-import com.celerii.celerii.Activities.Newsletters.NewsletterDetailKTActivity;
+import com.celerii.celerii.Activities.Utility.OpenPDFActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.models.NewsletterRow;
@@ -77,15 +84,17 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
         holder.clickableView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, NewsletterDetailKTActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("title", newsletterRow.getNewsletterTitle());
-                bundle.putString("imageURL", newsletterRow.getNewsletterHeaderImageURL());
-                bundle.putString("date", newsletterRow.getNewsletterDate());
-                bundle.putString("poster", newsletterRow.getSchoolID());
-                bundle.putString("body", newsletterRow.getNewsletterBody());
-                intent.putExtras(bundle);
-                context.startActivity(intent);
+                if (newsletterRow.getNewsletterPdfURL().trim().equals("")) {
+                    String messageString = "We couldn't find this newsletter.";
+                    showDialogWithMessage(Html.fromHtml(messageString));
+                } else {
+                    Intent intent = new Intent(context, OpenPDFActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("PDFTitle", newsletterRow.getNewsletterTitle());
+                    bundle.putString("PDFURL", newsletterRow.getNewsletterPdfURL());
+                    intent.putExtras(bundle);
+                    context.startActivity(intent);
+                }
             }
         });
     }
@@ -93,5 +102,32 @@ public class NewsletterRowAdapter extends RecyclerView.Adapter<NewsletterRowAdap
     @Override
     public int getItemCount() {
         return newsletterRowsList.size();
+    }
+
+    void showDialogWithMessage (Spanned messageString) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 }

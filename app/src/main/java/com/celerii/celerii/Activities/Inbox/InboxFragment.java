@@ -285,31 +285,34 @@ public class InboxFragment extends Fragment {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
                                         Parent parent = dataSnapshot.getValue(Parent.class);
-                                        newMessage.setName(parent.getFirstName() + " " + parent.getLastName());
-                                        newMessage.setProfilepicUrl(parent.getProfilePicURL());
-                                    } else {
-                                        newMessage.setName("Deleted User");
-                                        newMessage.setProfilepicUrl("");
-                                    }
 
-                                    inboxList.add(newMessage);
-
-                                    if (subList.size() == inboxList.size()) {
-                                        if (inboxList.size() > 1) {
-                                            Collections.sort(inboxList, new Comparator<MessageList>() {
-                                                @Override
-                                                public int compare(MessageList o1, MessageList o2) {
-                                                    return o1.getSortableTime().compareTo(o2.getSortableTime());
-                                                }
-                                            });
+                                        if (!parent.getIsDeleted()) {
+                                            newMessage.setName(parent.getFirstName() + " " + parent.getLastName());
+                                            newMessage.setProfilepicUrl(parent.getProfilePicURL());
+                                        } else {
+                                            newMessage.setName("Deleted User");
+                                            newMessage.setProfilepicUrl("");
                                         }
-                                        Collections.reverse(inboxList);
-                                        inboxList.add(0, new MessageList());
-                                        Gson gson = new Gson();
-                                        String json = gson.toJson(inboxList);
-                                        sharedPreferencesManager.setMessages(json);
-                                        mAdapter.notifyDataSetChanged();
-                                        mySwipeRefreshLayout.setRefreshing(false);
+
+                                        inboxList.add(newMessage);
+
+                                        if (subList.size() == inboxList.size()) {
+                                            if (inboxList.size() > 1) {
+                                                Collections.sort(inboxList, new Comparator<MessageList>() {
+                                                    @Override
+                                                    public int compare(MessageList o1, MessageList o2) {
+                                                        return o1.getSortableTime().compareTo(o2.getSortableTime());
+                                                    }
+                                                });
+                                            }
+                                            Collections.reverse(inboxList);
+                                            inboxList.add(0, new MessageList());
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(inboxList);
+                                            sharedPreferencesManager.setMessages(json);
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                        }
                                     }
                                 }
 
@@ -325,31 +328,34 @@ public class InboxFragment extends Fragment {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
                                         School school = dataSnapshot.getValue(School.class);
-                                        newMessage.setName(school.getSchoolName());
-                                        newMessage.setProfilepicUrl(school.getProfilePhotoUrl());
-                                    } else {
-                                        newMessage.setName("Deleted User");
-                                        newMessage.setProfilepicUrl("");
-                                    }
 
-                                    inboxList.add(newMessage);
-
-                                    if (subList.size() == inboxList.size()) {
-                                        if (inboxList.size() > 1) {
-                                            Collections.sort(inboxList, new Comparator<MessageList>() {
-                                                @Override
-                                                public int compare(MessageList o1, MessageList o2) {
-                                                    return o1.getSortableTime().compareTo(o2.getSortableTime());
-                                                }
-                                            });
+                                        if (!school.getIsDeleted()) {
+                                            newMessage.setName(school.getSchoolName());
+                                            newMessage.setProfilepicUrl(school.getProfilePhotoUrl());
+                                        } else {
+                                            newMessage.setName("Deleted User");
+                                            newMessage.setProfilepicUrl("");
                                         }
-                                        Collections.reverse(inboxList);
-                                        inboxList.add(0, new MessageList());
-                                        Gson gson = new Gson();
-                                        String json = gson.toJson(inboxList);
-                                        sharedPreferencesManager.setMessages(json);
-                                        mAdapter.notifyDataSetChanged();
-                                        mySwipeRefreshLayout.setRefreshing(false);
+
+                                        inboxList.add(newMessage);
+
+                                        if (subList.size() == inboxList.size()) {
+                                            if (inboxList.size() > 1) {
+                                                Collections.sort(inboxList, new Comparator<MessageList>() {
+                                                    @Override
+                                                    public int compare(MessageList o1, MessageList o2) {
+                                                        return o1.getSortableTime().compareTo(o2.getSortableTime());
+                                                    }
+                                                });
+                                            }
+                                            Collections.reverse(inboxList);
+                                            inboxList.add(0, new MessageList());
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(inboxList);
+                                            sharedPreferencesManager.setMessages(json);
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                        }
                                     }
                                 }
 
@@ -365,32 +371,35 @@ public class InboxFragment extends Fragment {
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
                                         Admin admin = dataSnapshot.getValue(Admin.class);
-                                        newMessage.setName(admin.getDisplayName());
-                                        newMessage.setProfilepicUrl(admin.getProfilePictureURL());
+
+                                        if (!admin.getIsDeleted()) {
+                                            newMessage.setName(admin.getDisplayName());
+                                            newMessage.setProfilepicUrl(admin.getProfilePictureURL());
 //                                        newMessage.setOtherParty("Admin");
-                                    } else {
-                                        newMessage.setName("Deleted User");
-                                        newMessage.setProfilepicUrl("");
-                                    }
-
-                                    inboxList.add(newMessage);
-
-                                    if (subList.size() == inboxList.size()) {
-                                        if (inboxList.size() > 1) {
-                                            Collections.sort(inboxList, new Comparator<MessageList>() {
-                                                @Override
-                                                public int compare(MessageList o1, MessageList o2) {
-                                                    return o1.getSortableTime().compareTo(o2.getSortableTime());
-                                                }
-                                            });
+                                        } else {
+                                            newMessage.setName("Deleted User");
+                                            newMessage.setProfilepicUrl("");
                                         }
-                                        Collections.reverse(inboxList);
-                                        inboxList.add(0, new MessageList());
-                                        Gson gson = new Gson();
-                                        String json = gson.toJson(inboxList);
-                                        sharedPreferencesManager.setMessages(json);
-                                        mAdapter.notifyDataSetChanged();
-                                        mySwipeRefreshLayout.setRefreshing(false);
+
+                                        inboxList.add(newMessage);
+
+                                        if (subList.size() == inboxList.size()) {
+                                            if (inboxList.size() > 1) {
+                                                Collections.sort(inboxList, new Comparator<MessageList>() {
+                                                    @Override
+                                                    public int compare(MessageList o1, MessageList o2) {
+                                                        return o1.getSortableTime().compareTo(o2.getSortableTime());
+                                                    }
+                                                });
+                                            }
+                                            Collections.reverse(inboxList);
+                                            inboxList.add(0, new MessageList());
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(inboxList);
+                                            sharedPreferencesManager.setMessages(json);
+                                            mAdapter.notifyDataSetChanged();
+                                            mySwipeRefreshLayout.setRefreshing(false);
+                                        }
                                     }
                                 }
 

@@ -376,7 +376,6 @@ public class ELibraryUploadBookActivity extends AppCompatActivity {
         }
     }
 
-
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
 
@@ -506,7 +505,7 @@ public class ELibraryUploadBookActivity extends AppCompatActivity {
         uploadTask.addOnCanceledListener(new OnCanceledListener() {
             @Override
             public void onCanceled() {
-
+                alertDialog.dismiss();
             }
         });
 

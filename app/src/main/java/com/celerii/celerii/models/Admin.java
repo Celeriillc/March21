@@ -80,7 +80,7 @@ public class Admin {
         this.gender = gender;
     }
 
-    public Boolean getDeleted() {
+    public Boolean getIsDeleted() {
         return isDeleted;
     }
 

@@ -104,7 +104,7 @@ public class EditPhoneNumberActivity extends AppCompatActivity {
 
     private boolean validatePhoneNumber(String accountTypeString) {
         if (accountTypeString.isEmpty()) {
-            String messageString = "You need to enter your phone number so we can call to confirm your pickup requests and pickup request location";
+            String messageString = "You need to enter your phone number so we can send you a verification code";
             showDialogWithMessage(messageString);
             return false;
         }

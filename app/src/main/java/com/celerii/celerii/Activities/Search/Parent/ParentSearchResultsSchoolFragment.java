@@ -23,7 +23,6 @@ import com.celerii.celerii.helperClasses.StringComparer;
 import com.celerii.celerii.models.School;
 import com.celerii.celerii.models.SearchExistingIncomingAndOutgoingConnections;
 import com.celerii.celerii.models.SearchResultsRow;
-import com.celerii.celerii.models.Student;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -151,7 +150,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
                             searchMap.put(key, 1);
                             String location = "";
                             SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
-                            if (!school.getDeleted()) {
+                            if (!school.getIsDeleted()) {
                                 searchResultsRowList.add(searchHistoryRow);
                             }
                             schoolMap.add(key);
@@ -173,7 +172,7 @@ public class ParentSearchResultsSchoolFragment extends Fragment {
                                     searchMap.put(key, 1);
                                     String location = "";
                                     SearchResultsRow searchHistoryRow = new SearchResultsRow(key, school.getSchoolName(), location, school.getProfilePhotoUrl(), "School");
-                                    if (!school.getDeleted()) {
+                                    if (!school.getIsDeleted()) {
                                         searchResultsRowList.add(searchHistoryRow);
                                     }
                                     schoolMap.add(key);

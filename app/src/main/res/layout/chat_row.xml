@@ -69,6 +69,52 @@
                 android:scaleType="centerCrop" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/fileimageclipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:background="@drawable/rounded_button_white_dark_gray_border">
+
+            <TextView
+                android:id="@+id/filename"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:text="The Adventures of Solomon Grandi.pdf"/>
+
+<!--            <RelativeLayout-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content">-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/fileimage"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="40dp"-->
+<!--                    android:layout_gravity="center"/>-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/fileicon"-->
+<!--                    android:layout_width="30dp"-->
+<!--                    android:layout_height="30dp"-->
+<!--                    android:layout_centerInParent="true"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:src="@drawable/ic_baseline_picture_as_pdf_purple_24"/>-->
+
+<!--            </RelativeLayout>-->
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/time"
             android:layout_width="wrap_content"

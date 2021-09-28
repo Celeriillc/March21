@@ -166,9 +166,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             case "Event":
                 notificationId = 4;
                 break;
-            case "EventReminder":
-                notificationId = 14;
-                break;
             case "Newsletter":
                 notificationId = 5;
                 break;

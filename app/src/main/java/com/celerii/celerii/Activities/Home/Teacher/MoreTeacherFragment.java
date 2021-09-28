@@ -684,7 +684,7 @@ public class MoreTeacherFragment extends Fragment {
         String ttb = "My TimeTable";
         String ecl = "E Classroom";
         String elb = "E Library";
-        String ptm = "PT Meeting";
+        String ptm = "PT Meetings";
         String mpef = "My Performance Analytics";
         String cpef = "Class Academic Records";
         String evt = "Events";

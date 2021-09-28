@@ -1,10 +1,12 @@
 package com.celerii.celerii.Activities.Inbox;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,20 +22,25 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.provider.OpenableColumns;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.Activities.ELibrary.Teacher.ELibraryUploadBookActivity;
 import com.celerii.celerii.Activities.Home.Parent.ParentMainActivityTwo;
 import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.R;
@@ -46,8 +53,10 @@ import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+import com.celerii.celerii.helperClasses.ShowDialogWithMessage;
 import com.celerii.celerii.models.Chats;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
+import com.celerii.celerii.models.ELibraryMaterialsModel;
 import com.celerii.celerii.models.MessageList;
 import com.celerii.celerii.models.NewChatRowModel;
 import com.celerii.celerii.models.Parent;
@@ -56,6 +65,7 @@ import com.celerii.celerii.models.Student;
 import com.celerii.celerii.models.StudentsSchoolsClassesandTeachersModel;
 import com.celerii.celerii.models.Teacher;
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -110,6 +120,7 @@ public class ChatActivity extends AppCompatActivity {
     TextView errorLayoutText;
     ImageView sendMessage, attachments, profilePicture;
     EditText editMessage;
+    String fileType = "", fileName;
     Boolean schoolAllowsParentTeacherMessaging = true;
 
     File file;
@@ -208,7 +219,8 @@ public class ChatActivity extends AppCompatActivity {
                 int width = metrics.widthPixels;
                 int height = metrics.heightPixels;
                 final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.custom_dialog_layout_select_image_from_gallery_camera_two);
+                dialog.setContentView(R.layout.custom_dialog_layout_select_file_for_messages);
+                LinearLayout pdf = (LinearLayout) dialog.findViewById(R.id.pdf);
                 LinearLayout camera = (LinearLayout) dialog.findViewById(R.id.camera);
                 LinearLayout gallery = (LinearLayout) dialog.findViewById(R.id.gallery);
                 Button cancel = (Button) dialog.findViewById(R.id.cancel);
@@ -218,6 +230,14 @@ public class ChatActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     return;
                 }
+
+                pdf.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getPDFFromDevice();
+                        dialog.dismiss();
+                    }
+                });
 
                 camera.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -518,7 +538,11 @@ public class ChatActivity extends AppCompatActivity {
         if (fileURL.isEmpty()) {
             message = editMessage.getText().toString().trim();
         } else {
-            message = "Image";
+            if (fileType.equals("image")) {
+                message = "Image";
+            } else {
+                message = "PDF";
+            }
         }
 
         if (message.isEmpty()) {
@@ -576,8 +600,8 @@ public class ChatActivity extends AppCompatActivity {
         boolean isRow = false;
         String date = Date.getDate();
         String sortableDate = Date.convertToSortableDate(date);
-        final Chats senderChat = new Chats(message, senderId, receiverId, date, sortableDate, isSeen, isMine, fileURL, "", isRow);
-        final Chats receiverChat = new Chats(message, senderId, receiverId, date, sortableDate, isSeen, !isMine, fileURL, sharedPreferencesManager.getMyPicURL(), isRow);
+        final Chats senderChat = new Chats(message, senderId, receiverId, date, sortableDate, isSeen, isMine, fileURL, fileType, fileName, "", isRow);
+        final Chats receiverChat = new Chats(message, senderId, receiverId, date, sortableDate, isSeen, !isMine, fileURL, fileType, fileName, sharedPreferencesManager.getMyPicURL(), isRow);
 
         Map<String, Object> newChatMessageMap = new HashMap<String, Object>();
         newChatMessageMap.put("Messages/" + senderId + "/" + receiverNode + "/" + senderKey, senderChat);
@@ -614,6 +638,25 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void getPDFFromDevice() {
+        if (ContextCompat.checkSelfPermission(ChatActivity.this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // No explanation needed; request the permission
+            ActivityCompat.requestPermissions(ChatActivity.this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUESTPPERMISSIONCODEWRITEEXTERNALSTORAGE);
+
+        } else {
+            // Permission has already been granted
+            Intent pdfIntent = new Intent();
+            pdfIntent.setAction(Intent.ACTION_GET_CONTENT);
+            pdfIntent.setType("application/pdf");
+            startActivityForResult(Intent.createChooser(pdfIntent, "Select PDF"), 3);
+        }
     }
 
     public void ImageCropFunction() {
@@ -794,6 +837,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Uri> task) {
                             String downloadURL = "";
                             downloadURL = task.getResult().toString();
+                            fileType = "image";
                             postMessageToFirebase(downloadURL);
                             progressDialog.dismiss();
                         }
@@ -830,7 +874,107 @@ public class ChatActivity extends AppCompatActivity {
 //                    return;
                 }
             }
+        } else if (requestCode == 3) {
+            if(resultCode == RESULT_OK) {
+                if (data != null) {
+                    uri = data.getData();
+
+                    if (uri != null) {
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this.context);
+                        final View dialogView = LayoutInflater.from(this.context).inflate(R.layout.custom_progress_dialog_for_upload, null);
+                        final TextView header = (TextView) dialogView.findViewById(R.id.header);
+                        final ProgressBar progressBar = (ProgressBar) dialogView.findViewById(R.id.progressbar);
+                        final ImageView cancelUpload = (ImageView) dialogView.findViewById(R.id.cancelupload);
+                        progressBar.setProgress(0);
+                        dialogBuilder.setView(dialogView);
+                        dialogBuilder.setCancelable(false);
+                        AlertDialog alertDialog = dialogBuilder.create();
+                        alertDialog.show();
+                        alertDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                        mStorageReference = mFirebaseStorage.getReference().child("Chat/" + mFirebaseUser.getUid() + "/" + IDofChatPartner + "/" + getFileName(uri));
+                        UploadTask uploadTask = mStorageReference.putFile(uri);
+                        Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                            @Override
+                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                if (!task.isSuccessful()) {
+                                    alertDialog.dismiss();
+                                    String messageString = "We could not upload this file at this time, please try again later.";
+                                    showDialogWithMessage(Html.fromHtml(messageString));
+                                    return null;
+                                }
+
+                                return mStorageReference.getDownloadUrl();
+                            }
+                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    String downloadURL = "";
+                                    downloadURL = task.getResult().toString();
+
+                                    fileType = "pdf";
+                                    fileName = getFileName(uri);
+                                    postMessageToFirebase(downloadURL);
+                                    alertDialog.dismiss();
+                                }
+                            }
+                        });
+
+                        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                final int progress = (int) ((100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount());
+                                progressBar.setProgress(progress);
+                            }
+                        });
+
+                        uploadTask.addOnCanceledListener(new OnCanceledListener() {
+                            @Override
+                            public void onCanceled() {
+                                alertDialog.dismiss();
+                            }
+                        });
+
+                        cancelUpload.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                uploadTask.cancel();
+                                alertDialog.dismiss();
+                            }
+                        });
+                    }
+                }
+            }
         }
+    }
+
+    private String getFileName(Uri uri) {
+        String uriString = uri.toString();
+
+        File myFile = new File(uriString);
+        String path = myFile.getAbsolutePath();
+        String displayName = null;
+
+        if (uriString.startsWith("content://")) {
+            Cursor cursor = null;
+            try {
+                cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } catch (Exception e) {
+                displayName = Date.convertToSortableDate(Date.getDate());
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        } else if (uriString.startsWith("file://")) {
+            displayName = myFile.getName();
+        }
+
+        return displayName;
     }
 
     void showDialogWithMessage (Spanned messageString) {
