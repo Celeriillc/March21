@@ -79,7 +79,8 @@
             android:paddingBottom="15dp"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
-            android:background="@drawable/rounded_button_white_dark_gray_border">
+            android:background="@drawable/rounded_button_white_dark_gray_border"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/filename"
