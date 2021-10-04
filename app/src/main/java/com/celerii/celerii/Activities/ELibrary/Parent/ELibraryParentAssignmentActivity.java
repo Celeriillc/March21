@@ -312,11 +312,11 @@ public class ELibraryParentAssignmentActivity extends AppCompatActivity {
         takeTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
-                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-                    showDialogWithMessage(Html.fromHtml(messageString));
-                    return;
-                }
+//                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+//                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//                    showDialogWithMessage(Html.fromHtml(messageString));
+//                    return;
+//                }
 
                 if (materialUploader.equals("Celerii")) {
                     Gson gson = new Gson();

@@ -163,7 +163,13 @@ public class PerformanceCurrentAdapter extends RecyclerView.Adapter<RecyclerView
             if (performanceCurrentModelList.size() <= 1){
                 ((HeaderViewHolder) holder).noDataLayout.setVisibility(View.VISIBLE);
                 String message = "There are no academic records for the "  + "<b>" + Term.Term(performanceCurrentHeader.getTerm()) + "</b>" + " of " +  "<b>" +  performanceCurrentHeader.getYear() + "</b>" + " yet";
-                ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(message));
+
+                if (!performanceCurrentHeader.getErrorMessage().equals("")) {
+                    ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(performanceCurrentHeader.getErrorMessage()));
+                } else {
+                    ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(message));
+                }
+
                 ((HeaderViewHolder) holder).chiefLayout.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             } else {
                 ((HeaderViewHolder) holder).noDataLayout.setVisibility(View.GONE);

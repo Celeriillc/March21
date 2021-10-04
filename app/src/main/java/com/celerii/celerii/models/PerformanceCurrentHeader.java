@@ -5,9 +5,18 @@ package com.celerii.celerii.models;
  */
 
 public class PerformanceCurrentHeader {
-    String term, year, termAverage, classAverage, maxPossibleAverage, className, school, student;
+    String term, year, termAverage, classAverage, maxPossibleAverage, className, school, student, errorMessage;
 
     public PerformanceCurrentHeader() {
+        this.term = "";
+        this.year = "";
+        this.termAverage = "";
+        this.classAverage = "";
+        this.maxPossibleAverage = "";
+        this.className = "";
+        this.school = "";
+        this.student = "";
+        this.errorMessage = "";
     }
 
     public PerformanceCurrentHeader(String term, String year, String termAverage, String classAverage, String maxPossibleAverage, String className, String school, String student) {
@@ -83,5 +92,13 @@ public class PerformanceCurrentHeader {
 
     public void setStudent(String student) {
         this.student = student;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

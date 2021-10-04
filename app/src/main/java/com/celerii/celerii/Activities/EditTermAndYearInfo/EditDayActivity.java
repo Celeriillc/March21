@@ -171,11 +171,11 @@ public class EditDayActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            if (selectedDay == null) {return false;}
-            Intent intent = new Intent();
-
-            intent.putExtra("Selected Day", selectedDay);
-            setResult(RESULT_OK, intent);
+//            if (selectedDay == null) {return false;}
+//            Intent intent = new Intent();
+//
+//            intent.putExtra("Selected Day", selectedDay);
+//            setResult(RESULT_OK, intent);
             finish();
         }
         else if (id == R.id.action_send){

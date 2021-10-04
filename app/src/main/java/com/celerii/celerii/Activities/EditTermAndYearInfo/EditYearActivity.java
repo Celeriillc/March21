@@ -171,11 +171,11 @@ public class EditYearActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            if (selectedYear == null) {return false;}
-            Intent intent = new Intent();
-
-            intent.putExtra("Selected Year", selectedYear);
-            setResult(RESULT_OK, intent);
+//            if (selectedYear == null) {return false;}
+//            Intent intent = new Intent();
+//
+//            intent.putExtra("Selected Year", selectedYear);
+//            setResult(RESULT_OK, intent);
             finish();
         }
         else if (id == R.id.action_send){

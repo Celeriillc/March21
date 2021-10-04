@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -59,6 +61,9 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
 //    Button message;
 
     String teacherID = "", teacherName = "";
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Teacher Profile";
@@ -152,16 +157,22 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
     }
 
     void loadFromFirebase(){
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(R.string.no_internet_message_for_offline_download);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference("Teacher").child(teacherID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -209,6 +220,7 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                         }
 
                         mDatabaseReference = mFirebaseDatabase.getReference("Teacher Bio").child(teacherID);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -221,10 +233,11 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                                     teacherBio.setText("No available bio");
                                 }
 
-//                                                if (!maritalStatusShowStatus) { maritalStatusLayout.setVisibility(View.GONE); }
+//                                if (!maritalStatusShowStatus) { maritalStatusLayout.setVisibility(View.GONE); }
 
                                 superLayout.setVisibility(View.VISIBLE);
                                 progressLayout.setVisibility(View.GONE);
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 errorLayout.setVisibility(View.GONE);
                             }
@@ -263,6 +276,7 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                     } else {
                         superLayout.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         mySwipeRefreshLayout.setRefreshing(false);
                         errorLayout.setVisibility(View.VISIBLE);
                         errorLayoutText.setText("This account has been deleted by the owner");
@@ -271,6 +285,7 @@ public class TeacherProfileOneActivity extends AppCompatActivity {
                 else{
                     superLayout.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     errorLayout.setVisibility(View.VISIBLE);
                     errorLayoutText.setText("This account has been deleted by the owner");

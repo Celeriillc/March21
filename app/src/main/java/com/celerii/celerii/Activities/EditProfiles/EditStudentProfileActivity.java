@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Html;
 import android.text.Spanned;
@@ -111,6 +112,9 @@ public class EditStudentProfileActivity extends AppCompatActivity {
 
     String childID = "";
     String childFirstName = "";
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Edit Student Profile";
@@ -236,16 +240,30 @@ public class EditStudentProfileActivity extends AppCompatActivity {
     }
 
     private void loadProfileInformation(){
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            superLayout.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference("Student").child(childID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -284,12 +302,14 @@ public class EditStudentProfileActivity extends AppCompatActivity {
                                 .into(profilePicturePrimary);
                     }
 
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     progressLayout.setVisibility(View.GONE);
                     superLayout.setVisibility(View.VISIBLE);
                     errorLayout.setVisibility(View.GONE);
                 }
                 else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     superLayout.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
@@ -301,6 +321,7 @@ public class EditStudentProfileActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 mySwipeRefreshLayout.setRefreshing(false);
                 superLayout.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
@@ -378,12 +399,6 @@ public class EditStudentProfileActivity extends AppCompatActivity {
             finish();
         }
         else if (id == R.id.action_save){
-            if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
-                String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-                showDialogWithMessage(Html.fromHtml(messageString));
-                return false;
-            }
-
             final String firstNameString = firstName.getText().toString().trim();
             final String lastNameString = lastName.getText().toString().trim();
 
@@ -418,9 +433,12 @@ public class EditStudentProfileActivity extends AppCompatActivity {
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                         progressDialog.dismiss();
                         if (databaseError == null) {
+                            if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                showDialogWithMessage(Html.fromHtml("<b>" + firstNameString + "</b>" + "'s profile has been successfully updated. " + R.string.offline_write_message));
+                            } else {
+                                showDialogWithMessage(Html.fromHtml("<b>" + firstNameString + "</b>" + "'s profile has been successfully updated"));
+                            }
                             UpdateDataFromFirebase.populateEssentials(context);
-                            String messageString = firstNameString + "</b>" + "'s profile has been successfully updated";
-                            showDialogWithMessage(Html.fromHtml(messageString));
                         } else {
                             String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
                             ShowDialogWithMessage.showDialogWithMessage(context, message);
@@ -428,6 +446,12 @@ public class EditStudentProfileActivity extends AppCompatActivity {
                     }
                 });
             } else {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(Html.fromHtml(messageString));
+                    return false;
+                }
+
                 mStorageReference = mFirebaseStorage.getReference().child("CeleriiProfilePicture/" + childID + "/profilepicture");
                 UploadTask uploadTask = mStorageReference.putBytes(byteArray);
                 Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {

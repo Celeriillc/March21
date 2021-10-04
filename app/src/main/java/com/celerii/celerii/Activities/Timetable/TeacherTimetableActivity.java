@@ -180,13 +180,13 @@ public class TeacherTimetableActivity extends AppCompatActivity {
     }
 
     void loadFromFirebaseParent() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-            showDialogWithMessage(messageString);
-            progressBar.setVisibility(View.GONE);
-            superLayout.setVisibility(View.VISIBLE);
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//            showDialogWithMessage(messageString);
+//            progressBar.setVisibility(View.GONE);
+//            superLayout.setVisibility(View.VISIBLE);
+//            return;
+//        }
 
         String activeKid = sharedPreferencesManager.getActiveKid();
 

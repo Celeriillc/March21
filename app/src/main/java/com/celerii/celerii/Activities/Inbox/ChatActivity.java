@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.text.Html;
 import android.text.Spanned;
@@ -136,6 +137,9 @@ public class ChatActivity extends AppCompatActivity {
     String nameOfChatPartner = "";
     String receiverNode = "";
     String parentActivity;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Chat";
@@ -299,13 +303,25 @@ public class ChatActivity extends AppCompatActivity {
     ArrayList<String> teacherList = new ArrayList<>();
     Boolean isDeleted = false;
     private void loadMessagesFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             Gson gson = new Gson();
@@ -333,6 +349,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -383,6 +400,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     mDatabaseReference = mFirebaseDatabase.getReference().child("School Teacher").child(schoolID);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -403,6 +421,7 @@ public class ChatActivity extends AppCompatActivity {
                     });
 
                     mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -433,6 +452,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void loadMessages() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(mFirebaseUser.getUid()).child(IDofChatPartner);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -451,17 +471,20 @@ public class ChatActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
 
                     if (recyclerView.getVisibility() == View.GONE) {
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         progressLayout.setVisibility(View.GONE);
                         recyclerView.setVisibility(View.VISIBLE);
                         errorLayout.setVisibility(View.GONE);
                     }
                 } else {
                     mDatabaseReference = mFirebaseDatabase.getReference().child("Admin").child(IDofChatPartner);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
                                 mDatabaseReference = mFirebaseDatabase.getReference().child("Messages").child(mFirebaseUser.getUid()).child("Admin");
+                                mDatabaseReference.keepSynced(true);
                                 mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -487,6 +510,7 @@ public class ChatActivity extends AppCompatActivity {
                                         }
 
                                         if (recyclerView.getVisibility() == View.GONE) {
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             progressLayout.setVisibility(View.GONE);
                                             recyclerView.setVisibility(View.VISIBLE);
                                             errorLayout.setVisibility(View.GONE);
@@ -500,6 +524,7 @@ public class ChatActivity extends AppCompatActivity {
                                 });
                             } else {
                                 if (recyclerView.getVisibility() == View.GONE) {
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     progressLayout.setVisibility(View.GONE);
                                     recyclerView.setVisibility(View.VISIBLE);
                                     errorLayout.setVisibility(View.GONE);
@@ -512,9 +537,6 @@ public class ChatActivity extends AppCompatActivity {
 
                         }
                     });
-
-
-
                 }
             }
 
@@ -526,11 +548,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void postMessageToFirebase(String fileURL) {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-            showDialogWithMessage(Html.fromHtml(messageString));
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//            showDialogWithMessage(Html.fromHtml(messageString));
+//            return;
+//        }
 
         DatabaseReference senderKeyDRef = mFirebaseDatabase.getReference().child("Messages").child(mFirebaseUser.getUid()).child(IDofChatPartner).push();
         final String senderKey = senderKeyDRef.getKey();
@@ -635,6 +657,11 @@ public class ChatActivity extends AppCompatActivity {
                 if (databaseError != null) {
                     String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
                     CustomToast.primaryBackgroundToast(context, message);
+                } else {
+                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                        String messageString = getString(R.string.offline_write_message);
+                        showDialogWithMessage(Html.fromHtml(messageString));
+                    }
                 }
             }
         });

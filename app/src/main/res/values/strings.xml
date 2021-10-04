@@ -34,5 +34,7 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="no_internet_message_for_offline_download">Your device is not connected to the internet. To enable offline mode for this page, visit this page with an active internet connection to allow us download the information to your phone for offline viewing.</string>
+    <string name="offline_write_message">Your device is in offline mode. Turn on your internet or wi-fi to sync with Celerii's cloud</string>
 
 </resources>

@@ -7,6 +7,8 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -75,6 +77,9 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
     String activeStudentID = "";
     String activeSubject = "";
     double previousScore;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Historical Academic Result Home";
@@ -158,14 +163,27 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
     HistoryPerformanceBody historyPerformanceBody;
 
     private void loadNewDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         counter = 0;
         overallTotal = 0.0;
@@ -177,6 +195,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -188,6 +207,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
 
                         if (subjectKey.equals(activeSubject)) {
                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID).child(subject_year_term);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -249,6 +269,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                             innerCounter = 0;
                                             for (final HistoryPerformanceBody historyPerformanceBody: historyPerformanceBodyList) {
                                                 mDatabaseReference = mFirebaseDatabase.getReference("Class").child(historyPerformanceBody.getClassID());
+                                                mDatabaseReference.keepSynced(true);
                                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -334,6 +355,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                                             header.setyList(y);
                                                             historyPerformanceBodyList.add(0, new HistoryPerformanceBody());
                                                             mAdapter.notifyDataSetChanged();
+                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                             progressLayout.setVisibility(View.GONE);
                                                             recyclerView.setVisibility(View.VISIBLE);
@@ -395,6 +417,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                                 header.setyList(y);
                                 historyPerformanceBodyList.add(0, new HistoryPerformanceBody());
                                 mAdapter.notifyDataSetChanged();
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 progressLayout.setVisibility(View.GONE);
                                 recyclerView.setVisibility(View.VISIBLE);
@@ -403,6 +426,7 @@ public class HistoryPerformanceActivity extends AppCompatActivity {
                         }
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

@@ -2,12 +2,16 @@ package com.celerii.celerii.Activities.StudentBehaviouralPerformance;
 
 import android.content.Context;
 import android.content.Intent;
+
+import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,6 +79,9 @@ public class BehaviouralResultActivity extends AppCompatActivity {
     String parentActivity;
     int totalPointsEarned, totalPointsFined, pointsEarnedThisTerm, pointsFinedThisTerm;
     int isNewCounter = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Behavioural Records";
@@ -265,14 +272,27 @@ public class BehaviouralResultActivity extends AppCompatActivity {
 
     int counter;
     void loadDetailsFromFirebase(){
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.GONE);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         updateBadges();
         behaviouralResultRowModelList.clear();
@@ -284,6 +304,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
         isNewCounter = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(activeStudentID).child("Reward");
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -292,6 +313,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(activeStudentID).child("Punishment");
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -302,6 +324,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                         final String year_term = year + "_" + term;
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(activeStudentID).child("Reward");
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.orderByChild("academicYear_Term").equalTo(year_term).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -314,6 +337,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                 }
 
                                 mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(activeStudentID).child("Punishment");
+                                mDatabaseReference.keepSynced(true);
                                 mDatabaseReference.orderByChild("academicYear_Term").equalTo(year_term).addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -336,6 +360,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                             counter = 0;
                                             for (final BehaviouralResultRowModel behaviouralResultRowModel : behaviouralResultRowModelList) {
                                                 mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(behaviouralResultRowModel.getClassID());
+                                                mDatabaseReference.keepSynced(true);
                                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -349,6 +374,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                                             for (final BehaviouralResultRowModel behaviouralResultRowModel: behaviouralResultRowModelList) {
                                                                 String key = behaviouralResultRowModel.getKey();
                                                                 mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordParentNotification").child(mFirebaseUser.getUid()).child(activeStudentID).child(key).child("status");
+                                                                mDatabaseReference.keepSynced(true);
                                                                 mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                                                     @Override
                                                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -378,10 +404,12 @@ public class BehaviouralResultActivity extends AppCompatActivity {
                                                                                 behaviouralResultRowModelList.add(0, new BehaviouralResultRowModel());
                                                                             }
 
+                                                                            behaviouralResultsHeaderModel.setErrorMessage("");
                                                                             mAdapter.notifyDataSetChanged();
                                                                             recyclerView.setVisibility(View.VISIBLE);
                                                                             progressLayout.setVisibility(View.GONE);
                                                                             errorLayout.setVisibility(View.GONE);
+                                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                                         }
                                                                     }
@@ -404,10 +432,12 @@ public class BehaviouralResultActivity extends AppCompatActivity {
 
                                         } else {
                                             behaviouralResultRowModelList.add(new BehaviouralResultRowModel());
+                                            behaviouralResultsHeaderModel.setErrorMessage("");
                                             mAdapter.notifyDataSetChanged();
                                             recyclerView.setVisibility(View.VISIBLE);
                                             progressLayout.setVisibility(View.GONE);
                                             errorLayout.setVisibility(View.GONE);
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                         }
                                     }
@@ -434,7 +464,7 @@ public class BehaviouralResultActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });

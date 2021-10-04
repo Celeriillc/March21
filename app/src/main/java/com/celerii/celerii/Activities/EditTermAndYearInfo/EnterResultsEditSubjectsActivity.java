@@ -279,20 +279,20 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            Intent intent = new Intent();
-
-            if (selectedSubject == null) {return false;}
-
-            if (activity.equals("WriteAttendance")) {
-                teacherTakeAttendanceSharedPreferences.setSubject(selectedSubject);
-            } else if (activity.equals("WriteResult")) {
-                teacherEnterResultsSharedPreferences.setSubject(selectedSubject);
-            } else if (activity.equals("ParentReadAttendance")) {
-                parentCheckAttendanceSharedPreferences.setSubject(selectedSubject);
-            }
-
-            intent.putExtra("Selected Subject", selectedSubject);
-            setResult(RESULT_OK, intent);
+//            Intent intent = new Intent();
+//
+//            if (selectedSubject == null) {return false;}
+//
+//            if (activity.equals("WriteAttendance")) {
+//                teacherTakeAttendanceSharedPreferences.setSubject(selectedSubject);
+//            } else if (activity.equals("WriteResult")) {
+//                teacherEnterResultsSharedPreferences.setSubject(selectedSubject);
+//            } else if (activity.equals("ParentReadAttendance")) {
+//                parentCheckAttendanceSharedPreferences.setSubject(selectedSubject);
+//            }
+//
+//            intent.putExtra("Selected Subject", selectedSubject);
+//            setResult(RESULT_OK, intent);
             finish();
         }
         else if (id == R.id.action_send){

@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,6 +68,9 @@ public class HistoryFragment extends Fragment {
     String activeStudentID = "";
     String activeStudent = "";
     String activeStudentName = "";
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Historical Academic Results";
@@ -230,14 +235,27 @@ public class HistoryFragment extends Fragment {
     HashMap<String, Double> subjectTotal = new HashMap<>();
     HashMap<String, Integer> subjectCount = new HashMap<>();
     private void loadNewDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         counter = 0;
         subjectTotal = new HashMap<>();
@@ -246,6 +264,7 @@ public class HistoryFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -254,6 +273,7 @@ public class HistoryFragment extends Fragment {
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         String subject_year_term = postSnapshot.getKey();
                         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID).child(subject_year_term);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -298,6 +318,7 @@ public class HistoryFragment extends Fragment {
 
                                     updateBadges();
                                     mAdapter.notifyDataSetChanged();
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     progressLayout.setVisibility(View.GONE);
                                     recyclerView.setVisibility(View.VISIBLE);
@@ -312,6 +333,7 @@ public class HistoryFragment extends Fragment {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

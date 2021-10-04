@@ -13,6 +13,9 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +35,7 @@ import com.celerii.celerii.adapters.CommentStoryAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -90,6 +94,9 @@ public class CommentStoryActivity extends AppCompatActivity {
     String comment, posterName, posterImageURL;
     int commentCounter = 0;
     Comment newComment = new Comment();
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Comment";
@@ -262,13 +269,22 @@ public class CommentStoryActivity extends AppCompatActivity {
                 commentRef.updateChildren(newCommentMap, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        hideKeyboard();
-                        recyclerView.scrollToPosition(0);
-//                        CustomToast.primaryBackgroundToast(CommentStoryActivity.this, "Your comment has been added");
-                        story.setNumberOfComments(story.getNumberOfComments() + 1);
-                        commentList.add(1, newComment);
-                        mAdapter.notifyDataSetChanged();
-                        addComment.setText(null);
+                        if (databaseError != null) {
+                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            showDialogWithMessage((message));
+                        } else {
+                            hideKeyboard();
+                            recyclerView.scrollToPosition(0);
+                            story.setNumberOfComments(story.getNumberOfComments() + 1);
+//                            commentList.add(1, newComment);
+//                            mAdapter.notifyDataSetChanged();
+                            addComment.setText(null);
+
+                            if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                String messageString = getString(R.string.offline_write_message);
+                                showDialogWithMessage((messageString));
+                            }
+                        }
                     }
                 });
             }
@@ -284,6 +300,7 @@ public class CommentStoryActivity extends AppCompatActivity {
     }
 
     private void loadCommentsFromFirebase() {
+
         Drawable textDrawable;
         String myName = sharedPreferencesManager.getMyFirstName() + " " + sharedPreferencesManager.getMyLastName();
         if (!myName.trim().isEmpty()) {
@@ -308,14 +325,27 @@ public class CommentStoryActivity extends AppCompatActivity {
                     .into(myProfilePic);
         }
 
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         DatabaseReference bottomNavBadgeRef = mFirebaseDatabase.getReference();
         HashMap<String, Object> bottomNavBadgeMap = new HashMap<String, Object>();
@@ -325,6 +355,7 @@ public class CommentStoryActivity extends AppCompatActivity {
 
         commentCounter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference("ClassStory/" + storyKey);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -348,6 +379,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
 
                     mDatabaseReference = mFirebaseDatabase.getReference("ClassStoryComment/" + storyKey);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.orderByChild("time").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -361,6 +393,7 @@ public class CommentStoryActivity extends AppCompatActivity {
 
                                     if (comment.getAccountType().equals("Parent") || comment.getAccountType().equals("Teacher")) {
                                         mDatabaseReference = mFirebaseDatabase.getReference("Parent/" + commenterID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -391,6 +424,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                                                     Collections.reverse(commentList);
                                                     commentList.add(0, new Comment());
                                                     mAdapter.notifyDataSetChanged();
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     progressLayout.setVisibility(View.GONE);
                                                     errorLayout.setVisibility(View.GONE);
@@ -401,6 +435,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
                                                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                 recyclerView.setVisibility(View.GONE);
                                                 progressLayout.setVisibility(View.GONE);
@@ -411,6 +446,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                                         });
                                     } else {
                                         mDatabaseReference = mFirebaseDatabase.getReference("School/" + commenterID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -440,6 +476,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                                                     Collections.reverse(commentList);
                                                     commentList.add(0, new Comment());
                                                     mAdapter.notifyDataSetChanged();
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     progressLayout.setVisibility(View.GONE);
                                                     errorLayout.setVisibility(View.GONE);
@@ -450,6 +487,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                                             @Override
                                             public void onCancelled(DatabaseError databaseError) {
                                                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                 recyclerView.setVisibility(View.GONE);
                                                 progressLayout.setVisibility(View.GONE);
@@ -467,6 +505,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                                 sendComment.setAlpha(1f);
                                 commentList.add(0, new Comment());
                                 mAdapter.notifyDataSetChanged();
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 progressLayout.setVisibility(View.GONE);
                                 errorLayout.setVisibility(View.GONE);
@@ -477,6 +516,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
                             String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                             mySwipeRefreshLayout.setRefreshing(false);
                             recyclerView.setVisibility(View.GONE);
                             progressLayout.setVisibility(View.GONE);
@@ -486,6 +526,7 @@ public class CommentStoryActivity extends AppCompatActivity {
                         }
                     });
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
@@ -497,6 +538,7 @@ public class CommentStoryActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);

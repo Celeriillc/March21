@@ -5,10 +5,16 @@ package com.celerii.celerii.models;
  */
 
 public class BehaviouralResultsHeaderModel {
-    String term, year, totalPointsEarned, totalPointsFined, pointsEarnedThisTerm, pointsFinedThisTerm;
+    String term, year, totalPointsEarned, totalPointsFined, pointsEarnedThisTerm, pointsFinedThisTerm, errorMessage;
 
     public BehaviouralResultsHeaderModel() {
-
+        this.term = "";
+        this.year = "";
+        this.totalPointsEarned = "";
+        this.totalPointsFined = "";
+        this.pointsEarnedThisTerm = "";
+        this.pointsFinedThisTerm = "";
+        this.errorMessage = "";
     }
 
     public BehaviouralResultsHeaderModel(String term, String year, String totalPointsEarned, String totalPointsFined, String pointsEarnedThisTerm, String pointsFinedThisTerm) {
@@ -18,6 +24,7 @@ public class BehaviouralResultsHeaderModel {
         this.totalPointsFined = totalPointsFined;
         this.pointsEarnedThisTerm = pointsEarnedThisTerm;
         this.pointsFinedThisTerm = pointsFinedThisTerm;
+        this.errorMessage = "";
     }
 
     public String getTerm() {
@@ -66,5 +73,13 @@ public class BehaviouralResultsHeaderModel {
 
     public void setPointsFinedThisTerm(String pointsFinedThisTerm) {
         this.pointsFinedThisTerm = pointsFinedThisTerm;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

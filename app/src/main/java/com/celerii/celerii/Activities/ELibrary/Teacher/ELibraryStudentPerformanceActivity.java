@@ -9,6 +9,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -57,6 +58,9 @@ public class ELibraryStudentPerformanceActivity extends AppCompatActivity {
 
     Bundle bundle;
     String assignmentID = "";
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "E Library Student Performance Home";
@@ -115,20 +119,34 @@ public class ELibraryStudentPerformanceActivity extends AppCompatActivity {
 
     int count;
     private void loadFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         eLibraryStudentPerformanceHomeModelList.clear();
         mAdapter.notifyDataSetChanged();
         count = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment Student Performance").child(assignmentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -141,6 +159,7 @@ public class ELibraryStudentPerformanceActivity extends AppCompatActivity {
                         int score = (int) ((Double.parseDouble(eLibraryAssignmentStudentPerformanceModel.getCorrectAnswers()) / Double.parseDouble(eLibraryAssignmentStudentPerformanceModel.getTotalQuestions())) * 100);
                         final ELibraryStudentPerformanceHomeModel eLibraryStudentPerformanceHomeModel = new ELibraryStudentPerformanceHomeModel(postSnapshot.getKey(), String.valueOf(score));
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(eLibraryStudentPerformanceHomeModel.getStudentID());
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -158,6 +177,7 @@ public class ELibraryStudentPerformanceActivity extends AppCompatActivity {
 
                                 if (count == childrenCount) {
                                     mAdapter.notifyDataSetChanged();
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     recyclerView.setVisibility(View.VISIBLE);
                                     progressLayout.setVisibility(View.GONE);
@@ -172,6 +192,7 @@ public class ELibraryStudentPerformanceActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

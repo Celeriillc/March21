@@ -2,10 +2,14 @@ package com.celerii.celerii.Activities.StudentPerformance.Current;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -33,6 +37,7 @@ import java.util.HashMap;
 
 public class PerformanceCurrentDetailActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -54,6 +59,9 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     String parentActivity;
     int isNewCounter = 0;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Current Academic Results Detail";
     long sessionStartTime = 0;
@@ -64,7 +72,8 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_performance_current_detail);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         Bundle bundle = getIntent().getExtras();
         studentID = bundle.getString("Active Student");
@@ -98,7 +107,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         academicRecordStudentList = new ArrayList<>();
-        mAdapter = new PerformanceCurrentDetailAdapter(academicRecordStudentList, this);
+        mAdapter = new PerformanceCurrentDetailAdapter(academicRecordStudentList, context);
         loadNewFromFirebase();
         recyclerView.setAdapter(mAdapter);
 
@@ -113,17 +122,31 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
     }
 
     void loadNewFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         isNewCounter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordStudent").child(studentID).child(subject_year_term);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -137,6 +160,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
                         academicRecordStudent.setRecordKey(postSnapshot.getKey());
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(academicRecordStudent.getClassID());
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -152,6 +176,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
                                         String key = academicRecordStudent.getRecordKey();
 
                                         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(studentID).child(subject_year_term).child(key).child("status");
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -170,6 +195,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
 
                                                 if (isNewCounter == academicRecordStudentList.size()) {
                                                     mAdapter.notifyDataSetChanged();
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     progressLayout.setVisibility(View.GONE);
                                                     errorLayout.setVisibility(View.GONE);
@@ -193,6 +219,7 @@ public class PerformanceCurrentDetailActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

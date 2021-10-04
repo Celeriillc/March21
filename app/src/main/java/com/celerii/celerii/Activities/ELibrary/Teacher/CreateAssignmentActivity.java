@@ -30,6 +30,7 @@ import com.celerii.celerii.adapters.CreateEditTemplateAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -255,11 +256,6 @@ public class CreateAssignmentActivity extends AppCompatActivity {
     }
 
     public void saveToCloud() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            showDialogWithMessage("Internet is down, check your connection and try again");
-            return;
-        }
-
         if (questionModelList.size() <= 2) {
             showDialogWithMessage("Assignments cannot be created because it doesn't contain any questions.");
             return;
@@ -335,7 +331,11 @@ public class CreateAssignmentActivity extends AppCompatActivity {
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
                 if (databaseError == null) {
                     progressDialog.dismiss();
-                    ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("Your assignment has been successfully created."));
+                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                        ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("Your assignment has been successfully created. " + R.string.offline_write_message));
+                    } else {
+                        ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("Your assignment has been successfully created."));
+                    }
                 } else {
                     progressDialog.dismiss();
                     String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
@@ -537,36 +537,41 @@ public class CreateAssignmentActivity extends AppCompatActivity {
         } else if (requestCode == 11) {
             if (resultCode == RESULT_OK) {
                 String selectedTemplate = data.getStringExtra("Selected Template");
-                Gson gson = new Gson();
-                Type type = new TypeToken<ELibraryMyTemplateModel>() {}.getType();
-                ELibraryMyTemplateModel template = gson.fromJson(selectedTemplate, type);
+                if (selectedTemplate != null) {
+                    Gson gson = new Gson();
+                    Type type = new TypeToken<ELibraryMyTemplateModel>() {}.getType();
+                    ELibraryMyTemplateModel template = gson.fromJson(selectedTemplate, type);
 
-                final CustomProgressDialogOne progressDialogOne = new CustomProgressDialogOne(context);
-                progressDialogOne.show();
+                    final CustomProgressDialogOne progressDialogOne = new CustomProgressDialogOne(context);
+                    progressDialogOne.show();
 
-                mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment Template Questions").child(mFirebaseUser.getUid()).child(template.getTemplateID());
-                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                                QuestionModel questionModel = postSnapshot.getValue(QuestionModel.class);
-                                questionModelList.add(questionModelList.size() - 1, questionModel);
+                    mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment Template Questions").child(mFirebaseUser.getUid()).child(template.getTemplateID());
+                    mDatabaseReference.keepSynced(true);
+                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                    QuestionModel questionModel = postSnapshot.getValue(QuestionModel.class);
+                                    questionModelList.add(questionModelList.size() - 1, questionModel);
+                                }
+
+                                mAdapter.notifyDataSetChanged();
+                            } else {
+                                showDialogWithMessage("The selected template doesn't contain any questions");
                             }
-
-                            mAdapter.notifyDataSetChanged();
-                        } else {
-                            showDialogWithMessage("The selected template doesn't contain any questions");
+                            progressDialogOne.dismiss();
                         }
-                        progressDialogOne.dismiss();
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
-
+                        }
+                    });
+                } else {
+                    String message = "You need to create a template first to be able to use one.";
+                    CustomToast.blueBackgroundToast(context, message);
+                }
             }
         }
     }

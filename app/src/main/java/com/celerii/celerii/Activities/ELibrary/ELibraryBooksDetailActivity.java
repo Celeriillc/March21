@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
@@ -117,7 +118,6 @@ public class ELibraryBooksDetailActivity extends AppCompatActivity {
         thumbnailURL = bundle.getString("thumbnailURL");
         materialURL = bundle.getString("materialURL");
         materialUploader = bundle.getString("materialUploader");
-
 
         if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
             activeStudent = bundle.getString("activeStudent");

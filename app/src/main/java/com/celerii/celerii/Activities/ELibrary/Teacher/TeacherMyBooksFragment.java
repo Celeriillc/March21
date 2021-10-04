@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,6 +79,7 @@ public class TeacherMyBooksFragment extends Fragment {
     ImageView recommendedBooksIconOne, recommendedBooksIconTwo, recommendedBooksIconThree, recommendedBooksIconFour,
             recommendedBooksIconFive, recommendedBooksIconSix, recommendedBooksIconSeven, recommendedBooksIconEight,
             recommendedBooksIconNine, recommendedBooksIconTen;
+    TextView myBooksErrorLayoutText, recommendedBooksErrorLayoutText;
     TextView myBooksTitleOne, myBooksTitleTwo, myBooksTitleThree, myBooksTitleFour, myBooksTitleFive, myBooksTitleSix, myBooksTitleSeven,
             myBooksTitleEight, myBooksTitleNine, myBooksTitleTen;
     TextView recommendedBooksTitleOne, recommendedBooksTitleTwo, recommendedBooksTitleThree, recommendedBooksTitleFour,
@@ -105,6 +107,9 @@ public class TeacherMyBooksFragment extends Fragment {
     ArrayList<String> myBooksListKeys;
     ArrayList<ELibraryMaterialsModel> recommendedBooksList;
     int schoolCount = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Teacher My Books";
@@ -232,6 +237,9 @@ public class TeacherMyBooksFragment extends Fragment {
         recommendedBooksIconEight = (ImageView) recommendedBooksLayoutEight.findViewById(R.id.booksicon);
         recommendedBooksIconNine = (ImageView) recommendedBooksLayoutNine.findViewById(R.id.booksicon);
         recommendedBooksIconTen = (ImageView) recommendedBooksLayoutTen.findViewById(R.id.booksicon);
+
+        myBooksErrorLayoutText = (TextView) myBooksLayoutOne.findViewById(R.id.mybookserrorlayouttext);
+        recommendedBooksErrorLayoutText = (TextView) myBooksLayoutTwo.findViewById(R.id.recommendedbookserrorlayouttext);
 
         myBooksTitleOne = (TextView) myBooksLayoutOne.findViewById(R.id.bookstitle);
         myBooksTitleTwo = (TextView) myBooksLayoutTwo.findViewById(R.id.bookstitle);
@@ -701,16 +709,31 @@ public class TeacherMyBooksFragment extends Fragment {
 
     int i;
     private void loadMyBooksFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            superLayout.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.VISIBLE);
+                    progressLayout.setVisibility(View.GONE);
+                    myBooksLayout.setVisibility(View.GONE);
+                    myBooksErrorLayout.setVisibility(View.VISIBLE);
+                    myBooksErrorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher School").child(mFirebaseUser.getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -725,6 +748,7 @@ public class TeacherMyBooksFragment extends Fragment {
                         final String schoolID = postSnapshot.getKey();
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Private Materials").child("School").child(schoolID);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -742,6 +766,7 @@ public class TeacherMyBooksFragment extends Fragment {
 
                                 if (schoolCount == childrenCount) {
                                     mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Private Materials").child("Teacher").child(mFirebaseUser.getUid());
+                                    mDatabaseReference.keepSynced(true);
                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -784,6 +809,7 @@ public class TeacherMyBooksFragment extends Fragment {
                                                 myBooksLayout.setVisibility(View.GONE);
                                                 myBooksErrorLayout.setVisibility(View.VISIBLE);
                                             }
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             progressLayout.setVisibility(View.GONE);
                                             superLayout.setVisibility(View.VISIBLE);
@@ -805,6 +831,7 @@ public class TeacherMyBooksFragment extends Fragment {
                     }
                 } else {
                     mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Private Materials").child("Teacher").child(mFirebaseUser.getUid());
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -842,6 +869,7 @@ public class TeacherMyBooksFragment extends Fragment {
                                 myBooksLayout.setVisibility(View.GONE);
                                 myBooksErrorLayout.setVisibility(View.VISIBLE);
                             }
+                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                             mySwipeRefreshLayout.setRefreshing(false);
                             progressLayout.setVisibility(View.GONE);
                             superLayout.setVisibility(View.VISIBLE);

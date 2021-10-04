@@ -11,6 +11,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
@@ -88,6 +89,9 @@ public class ClassProfileActivity extends AppCompatActivity {
     ArrayList<Double> normalizedAverageList;
     int attendanceCounter;
     double presentPercentageSummer;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Class Profile";
@@ -281,16 +285,30 @@ public class ClassProfileActivity extends AppCompatActivity {
     }
 
     void loadFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            superLayout.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(R.string.no_internet_message_for_offline_download);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference("Class").child(activeClass);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
@@ -345,6 +363,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(classTeacherString);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -362,6 +381,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                         }
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Class School").child(activeClass);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
@@ -376,6 +396,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                 }
 
                                 mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
+                                mDatabaseReference.keepSynced(true);
                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -388,6 +409,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                         }
 
                                         mDatabaseReference = mFirebaseDatabase.getReference("Class Students").child(activeClass);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -400,6 +422,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                                         final String studentKey = postSnapshot.getKey();
 
                                                         DatabaseReference childReference = mFirebaseDatabase.getReference("Student/" + studentKey);
+                                                        childReference.keepSynced(true);
                                                         childReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                             @Override
                                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -428,6 +451,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                                                     presentPercentageSummer = 0.0;
 
                                                                     mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceClass").child(activeClass);
+                                                                    mDatabaseReference.keepSynced(true);
                                                                     mDatabaseReference.orderByChild("subject_term_year").equalTo(subject_term_year).addListenerForSingleValueEvent(new ValueEventListener() {
                                                                         @Override
                                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -467,6 +491,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                                         });
                                                     }
                                                 } else {
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     superLayout.setVisibility(View.VISIBLE);
                                                     progressLayout.setVisibility(View.GONE);
@@ -515,6 +540,7 @@ public class ClassProfileActivity extends AppCompatActivity {
         normalizedAverageList = new ArrayList<>();
         counter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -527,6 +553,7 @@ public class ClassProfileActivity extends AppCompatActivity {
 
                         if (yearTermKey.equals(year_term)) {
                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subject_year_term);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -567,6 +594,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                         String averageString = (int) average + "%";
                                         averagePerformance.setText(averageString);
 
+                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                         mySwipeRefreshLayout.setRefreshing(false);
                                         superLayout.setVisibility(View.VISIBLE);
                                         progressLayout.setVisibility(View.GONE);
@@ -596,6 +624,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                                 String averageString = (int) average + "%";
                                 averagePerformance.setText(averageString);
 
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 superLayout.setVisibility(View.VISIBLE);
                                 progressLayout.setVisibility(View.GONE);
@@ -606,6 +635,7 @@ public class ClassProfileActivity extends AppCompatActivity {
                 } else {
                     averagePerformance.setText("0%");
 
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     superLayout.setVisibility(View.VISIBLE);
                     progressLayout.setVisibility(View.GONE);

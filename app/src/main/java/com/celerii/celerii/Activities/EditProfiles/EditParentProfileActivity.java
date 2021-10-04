@@ -288,12 +288,6 @@ public class EditParentProfileActivity extends AppCompatActivity {
             finish();
         }
         else if (id == R.id.action_save){
-            if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
-                String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-                showDialogWithMessage(Html.fromHtml(messageString));
-                return false;
-            }
-
             final String firstNameString = firstName.getText().toString().trim();
             final String middleNameString = middleName.getText().toString().trim();
             final String lastNameString = lastName.getText().toString().trim();
@@ -354,7 +348,11 @@ public class EditParentProfileActivity extends AppCompatActivity {
                             TextView close = (TextView) dialog.findViewById(R.id.close);
                             dialog.show();
 
-                            dialogMessage.setText("Your profile has been successfully updated");
+                            if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                dialogMessage.setText("Your profile has been successfully updated. " + R.string.offline_write_message);
+                            } else {
+                                dialogMessage.setText("Your profile has been successfully updated");
+                            }
 
                             close.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -370,6 +368,12 @@ public class EditParentProfileActivity extends AppCompatActivity {
                     }
                 });
             } else {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+                    showDialogWithMessage(Html.fromHtml(messageString));
+                    return false;
+                }
+
                 mStorageReference = mFirebaseStorage.getReference().child("CeleriiProfilePicture/" + mFirebaseUser.getUid() + "/profilepicture");
                 UploadTask uploadTask = mStorageReference.putBytes(byteArray);
                 Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {

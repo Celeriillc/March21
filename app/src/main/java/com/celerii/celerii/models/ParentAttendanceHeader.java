@@ -5,15 +5,20 @@ package com.celerii.celerii.models;
  */
 
 public class ParentAttendanceHeader {
-    String studentID, classID, term, year, subject;
+    String studentID, classID, term, year, subject, errorMessage;
 
     public ParentAttendanceHeader() {
+        this.term = "";
+        this.year = "";
+        this.subject = "";
+        this.errorMessage = "";
     }
 
     public ParentAttendanceHeader(String term, String year, String subject) {
         this.term = term;
         this.year = year;
         this.subject = subject;
+        this.errorMessage = "";
     }
 
     public String getStudentID() {
@@ -54,5 +59,13 @@ public class ParentAttendanceHeader {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

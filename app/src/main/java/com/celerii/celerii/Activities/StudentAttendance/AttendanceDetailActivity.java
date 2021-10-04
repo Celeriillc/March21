@@ -4,11 +4,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +50,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class AttendanceDetailActivity extends AppCompatActivity {
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -69,6 +73,9 @@ public class AttendanceDetailActivity extends AppCompatActivity {
     String parentActivity;
     Boolean isSubscribed;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Attendance Detail";
     long sessionStartTime = 0;
@@ -79,7 +86,8 @@ public class AttendanceDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_detail);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -149,16 +157,30 @@ public class AttendanceDetailActivity extends AppCompatActivity {
     }
 
     private void loadFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            superLayout.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceStudent").child(activeKidID).child(key);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -198,6 +220,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                     }
 
                     mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -209,6 +232,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                             }
 
                             mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolString);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -220,6 +244,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                                     }
 
                                     mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(teacherString);
+                                    mDatabaseReference.keepSynced(true);
                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -232,6 +257,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
 
                                             progressLayout.setVisibility(View.GONE);
                                             errorLayout.setVisibility(View.GONE);
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             superLayout.setVisibility(View.VISIBLE);
                                         }
@@ -259,6 +285,7 @@ public class AttendanceDetailActivity extends AppCompatActivity {
                 } else {
                     superLayout.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     errorLayout.setVisibility(View.VISIBLE);
                     errorLayoutText.setText("Sorry, we couldn't find this attendance record");

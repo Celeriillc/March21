@@ -8,6 +8,8 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,9 +62,6 @@ public class ParentAttendanceActivity extends AppCompatActivity {
     public RecyclerView recyclerView;
     public ParentAttendanceRowAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    String mMonth;
-    int thisMonth;
-    int thisYear;
     String subject, term, month, year, month_year, term_year, subject_term_year;
 
     SwipeRefreshLayout mySwipeRefreshLayout;
@@ -79,6 +78,9 @@ public class ParentAttendanceActivity extends AppCompatActivity {
     String searchTerm;
     String className, school, teacher;
     int isNewcounter = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Parent Attendance Home";
@@ -237,11 +239,10 @@ public class ParentAttendanceActivity extends AppCompatActivity {
         childID = activeKidModel.getStudentID();
         childsFirstName = activeKidModel.getFirstName();
 
-        Calendar calendar = Calendar.getInstance();
-        thisYear = calendar.get(Calendar.YEAR);
-        thisMonth = calendar.get(Calendar.MONTH);
-        mMonth = Month.Month(thisMonth);
-        subject = "General";
+        subject = parentCheckAttendanceSharedPreferences.getSubject();
+        year = Date.getYear();
+        month = Date.getMonth();
+        term = Term.getTermShort();
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(childsFirstName.trim()  + "'s Attendance");
@@ -272,25 +273,36 @@ public class ParentAttendanceActivity extends AppCompatActivity {
     }
 
     private void loadHeader(){
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.GONE);
+                    parentAttendanceHeader.setErrorMessage(getString(R.string.no_internet_message_for_offline_download));
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         updateBadges();
-        subject = parentCheckAttendanceSharedPreferences.getSubject();
-        year = Date.getYear();
-        month = Date.getMonth();
-        term = Term.getTermShort();
         month_year = month + "_" + year;
         term_year = term + "_" + year;
         subject_term_year = subject + "_" + term + "_" + year;
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Student Class").child(childID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -319,6 +331,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
         isNewcounter = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceStudent").child(childID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("subject_term_year").equalTo(subject_term_year).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -333,6 +346,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                         parentAttendanceHeader.setClassID(parentAttendanceRow.getClassID());
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(parentAttendanceRow.getClassID());
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -346,6 +360,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                                     for (final ParentAttendanceRow parentAttendanceRow: parentAttendanceRowList) {
                                         String key = parentAttendanceRow.getKey();
                                         mDatabaseReference = mFirebaseDatabase.getReference().child("AttendanceParentNotification").child(mFirebaseUser.getUid()).child(childID).child(key).child("status");
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -366,6 +381,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                                                     if (!parentAttendanceRowList.get(0).getClassID().equals("")) {
                                                         parentAttendanceRowList.add(0, new ParentAttendanceRow());
                                                     }
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     mAdapter.notifyDataSetChanged();
                                                     errorLayout.setVisibility(View.GONE);
@@ -393,10 +409,13 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 } else {
                     parentAttendanceRowList.clear();
                     parentAttendanceRowList.add(0, new ParentAttendanceRow());
+                    parentAttendanceHeader.setErrorMessage("");
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     mAdapter.notifyDataSetChanged();
                     recyclerView.setVisibility(View.VISIBLE);
                     progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.GONE);
                 }
             }
 
@@ -513,6 +532,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
+                loadHeader();
                 loadFromFirebase();
             }
         }
@@ -525,6 +545,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
+                loadHeader();
                 loadFromFirebase();
             }
         }
@@ -537,6 +558,7 @@ public class ParentAttendanceActivity extends AppCompatActivity {
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.VISIBLE);
                 mAdapter.notifyDataSetChanged();
+                loadHeader();
                 loadFromFirebase();
             }
         }

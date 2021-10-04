@@ -12,6 +12,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,6 +87,9 @@ public class InboxFragment extends Fragment {
     LinearLayoutManager mLayoutManager;
     int inboxCounter = 0;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Inbox";
     long sessionStartTime = 0;
@@ -135,7 +140,7 @@ public class InboxFragment extends Fragment {
         inboxList.add(new MessageList());
         mAdapter = new InboxAdapter(inboxList, getContext());
         recyclerView.setAdapter(mAdapter);
-        loadFromSharedPreferences();
+//        loadFromSharedPreferences();
         loadFromFirebase();
 
         newMessage.setOnClickListener(new View.OnClickListener() {
@@ -234,15 +239,29 @@ public class InboxFragment extends Fragment {
 
     private void loadFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.GONE);
+//            recyclerView.setVisibility(View.VISIBLE);
             CustomToast.blueBackgroundToast(context, "No Internet");
-            return;
+//            return;
         }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Messages Recent").child(mFirebaseUser.getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -280,6 +299,7 @@ public class InboxFragment extends Fragment {
                             String otherPartyID = newMessage.getOtherParty();
 
                             mDatabaseReference = mFirebaseDatabase.getReference().child("Parent").child(newMessage.getOtherParty());
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -312,6 +332,9 @@ public class InboxFragment extends Fragment {
                                             sharedPreferencesManager.setMessages(json);
                                             mAdapter.notifyDataSetChanged();
                                             mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
                                         }
                                     }
                                 }
@@ -323,6 +346,7 @@ public class InboxFragment extends Fragment {
                             });
 
                             mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(newMessage.getOtherParty());
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -355,6 +379,9 @@ public class InboxFragment extends Fragment {
                                             sharedPreferencesManager.setMessages(json);
                                             mAdapter.notifyDataSetChanged();
                                             mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
                                         }
                                     }
                                 }
@@ -366,6 +393,7 @@ public class InboxFragment extends Fragment {
                             });
 
                             mDatabaseReference = mFirebaseDatabase.getReference().child("Admin").child(newMessage.getOtherParty());
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -399,6 +427,9 @@ public class InboxFragment extends Fragment {
                                             sharedPreferencesManager.setMessages(json);
                                             mAdapter.notifyDataSetChanged();
                                             mySwipeRefreshLayout.setRefreshing(false);
+                                            recyclerView.setVisibility(View.VISIBLE);
+                                            progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
                                         }
                                     }
                                 }
@@ -421,6 +452,9 @@ public class InboxFragment extends Fragment {
                     inboxList.add(new MessageList());
                     mAdapter.notifyDataSetChanged();
                     mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.GONE);
                 }
             }
 

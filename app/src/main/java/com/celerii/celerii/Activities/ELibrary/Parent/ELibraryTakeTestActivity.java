@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
@@ -75,6 +76,9 @@ public class ELibraryTakeTestActivity extends AppCompatActivity {
 
     String activeStudentID = "";
     String activeStudentName;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "E Library Parent Take Test";
@@ -319,15 +323,28 @@ public class ELibraryTakeTestActivity extends AppCompatActivity {
     }
 
     private void loadQuestionsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            superLayout.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment Questions").child("Student").child(activeStudentID).child(assignmentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -346,10 +363,12 @@ public class ELibraryTakeTestActivity extends AppCompatActivity {
                     resetLayout();
                     highlightChosenAnswer(questionIndex);
 
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     superLayout.setVisibility(View.VISIBLE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.GONE);
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     superLayout.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
@@ -522,20 +541,62 @@ public class ELibraryTakeTestActivity extends AppCompatActivity {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
                 if (databaseError == null) {
-                    progressDialog.dismiss();
-                    Intent intent = new Intent(ELibraryTakeTestActivity.this, ELibraryFinishTestActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("materialTitle", materialTitle);
-                    bundle.putString("totalQuestions", eLibraryAssignmentStudentPerformanceModel.getTotalQuestions());
-                    bundle.putString("correctAnswers", eLibraryAssignmentStudentPerformanceModel.getCorrectAnswers());
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-                    finish();
+                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                        progressDialog.dismiss();
+                        proceedWithSubmissionOffline(eLibraryAssignmentStudentPerformanceModel);
+                    } else {
+                        progressDialog.dismiss();
+                        Intent intent = new Intent(ELibraryTakeTestActivity.this, ELibraryFinishTestActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("materialTitle", materialTitle);
+                        bundle.putString("totalQuestions", eLibraryAssignmentStudentPerformanceModel.getTotalQuestions());
+                        bundle.putString("correctAnswers", eLibraryAssignmentStudentPerformanceModel.getCorrectAnswers());
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                        finish();
+                    }
+
                 } else {
                     progressDialog.dismiss();
                     String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
                     showDialogWithMessage(message);
                 }
+            }
+        });
+    }
+
+    void proceedWithSubmissionOffline(ELibraryAssignmentStudentPerformanceModel eLibraryAssignmentStudentPerformanceModel) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_unary_message_dialog);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        TextView message = (TextView) dialog.findViewById(R.id.dialogmessage);
+        Button OK = (Button) dialog.findViewById(R.id.optionone);
+        try {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.show();
+        } catch (Exception e) {
+            return;
+        }
+
+        String messageString = "Your assignment response has been saved locally. Turn on your internet " +
+                "or connect to a wi-fi network to sync with Celerii cloud so your teacher can see your response. " +
+                "Please do not re-attempt the assignment.";
+        message.setText(messageString);
+
+        OK.setText("OK");
+
+        OK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ELibraryTakeTestActivity.this, ELibraryFinishTestActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("materialTitle", materialTitle);
+                bundle.putString("totalQuestions", eLibraryAssignmentStudentPerformanceModel.getTotalQuestions());
+                bundle.putString("correctAnswers", eLibraryAssignmentStudentPerformanceModel.getCorrectAnswers());
+                intent.putExtras(bundle);
+                startActivity(intent);
+                finish();
             }
         });
     }

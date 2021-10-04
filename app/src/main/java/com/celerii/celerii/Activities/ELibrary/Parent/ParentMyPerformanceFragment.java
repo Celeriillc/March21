@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,6 +63,9 @@ public class ParentMyPerformanceFragment extends Fragment {
     String activeStudentID = "";
     String activeStudent = "";
     String activeStudentName;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Parent My Performance";
@@ -217,18 +221,32 @@ public class ParentMyPerformanceFragment extends Fragment {
 
     int count;
     private void loadAssignmentsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         count = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference("E Library Assignment").child("Student").child(activeStudentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("submitted").equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -240,6 +258,7 @@ public class ParentMyPerformanceFragment extends Fragment {
                         final ELibraryMyAssignmentModel eLibraryMyAssignmentModel = postSnapshot.getValue(ELibraryMyAssignmentModel.class);
 
                         mDatabaseReference = mFirebaseDatabase.getReference("E Library Assignment Student Performance").child(eLibraryMyAssignmentModel.getAssignmentID()).child(activeStudentID);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -267,6 +286,7 @@ public class ParentMyPerformanceFragment extends Fragment {
 
                                     Collections.reverse(eLibraryMyAssignmentModelList);
                                     mAdapter.notifyDataSetChanged();
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     recyclerView.setVisibility(View.VISIBLE);
                                     progressLayout.setVisibility(View.GONE);
@@ -281,6 +301,7 @@ public class ParentMyPerformanceFragment extends Fragment {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

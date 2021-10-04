@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +27,7 @@ import com.celerii.celerii.Activities.Home.Teacher.TeacherMainActivityTwo;
 import com.celerii.celerii.Activities.Inbox.ChatActivity;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -63,6 +66,9 @@ public class ParentProfileActivity extends AppCompatActivity {
 //    Button message;
 
     String parentID, parentName = "", parentActivity;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Parent Profile";
@@ -159,7 +165,22 @@ public class ParentProfileActivity extends AppCompatActivity {
     }
 
     private void loadFromFirebase() {
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(R.string.no_internet_message_for_offline_download);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
+
         mDatabaseReference = mFirebaseDatabase.getReference("Parent").child(parentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -207,11 +228,13 @@ public class ParentProfileActivity extends AppCompatActivity {
 
                         progressLayout.setVisibility(View.GONE);
                         errorLayout.setVisibility(View.GONE);
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         mySwipeRefreshLayout.setRefreshing(false);
                         superLayout.setVisibility(View.VISIBLE);
                     } else {
                         superLayout.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         mySwipeRefreshLayout.setRefreshing(false);
                         errorLayout.setVisibility(View.VISIBLE);
                         errorLayoutText.setText("This account has been deleted by the owner");
@@ -219,6 +242,7 @@ public class ParentProfileActivity extends AppCompatActivity {
                 } else {
                     superLayout.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     errorLayout.setVisibility(View.VISIBLE);
                     errorLayoutText.setText("This account has been deleted by the owner");

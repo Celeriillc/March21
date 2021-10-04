@@ -3,6 +3,7 @@ package com.celerii.celerii.Activities.Newsletters;
 import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -54,6 +55,9 @@ public class NewsletterRowActivity extends AppCompatActivity {
     LinearLayoutManager mLayoutManager;
     String newsletterAccountType, accountType;
     int childrenCounter = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Newsletter Home";
@@ -116,18 +120,24 @@ public class NewsletterRowActivity extends AppCompatActivity {
     }
 
     private void loadNewslettersFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(R.string.no_internet_message_for_offline_download);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         updateBadges();
         childrenCounter = 0;
         mDatabaseReference = mFirebaseDatabase.getReference().child(newsletterAccountType).child(mFirebaseUser.getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -139,6 +149,7 @@ public class NewsletterRowActivity extends AppCompatActivity {
                         final String newsletterKey = postSnapshot.getKey();
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Newsletter").child(newsletterKey);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -148,6 +159,7 @@ public class NewsletterRowActivity extends AppCompatActivity {
 
                                     String schoolID = newsletterRow.getSchoolID();
                                     mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
+                                    mDatabaseReference.keepSynced(true);
                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -174,10 +186,13 @@ public class NewsletterRowActivity extends AppCompatActivity {
 
                                                     Collections.reverse(newsletterRowList);
                                                     mAdapter.notifyDataSetChanged();
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     progressLayout.setVisibility(View.GONE);
+                                                    errorLayout.setVisibility(View.GONE);
                                                     recyclerView.setVisibility(View.VISIBLE);
                                                 } else {
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                     recyclerView.setVisibility(View.GONE);
                                                     progressLayout.setVisibility(View.GONE);
@@ -202,10 +217,13 @@ public class NewsletterRowActivity extends AppCompatActivity {
                                     if (childrenCount == childrenCounter) {
                                         if (newsletterRowList.size() > 1) {
                                             mAdapter.notifyDataSetChanged();
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             progressLayout.setVisibility(View.GONE);
+                                            errorLayout.setVisibility(View.GONE);
                                             recyclerView.setVisibility(View.VISIBLE);
                                         } else {
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             recyclerView.setVisibility(View.GONE);
                                             progressLayout.setVisibility(View.GONE);
@@ -227,6 +245,7 @@ public class NewsletterRowActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

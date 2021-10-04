@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,6 +79,9 @@ public class CurrentFragment extends Fragment {
     String activeStudent = "";
     String activeStudentName;
     String parentActivity = "";
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Current Academic Results";
@@ -251,14 +256,28 @@ public class CurrentFragment extends Fragment {
     String className = "No result", schoolName = "No result";
 
     private void loadNewDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.GONE);
+                    performanceCurrentHeader.setErrorMessage(getString(R.string.no_internet_message_for_offline_download));
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         subjectCounter = 0;
         counter = 0;
@@ -266,6 +285,11 @@ public class CurrentFragment extends Fragment {
         studentScoreTotal = 0.0;
         classScoreTotal = 0.0;
         maxScoreTotal = 0.0;
+        performanceCurrentHeader.setTermAverage(String.valueOf(0));
+        performanceCurrentHeader.setClassAverage(String.valueOf(0));
+        performanceCurrentHeader.setMaxPossibleAverage(String.valueOf(0));
+        performanceCurrentHeader.setTerm(term);
+        performanceCurrentHeader.setYear(year);
         classID = "null__";
         schoolID = "null__";
         className = "No result";
@@ -276,6 +300,7 @@ public class CurrentFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
         updateBadges();
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -288,6 +313,7 @@ public class CurrentFragment extends Fragment {
 
                         if (yearTermKey.equals(year_term)) {
                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(activeStudentID).child(subject_year_term);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -353,6 +379,7 @@ public class CurrentFragment extends Fragment {
 
                                     if (counter == childrenCount) {
                                         mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -362,6 +389,7 @@ public class CurrentFragment extends Fragment {
                                                 }
 
                                                 mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                                                mDatabaseReference.keepSynced(true);
                                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -373,6 +401,7 @@ public class CurrentFragment extends Fragment {
                                                         for (final PerformanceCurrentModel performanceCurrentModel: performanceCurrentModelList) {
                                                             String subject_year_term = performanceCurrentModel.getSubject() + "_" + year_term;
                                                             mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(activeStudentID).child(subject_year_term).child("status");
+                                                            mDatabaseReference.keepSynced(true);
                                                             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -414,9 +443,11 @@ public class CurrentFragment extends Fragment {
                                                                         if (!performanceCurrentModelList.get(0).getSubject().equals("")) {
                                                                             performanceCurrentModelList.add(0, new PerformanceCurrentModel());
                                                                         }
+                                                                        performanceCurrentHeader.setErrorMessage("");
                                                                         mAdapter.notifyDataSetChanged();
                                                                         recyclerView.setVisibility(View.VISIBLE);
                                                                         errorLayout.setVisibility(View.GONE);
+                                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                         mySwipeRefreshLayout.setRefreshing(false);
                                                                         progressLayout.setVisibility(View.GONE);
                                                                     }
@@ -438,6 +469,7 @@ public class CurrentFragment extends Fragment {
                                                         for (final PerformanceCurrentModel performanceCurrentModel: performanceCurrentModelList) {
                                                             String subject_year_term = performanceCurrentModel.getSubject() + "_" + year_term;
                                                             mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(activeStudentID).child(subject_year_term).child("status");
+                                                            mDatabaseReference.keepSynced(true);
                                                             mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -479,9 +511,11 @@ public class CurrentFragment extends Fragment {
                                                                         if (!performanceCurrentModelList.get(0).getSubject().equals("")) {
                                                                             performanceCurrentModelList.add(0, new PerformanceCurrentModel());
                                                                         }
+                                                                        performanceCurrentHeader.setErrorMessage("");
                                                                         mAdapter.notifyDataSetChanged();
                                                                         recyclerView.setVisibility(View.VISIBLE);
                                                                         errorLayout.setVisibility(View.GONE);
+                                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                         mySwipeRefreshLayout.setRefreshing(false);
                                                                         progressLayout.setVisibility(View.GONE);
                                                                     }
@@ -517,6 +551,7 @@ public class CurrentFragment extends Fragment {
 
                             if (counter == childrenCount) {
                                 mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
+                                mDatabaseReference.keepSynced(true);
                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -529,6 +564,7 @@ public class CurrentFragment extends Fragment {
                                             for (final PerformanceCurrentModel performanceCurrentModel: performanceCurrentModelList) {
                                                 String subject_year_term = performanceCurrentModel.getSubject() + "_" + year_term;
                                                 mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentNotification").child(mFirebaseUser.getUid()).child(activeStudentID).child(subject_year_term).child("status");
+                                                mDatabaseReference.keepSynced(true);
                                                 mDatabaseReference.addValueEventListener(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -572,9 +608,11 @@ public class CurrentFragment extends Fragment {
                                                             if (!performanceCurrentModelList.get(0).getSubject().equals("")) {
                                                                 performanceCurrentModelList.add(0, new PerformanceCurrentModel());
                                                             }
+                                                            performanceCurrentHeader.setErrorMessage("");
                                                             mAdapter.notifyDataSetChanged();
                                                             recyclerView.setVisibility(View.VISIBLE);
                                                             errorLayout.setVisibility(View.GONE);
+                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                             progressLayout.setVisibility(View.GONE);
                                                         }
@@ -595,10 +633,12 @@ public class CurrentFragment extends Fragment {
                                             performanceCurrentHeader.setClassName("No result");
                                             performanceCurrentHeader.setSchool("No result");
                                             performanceCurrentHeader.setStudent(activeStudentID);
+                                            performanceCurrentHeader.setErrorMessage("");
                                             performanceCurrentModelList.add(0, new PerformanceCurrentModel());
                                             mAdapter.notifyDataSetChanged();
                                             recyclerView.setVisibility(View.VISIBLE);
                                             errorLayout.setVisibility(View.GONE);
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             progressLayout.setVisibility(View.GONE);
                                         }
@@ -621,10 +661,12 @@ public class CurrentFragment extends Fragment {
                     performanceCurrentHeader.setClassName("No result");
                     performanceCurrentHeader.setSchool("No result");
                     performanceCurrentHeader.setStudent(activeStudentID);
+                    performanceCurrentHeader.setErrorMessage("");
                     performanceCurrentModelList.add(0, new PerformanceCurrentModel());
                     mAdapter.notifyDataSetChanged();
                     recyclerView.setVisibility(View.VISIBLE);
                     errorLayout.setVisibility(View.GONE);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     progressLayout.setVisibility(View.GONE);
                 }

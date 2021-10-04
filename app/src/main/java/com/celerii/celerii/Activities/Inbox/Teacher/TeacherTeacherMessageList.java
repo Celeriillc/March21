@@ -9,6 +9,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,6 +71,9 @@ public class TeacherTeacherMessageList extends Fragment {
     HashMap<String, NewChatRowModel> teacherList;
     HashMap<String, String> schoolTeacher;
     int counterSchool = 0, counterTeacher = 0, counterSchoolName = 0, counterSchoolTeacher = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Teacher New Message to Teachers";
@@ -140,17 +144,31 @@ public class TeacherTeacherMessageList extends Fragment {
     }
 
     void loadFromFirebase(){
-        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         counterSchool = counterSchoolName = counterSchoolTeacher = counterTeacher = 0;
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher School").child(mFirebaseUser.getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -171,6 +189,7 @@ public class TeacherTeacherMessageList extends Fragment {
                     if (counterSchool == schoolList.size()) {
                         for (final String schoolID : schoolList) {
                             mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(schoolID);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -185,6 +204,7 @@ public class TeacherTeacherMessageList extends Fragment {
                                     if (counterSchoolName == schoolList.size()) {
                                         for (final String schoolID : schoolList){
                                             mDatabaseReference = mFirebaseDatabase.getReference().child("School Teacher").child(schoolID);
+                                            mDatabaseReference.keepSynced(true);
                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -201,6 +221,7 @@ public class TeacherTeacherMessageList extends Fragment {
                                                     if (counterSchoolTeacher == schoolList.size()) {
                                                         for (final Map.Entry<String, String> entry : schoolTeacher.entrySet()){
                                                             mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(entry.getKey());
+                                                            mDatabaseReference.keepSynced(true);
                                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -226,6 +247,7 @@ public class TeacherTeacherMessageList extends Fragment {
                                                                                     });
                                                                                 }
                                                                                 mAdapter.notifyDataSetChanged();
+                                                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                                 progressLayout.setVisibility(View.GONE);
                                                                                 errorLayout.setVisibility(View.GONE);
@@ -242,6 +264,7 @@ public class TeacherTeacherMessageList extends Fragment {
                                                             });
                                                         }
                                                         if (schoolTeacher.size() == 0) {
+                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                             recyclerView.setVisibility(View.GONE);
                                                             progressLayout.setVisibility(View.GONE);
@@ -271,6 +294,7 @@ public class TeacherTeacherMessageList extends Fragment {
                         }
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

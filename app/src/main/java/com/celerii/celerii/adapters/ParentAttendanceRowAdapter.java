@@ -125,7 +125,11 @@ public class ParentAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVie
             if (parentAttendanceRowList.size() <= 1){
                 ((HeaderViewHolder) holder).noDataLayout.setVisibility(View.VISIBLE);
                 String message = "There is no " + "<b>" + parentAttendanceHeader.getSubject() + "</b>" + " attendance recorded for the "  + "<b>" + Term.Term(parentAttendanceHeader.getTerm()) + "</b>" + " of " +  "<b>" +  parentAttendanceHeader.getYear() + "</b>";
-                ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(message));
+                if (!parentAttendanceHeader.getErrorMessage().equals("")) {
+                    ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(parentAttendanceHeader.getErrorMessage()));
+                } else {
+                    ((HeaderViewHolder) holder).noDataText.setText(Html.fromHtml(message));
+                }
                 ((HeaderViewHolder) holder).chiefLayout.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             } else {
                 ((HeaderViewHolder) holder).noDataLayout.setVisibility(View.GONE);

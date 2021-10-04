@@ -17,6 +17,8 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
@@ -93,6 +95,9 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
     String childName;
     String childImageURL;
     Integer maleCount = 0, femaleCount = 0, studentCount = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Teacher Take Attendance";
@@ -264,14 +269,27 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
     }
 
     void loadHeaderFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         Gson gson = new Gson();
         ArrayList<ClassesStudentsAndParentsModel> classesStudentsAndParentsModelList = new ArrayList<>();
@@ -333,6 +351,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
 
         mDatabaseReference = mFirebaseDatabase.getReference("Class School/" + activeClass);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -345,10 +364,12 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference("Class Students/" + activeClass);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
+                            int childrenCount = (int) dataSnapshot.getChildrenCount();
                             maleCount = 0;
                             femaleCount = 0;
                             studentCount = 0;
@@ -356,6 +377,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                                 final String studentKey = postSnapshot.getKey();
 
                                 DatabaseReference childReference = mFirebaseDatabase.getReference("Student/" + studentKey);
+                                childReference.keepSynced(true);
                                 childReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -371,12 +393,17 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                                         teacherAttendanceHeader.setNoOfBoys(String.valueOf(maleCount));
                                         teacherAttendanceHeader.setNoOfGirls(String.valueOf(femaleCount));
                                         teacherAttendanceHeader.setNoOfStudents(String.valueOf(studentCount));
-//                                        mAdapter.notifyDataSetChanged();
+
+                                        if (childrenCount == studentCount) {
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
+                                            loadDetailsFromFirebase();
+                                        }
                                     }
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
                                         String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                         mySwipeRefreshLayout.setRefreshing(false);
                                         recyclerView.setVisibility(View.GONE);
                                         progressLayout.setVisibility(View.GONE);
@@ -385,13 +412,12 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                                     }
                                 });
                             }
-
-                            loadDetailsFromFirebase();
                         } else {
                             teacherAttendanceHeader.setNoOfBoys("Not Available");
                             teacherAttendanceHeader.setNoOfGirls("Not Available");
                             teacherAttendanceHeader.setNoOfStudents("Not Available");
 
+                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                             loadDetailsFromFirebase();
                         }
 
@@ -400,6 +426,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         mySwipeRefreshLayout.setRefreshing(false);
                         recyclerView.setVisibility(View.GONE);
                         progressLayout.setVisibility(View.GONE);
@@ -412,6 +439,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
@@ -422,16 +450,30 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
     }
 
     private void loadDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference("Class Students/" + activeClass);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -443,6 +485,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                         String childKey = postSnapshot.getKey();
 
                         DatabaseReference childDatabaseReference = mFirebaseDatabase.getReference("Student/" + childKey);
+                        childDatabaseReference.keepSynced(true);
                         childDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -459,6 +502,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                                         teacherAttendanceRowList.add(0, new TeacherAttendanceRow());
                                         teacherAttendanceRowList.add(new TeacherAttendanceRow());
                                         mAdapter.notifyDataSetChanged();
+                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                         mySwipeRefreshLayout.setRefreshing(false);
                                         progressLayout.setVisibility(View.GONE);
                                         errorLayout.setVisibility(View.GONE);
@@ -470,6 +514,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
                                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 mySwipeRefreshLayout.setRefreshing(false);
                                 recyclerView.setVisibility(View.GONE);
                                 progressLayout.setVisibility(View.GONE);
@@ -479,6 +524,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
@@ -490,6 +536,7 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 mySwipeRefreshLayout.setRefreshing(false);
                 recyclerView.setVisibility(View.GONE);
                 progressLayout.setVisibility(View.GONE);
@@ -537,9 +584,15 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.show();
 
-        message.setText(Html.fromHtml("Please confirm the "  + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + ", " + "<b>" + Term.Term(teacherAttendanceHeader.getTerm()) + "</b>" + " attendance information " +
-                "you're about to save for " + "<b>" + className + "</b>" + ". Click the " + "<b>" + "Save" + "</b>" + " button " +
-                "if you have confirmed the information."));
+        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+            message.setText(Html.fromHtml("You're about to perform a sensitive operation while being offline. If you wish to save the "  + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + ", " + "<b>" + Term.Term(teacherAttendanceHeader.getTerm()) + "</b>" + " attendance information " +
+                    "for " + "<b>" + className + "</b>" + " on your device then sync to Celerii's Cloud later, click the " + "<b>" + "Save" + "</b>" + " button. " +
+                    "\n\nNB: Saving offline exposes you to the possibility of duplicate data entry since we can't confirm if the record already exists."));
+        } else {
+            message.setText(Html.fromHtml("Please confirm the "  + "<b>" + teacherAttendanceHeader.getSubject() + "</b>" + ", " + "<b>" + Term.Term(teacherAttendanceHeader.getTerm()) + "</b>" + " attendance information " +
+                    "you're about to save for " + "<b>" + className + "</b>" + ". Click the " + "<b>" + "Save" + "</b>" + " button " +
+                    "if you have confirmed the information."));
+        }
 
         save.setText("Save");
         cancel.setText("Cancel");
@@ -560,10 +613,10 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
     }
 
     public void saveToCloud() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            showDialogWithMessage("Internet is down, check your connection and try again");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            showDialogWithMessage("Internet is down, check your connection and try again");
+//            return;
+//        }
 
         if (teacherAttendanceRowList.size() <= 2) {
             showDialogWithMessage("Attendance cannot be saved to cloud because the class contains no students.");
@@ -659,7 +712,13 @@ public class TeacherTakeAttendanceActivity extends AppCompatActivity {
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                         if (databaseError == null) {
                             progressDialog.dismiss();
-                            ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + subject + "</b>" +  " attendance for " + "<b>" + className + "</b>" + " has been posted"));
+
+                            if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + subject + "</b>" +  " attendance for " + "<b>" + className + "</b>" + " has been posted. " + R.string.offline_write_message));
+                            } else {
+                                ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + subject + "</b>" +  " attendance for " + "<b>" + className + "</b>" + " has been posted"));
+                            }
+
                         } else {
                             progressDialog.dismiss();
                             String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());

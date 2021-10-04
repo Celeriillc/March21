@@ -15,6 +15,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
@@ -127,6 +129,9 @@ public class StudentProfileActivity extends AppCompatActivity {
     String activeKid = "";
     Boolean isOpenToAll = false;
     Boolean isExpired = false;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Student Profile";
@@ -531,20 +536,34 @@ public class StudentProfileActivity extends AppCompatActivity {
     }
 
     void loadFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            superLayout.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    superLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(R.string.no_internet_message_for_offline_download);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            superLayout.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
 
         term_year = term + "_" + year;
         year_term = year + "_" +  term;
         totalPointsAwarded = totalPointsFined = totalPointsEarned = 0;
 
         mDatabaseReference = mFirebaseDatabase.getReference("Student").child(studentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -598,6 +617,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                     }
 
                     mDatabaseReference = mFirebaseDatabase.getReference("Student Class").child(studentID);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -606,6 +626,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                     String classKey = postSnapshot.getKey();
 
                                     mDatabaseReference = mFirebaseDatabase.getReference("Class").child(classKey);
+                                    mDatabaseReference.keepSynced(true);
                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -629,6 +650,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                             }
 
                             mDatabaseReference = mFirebaseDatabase.getReference("Student School").child(studentID);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -637,6 +659,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                             String schoolKey = postSnapshot.getKey();
 
                                             mDatabaseReference = mFirebaseDatabase.getReference("School").child(schoolKey);
+                                            mDatabaseReference.keepSynced(true);
                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -659,6 +682,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                                     }
 ;
                                     mDatabaseReference = mFirebaseDatabase.getReference("AttendanceStudent").child(studentID);
+                                    mDatabaseReference.keepSynced(true);
                                     mDatabaseReference.orderByChild("term_year").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -718,6 +742,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
                                             progressLayout.setVisibility(View.GONE);
                                             errorLayout.setVisibility(View.GONE);
+                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                             mySwipeRefreshLayout.setRefreshing(false);
                                             superLayout.setVisibility(View.VISIBLE);
                                         }
@@ -745,6 +770,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                 else {
                     superLayout.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     errorLayout.setVisibility(View.VISIBLE);
                     errorLayoutText.setText("This student account has been deleted");
@@ -759,6 +785,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         });
 
         mDatabaseReference = mFirebaseDatabase.getReference("Student Subscription").child(studentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -796,6 +823,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         });
 
         mDatabaseReference = mFirebaseDatabase.getReference("AttendanceStudent").child(studentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("term_year").equalTo(term_year).limitToLast(10).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -863,6 +891,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         });
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(studentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -878,6 +907,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
                         if (yearTermKey.equals(year_term)) {
                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordStudent").child(studentID).child(subject_year_term);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -1100,6 +1130,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         });
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(studentID).child("Reward");
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("term_AcademicYear").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
@@ -1114,6 +1145,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("BehaviouralRecord").child("BehaviouralRecordStudent").child(studentID).child("Punishment");
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.orderByChild("term_AcademicYear").equalTo(term_year).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

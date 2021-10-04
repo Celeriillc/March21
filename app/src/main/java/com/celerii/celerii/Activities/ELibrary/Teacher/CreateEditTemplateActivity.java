@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
@@ -70,6 +71,9 @@ public class CreateEditTemplateActivity extends AppCompatActivity {
 
     Bundle bundle;
     String navType = "", templateID = "";
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "E Library Create Edit Template";
@@ -145,18 +149,32 @@ public class CreateEditTemplateActivity extends AppCompatActivity {
     }
 
     private void loadFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         questionModelList.clear();
         mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment Template").child(mFirebaseUser.getUid()).child(templateID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -167,6 +185,7 @@ public class CreateEditTemplateActivity extends AppCompatActivity {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("E Library Assignment Template Questions").child(mFirebaseUser.getUid()).child(templateID);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -180,6 +199,7 @@ public class CreateEditTemplateActivity extends AppCompatActivity {
                         questionModelList.add(0, new QuestionModel());
                         questionModelList.add(new QuestionModel());
                         mAdapter.notifyDataSetChanged();
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         mySwipeRefreshLayout.setRefreshing(false);
                         recyclerView.setVisibility(View.VISIBLE);
                         progressLayout.setVisibility(View.GONE);
@@ -203,11 +223,6 @@ public class CreateEditTemplateActivity extends AppCompatActivity {
     }
 
     public void saveToCloud() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            showDialogWithMessage("Internet is down, check your connection and try again");
-            return;
-        }
-
         if (questionModelList.size() <= 2) {
             showDialogWithMessage("Templates cannot be saved to cloud because it doesn't contain any questions.");
             return;
@@ -255,10 +270,19 @@ public class CreateEditTemplateActivity extends AppCompatActivity {
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference ref) {
                 if (databaseError == null) {
                     progressDialog.dismiss();
-                    if (navType.equals("Create")) {
-                        ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + templateTitle + "</b>" + " has been successfully created."));
+
+                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                        if (navType.equals("Create")) {
+                            ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + templateTitle + "</b>" + " has been successfully created. " + R.string.offline_write_message));
+                        } else {
+                            ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + templateTitle + "</b>" + " has been successfully updated. " + R.string.offline_write_message));
+                        }
                     } else {
-                        ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + templateTitle + "</b>" + " has been successfully updated."));
+                        if (navType.equals("Create")) {
+                            ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + templateTitle + "</b>" + " has been successfully created."));
+                        } else {
+                            ShowDialogWithMessage.showDialogWithMessageAndClose(context, Html.fromHtml("<b>" + templateTitle + "</b>" + " has been successfully updated."));
+                        }
                     }
                 } else {
                     progressDialog.dismiss();

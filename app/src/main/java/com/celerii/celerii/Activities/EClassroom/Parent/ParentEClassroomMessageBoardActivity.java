@@ -19,6 +19,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
@@ -134,6 +135,9 @@ public class ParentEClassroomMessageBoardActivity extends AppCompatActivity {
     String scheduledClassState = "";
     String scheduledClassScheduledDate = "";
     String parentActivity;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Parent E Classroom Message Board";
@@ -482,15 +486,28 @@ public class ParentEClassroomMessageBoardActivity extends AppCompatActivity {
     }
 
     private void loadMessagesFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("E Classroom Scheduled Class Message Board").child(scheduledClassID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("sortableDate").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -502,11 +519,13 @@ public class ParentEClassroomMessageBoardActivity extends AppCompatActivity {
                     }
 
                     recyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mAdapter.notifyDataSetChanged();
                     recyclerView.setVisibility(View.VISIBLE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.GONE);
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
@@ -522,11 +541,11 @@ public class ParentEClassroomMessageBoardActivity extends AppCompatActivity {
     }
 
     private void postMessageToFirebase(String fileURL) {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-            showDialogWithMessage(messageString);
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//            showDialogWithMessage(messageString);
+//            return;
+//        }
 
         DatabaseReference messageKeyRef = mFirebaseDatabase.getReference().child("E Classroom Scheduled Class Message Board").child(scheduledClassID).push();
         final String messageKey = messageKeyRef.getKey();

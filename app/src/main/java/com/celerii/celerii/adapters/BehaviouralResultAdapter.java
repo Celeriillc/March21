@@ -5,10 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.celerii.celerii.Activities.EditTermAndYearInfo.EditYearActivity;
@@ -52,6 +57,10 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView term, year, totalPointsEarned, totalPointsFined, pointsEarnedThisTerm, pointsFinedThisTerm;
+        LinearLayout chiefLayout;
+        RelativeLayout errorLayout;
+        TextView errorLayoutText;
+        Button errorLayoutButton;
 
         public HeaderViewHolder(View view) {
             super(view);
@@ -61,6 +70,10 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
             totalPointsFined = (TextView) view.findViewById(R.id.totalpointsfined);
             pointsEarnedThisTerm = (TextView) view.findViewById(R.id.pointsearnedthisterm);
             pointsFinedThisTerm = (TextView) view.findViewById(R.id.pointsfinedthisterm);
+            chiefLayout = (LinearLayout) view.findViewById(R.id.chieflayout);
+            errorLayout = (RelativeLayout) view.findViewById(R.id.errorlayout);
+            errorLayoutText = (TextView) errorLayout.findViewById(R.id.errorlayouttext);
+            errorLayoutButton = (Button) errorLayout.findViewById(R.id.errorlayoutbutton);
         }
     }
 
@@ -97,6 +110,23 @@ public class BehaviouralResultAdapter extends RecyclerView.Adapter<RecyclerView.
             ((HeaderViewHolder) holder).totalPointsFined.setText(behaviouralResultsHeaderModel.getTotalPointsFined());
             ((HeaderViewHolder) holder).pointsEarnedThisTerm.setText(behaviouralResultsHeaderModel.getPointsEarnedThisTerm());
             ((HeaderViewHolder) holder).pointsFinedThisTerm.setText(behaviouralResultsHeaderModel.getPointsFinedThisTerm());
+
+            if (behaviouralResultRowModelList.size() <= 1) {
+                String errorMessage = "There are no behavioural records for the "  + "<b>" + Term.Term(behaviouralResultsHeaderModel.getTerm()) + "</b>" + " of " +  "<b>" +  behaviouralResultsHeaderModel.getYear() + "</b>" + " yet";
+                ((HeaderViewHolder) holder).errorLayout.setVisibility(View.VISIBLE);
+                ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
+                if (!behaviouralResultsHeaderModel.getErrorMessage().equals("")) {
+                    ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(behaviouralResultsHeaderModel.getErrorMessage()));
+                } else {
+                    ((HeaderViewHolder) holder).errorLayoutText.setText(Html.fromHtml(errorMessage));
+                }
+
+                ((HeaderViewHolder) holder).errorLayoutButton.setVisibility(View.GONE);
+            } else {
+                ((HeaderViewHolder) holder).errorLayout.setVisibility(View.GONE);
+                ((HeaderViewHolder) holder).chiefLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            }
 
             ((HeaderViewHolder) holder).term.setOnClickListener(new View.OnClickListener() {
                 @Override

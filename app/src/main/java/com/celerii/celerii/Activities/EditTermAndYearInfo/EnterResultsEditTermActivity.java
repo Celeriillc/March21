@@ -115,22 +115,22 @@ public class EnterResultsEditTermActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == android.R.id.home){
-            Intent intent = new Intent();
-
-            if (selectedTerm == null) {return false;}
-
-            if (firstTerm.isChecked()){
-                selectedTerm = "1";
-            } else if (secondTerm.isChecked()){
-                selectedTerm = "2";
-            } else if (thirdTerm.isChecked()){
-                selectedTerm = "3";
-            } else {
-                selectedTerm = "0";
-            }
-
-            intent.putExtra("Selected Term", selectedTerm);
-            setResult(RESULT_OK, intent);
+//            Intent intent = new Intent();
+//
+//            if (selectedTerm == null) {return false;}
+//
+//            if (firstTerm.isChecked()){
+//                selectedTerm = "1";
+//            } else if (secondTerm.isChecked()){
+//                selectedTerm = "2";
+//            } else if (thirdTerm.isChecked()){
+//                selectedTerm = "3";
+//            } else {
+//                selectedTerm = "0";
+//            }
+//
+//            intent.putExtra("Selected Term", selectedTerm);
+//            setResult(RESULT_OK, intent);
             finish();
         }
         else if (id == R.id.action_send){

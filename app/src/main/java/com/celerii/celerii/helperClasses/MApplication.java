@@ -37,7 +37,7 @@ public class MApplication extends Application implements LifecycleObserver {
         sharedPreferencesManager = new SharedPreferencesManager(context);
         accountType = sharedPreferencesManager.getActiveAccount();
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(false);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 

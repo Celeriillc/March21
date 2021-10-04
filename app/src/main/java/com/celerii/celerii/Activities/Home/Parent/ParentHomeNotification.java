@@ -121,7 +121,7 @@ public class ParentHomeNotification extends Fragment {
         progressLayout.setVisibility(View.VISIBLE);
 
         notificationModelList = new ArrayList<>();
-        loadFromSharedPreferences();
+//        loadFromSharedPreferences();
         mAdapter = new ClassNotificationAdapter(notificationModelList, getContext());
         recyclerView.setAdapter(mAdapter);
         loadFromFirebase();
@@ -196,22 +196,23 @@ public class ParentHomeNotification extends Fragment {
 
     private void loadFromFirebase() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            progressLayout.setVisibility(View.GONE);
-            if (errorLayout.getVisibility() == View.VISIBLE) {
-                errorLayout.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-            }
-            if (recyclerView.getVisibility() == View.VISIBLE) {
-                errorLayout.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
-            }
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            progressLayout.setVisibility(View.GONE);
+//            if (errorLayout.getVisibility() == View.VISIBLE) {
+//                errorLayout.setVisibility(View.VISIBLE);
+//                recyclerView.setVisibility(View.GONE);
+//            }
+//            if (recyclerView.getVisibility() == View.VISIBLE) {
+//                errorLayout.setVisibility(View.GONE);
+//                recyclerView.setVisibility(View.VISIBLE);
+//            }
             CustomToast.blueBackgroundToast(context, "No Internet");
-            return;
+//            return;
         }
 
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("NotificationParent").child(mFirebaseUser.getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference./*orderByChild("time").*/limitToLast(50).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -226,6 +227,7 @@ public class ParentHomeNotification extends Fragment {
 
                         if (notificationModel.getFromAccountType().equals("School")) {
                             mDatabaseReference = mFirebaseDatabase.getReference().child("School").child(notificationModel.getFromID());
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -258,9 +260,9 @@ public class ParentHomeNotification extends Fragment {
 //                                        loadFromSharedPreferences();
                                         mAdapter.notifyDataSetChanged();
                                         mySwipeRefreshLayout.setRefreshing(false);
-//                                        progressLayout.setVisibility(View.GONE);
-//                                        errorLayout.setVisibility(View.GONE);
-//                                        recyclerView.setVisibility(View.VISIBLE);
+                                        progressLayout.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
                                     }
                                 }
 
@@ -272,6 +274,7 @@ public class ParentHomeNotification extends Fragment {
                         }
                         else if (notificationModel.getFromAccountType().equals("Teacher") || notificationModel.getFromAccountType().equals("Parent")) {
                             mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(notificationModel.getFromID());
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -304,9 +307,9 @@ public class ParentHomeNotification extends Fragment {
 //                                        loadFromSharedPreferences();
                                         mAdapter.notifyDataSetChanged();
                                         mySwipeRefreshLayout.setRefreshing(false);
-//                                        progressLayout.setVisibility(View.GONE);
-//                                        errorLayout.setVisibility(View.GONE);
-//                                        recyclerView.setVisibility(View.VISIBLE);
+                                        progressLayout.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
                                     }
                                 }
 
@@ -318,6 +321,7 @@ public class ParentHomeNotification extends Fragment {
                         }
                         else {
                             mDatabaseReference = mFirebaseDatabase.getReference().child("Admin").child(notificationModel.getFromID());
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -350,9 +354,9 @@ public class ParentHomeNotification extends Fragment {
 //                                        loadFromSharedPreferences();
                                         mAdapter.notifyDataSetChanged();
                                         mySwipeRefreshLayout.setRefreshing(false);
-//                                        progressLayout.setVisibility(View.GONE);
-//                                        errorLayout.setVisibility(View.GONE);
-//                                        recyclerView.setVisibility(View.VISIBLE);
+                                        progressLayout.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
                                     }
                                 }
 
@@ -434,6 +438,5 @@ public class ParentHomeNotification extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-
     }
 }

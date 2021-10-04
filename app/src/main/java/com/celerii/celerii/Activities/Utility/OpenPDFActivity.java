@@ -19,6 +19,8 @@ import android.widget.TextView;
 
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
+import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -130,6 +132,10 @@ public class OpenPDFActivity extends AppCompatActivity implements DownloadFile.L
 
             }
         });
+
+        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+            CustomToast.blueBackgroundToast(this, "There's no internet to open newsletter");
+        }
     }
 
     @Override
