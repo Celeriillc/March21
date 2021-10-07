@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 
 public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -54,6 +57,9 @@ public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity 
     public static ArrayList<AcademicRecordStudent> subjectRecord = new ArrayList<>();
     int isNewCounter = 0;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Current Academic Results Detail";
     long sessionStartTime = 0;
@@ -64,7 +70,8 @@ public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_year_term_performance_detail);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
 //        Bundle bundle = getIntent().getExtras();
 //        studentID = bundle.getString("Active Student");
@@ -114,6 +121,20 @@ public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity 
 
     int counter = 0;
     void loadNewFromFirebase() {
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
+
         academicRecordStudentList.addAll(subjectRecord);
 
         counter = 0;
@@ -122,6 +143,7 @@ public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity 
                 String classID = academicRecordStudent.getClassID();
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -136,6 +158,7 @@ public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity 
 
                         if (counter == academicRecordStudentList.size()) {
                             mAdapter.notifyDataSetChanged();
+                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                             mySwipeRefreshLayout.setRefreshing(false);
                             progressLayout.setVisibility(View.GONE);
                             errorLayout.setVisibility(View.GONE);
@@ -151,6 +174,7 @@ public class StudentYearTermPerformanceDetailActivity extends AppCompatActivity 
             }
         } else {
             mAdapter.notifyDataSetChanged();
+            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
             mySwipeRefreshLayout.setRefreshing(false);
             progressLayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.GONE);

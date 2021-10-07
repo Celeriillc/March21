@@ -16,6 +16,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -76,6 +77,10 @@ public class TeacherTimetableActivity extends AppCompatActivity {
     ArrayList<StudentsClassesModel> studentsClassesModelList;
     int heightOfHour = 50;
     int counter = 0;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Timetable Home";
     long sessionStartTime = 0;
@@ -147,15 +152,27 @@ public class TeacherTimetableActivity extends AppCompatActivity {
     }
 
     void loadFromFirebaseTeacher() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-            showDialogWithMessage(messageString);
-            progressBar.setVisibility(View.GONE);
-            superLayout.setVisibility(View.VISIBLE);
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//            showDialogWithMessage(messageString);
+//            progressBar.setVisibility(View.GONE);
+//            superLayout.setVisibility(View.VISIBLE);
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    showDialogWithMessage(getString(R.string.no_internet_message_for_offline_download));
+                    progressBar.setVisibility(View.GONE);
+                    superLayout.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher Timetable").child(mFirebaseUser.getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -168,6 +185,8 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                         teacherTimetableModelList.add(teacherTimetableModel);
                     }
                 }
+
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 progressBar.setVisibility(View.GONE);
                 superLayout.setVisibility(View.VISIBLE);
             }
@@ -187,6 +206,17 @@ public class TeacherTimetableActivity extends AppCompatActivity {
 //            superLayout.setVisibility(View.VISIBLE);
 //            return;
 //        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    showDialogWithMessage(getString(R.string.no_internet_message_for_offline_download));
+                    progressBar.setVisibility(View.GONE);
+                    superLayout.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         String activeKid = sharedPreferencesManager.getActiveKid();
 
@@ -203,11 +233,13 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                     activeKid = gson.toJson(myChildren.get(0));
                     sharedPreferencesManager.setActiveKid(activeKid);
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     progressBar.setVisibility(View.GONE);
                     superLayout.setVisibility(View.VISIBLE);
                     return;
                 }
             } else {
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 progressBar.setVisibility(View.GONE);
                 superLayout.setVisibility(View.VISIBLE);
                 return;
@@ -238,6 +270,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                     activeKid = gson.toJson(myChildren.get(0));
                     sharedPreferencesManager.setActiveKid(activeKid);
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     progressBar.setVisibility(View.GONE);
                     superLayout.setVisibility(View.VISIBLE);
                     return;
@@ -258,6 +291,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
         studentsClassesModelList = gson.fromJson(studentsClassesJSON, type);
 
         if (studentsClassesModelList == null) {
+            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
             studentsClassesModelList = new ArrayList<>();
         } else {
             for (int i = 0; i < studentsClassesModelList.size(); i++) {
@@ -265,6 +299,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
 
                 if (studentsClassesModel.getStudentID().equals(activeKidID)) {
                     mDatabaseReference = mFirebaseDatabase.getReference().child("Class Timetable").child(studentsClassesModel.getClassID());
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -280,6 +315,7 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                             }
 
                             if (counter == studentsClassesModelList.size()) {
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 progressBar.setVisibility(View.GONE);
                                 superLayout.setVisibility(View.VISIBLE);
                             }
@@ -292,6 +328,12 @@ public class TeacherTimetableActivity extends AppCompatActivity {
                     });
                 } else {
                     counter++;
+
+                    if (counter == studentsClassesModelList.size()) {
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
+                        progressBar.setVisibility(View.GONE);
+                        superLayout.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         }

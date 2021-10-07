@@ -244,11 +244,6 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
-                    showDialogWithMessage("Your device is not connected to the internet. Check your connection and try again.");
-                    return;
-                }
-
                 if (day.getText().toString().equals("Saturday") || day.getText().toString().equals("Sunday")) {
                     showDialogWithMessage("Timetable is not able to show entries for Saturdays and Sundays. Select a day from Monday to Friday.");
                     return;
@@ -282,7 +277,12 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                         if (databaseError == null) {
                             customProgressDialogOne.dismiss();
-                            String message = "Your timetable has been updated";
+                            String message = "";
+                            if (!CheckNetworkConnectivity.isNetworkAvailable(getBaseContext())) {
+                                message = "Your timetable has been updated. " + R.string.offline_write_message;
+                            } else {
+                                message = "Your timetable has been updated";
+                            }
                             showDialogWithMessageAndDisconnect(message);
                         } else {
                             customProgressDialogOne.dismiss();

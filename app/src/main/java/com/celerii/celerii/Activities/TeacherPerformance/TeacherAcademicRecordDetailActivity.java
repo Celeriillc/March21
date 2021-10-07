@@ -2,10 +2,14 @@ package com.celerii.celerii.Activities.TeacherPerformance;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -32,6 +36,7 @@ import java.util.HashMap;
 
 public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -51,6 +56,9 @@ public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
 
     String teacherID, subject, term, year, classID, subject_year_term;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Teacher Performance Analysis Detail";
     long sessionStartTime = 0;
@@ -61,6 +69,7 @@ public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_academic_record_detail);
 
+        context = this;
         sharedPreferencesManager = new SharedPreferencesManager(this);
 
         Bundle bundle = getIntent().getExtras();
@@ -110,18 +119,32 @@ public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
     }
 
     void loadNewFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         academicRecordTeacherList.clear();
         mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher").child(teacherID).child(subject_year_term);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByChild("classID").equalTo(classID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -133,6 +156,7 @@ public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
                         academicRecordTeacher.setRecordKey(postSnapshot.getKey());
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(academicRecordTeacher.getClassID());
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -144,6 +168,7 @@ public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
 
                                 if (childrenCount == academicRecordTeacherList.size()){
                                     mAdapter.notifyDataSetChanged();
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     progressLayout.setVisibility(View.GONE);
                                     errorLayout.setVisibility(View.GONE);
@@ -158,6 +183,7 @@ public class TeacherAcademicRecordDetailActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

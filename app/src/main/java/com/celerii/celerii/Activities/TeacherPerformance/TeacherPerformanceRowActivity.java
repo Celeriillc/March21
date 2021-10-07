@@ -2,10 +2,14 @@ package com.celerii.celerii.Activities.TeacherPerformance;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -36,6 +40,7 @@ import java.util.HashMap;
 
 public class TeacherPerformanceRowActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -60,6 +65,9 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
     String currentScore = "NA", previousScore = "NA", projectedScore;
     String myID;
     int teacherPerformanceRowListIterator, subIterator;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Teacher Performance Analysis Summary (Row)";
@@ -125,14 +133,27 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
     HashMap<String, Double> subjectTotal = new HashMap<>();
     HashMap<String, Integer> subjectCount = new HashMap<>();
     private void loadNewDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         counter = 0;
         subjectTotal = new HashMap<>();
@@ -141,6 +162,7 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTeacher").child(myID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -148,7 +170,9 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
                     final int childrenCount = (int) dataSnapshot.getChildrenCount();
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
                         String subject_year_term = postSnapshot.getKey();
+
                         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordTeacher").child(myID).child(subject_year_term);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -196,6 +220,7 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
                                     }
 
                                     mAdapter.notifyDataSetChanged();
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     progressLayout.setVisibility(View.GONE);
                                     recyclerView.setVisibility(View.VISIBLE);
@@ -210,6 +235,7 @@ public class TeacherPerformanceRowActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);

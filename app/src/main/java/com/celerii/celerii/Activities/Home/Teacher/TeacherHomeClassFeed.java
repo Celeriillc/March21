@@ -12,6 +12,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +83,9 @@ public class TeacherHomeClassFeed extends Fragment {
     Boolean stillLoading = true;
     int numberOfPostsPerLoad = 20;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Teacher Feed";
     long sessionStartTime = 0;
@@ -139,9 +143,13 @@ public class TeacherHomeClassFeed extends Fragment {
         storyList = new ArrayList<>();
         storyKeyList = new ArrayList<>();
 
-        loadFromSharedPreferences();
+//        loadFromSharedPreferences();
         mAdapter = new TeacherClassStoryAdapter(classStoryList, stillLoading, getContext());
         recyclerView.setAdapter(mAdapter);
+
+        recyclerView.setVisibility(View.GONE);
+        progressLayout.setVisibility(View.VISIBLE);
+
         loadTeacherFeed();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -156,6 +164,7 @@ public class TeacherHomeClassFeed extends Fragment {
         });
 
         DatabaseReference childEventRef = mFirebaseDatabase.getReference("ClassStory");
+        childEventRef.keepSynced(true);
         childEventRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -431,16 +440,31 @@ public class TeacherHomeClassFeed extends Fragment {
     int counter;
     int childrenCount;
     void loadTeacherFeed(){
-        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.VISIBLE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.GONE);
-            CustomToast.blueBackgroundToast(context, "No Internet");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(getContext())) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.VISIBLE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.GONE);
+//            CustomToast.blueBackgroundToast(context, "No Internet");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                    CustomToast.blueBackgroundToast(context, "No Internet");
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference("ClassStoryTeacherFeed/" + auth.getCurrentUser().getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByKey().limitToLast(numberOfPostsPerLoad).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -460,6 +484,7 @@ public class TeacherHomeClassFeed extends Fragment {
                         final boolean liked = postSnapshot.getValue(boolean.class);
 
                         mDatabaseReference = mFirebaseDatabase.getReference("ClassStory/" + classStoryKeys);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -470,6 +495,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                     if (posterAccountType.equals("School")) {
                                         String schoolID = classStoryServer.getPosterID();
                                         mDatabaseReference = mFirebaseDatabase.getReference("School/" + schoolID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -500,6 +526,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                                         sharedPreferencesManager.setTeacherFeed(json);
                                                         classStoryList.add(0, new ClassStory());
                                                         classStoryList.add(new ClassStory());
+                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                         mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -528,6 +555,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                                     Collections.reverse(classStoryList);
                                                     classStoryList.add(0, new ClassStory());
                                                     classStoryList.add(new ClassStory());
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -542,6 +570,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                     else if (posterAccountType.equals("Teacher") || posterAccountType.equals("Parent")) {
                                         String teacherID = classStoryServer.getPosterID();
                                         mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -572,6 +601,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                                         sharedPreferencesManager.setTeacherFeed(json);
                                                         classStoryList.add(0, new ClassStory());
                                                         classStoryList.add(new ClassStory());
+                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                         mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -600,6 +630,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                                     Collections.reverse(classStoryList);
                                                     classStoryList.add(0, new ClassStory());
                                                     classStoryList.add(new ClassStory());
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -614,6 +645,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                     else {
                                         String adminID = classStoryServer.getPosterID();
                                         mDatabaseReference = mFirebaseDatabase.getReference("Admin/" + adminID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -644,6 +676,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                                         sharedPreferencesManager.setTeacherFeed(json);
                                                         classStoryList.add(0, new ClassStory());
                                                         classStoryList.add(new ClassStory());
+                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                         mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -672,6 +705,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                                     Collections.reverse(classStoryList);
                                                     classStoryList.add(0, new ClassStory());
                                                     classStoryList.add(new ClassStory());
+                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                     mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -699,6 +733,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                         Collections.reverse(classStoryList);
                                         classStoryList.add(0, new ClassStory());
                                         classStoryList.add(new ClassStory());
+                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                         mySwipeRefreshLayout.setRefreshing(false);
 //                                                        progressLayout.setVisibility(View.GONE);
 //                                                        errorLayout.setVisibility(View.GONE);
@@ -719,6 +754,7 @@ public class TeacherHomeClassFeed extends Fragment {
                 } else {
                     classStoryList.add(0, new ClassStory());
                     mAdapter.notifyDataSetChanged();
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     recyclerView.setVisibility(View.VISIBLE);
                     progressLayout.setVisibility(View.GONE);
@@ -741,6 +777,7 @@ public class TeacherHomeClassFeed extends Fragment {
 
         final int sizeOnEntry = classStoryList.size() - 1;
         mDatabaseReference = mFirebaseDatabase.getReference("ClassStoryTeacherTimeline/" + auth.getCurrentUser().getUid());
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.orderByKey().endAt(lastKey).limitToLast(numberOfPostsPerLoad).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -754,6 +791,7 @@ public class TeacherHomeClassFeed extends Fragment {
                         final boolean liked = postSnapshot.getValue(boolean.class);
 
                         mDatabaseReference = mFirebaseDatabase.getReference("ClassStory/" + classStoryKeys);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -764,6 +802,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                     if (posterAccountType.equals("School")) {
                                         String schoolID = classStoryServer.getPosterID();
                                         mDatabaseReference = mFirebaseDatabase.getReference("School/" + schoolID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -817,6 +856,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                     else if (posterAccountType.equals("Teacher") || posterAccountType.equals("Parent")) {
                                         String teacherID = classStoryServer.getPosterID();
                                         mDatabaseReference = mFirebaseDatabase.getReference("Teacher/" + teacherID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -870,6 +910,7 @@ public class TeacherHomeClassFeed extends Fragment {
                                     else {
                                         String adminID = classStoryServer.getPosterID();
                                         mDatabaseReference = mFirebaseDatabase.getReference("Admin/" + adminID);
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {

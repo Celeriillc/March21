@@ -10,6 +10,8 @@ import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +67,9 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
     private List<AcademicRecordTeacher> AcademicRecordTeacherList;
     private ArrayList<KidScoreForTeachersModel> kidScoreForTeachersModelList;
     private Context context;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView examType, score, className, date, maxObtainable, term, year, viewDetails, delete, resultAsAt;
@@ -180,13 +185,25 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
 
     int numberOfRemainingResults = 0;
     private void deleteNewAcademicRecord(final AcademicRecordTeacher academicRecordTeacher) {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            showDialogWithMessage("Internet is down, check your connection and try again");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            showDialogWithMessage("Internet is down, check your connection and try again");
+//            return;
+//        }
 
         final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
         progressDialog.show();
+
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    progressDialog.dismiss();
+                    showDialogWithMessage(context.getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
+
         final String subject_year_term = academicRecordTeacher.getSubject_AcademicYear_Term();
         final String key = academicRecordTeacher.getRecordKey();
         final String teacherID = academicRecordTeacher.getTeacherID();
@@ -215,6 +232,7 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
 
             if (hasClass) {
                 mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher").child(teacherID).child(subject_year_term);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -228,6 +246,7 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
                         }
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -238,6 +257,7 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
                                 }
 
                                 mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+                                mDatabaseReference.keepSynced(true);
                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -261,23 +281,28 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
                                             deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
                                         }
 
+                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                         DatabaseReference updateRef = mFirebaseDatabase.getReference();
                                         updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
                                             @Override
                                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                                 if (databaseError == null) {
+                                                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                                        CustomToast.blueBackgroundToast(context, context.getString(R.string.offline_write_message));
+                                                    }
+
                                                     if (numberOfRemainingResults == 0) {
                                                         progressDialog.dismiss();
                                                         ((Activity) context).finish();
-//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
-//                                                notifyDataSetChanged();
+        //                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
+        //                                                notifyDataSetChanged();
                                                     } else {
                                                         progressDialog.dismiss();
-//                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
-//                                                notifyDataSetChanged();
+        //                                                AcademicRecordTeacherList.remove(academicRecordTeacher);
+        //                                                notifyDataSetChanged();
                                                     }
                                                 } else {
-//                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
+        //                                            String message = "This academic record could not be deleted. Ensure you have the permission to delete it";
                                                     progressDialog.dismiss();
                                                     String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
                                                     ShowDialogWithMessage.showDialogWithMessage(context, message);
@@ -306,17 +331,17 @@ public class TeacherAcademicRecordDetailAdapter extends RecyclerView.Adapter<Tea
                     }
                 });
             } else {
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 progressDialog.dismiss();
                 String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
                 showDialogWithMessage(message);
             }
         } else {
+            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
             progressDialog.dismiss();
             String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
             showDialogWithMessage(message);
         }
-
-
     }
 
     private double newClassAverage = 0.0;

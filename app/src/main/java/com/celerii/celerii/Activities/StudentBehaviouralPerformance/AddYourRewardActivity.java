@@ -108,11 +108,11 @@ public class AddYourRewardActivity extends AppCompatActivity {
 
                 rewardOrPunishmentString = rewardOrPunishmentString.substring(0, 1).toUpperCase() + rewardOrPunishmentString.substring(1);
 
-                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
-                    showDialogWithMessage(messageString);
-                    return;
-                }
+//                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//                    String messageString = "Your device is not connected to the internet. Check your connection and try again.";
+//                    showDialogWithMessage(messageString);
+//                    return;
+//                }
 
                 if (tag.equals("Reward")) {
                     mDatabaseReference = mFirebaseDatabase.getReference().child("TeacherBehaviouralRewardsCustom").child(auth.getCurrentUser().getUid()).child("Rewards").push();

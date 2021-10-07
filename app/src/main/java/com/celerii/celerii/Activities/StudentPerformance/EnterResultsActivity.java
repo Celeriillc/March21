@@ -15,6 +15,8 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
@@ -100,6 +102,9 @@ public class EnterResultsActivity extends AppCompatActivity {
 
     Map<String, Object> newResultEntry;
     Map<String, String> existingStudentScores;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Enter Class Results";
@@ -248,7 +253,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         studentParentList = new HashMap<String, ArrayList<String>>();
         mAdapter = new EnterResultAdapter(enterResultRowList, enterResultHeader, this, this);
         loadNewHeaderFromFirebase();
-        loadNewDetailsFromFirebase();
+//        loadNewDetailsFromFirebase();
         recyclerView.setAdapter(mAdapter);
 
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -256,7 +261,7 @@ public class EnterResultsActivity extends AppCompatActivity {
                     @Override
                     public void onRefresh() {
                         loadNewHeaderFromFirebase();
-                        loadNewDetailsFromFirebase();
+//                        loadNewDetailsFromFirebase();
                     }
                 }
         );
@@ -266,14 +271,27 @@ public class EnterResultsActivity extends AppCompatActivity {
     }
 
     private void loadNewHeaderFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         subject = teacherEnterResultsSharedPreferences.getSubject();
         date = Date.getDate();
@@ -308,6 +326,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subject_AcademicYear_Term);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -329,26 +348,30 @@ public class EnterResultsActivity extends AppCompatActivity {
                 enterResultHeader.setPercentageOfTotal(percentageOfTotal);
                 enterResultHeader.setPreviousPercentageOfTotal(previousPercentageOfTotal);
                 mAdapter.notifyDataSetChanged();
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                mDatabaseReference = mFirebaseDatabase.getReference("Class School/" + activeClass);
+                mDatabaseReference.keepSynced(true);
+                mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()){
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                                activeSchoolID = postSnapshot.getKey();
+                                enterResultHeader.setSchoolID(activeSchoolID);
+                                mAdapter.notifyDataSetChanged();
+                                break;
+                            }
+                        }
 
-            }
-        });
-
-        mDatabaseReference = mFirebaseDatabase.getReference("Class School/" + activeClass);
-        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-                        activeSchoolID = postSnapshot.getKey();
-                        enterResultHeader.setSchoolID(activeSchoolID);
-                        mAdapter.notifyDataSetChanged();
-                        break;
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
+                        loadNewDetailsFromFirebase();
                     }
-                }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
@@ -447,14 +470,27 @@ public class EnterResultsActivity extends AppCompatActivity {
     }
 
     private void loadNewDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+//        internetConnectionRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//                    mySwipeRefreshLayout.setRefreshing(false);
+//                    recyclerView.setVisibility(View.GONE);
+//                    progressLayout.setVisibility(View.GONE);
+//                    errorLayout.setVisibility(View.VISIBLE);
+//                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+//                }
+//            }
+//        };
+//        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         Gson gson = new Gson();
         ArrayList<ClassesStudentsAndParentsModel> classesStudentsAndParentsModelList = new ArrayList<>();
@@ -726,6 +762,7 @@ public class EnterResultsActivity extends AppCompatActivity {
         progressDialog.show();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subjectKey);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -825,7 +862,8 @@ public class EnterResultsActivity extends AppCompatActivity {
 
     public void saveNewToCloud() {
         if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            showDialogWithMessage("Internet is down, check your connection and try again", false);
+            showDialogWithMessage("Posting a class result is a sensitive operation and can only be completed" +
+                    " when online. Please turn on your internet or connect to a secure wi-fi network to continue.", false);
             return;
         }
 

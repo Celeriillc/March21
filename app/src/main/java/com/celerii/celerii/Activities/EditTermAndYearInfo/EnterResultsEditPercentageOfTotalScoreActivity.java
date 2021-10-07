@@ -75,6 +75,7 @@ public class EnterResultsEditPercentageOfTotalScoreActivity extends AppCompatAct
         mFirebaseUser = auth.getCurrentUser();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(subjectYearTerm);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

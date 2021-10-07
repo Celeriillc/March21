@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -39,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StudentYearTermPerformanceActivity extends AppCompatActivity {
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -64,6 +67,9 @@ public class StudentYearTermPerformanceActivity extends AppCompatActivity {
 
     StudentYearTermPerformanceHeader studentYearTermPerformanceHeader;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Student Year Term Performance Home";
     long sessionStartTime = 0;
@@ -74,7 +80,8 @@ public class StudentYearTermPerformanceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_year_term_performance);
 
-        sharedPreferencesManager = new SharedPreferencesManager(this);
+        context = this;
+        sharedPreferencesManager = new SharedPreferencesManager(context);
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -118,16 +125,30 @@ public class StudentYearTermPerformanceActivity extends AppCompatActivity {
     }
 
     private void loadDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -163,6 +184,7 @@ public class StudentYearTermPerformanceActivity extends AppCompatActivity {
                 }
 
                 mAdapter.notifyDataSetChanged();
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 mySwipeRefreshLayout.setRefreshing(false);
                 progressLayout.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);

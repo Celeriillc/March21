@@ -2,10 +2,14 @@ package com.celerii.celerii.Activities.TeacherPerformance;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -35,6 +39,7 @@ import java.util.HashMap;
 
 public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity {
 
+    Context context;
     SharedPreferencesManager sharedPreferencesManager;
 
     FirebaseAuth auth;
@@ -54,6 +59,9 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
     LinearLayoutManager mLayoutManager;
     String subject_year_term, recordID;
 
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
+
     String featureUseKey = "";
     String featureName = "Teacher Performance Analysis Detail with Delete";
     long sessionStartTime = 0;
@@ -64,6 +72,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher_view_result_detail_with_delete);
 
+        context = this;
         sharedPreferencesManager = new SharedPreferencesManager(this);
 
         Bundle bundle = getIntent().getExtras();
@@ -111,16 +120,30 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
     }
 
     private void loadNewHeader() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher").child(mFirebaseUser.getUid()).child(subject_year_term).child(recordID);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -145,6 +168,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
                     final String classID = newAcademicRecordTeacher.getClassID();
 
                     mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher").child(teacherID);
+                    mDatabaseReference.keepSynced(true);
                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -156,6 +180,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
                             }
 
                             mDatabaseReference = mFirebaseDatabase.getReference().child("Class").child(classID);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -272,6 +297,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
         kidScoreForTeachersModelList.clear();
         mAdapter.notifyDataSetChanged();
         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(mFirebaseUser.getUid()).child(subject_year_term).child(recordID).child("Students");
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -285,6 +311,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
                         String childID = postSnapshot.getKey();
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(childID);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -299,6 +326,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
                                     kidScoreForTeachersModelList.add(0, new KidScoreForTeachersModel());
                                     mAdapter.notifyDataSetChanged();
                                     recyclerView.setVisibility(View.VISIBLE);
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     progressLayout.setVisibility(View.GONE);
                                     errorLayout.setVisibility(View.GONE);
@@ -313,6 +341,7 @@ public class TeacherViewResultDetailWithDeleteActivity extends AppCompatActivity
                     }
                 } else {
                     recyclerView.setVisibility(View.GONE);
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);

@@ -12,6 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +31,7 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
 import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
+import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -71,6 +74,9 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
     public static final int Header = 1;
     public static final int Normal = 2;
     public static final int Footer = 3;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView studentName, subscriptionFlag;
@@ -419,10 +425,10 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
     }
 
     private void deleteAttendanceRecord() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            showDialogWithMessage("Internet is down, check your connection and try again");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            showDialogWithMessage("Internet is down, check your connection and try again");
+//            return;
+//        }
 
         final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
         final String attendanceKey = teacherAttendanceHeader.getKey();
@@ -432,6 +438,17 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
         final Map<String, Object> deleteAttendance = new HashMap<String, Object>();
 
         progressDialog.show();
+
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    progressDialog.dismiss();
+                    showDialogWithMessage(context.getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         Gson gson = new Gson();
         ArrayList<Class> myClasses = new ArrayList<>();
@@ -450,6 +467,7 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
 
             if (hasClass) {
                 mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("AttendanceParentRecipients").child(attendanceKey);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -472,11 +490,16 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                             deleteAttendance.put("NotificationParent/" + parentID + "/" + attendanceKey, null);
                         }
 
+                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
                         mDatabaseReference.updateChildren(deleteAttendance, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                 if (databaseError == null) {
+                                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                        CustomToast.blueBackgroundToast(context, context.getString(R.string.offline_write_message));
+                                    }
+
                                     progressDialog.dismiss();
                                     showDialogWithMessageAndClose("Attendance record has been deleted");
                                 } else {
@@ -494,11 +517,13 @@ public class TeacherAttendanceRowAdapter extends RecyclerView.Adapter<RecyclerVi
                     }
                 });
             } else {
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                 progressDialog.dismiss();
                 String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + activeClassName + "</b>" + ".";
                 showDialogWithMessage(message);
             }
         } else {
+            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
             progressDialog.dismiss();
             String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + activeClassName + "</b>" + ".";
             showDialogWithMessage(message);

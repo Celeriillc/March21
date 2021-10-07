@@ -116,6 +116,7 @@ public class StudentRewardFragment extends Fragment {
 
     void loadRewardsFromFirebase() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("TeacherBehaviouralRewardsCustom").child(sharedPreferencesManager.getMyUserID()).child("Rewards");
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -129,6 +130,7 @@ public class StudentRewardFragment extends Fragment {
                 }
 
                 mDatabaseReference = mFirebaseDatabase.getReference().child("TeacherBehaviouralRewardsDefault").child("Rewards");
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {

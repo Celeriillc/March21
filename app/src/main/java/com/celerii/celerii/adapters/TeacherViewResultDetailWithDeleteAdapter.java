@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,6 +72,9 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
     public static final int Header = 1;
     public static final int Normal = 2;
     public static final int Footer = 3;
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView kidName, kidScore;
@@ -262,10 +266,10 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
     }
 
     private void deleteNewAcademicRecord(final AcademicRecordTeacher academicRecordTeacher) {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-            showDialogWithMessage("Internet is down, check your connection and try again");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//            showDialogWithMessage("Internet is down, check your connection and try again");
+//            return;
+//        }
 
         final CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
         final String subject_year_term = academicRecordTeacher.getSubject_AcademicYear_Term();
@@ -273,13 +277,22 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
         final String teacherID = academicRecordTeacher.getTeacherID();
         final String classID = academicRecordTeacher.getClassID();
         final String className = academicRecordTeacher.getClassName();
-        final String schoolID = academicRecordTeacher.getSchoolID();
 
         final HashMap<String, Object> deleteMap = new HashMap<>();
         final ArrayList<String> parentsList = new ArrayList<>();
         final ArrayList<String> studentsList = new ArrayList<>();
 
         progressDialog.show();
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    progressDialog.dismiss();
+                    showDialogWithMessage(context.getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         Gson gson = new Gson();
         ArrayList<Class> myClasses = new ArrayList<>();
@@ -298,6 +311,7 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
 
             if (hasClass) {
                 mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordParentRecipients").child(key);
+                mDatabaseReference.keepSynced(true);
                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -308,6 +322,7 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
                         }
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("AcademicRecordTeacher-Student").child(teacherID).child(subject_year_term).child(key).child("Students");
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -331,11 +346,16 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
                                     deleteMap.put("AcademicRecordTeacher-Student/" + teacherID + "/" + subject_year_term + "/" + key, null);
                                 }
 
+                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                 DatabaseReference updateRef = mFirebaseDatabase.getReference();
                                 updateRef.updateChildren(deleteMap, new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                         if (databaseError == null) {
+                                            if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                                CustomToast.blueBackgroundToast(context, context.getString(R.string.offline_write_message));
+                                            }
+
                                             progressDialog.dismiss();
                                             ((Activity) context).finish();
                                         } else {
@@ -365,11 +385,13 @@ public class TeacherViewResultDetailWithDeleteAdapter extends RecyclerView.Adapt
                 progressDialog.dismiss();
                 String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
                 showDialogWithMessage(message);
+                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
             }
         } else {
             progressDialog.dismiss();
             String message = "You can't delete this record at this time because you're currently not connected to " + "<b>" + className + "</b>" + ".";
             showDialogWithMessage(message);
+            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
         }
     }
 

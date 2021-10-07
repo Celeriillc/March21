@@ -168,16 +168,21 @@ public class StudentRewardFragmentAdapter extends RecyclerView.Adapter<RecyclerV
             ((MyViewHolder) holder).clickableView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
-                        showDialogWithMessage("Internet is down, check your connection and try again");
-                        return;
-                    }
+//                    if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+//                        showDialogWithMessage("Internet is down, check your connection and try again");
+//                        return;
+//                    }
 
                     String date = Date.getDate();
                     String sortableDate = Date.convertToSortableDate(date);
                     Gson gson = new Gson();
                     Type type = new TypeToken<Class>() {}.getType();
                     Class activeClassModel = gson.fromJson(sharedPreferencesManager.getActiveClass(), type);
+
+                    if (activeClassModel == null) {
+                        return;
+                    }
+
                     String activeClass = activeClassModel.getID();
                     String year = Date.getYear();
                     String term = Term.getTermShort();
@@ -240,7 +245,11 @@ public class StudentRewardFragmentAdapter extends RecyclerView.Adapter<RecyclerV
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                             if (databaseError == null) {
                                 progressDialog.dismiss();
-                                showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName);
+                                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                                    showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName + ". " + R.string.offline_write_message);
+                                } else {
+                                    showDialogWithMessageAndClose("Your behavioural report has been added for " + studentName);
+                                }
                             } else {
                                 progressDialog.dismiss();
                                 String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());

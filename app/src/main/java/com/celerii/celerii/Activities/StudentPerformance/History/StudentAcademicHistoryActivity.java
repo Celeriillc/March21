@@ -10,6 +10,8 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,6 +77,9 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
     int counter1, counter2, studentCounter;
     HashMap<String, HashMap<String, ArrayList<AcademicRecordStudent>>> studentRecords;
     HashMap<String, String> mapOfKeyAndSubjectYearTerm = new HashMap<>();
+
+    Handler internetConnectionHandler = new Handler();
+    Runnable internetConnectionRunnable;
 
     String featureUseKey = "";
     String featureName = "Class Term Average for Teacher";
@@ -379,19 +384,33 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
 //    }
 
     private void loadNewDetailsFromFirebase() {
-        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
-            mySwipeRefreshLayout.setRefreshing(false);
-            recyclerView.setVisibility(View.GONE);
-            progressLayout.setVisibility(View.GONE);
-            errorLayout.setVisibility(View.VISIBLE);
-            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
-            return;
-        }
+//        if (!CheckNetworkConnectivity.isNetworkAvailable(this)) {
+//            mySwipeRefreshLayout.setRefreshing(false);
+//            recyclerView.setVisibility(View.GONE);
+//            progressLayout.setVisibility(View.GONE);
+//            errorLayout.setVisibility(View.VISIBLE);
+//            errorLayoutText.setText("Your device is not connected to the internet. Check your connection and try again.");
+//            return;
+//        }
+        internetConnectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!CheckNetworkConnectivity.isNetworkAvailable(context)) {
+                    mySwipeRefreshLayout.setRefreshing(false);
+                    recyclerView.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
+                    errorLayout.setVisibility(View.VISIBLE);
+                    errorLayoutText.setText(getString(R.string.no_internet_message_for_offline_download));
+                }
+            }
+        };
+        internetConnectionHandler.postDelayed(internetConnectionRunnable, 7000);
 
         year_term = year + "_" + term;
         studentRecords.clear();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -404,6 +423,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
 
                         if (yearTermKey.equals(year_term)) {
                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(subject_year_term);
+                            mDatabaseReference.keepSynced(true);
                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -418,6 +438,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                             counter2 = 0;
                                             for (Map.Entry<String, String> entry : mapOfKeyAndSubjectYearTerm.entrySet()) {
                                                 mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(entry.getValue()).child(entry.getKey());
+                                                mDatabaseReference.keepSynced(true);
                                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -431,6 +452,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                             String classId =academicRecordClass.getClassID();
 
                                                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(entry.getValue()).child(entry.getKey()).child("Students");
+                                                            mDatabaseReference.keepSynced(true);
                                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -501,6 +523,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 studentCounter = 0;
                                                                                 for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                                     mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.keepSynced(true);
                                                                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                         @Override
                                                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -521,6 +544,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                             if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                                 studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                                 mAdapter.notifyDataSetChanged();
+                                                                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                                                 progressLayout.setVisibility(View.GONE);
                                                                                                 errorLayout.setVisibility(View.GONE);
@@ -538,6 +562,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                     mAdapter.notifyDataSetChanged();
+                                                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                                                     progressLayout.setVisibility(View.GONE);
                                                                                     errorLayout.setVisibility(View.GONE);
@@ -581,6 +606,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 studentCounter = 0;
                                                                                 for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                                     mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.keepSynced(true);
                                                                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                         @Override
                                                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -601,6 +627,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                             if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                                 studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                                 mAdapter.notifyDataSetChanged();
+                                                                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                                                 progressLayout.setVisibility(View.GONE);
                                                                                                 errorLayout.setVisibility(View.GONE);
@@ -618,6 +645,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                     mAdapter.notifyDataSetChanged();
+                                                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                                                     progressLayout.setVisibility(View.GONE);
                                                                                     errorLayout.setVisibility(View.GONE);
@@ -669,6 +697,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                     studentCounter = 0;
                                                                     for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                         mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                        mDatabaseReference.keepSynced(true);
                                                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                             @Override
                                                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -689,6 +718,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                     mAdapter.notifyDataSetChanged();
+                                                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                                                     progressLayout.setVisibility(View.GONE);
                                                                                     errorLayout.setVisibility(View.GONE);
@@ -706,6 +736,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                     if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                         studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                         mAdapter.notifyDataSetChanged();
+                                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                         mySwipeRefreshLayout.setRefreshing(false);
                                                                         progressLayout.setVisibility(View.GONE);
                                                                         errorLayout.setVisibility(View.GONE);
@@ -729,6 +760,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                             counter2 = 0;
                                             for (Map.Entry<String, String> entry : mapOfKeyAndSubjectYearTerm.entrySet()) {
                                                 mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(entry.getValue()).child(entry.getKey());
+                                                mDatabaseReference.keepSynced(true);
                                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -739,6 +771,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                             String percentageOfTotal = academicRecordClass.getPercentageOfTotal();
 
                                                             mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(entry.getValue()).child(entry.getKey()).child("Students");
+                                                            mDatabaseReference.keepSynced(true);
                                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -804,6 +837,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 studentCounter = 0;
                                                                                 for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                                     mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.keepSynced(true);
                                                                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                         @Override
                                                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -824,6 +858,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                             if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                                 studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                                 mAdapter.notifyDataSetChanged();
+                                                                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                                                 progressLayout.setVisibility(View.GONE);
                                                                                                 errorLayout.setVisibility(View.GONE);
@@ -841,6 +876,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                     mAdapter.notifyDataSetChanged();
+                                                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                                                     progressLayout.setVisibility(View.GONE);
                                                                                     errorLayout.setVisibility(View.GONE);
@@ -884,6 +920,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 studentCounter = 0;
                                                                                 for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                                     mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                                    mDatabaseReference.keepSynced(true);
                                                                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                         @Override
                                                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -904,6 +941,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                             if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                                 studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                                 mAdapter.notifyDataSetChanged();
+                                                                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                                                 progressLayout.setVisibility(View.GONE);
                                                                                                 errorLayout.setVisibility(View.GONE);
@@ -921,6 +959,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                     mAdapter.notifyDataSetChanged();
+                                                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                                                     progressLayout.setVisibility(View.GONE);
                                                                                     errorLayout.setVisibility(View.GONE);
@@ -972,6 +1011,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                     studentCounter = 0;
                                                                     for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                         mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                        mDatabaseReference.keepSynced(true);
                                                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                             @Override
                                                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -992,6 +1032,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                 if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                     mAdapter.notifyDataSetChanged();
+                                                                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                     mySwipeRefreshLayout.setRefreshing(false);
                                                                                     progressLayout.setVisibility(View.GONE);
                                                                                     errorLayout.setVisibility(View.GONE);
@@ -1009,6 +1050,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                     if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                         studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                         mAdapter.notifyDataSetChanged();
+                                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                         mySwipeRefreshLayout.setRefreshing(false);
                                                                         progressLayout.setVisibility(View.GONE);
                                                                         errorLayout.setVisibility(View.GONE);
@@ -1041,6 +1083,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                 if (mapOfKeyAndSubjectYearTerm.size() > 0) {
                                     for (Map.Entry<String, String> entry : mapOfKeyAndSubjectYearTerm.entrySet()) {
                                         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass").child(activeClass).child(entry.getValue()).child(entry.getKey());
+                                        mDatabaseReference.keepSynced(true);
                                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1051,6 +1094,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                     String percentageOfTotal = academicRecordClass.getPercentageOfTotal();
 
                                                     mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass).child(entry.getValue()).child(entry.getKey()).child("Students");
+                                                    mDatabaseReference.keepSynced(true);
                                                     mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1116,6 +1160,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                         studentCounter = 0;
                                                                         for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                             mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                            mDatabaseReference.keepSynced(true);
                                                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                 @Override
                                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1136,6 +1181,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                     if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                         studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                         mAdapter.notifyDataSetChanged();
+                                                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                         mySwipeRefreshLayout.setRefreshing(false);
                                                                                         progressLayout.setVisibility(View.GONE);
                                                                                         errorLayout.setVisibility(View.GONE);
@@ -1153,6 +1199,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                         if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                             studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                             mAdapter.notifyDataSetChanged();
+                                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                                             progressLayout.setVisibility(View.GONE);
                                                                             errorLayout.setVisibility(View.GONE);
@@ -1196,6 +1243,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                         studentCounter = 0;
                                                                         for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                             mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                            mDatabaseReference.keepSynced(true);
                                                                             mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                 @Override
                                                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1216,6 +1264,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                                     if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                                         studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                                         mAdapter.notifyDataSetChanged();
+                                                                                        internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                                         mySwipeRefreshLayout.setRefreshing(false);
                                                                                         progressLayout.setVisibility(View.GONE);
                                                                                         errorLayout.setVisibility(View.GONE);
@@ -1233,6 +1282,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                         if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                             studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                             mAdapter.notifyDataSetChanged();
+                                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                                             progressLayout.setVisibility(View.GONE);
                                                                             errorLayout.setVisibility(View.GONE);
@@ -1284,6 +1334,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                             studentCounter = 0;
                                                             for (StudentAcademicHistoryRowModel studentAcademicHistoryRowModel : studentAcademicHistoryRowModelList) {
                                                                 mDatabaseReference = mFirebaseDatabase.getReference().child("Student").child(studentAcademicHistoryRowModel.getStudentID());
+                                                                mDatabaseReference.keepSynced(true);
                                                                 mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                     @Override
                                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1304,6 +1355,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                                         if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                             studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                             mAdapter.notifyDataSetChanged();
+                                                                            internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                             mySwipeRefreshLayout.setRefreshing(false);
                                                                             progressLayout.setVisibility(View.GONE);
                                                                             errorLayout.setVisibility(View.GONE);
@@ -1321,6 +1373,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                                             if (studentCounter == studentAcademicHistoryRowModelList.size()) {
                                                                 studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                                                 mAdapter.notifyDataSetChanged();
+                                                                internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                                                 mySwipeRefreshLayout.setRefreshing(false);
                                                                 progressLayout.setVisibility(View.GONE);
                                                                 errorLayout.setVisibility(View.GONE);
@@ -1340,6 +1393,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                                 } else {
                                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                                     mAdapter.notifyDataSetChanged();
+                                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                                     mySwipeRefreshLayout.setRefreshing(false);
                                     progressLayout.setVisibility(View.GONE);
                                     errorLayout.setVisibility(View.GONE);
@@ -1351,6 +1405,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
                 } else {
                     studentAcademicHistoryRowModelList.add(0, new StudentAcademicHistoryRowModel());
                     mAdapter.notifyDataSetChanged();
+                    internetConnectionHandler.removeCallbacks(internetConnectionRunnable);
                     mySwipeRefreshLayout.setRefreshing(false);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.GONE);

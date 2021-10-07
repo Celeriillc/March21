@@ -163,6 +163,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
 
     private void loadFromFirebase() {
         mDatabaseReference = mFirebaseDatabase.getReference().child("Class School").child(activeClass);
+        mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -171,6 +172,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                         String schoolID = postSnapshot.getKey();
 
                         mDatabaseReference = mFirebaseDatabase.getReference().child("School Subjects").child(schoolID);
+                        mDatabaseReference.keepSynced(true);
                         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
