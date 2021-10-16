@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.Utility.OpenPDFActivity"></activity>
+        <activity android:name=".Activities.Utility.OpenPDFActivity"/>
         <activity android:name=".Activities.StudentPerformance.History.StudentYearTermPerformanceDetailActivity" />
         <activity android:name=".Activities.StudentPerformance.History.StudentYearTermPerformanceActivity" />
         <activity android:name=".Activities.EMeeting.Parent.ParentEMeetingMessageBoardActivity" />

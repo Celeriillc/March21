@@ -525,7 +525,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     if (classStory.getPosterAccountType().equals("School")) {
                         Intent I = new Intent(context, SchoolProfileActivity.class);
                         Bundle b = new Bundle();
-                        b.putString("ID", classStory.getPosterID());
+                        b.putString("schoolID", classStory.getPosterID());
                         I.putExtras(b);
                         context.startActivity(I);
                     } else if (classStory.getPosterAccountType().equals("Teacher")) {
@@ -544,7 +544,7 @@ public class ClassStoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     if (classStory.getPosterAccountType().equals("School")) {
                         Intent I = new Intent(context, SchoolProfileActivity.class);
                         Bundle b = new Bundle();
-                        b.putString("ID", classStory.getPosterID());
+                        b.putString("schoolID", classStory.getPosterID());
                         I.putExtras(b);
                         context.startActivity(I);
                     } else if (classStory.getPosterAccountType().equals("Teacher")) {

@@ -624,7 +624,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                             b.putString("parentID", notificationModel.getFromID());
                         } else {
                             intent = new Intent(context, SchoolProfileActivity.class);
-                            b.putString("School ID", notificationModel.getFromID());
+                            b.putString("schoolID", notificationModel.getFromID());
                         }
                         intent.putExtras(b);
                         context.startActivity(intent);
@@ -632,7 +632,7 @@ public class ClassNotificationAdapter extends RecyclerView.Adapter<ClassNotifica
                     } else if (sharedPreferencesManager.getActiveAccount().equals("Teacher")) {
                         Intent I = new Intent(context, SchoolProfileActivity.class);
                         Bundle b = new Bundle();
-                        b.putString("School ID", notificationModel.getFromID());
+                        b.putString("schoolID", notificationModel.getFromID());
                         I.putExtras(b);
                         context.startActivity(I);
                     }

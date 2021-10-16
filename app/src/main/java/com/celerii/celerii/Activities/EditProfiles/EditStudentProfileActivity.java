@@ -132,7 +132,7 @@ public class EditStudentProfileActivity extends AppCompatActivity {
         byteArray = null;
 
         bundle = getIntent().getExtras();
-        childID = bundle.getString("StudentID");
+        childID = bundle.getString("studentID");
 
         auth = FirebaseAuth.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();

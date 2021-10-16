@@ -136,7 +136,7 @@ public class SearchHistoryAdapter extends RecyclerView.Adapter<RecyclerView.View
                             Gson gson = new Gson();
                             Student student = new Student(searchHistoryRow.getEntityName(), searchHistoryRow.getEntityId(), "");
                             String studentCred = gson.toJson(student);
-                            b.putString("childID", studentCred);
+                            b.putString("studentID", studentCred);
                             Intent I = new Intent(context, StudentProfileActivity.class);
                             I.putExtras(b);
                             context.startActivity(I);

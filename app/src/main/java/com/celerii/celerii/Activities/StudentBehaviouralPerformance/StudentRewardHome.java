@@ -106,7 +106,7 @@ public class StudentRewardHome extends AppCompatActivity {
                 Gson gson = new Gson();
                 Student student = new Student(studentName, studentID, studentPicURL);
                 String studentCred = gson.toJson(student);
-                bundle.putString("childID", studentCred);
+                bundle.putString("studentID", studentCred);
                 I.putExtras(bundle);
                 startActivity(I);
             }

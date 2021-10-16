@@ -742,7 +742,7 @@ public class MoreParentFragment extends Fragment {
             public void onClick(View v) {
                 Intent I = new Intent(context, StudentProfileActivity.class);
                 Bundle b = new Bundle();
-                b.putString("childID", sharedPreferencesManager.getActiveKid());
+                b.putString("studentID", sharedPreferencesManager.getActiveKid());
                 I.putExtras(b);
                 context.startActivity(I);
             }

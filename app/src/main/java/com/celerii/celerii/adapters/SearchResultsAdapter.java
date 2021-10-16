@@ -950,7 +950,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                     Gson gson = new Gson();
                     Student student = new Student(searchResultsRow.getEntityName(), searchResultsRow.getEntityId(), searchResultsRow.getEntityPic());
                     String studentCred = gson.toJson(student);
-                    bundle.putString("childID", studentCred);
+                    bundle.putString("studentID", studentCred);
                 }
                 else {
                     bundle.putString("ID", entityId);

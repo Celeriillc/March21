@@ -153,7 +153,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         subjectList = new ArrayList<>();
 
         Bundle b = getIntent().getExtras();
-        activeKid = b.getString("childID");
+        activeKid = b.getString("studentID");
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         superLayout = (ScrollView) findViewById(R.id.superlayout);
@@ -475,7 +475,7 @@ public class StudentProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent I = new Intent(StudentProfileActivity.this, EditStudentProfileActivity.class);
                 Bundle bundleOne = new Bundle();
-                bundleOne.putString("StudentID", studentID);
+                bundleOne.putString("studentID", studentID);
                 I.putExtras(bundleOne);
                 startActivity(I);
             }

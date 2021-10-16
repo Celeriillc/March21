@@ -106,7 +106,7 @@ public class ManageKidsAdapter extends RecyclerView.Adapter<ManageKidsAdapter.My
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
-                bundle.putString("childID", childID);
+                bundle.putString("studentID", childID);
                 Intent I = new Intent(context, StudentProfileActivity.class);
                 I.putExtras(bundle);
                 context.startActivity(I);
