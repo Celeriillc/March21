@@ -32,6 +32,8 @@ import android.widget.VideoView;
 import com.celerii.celerii.R;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
+//import com.google.android.exoplayer2.SimpleExoPlayer;
+//import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -61,6 +63,12 @@ public class ELibraryWatchVideoActivity extends AppCompatActivity {
     TextView errorText, currentTime, totalTime;
     ImageView fullScreen;
     ImageButton playPause, replay, forward;
+
+    // creating a variable for exoplayerview.
+//    PlayerView exoPlayerView;
+
+    // creating a variable for exoplayer
+//    SimpleExoPlayer exoPlayer;
 
     MediaPlayer mediaPlayer;
     Boolean isPlaying, isPrepared, isFlipped;
@@ -96,17 +104,19 @@ public class ELibraryWatchVideoActivity extends AppCompatActivity {
         materialID = bundle.getString("materialID");
         materialTitle = bundle.getString("materialTitle");
         materialURL = bundle.getString("materialURL");
-//        materialURL = "https://firebasestorage.googleapis.com/v0/b/altarii-aa0e5.appspot.com/o/ELibrary%2FwAKoSvpuADThnif48BcfcXRrPhx1%2Fvideoplayback.mp4?alt=media&token=0294a670-0cec-4fbe-91ff-35e8dd8e9b7d" ;//bundle.getString("materialURL");
+//        materialURL = "https://firebasestorage.googleapis.com/v0/b/altarii-aa0e5.appspot.com/o/ELibrary%2FyNheOXLhh4h9jQv02E0G7tQeTkC3%2FVID_20211021_090821.mp4?alt=media&token=72ce58ff-239c-4eb0-8782-7d0c3def79f8" ;//bundle.getString("materialURL");
 
         countDownTimer = new MyCountDownTimer(startTime, interval);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(materialTitle);
+        TextView toolbarTitle = toolbar.findViewById(R.id.title);
+        toolbarTitle.setText(materialTitle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_white);
 
+//        exoPlayerView = findViewById(R.id.videoview);
         background = (RelativeLayout) findViewById(R.id.background);
         mediaControl = (LinearLayout) findViewById(R.id.mediacontrol);
         playControl = (LinearLayout) findViewById(R.id.playcontrol);

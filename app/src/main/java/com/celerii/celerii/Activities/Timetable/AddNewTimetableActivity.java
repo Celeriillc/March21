@@ -215,6 +215,7 @@ public class AddNewTimetableActivity extends AppCompatActivity implements TimePi
             public void onClick(View v) {
                 Intent intent = new Intent(AddNewTimetableActivity.this, EnterResultsEditSubjectsActivity.class);
                 Bundle bundle = new Bundle();
+                bundle.putString("Active Class", activeClassID);
                 bundle.putString("Activity", "AddNewTimetable");
                 bundle.putString("Subject", subject.getText().toString());
                 intent.putExtras(bundle);

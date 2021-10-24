@@ -66,6 +66,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
     Toolbar toolbar;
     String activeClass;
     String selectedSubject, activity;
+    String myUserID, activeAccount;
 
     String featureUseKey = "";
     String featureName = "Edit Subject";
@@ -85,7 +86,7 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
         parentCheckAttendanceSharedPreferences.deleteSubject();
 
         Bundle bundle = getIntent().getExtras();
-//        activeClass = bundle.getString("Active Class");
+        activeClass = bundle.getString("Active Class");
         activity = bundle.getString("Activity");
         selectedSubject = bundle.getString("Subject");
 
@@ -93,6 +94,9 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mFirebaseUser = auth.getCurrentUser();
+
+        myUserID = mFirebaseUser.getUid();
+        activeAccount = sharedPreferencesManager.getActiveAccount();
 
         mySwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
@@ -114,8 +118,13 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
 
         selectSubjectModelList = new ArrayList<>();
         mAdapter = new SelectSubjectAdapter(selectSubjectModelList, selectedSubject, this);
-        loadFromSharedPreferences();
         recyclerView.setAdapter(mAdapter);
+
+        if (activeAccount.equals("Teacher")) {
+            loadFromSharedPreferences();
+        } else {
+            loadFromFirebase();
+        }
 
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -146,10 +155,16 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
             errorLayout.setVisibility(View.VISIBLE);
             errorLayoutText.setText("There are no subjects for you to access. If you're not connected to a school, use the search feature to search for a school and send a request.");
         } else {
+            selectSubjectModelList.clear();
             for (int i = 0; i < subjectList.size(); i++) {
                 SelectSubjectModel selectSubjectModel = new SelectSubjectModel(subjectList.get(i));
                 selectSubjectModelList.add(selectSubjectModel);
 //                if (!selectSubjectModelList.contains(new SelectSubjectModel("General"))) selectSubjectModelList.add(0, new SelectSubjectModel("General"));
+            }
+
+            if (!subjectList.contains("General")) {
+                selectSubjectModelList.add(0, new SelectSubjectModel("General"));
+                subjectList.add(0, "General");
             }
 
             selectSubjectModelList.add(0, new SelectSubjectModel(""));
@@ -162,7 +177,15 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
     }
 
     private void loadFromFirebase() {
-        mDatabaseReference = mFirebaseDatabase.getReference().child("Class School").child(activeClass);
+        selectSubjectModelList.clear();
+        mAdapter.notifyDataSetChanged();
+
+        if (activeAccount.equals("Teacher")) {
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Teacher School").child(myUserID);
+        } else {
+            mDatabaseReference = mFirebaseDatabase.getReference().child("Class School").child(activeClass);
+        }
+
         mDatabaseReference.keepSynced(true);
         mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -178,8 +201,6 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 final int childrenCount = (int) dataSnapshot.getChildrenCount();
                                 if (dataSnapshot.exists()) {
-                                    selectSubjectModelList.clear();
-                                    mAdapter.notifyDataSetChanged();
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                         String subject = postSnapshot.getKey();
 
@@ -187,18 +208,29 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                                         selectSubjectModelList.add(selectSubjectModel);
 
                                         if (childrenCount == selectSubjectModelList.size()) {
-                                            if (!selectSubjectModelList.contains(new SelectSubjectModel("General"))) selectSubjectModelList.add(0, new SelectSubjectModel("General"));
                                             subjectList.clear();
-                                            mAdapter.notifyDataSetChanged();
                                             for (int i = 0; i < selectSubjectModelList.size(); i++) {
                                                 subjectList.add(selectSubjectModelList.get(i).getSubject());
                                             }
 
+                                            if (!subjectList.contains("General")) {
+                                                selectSubjectModelList.add(0, new SelectSubjectModel("General"));
+                                                subjectList.add(0, "General");
+                                            }
                                             mAdapter.notifyDataSetChanged();
-                                            Gson gson = new Gson();
-                                            String json = gson.toJson(subjectList);
-                                            sharedPreferencesManager.setSubjects(json);
-                                            mySwipeRefreshLayout.setRefreshing(false);
+
+                                            if (activeAccount.equals("Teacher")) {
+                                                Gson gson = new Gson();
+                                                String json = gson.toJson(subjectList);
+                                                sharedPreferencesManager.setSubjects(json);
+                                                mySwipeRefreshLayout.setRefreshing(false);
+                                            } else {
+                                                selectSubjectModelList.add(0, new SelectSubjectModel(""));
+                                                mySwipeRefreshLayout.setRefreshing(false);
+                                                progressLayout.setVisibility(View.GONE);
+                                                recyclerView.setVisibility(View.VISIBLE);
+                                                errorLayout.setVisibility(View.GONE);
+                                            }
                                         }
                                     }
                                 } else {
@@ -206,7 +238,12 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                                     recyclerView.setVisibility(View.GONE);
                                     progressLayout.setVisibility(View.GONE);
                                     errorLayout.setVisibility(View.VISIBLE);
-                                    errorLayoutText.setText("Your school hasn't registered any subjects yet use the search feature to search for a school and send a request.");
+
+                                    if (activeAccount.equals("Teacher")) {
+                                        errorLayoutText.setText("Your school hasn't registered any subjects yet.");
+                                    } else {
+                                        errorLayoutText.setText("Your child's school hasn't registered any subjects yet.");
+                                    }
                                 }
                             }
 
@@ -227,7 +264,12 @@ public class EnterResultsEditSubjectsActivity extends AppCompatActivity {
                     recyclerView.setVisibility(View.GONE);
                     progressLayout.setVisibility(View.GONE);
                     errorLayout.setVisibility(View.VISIBLE);
-                    errorLayoutText.setText("There are no subjects for you to access. If you're not connected to a school, use the search feature to search for a school and send a request.");
+
+                    if (activeAccount.equals("Teacher")) {
+                        errorLayoutText.setText("There are no subjects for you to access. If you're not connected to a school, use the search feature to search for a school and send a request.");
+                    } else {
+                        errorLayoutText.setText("There are no subjects for you to access.");
+                    }
                 }
             }
 

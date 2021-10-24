@@ -90,6 +90,7 @@ public class UpdateDataFromFirebase {
     private static ArrayList<MessageList> inboxList = new ArrayList<>();
     private static ArrayList<NotificationModel> parentNotificationModelList = new ArrayList<>();
     private static ArrayList<NotificationModel> teacherNotificationModelList = new ArrayList<>();
+    private static ArrayList<String> examTypeList = new ArrayList<>();
 
     private static HashMap<String, ClassesStudentsAndParentsModel> classesStudentsAndParentsModelMap;
     private static HashMap<String, ClassesStudentsAndParentsModel> classesStudentsModelMap;
@@ -1749,11 +1750,57 @@ public class UpdateDataFromFirebase {
                     }
                 }
 
-                loadIsOpenToAll();
+                loadExamTypeInfo();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private static void loadExamTypeInfo() {
+        examTypeList.clear();
+        mDatabaseReference = mFirebaseDatabase.getReference("Teacher School/" + auth.getCurrentUser().getUid());
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        final String schoolKey = postSnapshot.getKey();
+
+                        mDatabaseReference = FirebaseDatabase.getInstance().getReference("School Exam Type").child(schoolKey);
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                        final String examTypeKey = postSnapshot.getKey();
+
+                                        if (!examTypeList.contains(examTypeKey)) {
+                                            examTypeList.add(examTypeKey);
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(examTypeList);
+                                            sharedPreferencesManager.setExamType(json);
+                                        }
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+
+                loadIsOpenToAll();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
@@ -1776,135 +1823,4 @@ public class UpdateDataFromFirebase {
             }
         });
     }
-
-//    private static void loadAllMessages() {
-//        if (mFirebaseUser == null) {
-//            return;
-//        }
-//
-//
-//
-//        if (sharedPreferencesManager.getActiveAccount().equals("Parent")) {
-//            Gson gson = new Gson();
-//            String studentsSchoolsClassesandTeachersJSON = sharedPreferencesManager.getStudentsSchoolsClassesTeachers();
-//            Type type = new TypeToken<ArrayList<StudentsSchoolsClassesandTeachersModel>>() {}.getType();
-//            studentsSchoolsClassesandTeachersModelList = gson.fromJson(studentsSchoolsClassesandTeachersJSON, type);
-//            schoolAllowsParentTeacherMessagingCounter = 0;
-//
-//            if (studentsSchoolsClassesandTeachersModelList == null) {
-//                studentsSchoolsClassesandTeachersModelList = new ArrayList<>();
-//            }
-//
-//            if (studentsSchoolsClassesandTeachersModelList.size() > 0) {
-//                for (int i = 0; i < studentsSchoolsClassesandTeachersModelList.size(); i++) {
-//                    final StudentsSchoolsClassesandTeachersModel studentsSchoolsClassesandTeachersModel = studentsSchoolsClassesandTeachersModelList.get(i);
-//                    String teacherID = studentsSchoolsClassesandTeachersModel.getTeacherID();
-//                    String schoolID = studentsSchoolsClassesandTeachersModel.getSchoolID();
-//
-//                    if (!teacherID.equals("")) {
-//                        teacherSchoolMap.put(teacherID, schoolID);
-//                    }
-//
-//                    if (!schoolList.contains(schoolID)) {
-//                        schoolList.add(schoolID);
-//                    }
-//
-//                    mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
-//                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                            schoolAllowsParentTeacherMessagingCounter++;
-//                            if (dataSnapshot.exists()) {
-//                                SchoolSettings schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
-//                                schoolAllowsParentTeacherMessagingMap.put(schoolID, schoolSettings.isAllowParentTeacherMessaging());
-//                            } else {
-//                                schoolAllowsParentTeacherMessagingMap.put(schoolID, true);
-//                            }
-//
-//                            if (schoolAllowsParentTeacherMessagingCounter == studentsSchoolsClassesandTeachersModelList.size()) {
-//                                loadMessages();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                        }
-//                    });
-//                }
-//            } else {
-//                loadMessages();
-//            }
-//        } else {
-//            Gson gson = new Gson();
-//            String classStudentParentJSON = sharedPreferencesManager.getClassesStudentParent();
-//            Type type = new TypeToken<ArrayList<ClassesStudentsAndParentsModel>>() {}.getType();
-//            classesStudentsAndParentsModelList = gson.fromJson(classStudentParentJSON, type);
-//            schoolAllowsParentTeacherMessagingCounter = 0;
-//
-//            if (classesStudentsAndParentsModelList == null) {
-//                classesStudentsAndParentsModelList = new ArrayList<>();
-//            }
-//
-//            if (classesStudentsAndParentsModelList.size() > 0) {
-//                for (int i = 0; i < classesStudentsAndParentsModelList.size(); i++) {
-//                    final ClassesStudentsAndParentsModel classesStudentsAndParentsModel = classesStudentsAndParentsModelList.get(i);
-//                    String parentID = classesStudentsAndParentsModel.getParentID();
-//                    String schoolID = classesStudentsAndParentsModel.getSchoolID();
-//                    if (!parentID.equals("")) {
-//                        parentSchoolMap.put(parentID, schoolID);
-//                    }
-//
-//                    if (!schoolList.contains(schoolID)) {
-//                        schoolList.add(schoolID);
-//                    }
-//
-//                    mDatabaseReference = mFirebaseDatabase.getReference().child("School Teacher").child(schoolID);
-//                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                            if (dataSnapshot.exists()) {
-//                                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-//                                    String teacherID = postSnapshot.getKey();
-//                                    if (!teacherList.contains(teacherID)) {
-//                                        teacherList.add(teacherID);
-//                                    }
-//                                }
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                        }
-//                    });
-//
-//                    mDatabaseReference = mFirebaseDatabase.getReference().child("School Settings").child(schoolID);
-//                    mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                            schoolAllowsParentTeacherMessagingCounter++;
-//                            if (dataSnapshot.exists()) {
-//                                SchoolSettings schoolSettings = dataSnapshot.getValue(SchoolSettings.class);
-//                                schoolAllowsParentTeacherMessagingMap.put(schoolID, schoolSettings.isAllowParentTeacherMessaging());
-//                            } else {
-//                                schoolAllowsParentTeacherMessagingMap.put(schoolID, true);
-//                            }
-//
-//                            if (schoolAllowsParentTeacherMessagingCounter == classesStudentsAndParentsModelList.size()) {
-//                                loadMessages();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                        }
-//                    });
-//                }
-//            } else {
-//                loadMessages();
-//            }
-//        }
-//    }
 }

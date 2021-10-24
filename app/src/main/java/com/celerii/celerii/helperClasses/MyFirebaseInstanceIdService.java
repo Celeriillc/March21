@@ -40,7 +40,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService{
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         FirebaseUser mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         String deviceID = FirebaseInstanceId.getInstance().getId();
-        if (mFirebaseUser == null) {
+        if (mFirebaseUser != null) {
             reference.child("UserRoles").child(mFirebaseUser.getUid()).child("token").setValue(token);
         }
     }

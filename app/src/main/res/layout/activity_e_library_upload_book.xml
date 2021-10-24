@@ -35,7 +35,7 @@
                     android:layout_marginBottom="30dp"
                     android:gravity="center"
                     android:textColor="@color/colorBottomNavigationIconGray"
-                    android:text="Tap to upload book, video or audio book"/>
+                    android:text="Tap to upload book, video or audio book (for large files like videos, please compress first)"/>
 
                 <RelativeLayout
                     android:id="@+id/uploadrelativelayout"

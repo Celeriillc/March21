@@ -44,6 +44,7 @@ import android.widget.TextView;
 import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.ClassListAdapterHorizontal;
 import com.celerii.celerii.adapters.InboxAdapter;
+import com.celerii.celerii.adapters.TeacherCreateClassPostAddImageAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
 import com.celerii.celerii.helperClasses.CreateTextDrawable;
@@ -58,6 +59,7 @@ import com.celerii.celerii.models.ClassStory;
 import com.celerii.celerii.models.ClassesStudentsAndParentsModel;
 import com.celerii.celerii.models.NotificationModel;
 import com.bumptech.glide.Glide;
+import com.celerii.celerii.models.TeacherCreateClassPostAddImageModel;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -107,19 +109,15 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     private ArrayList<Class> classList;
     private ArrayList<ClassesStudentsAndParentsModel> classesStudentsAndParentsModelList;
     private ArrayList<String> classListString, parentList, studentList, downloadURLs;
-    private ArrayList<Bitmap> bitmaps;
-    public RecyclerView recyclerView;
+    private ArrayList<TeacherCreateClassPostAddImageModel> teacherCreateClassPostAddImageModelList;
+    public RecyclerView recyclerView, addImageRecyclerView;
     public ClassListAdapterHorizontal mAdapter;
+    public TeacherCreateClassPostAddImageAdapter teacherCreateClassPostAddImageAdapter;
     LinearLayoutManager mLayoutManager;
     ClassStory classStory;
     NotificationModel notificationModelParent, notificationModelSchool;
     ProgressBar progressBar;
     ScrollView superLayout;
-
-    HorizontalScrollView imageContainer;
-    RelativeLayout imageLayoutOne, imageLayoutTwo, imageLayoutThree, imageLayoutFour, imageLayoutFive, imageLayoutSix, imageLayoutSeven, imageLayoutEight, imageLayoutNine, imageLayoutTen;
-    ImageView storyImageOne, storyImageTwo, storyImageThree, storyImageFour, storyImageFive, storyImageSix, storyImageSeven, storyImageEight, storyImageNine, storyImageTen;
-    ImageView iconOne, iconTwo, iconThree, iconFour, iconFive, iconSix, iconSeven, iconEight, iconNine, iconTen;
 
     ImageView posterPic;
     EditText classPost;
@@ -137,7 +135,6 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     String classRecipientstring = "", downloadURLString = "";
     CustomProgressDialogOne progressDialog;
 
-    boolean isClassLoaded, isParentsLoaded, isTextNotEmpty, isTeacherInfoLoaded;
     int downloadURLCounter = 0;
 
     String featureUseKey = "";
@@ -179,63 +176,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         superLayout = (ScrollView) findViewById(R.id.superlayout);
         post = (Button) findViewById(R.id.post);
 
-        imageContainer = (HorizontalScrollView) findViewById(R.id.imagecontainer);
         profilePictureClipper.setClipToOutline(true);
-
-        imageLayoutOne = (RelativeLayout) findViewById(R.id.imagelayoutone);
-        imageLayoutTwo = (RelativeLayout) findViewById(R.id.imagelayouttwo);
-        imageLayoutThree = (RelativeLayout) findViewById(R.id.imagelayoutthree);
-        imageLayoutFour = (RelativeLayout) findViewById(R.id.imagelayoutfour);
-        imageLayoutFive = (RelativeLayout) findViewById(R.id.imagelayoutfive);
-        imageLayoutSix = (RelativeLayout) findViewById(R.id.imagelayoutsix);
-        imageLayoutSeven = (RelativeLayout) findViewById(R.id.imagelayoutseven);
-        imageLayoutEight = (RelativeLayout) findViewById(R.id.imagelayouteight);
-        imageLayoutNine = (RelativeLayout) findViewById(R.id.imagelayoutnine);
-        imageLayoutTen = (RelativeLayout) findViewById(R.id.imagelayoutten);
-
-        storyImageOne = (ImageView) findViewById(R.id.storyimageone);
-        storyImageTwo = (ImageView) findViewById(R.id.storyimagetwo);
-        storyImageThree = (ImageView) findViewById(R.id.storyimagethree);
-        storyImageFour = (ImageView) findViewById(R.id.storyimagefour);
-        storyImageFive = (ImageView) findViewById(R.id.storyimagefive);
-        storyImageSix = (ImageView) findViewById(R.id.storyimagesix);
-        storyImageSeven = (ImageView) findViewById(R.id.storyimageseven);
-        storyImageEight = (ImageView) findViewById(R.id.storyimageeight);
-        storyImageNine = (ImageView) findViewById(R.id.storyimagenine);
-        storyImageTen = (ImageView) findViewById(R.id.storyimageten);
-
-        iconOne = (ImageView) findViewById(R.id.iconone);
-        iconTwo = (ImageView) findViewById(R.id.icontwo);
-        iconThree = (ImageView) findViewById(R.id.iconthree);
-        iconFour = (ImageView) findViewById(R.id.iconfour);
-        iconFive = (ImageView) findViewById(R.id.iconfive);
-        iconSix = (ImageView) findViewById(R.id.iconsix);
-        iconSeven = (ImageView) findViewById(R.id.iconseven);
-        iconEight = (ImageView) findViewById(R.id.iconeight);
-        iconNine = (ImageView) findViewById(R.id.iconnine);
-        iconTen = (ImageView) findViewById(R.id.iconten);
-
-        imageLayoutOne.setClipToOutline(true);
-        imageLayoutTwo.setClipToOutline(true);
-        imageLayoutThree.setClipToOutline(true);
-        imageLayoutFour.setClipToOutline(true);
-        imageLayoutFive.setClipToOutline(true);
-        imageLayoutSix.setClipToOutline(true);
-        imageLayoutSeven.setClipToOutline(true);
-        imageLayoutEight.setClipToOutline(true);
-        imageLayoutNine.setClipToOutline(true);
-        imageLayoutTen.setClipToOutline(true);
-
-        imageLayoutOne.setVisibility(View.VISIBLE);
-        imageLayoutTwo.setVisibility(View.GONE);
-        imageLayoutThree.setVisibility(View.GONE);
-        imageLayoutFour.setVisibility(View.GONE);
-        imageLayoutFive.setVisibility(View.GONE);
-        imageLayoutSix.setVisibility(View.GONE);
-        imageLayoutSeven.setVisibility(View.GONE);
-        imageLayoutEight.setVisibility(View.GONE);
-        imageLayoutNine.setVisibility(View.GONE);
-        imageLayoutTen.setVisibility(View.GONE);
 
         classPost.setFilters(new InputFilter[] {new InputFilter.LengthFilter(maxNumberOfCharacters)});
 
@@ -269,20 +210,26 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         noDataLayout.setVisibility(View.GONE);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        addImageRecyclerView = (RecyclerView) findViewById(R.id.addimagerecyclerview);
         mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(mLayoutManager);
+        addImageRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         classList = new ArrayList<>();
         classListString = new ArrayList<>();
         parentList = new ArrayList<>();
         studentList = new ArrayList<>();
         downloadURLs = new ArrayList<>();
-        bitmaps = new ArrayList<>();
         classParentMap = new HashMap<String, ArrayList<String>>();
         classSchoolMap = new HashMap<String, ArrayList<String>>();
         loadClasses();
         mAdapter = new ClassListAdapterHorizontal(classList, this);
         recyclerView.setAdapter(mAdapter);
+
+        teacherCreateClassPostAddImageModelList = new ArrayList<>();
+        teacherCreateClassPostAddImageModelList.add(new TeacherCreateClassPostAddImageModel());
+        teacherCreateClassPostAddImageAdapter = new TeacherCreateClassPostAddImageAdapter(teacherCreateClassPostAddImageModelList, context);
+        addImageRecyclerView.setAdapter(teacherCreateClassPostAddImageAdapter);
 
         classPost.addTextChangedListener(new TextWatcher() {
             @Override
@@ -304,96 +251,6 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                 int presentNumOfChars = classPost.getText().length();
                 int remainingNumOfChars = maxNumberOfCharacters - presentNumOfChars;
                 maxCharacters.setText(String.valueOf(remainingNumOfChars));
-            }
-        });
-
-        storyImageOne.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageOne.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageTwo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageTwo.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageThree.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageThree.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageFour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageFour.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageFive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageFive.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageSix.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageSix.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageSeven.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageSeven.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageEight.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageEight.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageNine.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageNine.getDrawable() == null) {
-                    addNewImage();
-                }
-            }
-        });
-
-        storyImageTen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (storyImageTen.getDrawable() == null) {
-                    addNewImage();
-                }
             }
         });
 
@@ -506,7 +363,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 //        if (classSet != null) { classes = new ArrayList<>(classSet); }
         gson = new Gson();
         classesStudentsAndParentsModelList = new ArrayList<>();
-        classesStudentsAndParentsModelList.clear();
+//        classesStudentsAndParentsModelList.clear();
 //        classList.clear();
 //        classListString.clear();
 
@@ -563,8 +420,8 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     }
 
     public void uploadImages(final int index) {
-        if (index < bitmaps.size()) {
-            Bitmap bitmap = bitmaps.get(index);
+        if (index < teacherCreateClassPostAddImageModelList.size() - 1) {
+            Bitmap bitmap = teacherCreateClassPostAddImageModelList.get(index).getBitmap();
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
@@ -591,7 +448,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
                     downloadURLs.add(downloadURL);
                     downloadURLString = downloadURLString + downloadURL + " ";
 
-                    if (index == bitmaps.size() - 1) {
+                    if (index == teacherCreateClassPostAddImageModelList.size() - 2) {
                         downloadURLString = downloadURLString.trim();
                         classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, downloadURLString, url);
                         classStory.setClassRecipients(classRecipients);
@@ -653,7 +510,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
 
     public void uploadStory() {
         try {
-            if (bitmaps.size() > 0) {
+            if (teacherCreateClassPostAddImageModelList.size() > 0) {
                 uploadImages(0);
             }
             else {
@@ -712,154 +569,6 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
             progressDialog.dismiss();
             String messageString = "An error occurred while uploading your story, please try again";
             showDialogWithMessage((messageString));
-            Log.d("Upload Story", e.getMessage());
-        }
-    }
-
-    public void uploadStoryOld(){
-        try {
-            if (bitmaps.size() > 0) {
-                for (int i = 0; i < bitmaps.size(); i++) {
-                    Bitmap bitmap = bitmaps.get(i);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    byte[] byteArray = stream.toByteArray();
-
-                    mStorageReference = mFirebaseStorage.getReference().child("ClassStory/" + UID + "/" + sortableDate + "_" + i + ".jpg");
-                    UploadTask uploadTask = mStorageReference.putBytes(byteArray);
-                    Task<Uri> uriTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                return null;
-                            }
-
-                            return mStorageReference.getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            downloadURLCounter++;
-                            String downloadURL = "";
-                            downloadURL = task.getResult().toString();
-
-                            downloadURLs.add(downloadURL);
-                            downloadURLString = downloadURLString + downloadURL + " ";
-
-                            if (downloadURLCounter == bitmaps.size()) {
-                                downloadURLString = downloadURLString.trim();
-                                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, downloadURLString, url);
-                                classStory.setClassRecipients(classRecipients);
-                                imageURL = downloadURLs.get(0);
-                                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
-                                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
-
-                                DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
-                                String pushID = newStoryR.getKey();
-                                DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
-                                classStory.setPostID(pushID);
-                                notificationModelParent.setActivityID(pushID);
-                                notificationModelSchool.setActivityID(pushID);
-
-                                Map<String, Object> newStory = new HashMap<String, Object>();
-                                newStory.put("ClassStory/" + pushID, classStory);
-                                newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
-                                newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
-
-                                for (int i = 0; i < classRecipients.size(); i++){
-                                    String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
-                                    newStory.put(classStoryRecipientsPush + classRecipients.get(i), true);
-                                    newStory.put("ClassStoryClass/" + classRecipients.get(i) + "/" + pushID, true);
-                                }
-                                for (int i = 0; i < schoolRecipients.size(); i++) {
-                                    newStory.put("ClassStorySchoolFeed/" + schoolRecipients.get(i) + "/" + pushID, false);
-                                    notificationModelSchool.setToID(schoolRecipients.get(i));
-                                    newStory.put("NotificationSchool/" + schoolRecipients.get(i) + "/" + pushID, notificationModelSchool);
-                                    newStory.put("Notification Badges/Schools/" + schoolRecipients.get(i) + "/ClassStory/status", true);
-                                }
-                                for (int i = 0; i < parentRecipients.size(); i++){
-                                    newStory.put("ClassStoryParentFeed/" + parentRecipients.get(i) + "/" + pushID, false);
-                                    notificationModelParent.setToID(parentRecipients.get(i));
-                                    newStory.put("NotificationParent/" + parentRecipients.get(i) + "/" + pushID, notificationModelParent);
-                                    newStory.put("Notification Badges/Parents/" + parentRecipients.get(i) + "/ClassStory/status", true);
-                                }
-
-                                newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        if (databaseError == null) {
-                                            progressDialog.dismiss();
-                                            CustomToast.blueBackgroundToast(context, "Your class story has been posted");
-                                            finish();
-                                        } else {
-                                            progressDialog.dismiss();
-                                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-                                            ShowDialogWithMessage.showDialogWithMessage(context, message);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }
-            }
-            else {
-                classStory = new ClassStory(story, date, sortableDate, "Teacher", posterID, posterNameString, posterProfilePicURL, classRecipientstring, "", url);
-                classStory.setClassRecipients(classRecipients);
-                imageURL = "";
-                notificationModelParent = new NotificationModel(mFirebaseUser.getUid(), "", "Parent", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
-                notificationModelSchool = new NotificationModel(mFirebaseUser.getUid(), "", "School", "Teacher", date, sortableDate, "", "ClassPost", imageURL, classRecipientstring, false);
-
-                DatabaseReference newStoryR = mDatabaseReference.child("ClassStory").push();
-                String pushID = newStoryR.getKey();
-                DatabaseReference newStoryRef = mFirebaseDatabase.getReference();
-                classStory.setPostID(pushID);
-                notificationModelParent.setActivityID(pushID);
-                notificationModelSchool.setActivityID(pushID);
-
-                Map<String, Object> newStory = new HashMap<String, Object>();
-                newStory.put("ClassStory/" + pushID, classStory);
-                newStory.put("ClassStoryTeacherTimeline/" + posterID + "/" + pushID, false);
-                newStory.put("ClassStoryTeacherFeed/" + posterID + "/" + pushID, false);
-
-                for (int i = 0; i < classRecipients.size(); i++){
-                    String classStoryRecipientsPush = "ClassStoryRecipients/" + pushID + "/";
-                    newStory.put(classStoryRecipientsPush + classRecipients.get(i), true);
-                    newStory.put("ClassStoryClass/" + classRecipients.get(i) + "/" + pushID, true);
-                }
-                for (int i = 0; i < schoolRecipients.size(); i++) {
-                    newStory.put("ClassStorySchoolFeed/" + schoolRecipients.get(i) + "/" + pushID, false);
-                    notificationModelSchool.setToID(schoolRecipients.get(i));
-                    newStory.put("NotificationSchool/" + schoolRecipients.get(i) + "/" + pushID, notificationModelSchool);
-                    newStory.put("Notification Badges/Schools/" + schoolRecipients.get(i) + "/ClassStory/status", true);
-                }
-                for (int i = 0; i < parentRecipients.size(); i++){
-                    newStory.put("ClassStoryParentFeed/" + parentRecipients.get(i) + "/" + pushID, false);
-                    notificationModelParent.setToID(parentRecipients.get(i));
-                    newStory.put("NotificationParent/" + parentRecipients.get(i) + "/" + pushID, notificationModelParent);
-                    newStory.put("Notification Badges/Parents/" + parentRecipients.get(i) + "/ClassStory/status", true);
-                }
-
-                newStoryRef.updateChildren(newStory, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        if (databaseError == null) {
-                            progressDialog.dismiss();
-                            CustomToast.blueBackgroundToast(context, "Your class story has been posted");
-                            finish();
-                        } else {
-                            progressDialog.dismiss();
-                            String message = FirebaseErrorMessages.getErrorMessage(databaseError.getCode());
-                            showDialogWithMessage(message);
-                        }
-                    }
-                });
-            }
-        } catch (Exception e) {
-            progressDialog.dismiss();
-            String messageString = "An error occured while uploading your story, please try again";
-            showDialogWithMessage((messageString));
-            Log.d("Upload Story", e.getMessage());
         }
     }
 
@@ -889,7 +598,7 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
         });
     }
 
-    void addNewImage() {
+    public void addNewImage() {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_dialog_layout_select_image_from_gallery_camera_two);
         LinearLayout camera = (LinearLayout) dialog.findViewById(R.id.camera);
@@ -1099,75 +808,11 @@ public class TeacherCreateClassPostActivity extends AppCompatActivity {
     }
 
     void loadImageViews(Bitmap bitmap) {
-        if (storyImageOne.getDrawable() == null) {
-            storyImageOne.setImageDrawable(null);
-            storyImageOne.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutTwo);
-            iconOne.setVisibility(View.GONE);
-            imageLayoutTwo.setVisibility(View.VISIBLE);
-        } else if (storyImageTwo.getDrawable() == null) {
-            storyImageTwo.setImageDrawable(null);
-            storyImageTwo.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutThree);
-            iconTwo.setVisibility(View.GONE);
-            imageLayoutThree.setVisibility(View.VISIBLE);
-        } else if (storyImageThree.getDrawable() == null) {
-            storyImageThree.setImageDrawable(null);
-            storyImageThree.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutFour);
-            iconThree.setVisibility(View.GONE);
-            imageLayoutFour.setVisibility(View.VISIBLE);
-        } else if (storyImageFour.getDrawable() == null) {
-            storyImageFour.setImageDrawable(null);
-            storyImageFour.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutFive);
-            iconFour.setVisibility(View.GONE);
-            imageLayoutFive.setVisibility(View.VISIBLE);
-        } else if (storyImageFive.getDrawable() == null) {
-            storyImageFive.setImageDrawable(null);
-            storyImageFive.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutSix);
-            iconFive.setVisibility(View.GONE);
-            imageLayoutSix.setVisibility(View.VISIBLE);
-        } else if (storyImageSix.getDrawable() == null) {
-            storyImageSix.setImageDrawable(null);
-            storyImageSix.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutSeven);
-            iconSix.setVisibility(View.GONE);
-            imageLayoutSeven.setVisibility(View.VISIBLE);
-        } else if (storyImageSeven.getDrawable() == null) {
-            storyImageSeven.setImageDrawable(null);
-            storyImageSeven.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutEight);
-            iconSeven.setVisibility(View.GONE);
-            imageLayoutEight.setVisibility(View.VISIBLE);
-        } else if (storyImageEight.getDrawable() == null) {
-            storyImageEight.setImageDrawable(null);
-            storyImageEight.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutNine);
-            iconEight.setVisibility(View.GONE);
-            imageLayoutNine.setVisibility(View.VISIBLE);
-        } else if (storyImageNine.getDrawable() == null) {
-            storyImageNine.setImageDrawable(null);
-            storyImageNine.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            animateOn(imageLayoutTen);
-            iconNine.setVisibility(View.GONE);
-            imageLayoutTen.setVisibility(View.VISIBLE);
-        } else if (storyImageTen.getDrawable() == null) {
-            storyImageTen.setImageDrawable(null);
-            storyImageTen.setImageBitmap(bitmap);
-            bitmaps.add(bitmap);
-            iconTen.setVisibility(View.GONE);
-        }
+        TeacherCreateClassPostAddImageModel teacherCreateClassPostAddImageModel =
+                new TeacherCreateClassPostAddImageModel(bitmap);
+        int insertAt = teacherCreateClassPostAddImageModelList.size() - 1;
+        teacherCreateClassPostAddImageModelList.add(insertAt, teacherCreateClassPostAddImageModel);
+        teacherCreateClassPostAddImageAdapter.notifyDataSetChanged();
     }
 
     public void animateOn(final RelativeLayout view) {

@@ -19,7 +19,9 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.text.Html;
 import android.text.Spanned;
@@ -41,6 +43,7 @@ import com.celerii.celerii.R;
 import com.celerii.celerii.adapters.TagsAdapter;
 import com.celerii.celerii.helperClasses.Analytics;
 import com.celerii.celerii.helperClasses.CheckNetworkConnectivity;
+import com.celerii.celerii.helperClasses.CustomProgressDialogOne;
 import com.celerii.celerii.helperClasses.Date;
 import com.celerii.celerii.helperClasses.FirebaseErrorMessages;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -63,6 +66,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.iceteck.silicompressorr.SiliCompressor;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -627,6 +631,7 @@ public class ELibraryUploadBookActivity extends AppCompatActivity {
             if(resultCode == RESULT_OK) {
                 if (data != null) {
                     uri = data.getData();
+//                    new CompressVideoTask().execute();
                     fileType = "video";
                     fileName.setText(getFileName(uri));
                     title.setText(getFileName(uri));
@@ -720,5 +725,44 @@ public class ELibraryUploadBookActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
+    }
+
+    private class CompressVideoTask extends AsyncTask<Void, Void, Void> {
+        CustomProgressDialogOne progressDialog = new CustomProgressDialogOne(context);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.showWithMessage("Compressing video...");
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/"
+                    + getPackageName() + "/eLibrary/compressedVideos");
+                String filePath = SiliCompressor.with(context).compressVideo(uri, f.getPath());
+                uri = Uri.fromFile(new File(filePath));
+                fileType = "video";
+                fileName.setText(getFileName(uri));
+                title.setText(getFileName(uri));
+                fileImage.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_baseline_video_purple_24));
+                fileLayout.setVisibility(View.VISIBLE);
+                tapToUploadLayout.setVisibility(View.GONE);
+                tapToUploadTextView.setVisibility(View.GONE);
+            } catch (Exception e) {
+//                uri = null;
+//                String messageString = "Video compression operation failed.";
+//                ShowDialogWithMessage.showDialogWithMessage(context, messageString);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            progressDialog.dismiss();
+            super.onPostExecute(unused);
+        }
     }
 }

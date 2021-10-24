@@ -55,6 +55,7 @@ public class SharedPreferencesManager {
     static final String reminder_Ids = "reminder_ids";
     static final String reminder_details = "reminder_details";
     static final String application_update_state = "applicationUpdateState";
+    static final String exam_type = "examType";
 
     public SharedPreferencesManager(Context context) {
         this.context = context;
@@ -753,6 +754,22 @@ public class SharedPreferencesManager {
     }
     //endregion
 
+    //region ExamType
+    public String getExamType() {
+        return prefs.getString(exam_type, "");
+    }
+
+    public void setExamType(String examType) {
+        editor.putString(exam_type, examType);
+        editor.apply();
+    }
+
+    public void deleteExamType() {
+        editor.remove(exam_type);
+        editor.apply();
+    }
+    //endregion
+
     public void clear() {
         deleteActiveAccount();
         deleteMyUserID();
@@ -793,5 +810,6 @@ public class SharedPreferencesManager {
         deleteReminderIDs();
         deleteReminderDetails();
         deleteApplicationUpdateState();
+        deleteExamType();
     }
 }

@@ -39,6 +39,8 @@ public class MApplication extends Application implements LifecycleObserver {
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+        MyFirebaseInstanceIdService myFirebaseInstanceIdService = new MyFirebaseInstanceIdService();
+        myFirebaseInstanceIdService.onTokenRefresh();
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

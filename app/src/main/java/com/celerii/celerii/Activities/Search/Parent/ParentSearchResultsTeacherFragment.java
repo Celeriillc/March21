@@ -172,7 +172,6 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
                             if (dataSnapshot.exists()) {
                                 Teacher teacher = dataSnapshot.getValue(Teacher.class);
                                 String teacherKey = dataSnapshot.getKey();
-                                String teacherName = teacher.getLastName() + " " + teacher.getFirstName();
                                 String teacherFirstName = teacher.getFirstName();
                                 String teacherLastName = teacher.getLastName();
                                 String teacherMiddleName = teacher.getMiddleName();
@@ -188,42 +187,24 @@ public class ParentSearchResultsTeacherFragment extends Fragment {
                                         teacherMap.add(teacherKey);
                                         teachersList.put(teacherKey, searchResultsRow);
                                     }
+                                }
 
-                                    if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
-                                        sendSearchAnalytics();
+                                if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
+                                    sendSearchAnalytics();
 
-                                        if (searchResultsRowList.size() > 0) {
-                                            //Collections.shuffle(searchResultsRowList);
-                                            mAdapter.notifyDataSetChanged();
-                                            mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            errorLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.VISIBLE);
-                                        } else {
-                                            mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.GONE);
-                                            errorLayout.setVisibility(View.VISIBLE);
-                                            errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
-                                        }
-                                    }
-                                } else {
-                                    if (counter == studentsSchoolsClassesandTeachersModelList.size()) {
-                                        sendSearchAnalytics();
-                                        if (searchResultsRowList.size() > 0) {
-                                            //Collections.shuffle(searchResultsRowList);
-                                            mAdapter.notifyDataSetChanged();
-                                            mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            errorLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.VISIBLE);
-                                        } else {
-                                            mySwipeRefreshLayout.setRefreshing(false);
-                                            progressLayout.setVisibility(View.GONE);
-                                            recyclerView.setVisibility(View.GONE);
-                                            errorLayout.setVisibility(View.VISIBLE);
-                                            errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
-                                        }
+                                    if (searchResultsRowList.size() > 0) {
+                                        //Collections.shuffle(searchResultsRowList);
+                                        mAdapter.notifyDataSetChanged();
+                                        mySwipeRefreshLayout.setRefreshing(false);
+                                        progressLayout.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.VISIBLE);
+                                    } else {
+                                        mySwipeRefreshLayout.setRefreshing(false);
+                                        progressLayout.setVisibility(View.GONE);
+                                        recyclerView.setVisibility(View.GONE);
+                                        errorLayout.setVisibility(View.VISIBLE);
+                                        errorLayoutText.setText("There are no teachers fitting the search criteria. Please check the search term and try again.");
                                     }
                                 }
                             }

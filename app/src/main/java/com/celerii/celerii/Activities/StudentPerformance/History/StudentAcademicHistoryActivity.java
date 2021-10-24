@@ -220,7 +220,7 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
         progressLayout.setVisibility(View.VISIBLE);
 
         year = Date.getYear();
-        term = "2"; //Term.getTermShort();
+        term = Term.getTermShort();
         studentRecords = new HashMap<>();
         studentAcademicHistoryHeaderModel = new StudentAcademicHistoryHeaderModel(term, year, className, studentRecords);
 
@@ -408,6 +408,8 @@ public class StudentAcademicHistoryActivity extends AppCompatActivity {
 
         year_term = year + "_" + term;
         studentRecords.clear();
+        studentAcademicHistoryRowModelList.clear();
+        mAdapter.notifyDataSetChanged();
 
         mDatabaseReference = mFirebaseDatabase.getReference("AcademicRecordClass-Student").child(activeClass);
         mDatabaseReference.keepSynced(true);

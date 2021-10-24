@@ -79,6 +79,7 @@ import com.celerii.celerii.helperClasses.CheckDeletedState;
 import com.celerii.celerii.helperClasses.CheckLoggedInState;
 import com.celerii.celerii.helperClasses.CustomToast;
 import com.celerii.celerii.helperClasses.LogoutProtocol;
+import com.celerii.celerii.helperClasses.MyFirebaseInstanceIdService;
 import com.celerii.celerii.helperClasses.NotificationReceiver;
 import com.celerii.celerii.helperClasses.ServerDeviceTimeDifference;
 import com.celerii.celerii.helperClasses.SharedPreferencesManager;
@@ -412,7 +413,12 @@ public class ParentMainActivityTwo extends AppCompatActivity {
             }
         };
 
-//        createNotification();
+        Thread t =  new Thread(new Runnable(){
+            public void run() {
+                MyFirebaseInstanceIdService myFirebaseInstanceIdService = new MyFirebaseInstanceIdService();
+                myFirebaseInstanceIdService.onTokenRefresh();
+            }});
+        t.start();
     }
 
 //    public void createNotification () {

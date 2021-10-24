@@ -75,6 +75,7 @@ public class UpdateDataFromFirebaseForLogin {
     private static ArrayList<MessageList> inboxList = new ArrayList<>();
     private static ArrayList<NotificationModel> parentNotificationModelList = new ArrayList<>();
     private static ArrayList<NotificationModel> teacherNotificationModelList = new ArrayList<>();
+    private static ArrayList<String> examTypeList = new ArrayList<>();
 
     private static HashMap<String, ClassesStudentsAndParentsModel> classesStudentsAndParentsModelMap;
     private static HashMap<String, ClassesStudentsAndParentsModel> classesStudentsModelMap;
@@ -1602,11 +1603,57 @@ public class UpdateDataFromFirebaseForLogin {
                     }
                 }
 
-                loadIsOpenToAll();
+                loadExamTypeInfo();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private static void loadExamTypeInfo() {
+        examTypeList.clear();
+        mDatabaseReference = mFirebaseDatabase.getReference("Teacher School/" + auth.getCurrentUser().getUid());
+        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        final String schoolKey = postSnapshot.getKey();
+
+                        mDatabaseReference = FirebaseDatabase.getInstance().getReference("School Exam Type").child(schoolKey);
+                        mDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                        final String examTypeKey = postSnapshot.getKey();
+
+                                        if (!examTypeList.contains(examTypeKey)) {
+                                            examTypeList.add(examTypeKey);
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(examTypeList);
+                                            sharedPreferencesManager.setExamType(json);
+                                        }
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+
+                loadIsOpenToAll();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });

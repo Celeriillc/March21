@@ -256,6 +256,7 @@ public class TeacherEClassroomScheduleClassActivity extends AppCompatActivity im
             public void onClick(View v) {
                 Intent intent = new Intent(TeacherEClassroomScheduleClassActivity.this, EnterResultsEditSubjectsActivity.class);
                 Bundle bundle = new Bundle();
+                bundle.putString("Active Class", activeClassID);
                 bundle.putString("Activity", "AddNewTimetable");
                 bundle.putString("Subject", subject.getText().toString());
                 intent.putExtras(bundle);
